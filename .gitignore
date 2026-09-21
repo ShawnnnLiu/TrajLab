@@ -1,0 +1,21 @@
+# data and secrets
+corpus/jobs/
+.env
+*.jsonl
+!tests/fixtures/**/*.jsonl
+!corpus/manifests/**
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+dist/
+# notebooks
+notebooks/**/*.ipynb_checkpoints
+# os/editor
+.DS_Store
+.idea/
+.vscode/
+# harbor reference clone if someone puts it inside by mistake
+harbor-ref/

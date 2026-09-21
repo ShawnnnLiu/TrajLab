@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash|Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'mkdir -p \"$CLAUDE_CONFIG_DIR/../checkpoints\" && exec sh \"$CLAUDE_CONFIG_DIR/../hook/post_tool_use.sh\"'",
+            "timeout": 300
+          }
+        ]
+      }
+    ]
+  }
+}
