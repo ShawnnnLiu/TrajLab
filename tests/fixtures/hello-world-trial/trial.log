@@ -1,0 +1,11 @@
+Skipping image OS validation for hb__7140400b79079e5552d1ff0c04b84dfe: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl bash nodejs npm procps
+Command outputs captured
+Running command: set -euo pipefail; if command -v apk &> /dev/null; then  npm install -g @anthropic-ai/claude-code; else  curl -fsSL https://downloads.claude.ai/claude-code-releases/bootstrap.sh | bash -s --; fi && echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && export PATH="$HOME/.local/bin:$PATH" && claude --version
+Command outputs captured
+Running command: mkdir -p $CLAUDE_CONFIG_DIR/debug $CLAUDE_CONFIG_DIR/projects/-app $CLAUDE_CONFIG_DIR/shell-snapshots $CLAUDE_CONFIG_DIR/statsig $CLAUDE_CONFIG_DIR/todos $CLAUDE_CONFIG_DIR/skills && if [ -d ~/.claude/skills ]; then cp -r ~/.claude/skills/. $CLAUDE_CONFIG_DIR/skills/ 2>/dev/null || true; fi
+Command outputs captured
+Running command: export PATH="$HOME/.local/bin:$PATH"; harbor_claude_code_instruction_633e5fe6c6cd44cd9cecd121cae776ed="$HARBOR_CLAUDE_CODE_INSTRUCTION_633E5FE6C6CD44CD9CECD121CAE776ED"; unset HARBOR_CLAUDE_CODE_INSTRUCTION_633E5FE6C6CD44CD9CECD121CAE776ED; printf "%s" "$harbor_claude_code_instruction_633e5fe6c6cd44cd9cecd121cae776ed" | claude --verbose --output-format=stream-json --permission-mode=bypassPermissions --print 2>&1 | tee /logs/agent/claude-code.txt
+Command outputs captured
+Wrote Claude Code trajectory to corpus/jobs/hello-world-smoke/hello-world__K3GBok3/agent/trajectory.json
+Collecting main service artifacts

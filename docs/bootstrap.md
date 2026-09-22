@@ -4,10 +4,26 @@ Do these by hand, in order, before handing the repo to Claude Code. Estimated ti
 
 ## 0. Prerequisites on the machine
 
-- Docker Desktop (or Docker Engine) running; `docker info` works without sudo.
+- Docker Desktop running; `docker info` works without sudo. Install steps below.
 - `uv` installed (`curl -LsSf https://astral.sh/uv/install.sh | sh`).
 - `gh` installed and logged in (`gh auth status`).
-- Claude Code installed locally (`claude --version`); an `ANTHROPIC_API_KEY` with budget for corpus runs.
+- Claude Code installed locally (`claude --version`).
+- Either a Claude subscription (Pro or Max) or an `ANTHROPIC_API_KEY` with budget. See step 3 for how to pick.
+
+### Installing Docker on macOS
+
+```bash
+brew install --cask docker      # Docker Desktop, includes the docker CLI and compose plugin
+open -a Docker                  # first launch: accept the license, enter your password for the helper
+docker info                     # must print server info without sudo
+```
+
+Run `brew install` in your own terminal, not from an agent or a script.
+The cask calls `sudo` once to link a credential helper into `/usr/local/bin`, and without a terminal to read the password Homebrew rolls the whole install back and leaves nothing behind.
+Docker Desktop needs about 8 GB of RAM allotted in its settings for Terminal-Bench images; the default is fine for hello-world.
+
+Alternatives that also work with Harbor, if you would rather not run Docker Desktop: OrbStack (`brew install --cask orbstack`, a drop-in replacement) or Colima (`brew install colima docker docker-compose && colima start --cpu 4 --memory 8`, no GUI and no sudo).
+Everyone on the team using the same one avoids surprises, and the checkpoint watcher is tested against Docker Desktop first.
 
 ## 1. Create the repo
 
@@ -49,14 +65,29 @@ Claude Code reads the installed package in `.venv/`, but the reference clone has
 
 ## 3. Prove Harbor works on this machine (stock, no trajlab code)
 
+Pick how Claude Code inside the container authenticates. Both are supported by the pinned Harbor (`harbor/agents/installed/claude_code.py`, `_resolve_auth_env`):
+
+- **Claude subscription (default for this project).** Run `claude setup-token` in your own terminal; it opens a browser login and prints a long-lived OAuth token. Put it in `.env` as `CLAUDE_CODE_OAUTH_TOKEN` and set `CLAUDE_FORCE_OAUTH=1`. Usage counts against your plan's rate limits, not a per-token bill. One account's limits are shared by every concurrent trial, so keep `n_concurrent` low.
+- **API key.** Put `ANTHROPIC_API_KEY` in `.env` and leave `CLAUDE_FORCE_OAUTH` unset. Billed per token.
+
+Harbor prefers the API key whenever both are present. `CLAUDE_FORCE_OAUTH=1` drops the key for the run so the subscription is used, and it refuses to start if the token is missing, which is the guard we want: a shell that happens to export `ANTHROPIC_API_KEY` cannot silently bill a corpus run.
+
 ```bash
-cp .env.example .env                    # add ANTHROPIC_API_KEY
-set -a && source .env && set +a
-uv run harbor run -t hello-world/hello-world -a claude-code -m anthropic/<model> -e docker
-uv run harbor view jobs                 # open http://127.0.0.1:8080, click the trial
+cp .env.example .env                    # fill in CLAUDE_CODE_OAUTH_TOKEN (or ANTHROPIC_API_KEY)
+uv run harbor run -t hello-world/hello-world -a claude-code -m anthropic/<model> -e docker \
+    -o corpus/jobs --job-name hello-world-smoke --env-file .env -y
+uv run harbor view corpus/jobs          # open http://127.0.0.1:8080, click the trial
 ```
 
-If this fails, nothing else matters; fix it first. Common causes: Docker not running, image pull blocked, API key missing, Node install in the container failing on a slow network.
+Then confirm which credential was actually used. Claude Code records it in the first line of the agent log:
+
+```bash
+grep -o '"apiKeySource":"[^"]*"' corpus/jobs/hello-world-smoke/*/agent/claude-code.txt
+```
+
+`"ANTHROPIC_API_KEY"` means the API key was billed. Anything else means the subscription token was used. Check this once per machine; it is the only way to be sure.
+
+If this fails, nothing else matters; fix it first. Common causes: Docker not running, image pull blocked, no credential in `.env`, `CLAUDE_FORCE_OAUTH=1` set without a token, Node install in the container failing on a slow network.
 
 ## 4. Make the fixture
 

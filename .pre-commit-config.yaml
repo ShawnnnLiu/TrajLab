@@ -9,7 +9,9 @@ repos:
     rev: v5.0.0
     hooks:
       - id: end-of-file-fixer
+        exclude: ^tests/fixtures/
       - id: trailing-whitespace
+        exclude: ^tests/fixtures/
       - id: check-added-large-files
         args: [--maxkb=500]
       - id: detect-private-key

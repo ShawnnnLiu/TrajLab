@@ -24,8 +24,9 @@ corpus/jobs/<job>/<task>__<id>/
 ## Quickstart
 
 ```bash
+brew install --cask docker && open -a Docker   # macOS; run in your own terminal, it asks for a password
 uv sync                          # Python 3.12, harbor pinned, everything in uv.lock
-cp .env.example .env             # add ANTHROPIC_API_KEY
+cp .env.example .env             # add CLAUDE_CODE_OAUTH_TOKEN from `claude setup-token`, or an API key
 docker info                      # Docker must be running
 
 # 1. Stock corpus, no checkpoints
@@ -39,6 +40,17 @@ uv run trajlab run configs/harbor/tb_subset_v0.json --hooks configs/claude-code/
 uv run trajlab postprocess corpus/jobs/<job>
 uv run trajlab validate corpus/jobs/<job>
 ```
+
+## Authentication
+
+Claude Code inside the container can run on a **Claude subscription** or an **API key**. The
+subscription is the default here: run `claude setup-token`, put the token in `.env` as
+`CLAUDE_CODE_OAUTH_TOKEN`, and keep `CLAUDE_FORCE_OAUTH=1` so Harbor drops any API key your shell
+happens to export. Subscription runs count against your plan's rate limits rather than a bill, and
+one account's limits are shared by every concurrent trial. To use an API key instead, set
+`ANTHROPIC_API_KEY` and unset `CLAUDE_FORCE_OAUTH`. After the first run, confirm with
+`grep apiKeySource <trial>/agent/claude-code.txt`; `"ANTHROPIC_API_KEY"` means the key was billed.
+Full setup, including installing Docker, is in `docs/bootstrap.md`.
 
 ## How checkpointing works
 
@@ -70,6 +82,7 @@ Data lives outside git; see `corpus/README.md`.
 
 ## Status
 
+- [x] environment, scaffold, hello-world fixture (Sep 22)
 - [ ] stock Harbor corpus on a Terminal-Bench subset (Sep 25)
 - [ ] hook + watcher + docker_commit backend
 - [ ] checkpoint join as ATIF system steps

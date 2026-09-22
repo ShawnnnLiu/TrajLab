@@ -1,0 +1,13 @@
+{
+    "task": {
+        "name": "hello-world/hello-world",
+        "ref": "latest"
+    },
+    "trial_name": "hello-world__K3GBok3",
+    "trials_dir": "corpus/jobs/hello-world-smoke",
+    "agent": {
+        "name": "claude-code",
+        "model_name": "anthropic/claude-sonnet-5"
+    },
+    "job_id": "46eeee6e-8ffa-42b8-81da-b47efcf1407f"
+}

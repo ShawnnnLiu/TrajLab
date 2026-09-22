@@ -1,0 +1,162 @@
+{
+  "schema_version": "ATIF-v1.7",
+  "session_id": "78b481c6-4620-425b-b2c0-ec60bce7422f",
+  "agent": {
+    "name": "claude-code",
+    "version": "2.1.278",
+    "model_name": "claude-sonnet-5",
+    "extra": {
+      "cwds": [
+        "/app"
+      ],
+      "git_branches": [
+        "HEAD"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "step_id": 1,
+      "timestamp": "2026-09-22T00:49:15.294Z",
+      "source": "user",
+      "message": "Create a file called hello.txt with \"Hello, world!\" as the content.\n",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 2,
+      "timestamp": "2026-09-22T00:49:17.070Z",
+      "source": "agent",
+      "model_name": "claude-sonnet-5",
+      "message": "I'll create the file now.",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01TKn2WsYzAzVaTXotNFqp2Z",
+          "function_name": "Write",
+          "arguments": {
+            "file_path": "/app/hello.txt",
+            "content": "Hello, world!"
+          },
+          "extra": {
+            "raw_arguments": {
+              "file_path": "/app/hello.txt",
+              "content": "Hello, world!"
+            },
+            "tool_use_name": "Write"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01TKn2WsYzAzVaTXotNFqp2Z",
+            "content": "File created successfully at: /app/hello.txt (file state is current in your context — no need to Read it back)\n\n[metadata] {\"type\": \"create\", \"filePath\": \"/app/hello.txt\", \"content\": \"Hello, world!\", \"structuredPatch\": [], \"originalFile\": null, \"userModified\": false}",
+            "extra": {
+              "tool_result_metadata": {
+                "tool_use_result": {
+                  "type": "create",
+                  "filePath": "/app/hello.txt",
+                  "content": "Hello, world!",
+                  "structuredPatch": [],
+                  "originalFile": null,
+                  "userModified": false
+                },
+                "raw_tool_result": {
+                  "tool_use_id": "toolu_01TKn2WsYzAzVaTXotNFqp2Z",
+                  "type": "tool_result",
+                  "content": "File created successfully at: /app/hello.txt (file state is current in your context — no need to Read it back)"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 27097,
+        "completion_tokens": 90,
+        "cached_tokens": 18569,
+        "cost_usd": 0.025932800000000002,
+        "extra": {
+          "cache_creation_input_tokens": 8526,
+          "cache_read_input_tokens": 18569,
+          "output_tokens_details": {
+            "thinking_tokens": 0
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 8526
+          },
+          "inference_geo": "global",
+          "iterations": [],
+          "speed": "standard",
+          "cost_source": "litellm_estimate"
+        }
+      },
+      "llm_call_count": 1,
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/app",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 3,
+      "timestamp": "2026-09-22T00:49:18.565Z",
+      "source": "agent",
+      "model_name": "claude-sonnet-5",
+      "message": "Created `/app/hello.txt` with the content \"Hello, world!\".",
+      "metrics": {
+        "prompt_tokens": 27264,
+        "completion_tokens": 25,
+        "cached_tokens": 27095,
+        "cost_usd": 0.0060904999999999996,
+        "extra": {
+          "cache_creation_input_tokens": 167,
+          "cache_read_input_tokens": 27095,
+          "output_tokens_details": {
+            "thinking_tokens": 0
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 167
+          },
+          "inference_geo": "global",
+          "iterations": [],
+          "speed": "standard",
+          "cost_source": "litellm_estimate"
+        }
+      },
+      "llm_call_count": 1,
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/app",
+        "is_sidechain": false
+      }
+    }
+  ],
+  "final_metrics": {
+    "total_prompt_tokens": 54361,
+    "total_completion_tokens": 115,
+    "total_cached_tokens": 45664,
+    "total_cost_usd": 0.0320233,
+    "total_steps": 3,
+    "extra": {
+      "service_tiers": [
+        "standard"
+      ],
+      "total_cache_creation_input_tokens": 8693,
+      "total_cache_read_input_tokens": 45664
+    }
+  }
+}

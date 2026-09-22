@@ -1,6 +1,6 @@
 # Harbor facts this repo depends on
 
-Verified 2026-09-21 against harbor-framework/harbor main (commit 404bae7) and docs.harborframework.com. Re-verify against the installed version in `.venv/lib/python3.12/site-packages/harbor/` whenever the pin changes. Each fact names the module to read.
+Verified 2026-09-21 against harbor-framework/harbor main (commit 404bae7) and docs.harborframework.com; items marked **[0.23.0]** were re-checked against the pinned install on 2026-09-22. Re-verify against the installed version in `.venv/lib/python3.12/site-packages/harbor/` whenever the pin changes. Each fact names the module to read.
 
 ## Trial lifecycle (`harbor/trial/trial.py`, `trial/single_step.py`, `trial/hooks.py`)
 
@@ -33,8 +33,11 @@ In-container contract: `/logs/agent`, `/logs/verifier`, `/logs/artifacts` are mo
   `printf "%s" "$instruction" | claude --verbose --output-format=stream-json [--settings <path>] [--continue|--resume <id>] --print 2>&1 | tee /logs/agent/claude-code.txt`
 - `CLAUDE_CONFIG_DIR=/logs/agent/sessions`. So the native session JSONL is at `agent/sessions/projects/<cwd-slug>/<session-id>.jsonl`, subagents at `.../subagents/agent-<id>.jsonl`. `todos/`, `debug/`, `shell-snapshots/`, `skills/`, `.claude.json` (MCP) are there too.
 - Env set by Harbor: `IS_SANDBOX=1`, `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1`, `FORCE_AUTO_BACKGROUND_TASKS=1`, `ENABLE_BACKGROUND_TASKS=1`, `ANTHROPIC_MODEL`, auth vars. Extra env via `--ae KEY=VALUE`.
+- **Auth [0.23.0]** (`_resolve_auth_env`, `_should_force_oauth`): Harbor forwards `ANTHROPIC_API_KEY` and `CLAUDE_CODE_OAUTH_TOKEN` into the container. If both are set it keeps the API key. `CLAUDE_FORCE_OAUTH=1` drops the key so the CLI uses the subscription token, and raises if the token is missing. So a Claude subscription works; get the token with `claude setup-token`. Which one was used is visible as `apiKeySource` in the first line of `agent/claude-code.txt`. Harbor never logs the values.
 - **`--ak config=<settings.json>` is uploaded verbatim and passed as `--settings`.** Hooks defined there work. Harbor does not merge or filter the file (`_load_base_settings`, `_upload_base_settings`).
 - Capabilities: `atif, resume, load_native_trajectory, load_atif_trajectory, handoff, native_config, skills, mcp_servers`.
+- **Schema version [0.23.0]:** the Claude Code converter stamps `schema_version="ATIF-v1.7"` even though `Trajectory` defaults to v1.8 and accepts both. Do not assert v1.8 on Harbor's file; the enriched file may use either.
+- **`context_management` is not a typed field [0.23.0]:** nothing under `harbor/models/trajectories/` defines it. It is a convention inside step `extra`, exactly as the RFC reserves it, so our `ContextManagementExtra` model in `contracts/` is the only schema for it.
 - **The converter emits no `context_management` system steps.** It dedups tool calls "replayed after compaction" (`_convert_events_to_trajectory`). Compaction boundaries must be recovered from the native JSONL. Only the `vibe` agent's converter emits `context_management`.
 - Per-step ATIF `metrics`: `prompt_tokens = input + cache_read + cache_creation`, `cached_tokens = cache_read`, raw usage dict in `metrics.extra`. Trajectory `total_cost_usd` is parsed from the stream-json `result` event in `claude-code.txt`.
 - Observations: `content` is `[stdout]…[stderr]…[exit_code] N…`; `extra.tool_use_result` keeps Claude Code's structured result; `extra.raw_tool_result` the untouched block; `is_error` preserved.
