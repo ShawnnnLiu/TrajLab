@@ -10,3 +10,7 @@ Every checkpoint is physical. `CheckpointRecord.physical` is always True in this
 
 ## Consequences
 Higher capture cost; ground truth for every benchmark question is materialized state, never reconstructed state.
+
+## Amendment (2026-09-23, ADR-0004)
+The StateFork backend was dropped; `docker_commit`, the only remaining backend, has no virtual mode, so this ADR's constraint holds trivially.
+The `physical` field stays in `CheckpointRecord` for the queryability reason above.

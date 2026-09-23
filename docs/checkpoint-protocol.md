@@ -10,7 +10,7 @@ One environment checkpoint per state-mutating tool call, taken synchronously bet
 
 - **Hook** (inside the container): a Claude Code `PostToolUse` hook registered in `settings.hooks.json`, which Harbor passes through as `--settings`. Runs as the agent user with `CLAUDE_CONFIG_DIR=/logs/agent/sessions` set, so `/logs/agent` is `$CLAUDE_CONFIG_DIR/..`.
 - **Watcher** (on the host): `trajlab watch <jobs-dir> --backend <name>`. Watches `*/agent/checkpoints/*.req` under every trial dir with `watchdog`, one process per job.
-- **Backend** (on the host): implements `SnapshotBackend.snapshot(target, name) -> CheckpointRecord`. First backend is `docker_commit`; second is `statefork` (attach mode). `restore()` and `fork()` are declared on the protocol but raise `NotImplementedError` in this phase.
+- **Backend** (on the host): implements `SnapshotBackend.snapshot(target, name) -> CheckpointRecord`. The only backend is `docker_commit` (ADR-0004; the planned `statefork` backend was dropped). `restore()` and `fork()` are declared on the protocol but raise `NotImplementedError` in this phase.
 
 ## Files, all under `<trial>/agent/checkpoints/`
 
@@ -37,13 +37,13 @@ From the `.req` path, the trial dir is two levels up. Read `config.json` for `tr
 ## CheckpointRecord (in `contracts/checkpoint.py`)
 
 ```
-checkpoint_id   str    backend-specific handle (image id for docker_commit; checkpoint name for statefork)
+checkpoint_id   str    backend-specific handle (image id for docker_commit)
 trial_id        UUID   from result.json / config
 tool_call_id    str    == tool_use_id
 seq             int    capture order within the trial, from 1
 tool_name       str
-backend         str    "docker_commit" | "statefork"
-physical        bool   always True in this phase; StateFork virtual snapshots are disabled
+backend         str    always "docker_commit"; kept as a field for per-snapshot provenance (ADR-0004)
+physical        bool   always True; docker commit has no virtual mode (ADR-0002, ADR-0004)
 capture_ms      int
 bytes           int | None
 path            str | None   on-disk location, if any
@@ -56,7 +56,7 @@ requested_at / captured_at   ISO 8601
 - **Tool coverage**: read-only tools (`Read`, `Grep`, `Glob`, `WebFetch`) are not matched. Postprocess joins those steps to the most recent earlier checkpoint. This is ADR-0001.
 - **No jq/python guarantee** in task images. The hook is POSIX `sh` and extracts `tool_use_id` with `sed`. Test against an Alpine image.
 - **Watcher absent** (e.g. stock corpus run): no `.ack` ever arrives; every call writes `.timeout` after 240 s. So **do not pass `settings.hooks.json` unless the watcher is running.** `trajlab run --hooks` refuses to start if it cannot see a watcher pid file.
-- **docker commit** pauses the container briefly and captures the filesystem only; live memory and shell state are lost. Fine for filesystem questions; stated as a limitation. Note the `statefork` backend in attach mode does not lift it: StateFork's `docker_attach` also snapshots via `docker commit` (`vendor/statefork/controller/container_env_manager.py:120`), so it has the same filesystem-only fidelity. Process-state capture requires StateFork's CRIU, hybrid (Podman + runc, root containers), or Waypoint backends, which need root on a Linux host and do not attach to plain Docker containers.
+- **docker commit** pauses the container briefly and captures the filesystem only; live memory and shell state are lost. This is a permanent, accepted limitation of the project (ADR-0004): no CRIU-capable backend attaches to the Docker containers Harbor runs, and CRIU's per-call cost exceeds our storage and compute budget. See `docs/research/2026-09-23_checkpoint-platform-research.md` Q1/Q3 for the evidence.
 - **Idempotence**: a `.req` with an existing `.ack` is ignored. Watcher restart replays unacked `.req` files.
 
 ## settings.hooks.json (shape)

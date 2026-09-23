@@ -87,7 +87,7 @@ Data lives outside git; see `corpus/README.md`.
 - [ ] hook + watcher + docker_commit backend
 - [ ] checkpoint join as ATIF system steps
 - [ ] compaction recovery from native JSONL
-- [ ] StateFork backend
+- ~~StateFork backend~~ dropped: filesystem-only checkpoints (ADR-0004)
 - [ ] analysis modules (store, benchmark, evaluation): separate decision
 
 ## Contributing

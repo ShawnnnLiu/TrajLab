@@ -54,7 +54,8 @@ docs/decisions/            ADRs
 5. **`capture/`**: `corpus.py` writes a manifest (corpus_id, harbor version from `importlib.metadata`, this repo's git sha, config path, task list, model, n_attempts, job dirs); `harbor_runner.py` shells out to `harbor run` with a config file and records the manifest; `discover.py` yields trial dirs and derives the compose project name from `session_id` (see facts file). Check: `uv run trajlab manifest corpus/jobs/<job>` produces a manifest for the fixture's parent.
 6. **`checkpoint/`**: hook script, `settings.hooks.json`, watcher, `docker_commit` backend, join records. Protocol in `@docs/checkpoint-protocol.md`. Check: manual Docker run on hello-world produces `agent/checkpoints/checkpoints.jsonl` with one record per tool call and `.ack` for every `.req`.
 7. **`atif/postprocess.py` + `atif/compaction.py`**: insert one system step per checkpoint after the agent step that owns the `tool_call_id`; insert `context_management` system steps from native JSONL compaction entries; write `agent/trajectory.enriched.json`; validator passes on the output. Check: tests on the fixture with a synthetic `checkpoints.jsonl`.
-8. **`statefork` backend**: same interface as `docker_commit`, attach mode. Only after 6 works end to end.
+
+Capture ends at step 7. The formerly planned step 8 (`statefork` backend) was dropped by ADR-0004: `docker_commit` is the only backend.
 
 Stop after each step and run `make test`. Do not start step N+1 with step N red.
 
@@ -62,7 +63,7 @@ Stop after each step and run `make test`. Do not start step N+1 with step N red.
 
 - Do not run `harbor run` inside tests or on import. It costs money and needs Docker.
 - Do not put API keys anywhere but `.env`; `harbor_runner.py` reads them from the environment and never logs them.
-- Do not write a `WaypointEnvironment` yet. It is a later ADR.
+- Do not write a `WaypointEnvironment` or any CRIU-based backend. Decided against in ADR-0004; checkpoints are filesystem-only via `docker_commit`.
 - Do not add a database, a query layer, or an LLM judge. That is analysis.
 - Do not "clean up" Harbor's trial directory. Add files next to Harbor's; never rename or rewrite `trajectory.json`, `result.json`, or `lock.json`.
 
