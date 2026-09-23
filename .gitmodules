@@ -1,0 +1,6 @@
+[submodule "vendor/statefork"]
+	path = vendor/statefork
+	url = https://github.com/Alex-XJK/StateFork
+[submodule "vendor/waypoint"]
+	path = vendor/waypoint
+	url = https://github.com/Alex-XJK/waypoint
