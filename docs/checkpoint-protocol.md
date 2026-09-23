@@ -56,7 +56,7 @@ requested_at / captured_at   ISO 8601
 - **Tool coverage**: read-only tools (`Read`, `Grep`, `Glob`, `WebFetch`) are not matched. Postprocess joins those steps to the most recent earlier checkpoint. This is ADR-0001.
 - **No jq/python guarantee** in task images. The hook is POSIX `sh` and extracts `tool_use_id` with `sed`. Test against an Alpine image.
 - **Watcher absent** (e.g. stock corpus run): no `.ack` ever arrives; every call writes `.timeout` after 240 s. So **do not pass `settings.hooks.json` unless the watcher is running.** `trajlab run --hooks` refuses to start if it cannot see a watcher pid file.
-- **docker commit** pauses the container briefly and captures the filesystem only; live memory and shell state are lost. Fine for filesystem questions; stated as a limitation. StateFork/CRIU is the upgrade path.
+- **docker commit** pauses the container briefly and captures the filesystem only; live memory and shell state are lost. Fine for filesystem questions; stated as a limitation. Note the `statefork` backend in attach mode does not lift it: StateFork's `docker_attach` also snapshots via `docker commit` (`vendor/statefork/controller/container_env_manager.py:120`), so it has the same filesystem-only fidelity. Process-state capture requires StateFork's CRIU, hybrid (Podman + runc, root containers), or Waypoint backends, which need root on a Linux host and do not attach to plain Docker containers.
 - **Idempotence**: a `.req` with an existing `.ack` is ignored. Watcher restart replays unacked `.req` files.
 
 ## settings.hooks.json (shape)
