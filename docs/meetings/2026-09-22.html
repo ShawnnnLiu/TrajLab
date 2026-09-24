@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TrajectoryDB Explained</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#1a2230; --ink-2:#48545f; --muted:#6f7b87;
+  --line:#d5dbe1; --line-strong:#aeb8c2;
+  --idea:#1f6f8b; --idea-soft:#dfeef3;
+  --have:#5b6b7c; --have-soft:#e8edf1;
+  --build:#b4551f; --build-soft:#f7e7db;
+  --later:#7a6f9b; --later-soft:#ece8f3;
+  --code-bg:#eef1f4;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141a20; --surface:#1c232b; --ink:#e7ebef; --ink-2:#b8c1ca; --muted:#8d98a4;
+    --line:#2e3841; --line-strong:#4a5663;
+    --idea:#7cc0da; --idea-soft:#1c333d;
+    --have:#aab6c3; --have-soft:#262e37;
+    --build:#e79a6a; --build-soft:#3b2718;
+    --later:#b5a9dc; --later-soft:#2b2538;
+    --code-bg:#232b34;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141a20; --surface:#1c232b; --ink:#e7ebef; --ink-2:#b8c1ca; --muted:#8d98a4;
+  --line:#2e3841; --line-strong:#4a5663;
+  --idea:#7cc0da; --idea-soft:#1c333d;
+  --have:#aab6c3; --have-soft:#262e37;
+  --build:#e79a6a; --build-soft:#3b2718;
+  --later:#b5a9dc; --later-soft:#2b2538;
+  --code-bg:#232b34;
+}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.55;}
+.wrap{max-width:860px;margin:0 auto;padding-block:40px 72px;padding-inline:20px;}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.88em;}
+code{background:var(--code-bg);padding:1px 5px;border-radius:3px;}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:6px;padding:12px 14px;overflow-x:auto;font-size:0.82rem;line-height:1.5;margin:0;}
+pre code{background:none;padding:0;font-size:1em;}
+h1{font-size:2.1rem;font-weight:600;letter-spacing:-0.01em;line-height:1.12;margin:0 0 10px;text-wrap:balance;}
+h2{font-size:1.2rem;font-weight:600;margin:48px 0 14px;padding-top:16px;border-top:1px solid var(--line);text-wrap:balance;}
+h3{font-size:1rem;font-weight:600;margin:0 0 6px;}
+p{margin:0 0 12px;max-width:66ch;}
+.eyebrow{font-size:0.74rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:500;margin-bottom:12px;}
+.lede{color:var(--ink-2);font-size:1.12rem;max-width:60ch;}
+.goal{margin:26px 0 0;padding:16px 20px;border-left:3px solid var(--idea);background:var(--idea-soft);border-radius:0 6px 6px 0;max-width:70ch;}
+.goal .k{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--idea);font-weight:600;}
+.goal .q{font-size:1.15rem;font-weight:600;margin-top:4px;line-height:1.35;text-wrap:balance;}
+.goal .a{margin-top:6px;color:var(--ink-2);}
+
+/* glossary */
+.terms{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:8px 0 0;}
+@media (max-width:640px){.terms{grid-template-columns:1fr;}}
+.term{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px;}
+.term .w{font-weight:600;font-size:1rem;}
+.term .d{font-size:0.92rem;color:var(--ink-2);margin-top:4px;}
+
+/* chips */
+.chip{display:inline-block;font-size:0.68rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;white-space:nowrap;}
+.chip.idea{background:var(--idea-soft);color:var(--idea);}
+.chip.have{background:var(--have-soft);color:var(--have);}
+.chip.build{background:var(--build-soft);color:var(--build);}
+.chip.later{background:var(--later-soft);color:var(--later);}
+
+/* tree */
+.treewrap{overflow-x:auto;margin:18px 0 6px;padding-bottom:6px;}
+.tree{width:max-content;min-width:100%;margin:0 auto;}
+.tree ul{padding:22px 0 0;margin:0;list-style:none;display:flex;justify-content:center;position:relative;}
+.tree > ul{padding-top:0;}
+.tree li{list-style:none;position:relative;padding:22px 6px 0;text-align:center;}
+.tree > ul > li{padding-top:0;}
+.tree li::before,.tree li::after{content:"";position:absolute;top:0;right:50%;width:50%;height:22px;border-top:2px solid var(--line-strong);}
+.tree li::after{right:auto;left:50%;border-left:2px solid var(--line-strong);}
+.tree li:only-child::before,.tree li:only-child::after{display:none;}
+.tree li:only-child{padding-top:0;}
+.tree li:first-child::before,.tree li:last-child::after{border:0 none;}
+.tree li:last-child::before{border-right:2px solid var(--line-strong);border-radius:0 6px 0 0;}
+.tree li:first-child::after{border-radius:6px 0 0 0;}
+.tree ul ul::before{content:"";position:absolute;top:0;left:50%;width:0;height:22px;border-left:2px solid var(--line-strong);}
+.node{display:inline-block;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 12px;width:168px;box-sizing:border-box;vertical-align:top;}
+.node.wide{width:360px;}
+.node .n{font-weight:600;font-size:0.95rem;display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+.node .r{font-size:0.8rem;color:var(--ink-2);margin-top:4px;line-height:1.4;}
+.node.idea{border-color:var(--idea);}
+.node.build{border-color:var(--build);background:var(--build-soft);}
+.node.later{border-style:dashed;}
+.legend{display:flex;flex-wrap:wrap;gap:14px 22px;font-size:0.86rem;color:var(--ink-2);margin:10px 0 0;}
+.legend span{display:inline-flex;align-items:center;gap:6px;}
+.sw{width:12px;height:12px;border-radius:3px;border:1.5px solid var(--line-strong);background:var(--surface);}
+.sw.idea{border-color:var(--idea);}
+.sw.build{border-color:var(--build);background:var(--build-soft);}
+.sw.later{border-style:dashed;}
+
+/* explainer blocks */
+.block{display:grid;grid-template-columns:150px 1fr;gap:6px 24px;padding:18px 0;border-bottom:1px solid var(--line);}
+.block:last-of-type{border-bottom:0;}
+@media (max-width:640px){.block{grid-template-columns:1fr;}}
+.block .who{font-weight:600;font-size:1.05rem;}
+.block .what{min-width:0;}
+.block .who .chip{display:block;width:max-content;margin-top:6px;}
+.block .what p{margin-bottom:8px;}
+.cc{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;}
+@media (max-width:640px){.cc{grid-template-columns:1fr;}}
+.cc div{font-size:0.9rem;}
+.cc .h{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);font-weight:600;margin-bottom:4px;}
+.cc ul{margin:0;padding-left:18px;}
+.cc li{margin:3px 0;}
+
+/* status */
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:8px 0 0;}
+@media (max-width:640px){.facts{grid-template-columns:1fr;}}
+.fact{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px;}
+.fact .k{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);}
+.fact .v{font-size:1rem;font-weight:600;margin-top:4px;}
+.fact .s{font-size:0.86rem;color:var(--ink-2);margin-top:2px;}
+.dates{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:18px 0 0;border-top:2px solid var(--line);}
+@media (max-width:640px){.dates{grid-template-columns:1fr;}}
+.dt{padding:10px 10px 0 0;position:relative;}
+.dt::before{content:"";position:absolute;top:-2px;left:0;width:34px;height:2px;background:var(--line-strong);}
+.dt.next::before{background:var(--build);}
+.dt .d{font-size:0.74rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);font-variant-numeric:tabular-nums;}
+.dt .t{font-weight:600;font-size:0.95rem;margin-top:2px;}
+.dt .n{font-size:0.86rem;color:var(--ink-2);}
+ul.plain{padding-left:20px;margin:0;}
+ul.plain li{margin:6px 0;max-width:70ch;}
+table.data{width:100%;border-collapse:collapse;margin:12px 0 0;font-size:0.88rem;}
+table.data th,table.data td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);}
+table.data thead th{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line-strong);}
+table.data td.num,table.data th.num{text-align:right;font-variant-numeric:tabular-nums;}
+table.data td.num{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:0.84rem;}
+table.data tr.key td{font-weight:600;}
+table.data tr:last-child td{border-bottom:0;}
+.tablewrap{overflow-x:auto;}
+.note{font-size:0.86rem;color:var(--muted);margin-top:8px;max-width:70ch;}
+table.data .sub{display:block;font-size:0.74rem;font-weight:400;color:var(--muted);margin-top:2px;font-family:inherit;}
+table.data td .sub{max-width:34ch;}
+table.data thead th.grp{text-align:center;border-bottom:1px solid var(--line);}
+.block + .foot{border-top:0;margin-top:20px;}
+.foot{margin-top:44px;font-size:0.82rem;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="eyebrow">COMS 6113 · Project 16 · Team brief · Sep 22, 2026</div>
+  <h1>TrajectoryDB</h1>
+  <p class="lede">Which components exist, which we build, and how they fit together.</p>
+
+
+
+  <h2>Architecture</h2>
+  <p>The brief names two building blocks: TrajectoryDB for the run record, StateFork for branchable environment state. TrajectoryDB is a vision paper, so Harbor and ATIF stand in for it. StateFork is a working system we plug in. The link between them is the part we implement.</p>
+  <div class="treewrap">
+  <div class="tree">
+    <ul>
+      <li>
+        <div class="node idea wide"><div class="n">Research goal</div><div class="r">Answer analysis questions about agent runs faster, or with much less analyst effort, than ad hoc workflows, without losing accuracy or provenance. Project #16.</div></div>
+        <ul>
+          <li>
+            <div class="node idea"><div class="n">TrajectoryDB <span class="chip idea">concept</span></div><div class="r">One store holding every run: its trajectory plus a checkpoint after each step, linked.</div></div>
+            <ul>
+              <li>
+                <div class="node"><div class="n">Harbor <span class="chip have">existing</span></div><div class="r">The runner. Runs the agent on a task, grades it, writes the trajectory.</div></div>
+                <ul>
+                  <li><div class="node"><div class="n">Docker <span class="chip have">existing</span></div><div class="r">The sandbox each task runs in.</div></div></li>
+                </ul>
+              </li>
+              <li>
+                <div class="node"><div class="n">ATIF <span class="chip have">existing</span></div><div class="r">The file format a trajectory is written in. Has a slot for "checkpoint taken here".</div></div>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <div class="node build"><div class="n">The link <span class="chip build">we build</span></div><div class="r">Checkpoint after every tool call, keyed by the call's id, written back into the trajectory.</div></div>
+          </li>
+          <li>
+            <div class="node"><div class="n">StateFork <span class="chip have">existing</span></div><div class="r">DAPLab's environment versioning: checkpoint, restore, and fork a running sandbox.</div></div>
+            <ul>
+              <li><div class="node"><div class="n">docker commit <span class="chip have">existing</span></div><div class="r">First backend. Filesystem only. Used until the pipeline works end to end.</div></div></li>
+              <li><div class="node later"><div class="n">StateFork attach <span class="chip later">later</span></div><div class="r">Second backend, same interface. Build step 8.</div></div></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+  </div>
+  <div class="legend">
+    <span><i class="sw idea"></i>Concept</span>
+    <span><i class="sw"></i>Existing, plugged in</span>
+    <span><i class="sw build"></i>Implemented by us</span>
+    <span><i class="sw later"></i>Plugged in later, same interface</span>
+  </div>
+
+  <h2>Components</h2>
+
+  <div class="block">
+    <div class="who">TrajectoryDB<span class="chip idea">concept</span></div>
+    <div class="what">
+      <p>A store of agent runs where every step has two halves: the action, from the trajectory, and the resulting environment state, from a checkpoint. Both halves carry the same step id, so it can serve the five question classes in the brief, which neither half answers alone:</p>
+      <ul class="plain">
+        <li>Recurring strategies and action sequences</li>
+        <li>Where successful and failed runs diverge</li>
+        <li>Whether the agent follows an expected process</li>
+        <li>Which actions cause consequential environment changes</li>
+        <li>How early success, failure, or a safety violation is detectable</li>
+      </ul>
+      <p style="margin-top:10px">No existing system provides this. Harbor and ATIF cover the action half, StateFork the state half. We build the join.</p>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="who">Harbor<span class="chip have">existing</span></div>
+    <div class="what">
+      <p>The runner. Given a Terminal-Bench task and an agent (Claude Code), it builds a Docker sandbox, runs the agent inside, grades the result, and writes one directory per run with the trajectory, the score, and the cost.</p>
+      <div class="cc">
+        <div><div class="h">It does</div><ul><li>Run many tasks in parallel, safely isolated</li><li>Grade each run (pass / fail, tokens, dollars)</li><li>Write the trajectory in ATIF</li><li>Pass Claude Code settings through, which is how our hook gets in</li></ul></div>
+        <div><div class="h">It does not</div><ul><li>Record the environment state at any point</li><li>Give us a signal while the agent is running</li><li>Remember where the agent's memory got summarized mid-run</li></ul></div>
+      </div>
+      <p style="margin-top:10px">Harbor stays a pinned, unmodified dependency. Everything we add attaches from outside.</p>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="who">ATIF<span class="chip have">existing</span></div>
+    <div class="what">
+      <p>Agent Trajectory Interchange Format. A JSON file, one entry per step: source (agent, user, or system), message, tool calls, and tool results. Harbor writes it and ships a validator. Two properties matter for us: every tool call carries an id, and the format reserves system steps for events such as checkpoint creation.</p>
+      <p>An agent step as Harbor writes it, followed by the checkpoint step we insert:</p>
+<pre><code>{ "step_id": 12, "source": "agent",
+  "tool_calls": [{ "tool_call_id": "toolu_01A…",
+                   "function_name": "Bash",
+                   "arguments": { "command": "make test" } }] }
+
+{ "step_id": 13, "source": "system",            ← ours
+  "message": "checkpoint after toolu_01A…",
+  "observation": { "checkpoint_id": "sha256:…", "backend": "docker_commit" } }</code></pre>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="who">StateFork<span class="chip have">existing</span></div>
+    <div class="what">
+      <p>DAPLab's environment branching interface (arXiv:2510.05556; corrected 2026-09-23, there is no SOSP paper). StateFork is the common snapshot/restore/fork interface and benchmark; the CRIU checkpointing lives in its Waypoint backend (CRIU + OverlayFS, Linux-only, root), while its Docker attach mode snapshots with <code>docker commit</code>. This is the state half of TrajectoryDB and it exists today; we plug it in rather than build it. Dean covers the mechanism.</p>
+      <p>Order of operations: the first backend is <code>docker commit</code>, which captures the filesystem and loses shell state and memory, enough for file-level questions and for proving the pipeline. StateFork attaches behind the same backend interface afterwards, so the swap is a config change, not a rewrite; note (corrected 2026-09-23) its Docker attach mode is also <code>docker commit</code> underneath, so shell state and memory are only captured once we run its Waypoint/CRIU backends on a root Linux host. Its virtual snapshots stay off: Terminal-Bench runs are not deterministic, so every checkpoint is physical (ADR-0002).</p>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="who">The link<span class="chip build">we build</span></div>
+    <div class="what">
+      <p>Not provided by any component above. After every tool call that can change the sandbox, take a checkpoint tagged with that call's id. The same id is in the trajectory, so each step maps to exactly one checkpoint. Three parts:</p>
+      <ul class="plain">
+        <li><strong>Hook</strong>, inside the sandbox: Claude Code runs it after each tool call. It writes a request and waits for an ack.</li>
+        <li><strong>Watcher</strong>, on the host: sees the request, takes the checkpoint, writes the ack.</li>
+        <li><strong>Post-processing</strong>, after the run: inserts one checkpoint step per tool call into the trajectory, and restores the context compaction boundaries that Harbor's converter drops.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>The baseline</h2>
+  <p>Why not hand the whole trace to a long-context model and ask what went wrong? TRAIL measured that. A 2026 follow-up says a newer model does not fix it, and says why.</p>
+
+  <div class="block">
+    <div class="who">TRAIL<span class="chip have">prior work</span></div>
+    <div class="what">
+      <p>Patronus AI, 2025. 148 human-annotated traces from GAIA and SWE-Bench-Lite, 841 errors, about twenty error categories. Task: read the raw trace, give every error a span and a category.</p>
+      <div class="facts" style="margin-top:12px">
+        <div class="fact"><div class="k">Best joint, GAIA</div><div class="v">0.183</div><div class="s">Gemini-2.5-Pro, best of eight models.</div></div>
+        <div class="fact"><div class="k">Best joint, SWE-Bench</div><div class="v">0.050</div><div class="s">Three of eight could not fit the traces.</div></div>
+        <div class="fact"><div class="k">By hand</div><div class="v">30–40 min</div><div class="s">Per trace to annotate; &asymp;110&ndash;120 min with TRAIL&rsquo;s verification rounds.</div></div>
+      </div>
+      <p style="margin-top:12px">Accuracy falls as traces get longer (Spearman −0.508 on location) — the wrong direction for agents that run longer every year.</p>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="who">Deepchecks, 2026<span class="chip have">new rows + reprints</span></div>
+    <div class="what">
+      <p>TRAIL's paper is fixed at June 2025 (v3). In May 2026 Deepchecks ran new frontier models as whole-trace judges on the same benchmark, and ran the same model span by span. Their table reprints TRAIL's 2025 rows and AgentCompass's published numbers next to their own; only the GPT-5.4 rows are theirs. Same three metrics as TRAIL.</p>
+      <div class="tablewrap">
+      <table class="data">
+        <thead>
+          <tr><th rowspan="2">Setup</th><th rowspan="2">Ran by</th><th class="num grp" colspan="3">GAIA</th><th class="num grp" colspan="3">SWE-Bench</th></tr>
+          <tr><th class="num">Cat. F1</th><th class="num">Loc.</th><th class="num">Joint</th><th class="num">Cat. F1</th><th class="num">Loc.</th><th class="num">Joint</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Gemini-2.5-Pro, whole trace<span class="sub">2025 &middot; reasoning &ldquo;high&rdquo; &middot; mean of 3 runs &middot; over-context traces: handling not stated</span></td><td>TRAIL <span class="sub">reprinted</span></td><td class="num">0.389</td><td class="num">0.546</td><td class="num">0.183</td><td class="num">0.148</td><td class="num">0.238</td><td class="num">0.050</td></tr>
+          <tr class="key"><td>GPT-5.4, whole trace<span class="sub">2026 &middot; 6.0% of GAIA and 22.6% of SWE traces excluded for context &middot; effort, runs not stated</span></td><td>Deepchecks</td><td class="num">0.434</td><td class="num">0.292</td><td class="num">0.146</td><td class="num">0.504</td><td class="num">0.070</td><td class="num">0.014</td></tr>
+          <tr><td>AgentCompass<span class="sub">Sept 2025 &middot; multi-stage pipeline &middot; exclusions not reported</span></td><td>FAGI <span class="sub">reprinted</span></td><td class="num">0.309</td><td class="num">0.657</td><td class="num">0.239</td><td class="num">0.232</td><td class="num">0.250</td><td class="num">0.051</td></tr>
+          <tr class="key"><td>GPT-5.4, span by span + agent-level metrics<span class="sub">2026 &middot; 0% excluded &middot; rubric prompts, LLM-mapped into TRAIL categories</span></td><td>Deepchecks</td><td class="num">0.547</td><td class="num">0.823</td><td class="num">0.616</td><td class="num">0.698</td><td class="num">0.860</td><td class="num">0.638</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="cc" style="margin-top:14px">
+        <div><div class="h">A newer model did not help localization</div><ul><li>GPT-5.4 on the whole trace beats the 2025 model on category F1, both splits, but trails it on span localization and joint accuracy, both splits.</li><li>That is with GPT-5.4's longest 6% / 23% of traces dropped. TRAIL shows accuracy falls with length, so the exclusion favors GPT-5.4.</li></ul></div>
+        <div><div class="h">A new representation did</div><ul><li>Same model, same benchmark, same scoring code: GAIA joint 0.146 &rarr; 0.616, SWE localization 0.070 &rarr; 0.860.</li><li>Their conclusion, quoted: &ldquo;evaluation methodology, not model capability, is the bottleneck.&rdquo;</li></ul></div>
+      </div>
+      <p class="note">Read across rows with care. The two whole-trace rows are two labs' runs a year apart: Deepchecks does not say whether it reused TRAIL's prompt, how many runs it averaged, or GPT-5.4's reasoning effort, and neither paper reports traces scored per row. Within Deepchecks, the whole-trace row covers 94% / 77% of traces and the span row 100% (dropped vs. zeroed: not stated); the span row uses different prompts, adds agent-level metrics, and passes through an LLM mapper into TRAIL's categories, while baselines emit TRAIL labels directly. Loc. and joint are precision over predicted spans; neither paper reports recall.</p>
+    </div>
+  </div>
+
+  <div class="foot">Sources: docs/project-brief.md (the course brief, verbatim), README, docs/harbor-facts.md, docs/checkpoint-protocol.md, docs/decisions/ in the trajlab repo. Baseline section: TRAIL, arXiv 2505.08638v3 · Holistic Evaluation and Failure Diagnosis of AI Agents, arXiv 2605.14865 · AgentCompass, arXiv 2509.14647 · TELBench, arXiv 2606.02060 · From Agent Traces to Trust, arXiv 2606.04990. State as of Sep 21, 2026.</div>
+</div>
+</body>
+</html>

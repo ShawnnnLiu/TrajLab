@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Waypoint Blocker Brief</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#1a2230; --ink-2:#48545f; --muted:#6f7b87;
+  --line:#d5dbe1; --line-strong:#aeb8c2;
+  --idea:#1f6f8b; --idea-soft:#dfeef3;
+  --have:#5b6b7c; --have-soft:#e8edf1;
+  --build:#b4551f; --build-soft:#f7e7db;
+  --block:#a8323a; --block-soft:#f6e1e2;
+  --ok:#2f7a4b; --ok-soft:#e0f0e6;
+  --code-bg:#eef1f4;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#141a20; --surface:#1c232b; --ink:#e7ebef; --ink-2:#b8c1ca; --muted:#8d98a4;
+    --line:#2e3841; --line-strong:#4a5663;
+    --idea:#7cc0da; --idea-soft:#1c333d;
+    --have:#aab6c3; --have-soft:#262e37;
+    --build:#e79a6a; --build-soft:#3b2718;
+    --block:#ec8a90; --block-soft:#3d1f22;
+    --ok:#7fcf9c; --ok-soft:#1d3527;
+    --code-bg:#232b34;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#141a20; --surface:#1c232b; --ink:#e7ebef; --ink-2:#b8c1ca; --muted:#8d98a4;
+  --line:#2e3841; --line-strong:#4a5663;
+  --idea:#7cc0da; --idea-soft:#1c333d;
+  --have:#aab6c3; --have-soft:#262e37;
+  --build:#e79a6a; --build-soft:#3b2718;
+  --block:#ec8a90; --block-soft:#3d1f22;
+  --ok:#7fcf9c; --ok-soft:#1d3527;
+  --code-bg:#232b34;
+}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.55;margin:0;}
+.wrap{max-width:860px;margin:0 auto;padding-block:40px 72px;padding-inline:20px;}
+code{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.86em;background:var(--code-bg);padding:1px 5px;border-radius:3px;}
+h1{font-size:2.1rem;font-weight:600;letter-spacing:-0.01em;line-height:1.12;margin:0 0 10px;text-wrap:balance;}
+h2{font-size:1.2rem;font-weight:600;margin:44px 0 14px;padding-top:16px;border-top:1px solid var(--line);text-wrap:balance;}
+p{margin:0 0 12px;max-width:68ch;}
+.eyebrow{font-size:0.74rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:500;margin-bottom:12px;}
+.lede{color:var(--ink-2);font-size:1.12rem;max-width:62ch;}
+.callout{margin:24px 0 0;padding:14px 18px;border-left:3px solid var(--block);background:var(--block-soft);border-radius:0 6px 6px 0;max-width:72ch;}
+.callout .k{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--block);font-weight:600;}
+.callout .q{font-size:1.08rem;font-weight:600;margin-top:4px;line-height:1.4;text-wrap:balance;}
+
+.chip{display:inline-block;font-size:0.68rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;white-space:nowrap;}
+.chip.idea{background:var(--idea-soft);color:var(--idea);}
+.chip.have{background:var(--have-soft);color:var(--have);}
+.chip.build{background:var(--build-soft);color:var(--build);}
+.chip.block{background:var(--block-soft);color:var(--block);}
+.chip.ok{background:var(--ok-soft);color:var(--ok);}
+.chip.stale{background:transparent;color:var(--muted);border:1px dashed var(--line-strong);}
+
+/* tree */
+.treewrap{overflow-x:auto;margin:18px 0 6px;padding-bottom:6px;}
+.tree{width:max-content;min-width:100%;margin:0 auto;}
+.tree ul{padding:22px 0 0;margin:0;list-style:none;display:flex;justify-content:center;position:relative;}
+.tree > ul{padding-top:0;}
+.tree li{list-style:none;position:relative;padding:22px 6px 0;text-align:center;}
+.tree > ul > li{padding-top:0;}
+.tree li::before,.tree li::after{content:"";position:absolute;top:0;right:50%;width:50%;height:22px;border-top:2px solid var(--line-strong);}
+.tree li::after{right:auto;left:50%;border-left:2px solid var(--line-strong);}
+.tree li:only-child::before,.tree li:only-child::after{display:none;}
+.tree li:only-child{padding-top:0;}
+.tree li:first-child::before,.tree li:last-child::after{border:0 none;}
+.tree li:last-child::before{border-right:2px solid var(--line-strong);border-radius:0 6px 0 0;}
+.tree li:first-child::after{border-radius:6px 0 0 0;}
+.tree ul ul::before{content:"";position:absolute;top:0;left:50%;width:0;height:22px;border-left:2px solid var(--line-strong);}
+.node{display:inline-block;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 12px;width:168px;box-sizing:border-box;vertical-align:top;}
+.node.wide{width:360px;}
+.node .n{font-weight:600;font-size:0.95rem;display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.node .r{font-size:0.8rem;color:var(--ink-2);margin-top:4px;line-height:1.4;}
+.node.idea{border-color:var(--idea);}
+.node.build{border-color:var(--build);background:var(--build-soft);}
+.node.ok{border-color:var(--ok);border-width:2px;}
+.node.block{border-color:var(--block);border-style:dashed;background:var(--block-soft);}
+.node.stale{border-style:dashed;border-color:var(--line-strong);background:transparent;}
+.node.stale .n .t{text-decoration:line-through;color:var(--muted);}
+.node.stale .r{color:var(--muted);}
+.legend{display:flex;flex-wrap:wrap;gap:12px 20px;font-size:0.86rem;color:var(--ink-2);margin:10px 0 0;}
+.legend span{display:inline-flex;align-items:center;gap:6px;}
+.sw{width:12px;height:12px;border-radius:3px;border:1.5px solid var(--line-strong);background:var(--surface);}
+.sw.idea{border-color:var(--idea);}
+.sw.build{border-color:var(--build);background:var(--build-soft);}
+.sw.ok{border-color:var(--ok);border-width:2px;}
+.sw.block{border-color:var(--block);border-style:dashed;background:var(--block-soft);}
+.sw.stale{border-style:dashed;background:transparent;}
+
+.cc{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px;}
+@media (max-width:640px){.cc{grid-template-columns:1fr;}}
+.cc > div{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px;font-size:0.92rem;}
+.cc .h{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;font-weight:600;margin-bottom:6px;}
+.cc .h.ok{color:var(--ok);}
+.cc .h.block{color:var(--block);}
+.cc ul{margin:0;padding-left:18px;}
+.cc li{margin:4px 0;}
+
+ul.plain{padding-left:20px;margin:0;}
+ul.plain li{margin:8px 0;max-width:70ch;}
+.tablewrap{overflow-x:auto;margin-top:10px;}
+table.data{width:100%;border-collapse:collapse;font-size:0.88rem;}
+table.data th,table.data td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+table.data thead th{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line-strong);white-space:nowrap;}
+table.data tr:last-child td{border-bottom:0;}
+table.data td:first-child{font-weight:600;}
+table.data td.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:0.82rem;font-weight:500;}
+table.data td.num{text-align:right;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",ui-monospace,monospace;}
+table.data td.pending{color:var(--muted);text-align:center;font-family:"IBM Plex Mono",ui-monospace,monospace;}
+.verdict{font-size:0.82rem;font-weight:600;}
+.verdict.low{color:var(--ok);}
+.verdict.mid{color:var(--build);}
+.verdict.high{color:var(--block);}
+.note{font-size:0.86rem;color:var(--muted);margin-top:8px;max-width:72ch;}
+.ask{margin-top:14px;background:var(--surface);border:1px solid var(--build);border-radius:6px;padding:16px 18px;}
+.ask .k{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--build);font-weight:600;}
+.ask .q{font-size:1.1rem;font-weight:600;margin:4px 0 10px;line-height:1.35;text-wrap:balance;}
+.ask ul{margin:0;padding-left:18px;font-size:0.92rem;}
+.ask li{margin:4px 0;}
+.foot{margin-top:44px;font-size:0.82rem;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;}
+
+/* print / save as PDF: light palette, full-width page, tree scaled to fit (natural width ~1130px) */
+@page{margin:12mm;}
+@media print{
+  :root,:root:not([data-theme="light"]),:root[data-theme="dark"]{
+    color-scheme:light;
+    --bg:#ffffff; --surface:#ffffff; --ink:#1a2230; --ink-2:#48545f; --muted:#6f7b87;
+    --line:#d5dbe1; --line-strong:#aeb8c2;
+    --idea:#1f6f8b; --idea-soft:#dfeef3;
+    --have:#5b6b7c; --have-soft:#e8edf1;
+    --build:#b4551f; --build-soft:#f7e7db;
+    --block:#a8323a; --block-soft:#f6e1e2;
+    --ok:#2f7a4b; --ok-soft:#e0f0e6;
+    --code-bg:#eef1f4;
+  }
+  html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .wrap{max-width:none;padding-block:0;padding-inline:0;}
+  .treewrap,.tablewrap{overflow:visible;}
+  .tree{zoom:0.6;min-width:0;}
+  .keep,.treewrap,.legend,.callout,.cc > div,.ask,table.data tr,ul.plain li{break-inside:avoid;}
+  h2,h3{break-after:avoid;}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="eyebrow">COMS 6113 &middot; Project 16 &middot; Team brief &middot; Fri Sep 25, 2026</div>
+  <h1>Branching needs a Linux server</h1>
+  <div class="callout">
+    <div class="k">Bottom line</div>
+    <div class="q">The project brief requires branchable environment state alongside agent trajectories. Only Waypoint branches a live sandbox, and it runs only on a root Linux host. Our Macs cannot meet the brief, so we need a Linux server.</div>
+  </div>
+
+  <h2>Revised architecture</h2>
+  <p>This is the same tree as Sep 22 with the state half corrected. StateFork is the common interface and benchmark layer. The CRIU engine that captures memory and forks live sandboxes is Waypoint. StateFork's Docker path is <code>docker commit</code>, the same thing we already run, so we dropped it (ADR-0004).</p>
+  <div class="treewrap">
+  <div class="tree">
+    <ul>
+      <li>
+        <div class="node idea wide"><div class="n">Research goal</div><div class="r">Answer analysis questions about agent runs faster, or with much less analyst effort, than ad hoc workflows, without losing accuracy or provenance. Project #16.</div></div>
+        <ul>
+          <li>
+            <div class="node idea"><div class="n">TrajectoryDB <span class="chip idea">concept</span></div><div class="r">One store that links every run's trajectory to a checkpoint after each step.</div></div>
+            <ul>
+              <li>
+                <div class="node ok"><div class="n">Harbor <span class="chip ok">works</span></div><div class="r">Runs the agent on a task, grades it, writes the trajectory.</div></div>
+                <ul>
+                  <li><div class="node ok"><div class="n">Docker <span class="chip ok">works</span></div><div class="r">The sandbox. Runs on Mac or Linux without root.</div></div></li>
+                </ul>
+              </li>
+              <li>
+                <div class="node ok"><div class="n">ATIF <span class="chip ok">works</span></div><div class="r">Trajectory format. Has a slot for "checkpoint taken here".</div></div>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <div class="node build"><div class="n">The link <span class="chip build">we build</span></div><div class="r">Checkpoints every tool call, keys it by the call's id, and writes it into the trajectory.</div></div>
+          </li>
+          <li>
+            <div class="node build"><div class="n">Snapshot backend <span class="chip build">we build</span></div><div class="r">One pluggable interface. Was "StateFork" on Sep 22.</div></div>
+            <ul>
+              <li><div class="node ok"><div class="n">docker commit <span class="chip ok">in use</span></div><div class="r">Current backend. Filesystem only. Runs on our Macs.</div></div></li>
+              <li><div class="node block"><div class="n">Waypoint <span class="chip block">needs Linux</span></div><div class="r">Required for branching. CRIU + OverlayFS: memory, processes, live forks. Root Linux only.</div></div></li>
+              <li><div class="node stale"><div class="n"><span class="t">StateFork attach</span> <span class="chip stale">stale</span></div><div class="r">Dropped. Its Docker attach is <code>docker commit</code> underneath.</div></div></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+  </div>
+  <div class="legend">
+    <span><i class="sw idea"></i>Concept</span>
+    <span><i class="sw ok"></i>Works today on macOS</span>
+    <span><i class="sw build"></i>Implemented by us</span>
+    <span><i class="sw block"></i>Blocked without a Linux host</span>
+    <span><i class="sw stale"></i>Stale since Sep 22</span>
+  </div>
+
+  <h2>Three blockers</h2>
+  <p>We checked this against the StateFork and Waypoint source (v0.7.0, vendored under <code>vendor/</code>) and the Harbor source. A Linux server removes the first blocker. The second is integration work we can do without patching Harbor. The third rules out every shortcut.</p>
+  <ul class="plain">
+    <li><strong>It needs root on a Linux host.</strong> Waypoint is a Go binary built on CRIU and OverlayFS, and it requires root. On macOS, Docker Desktop's VM has no CRIU at all (docker/for-mac#1059, open since 2017). OrbStack exposes <code>docker checkpoint</code>, but only for arm64-native containers, and it is still not a Linux host we control.</li>
+    <li><strong>It does not attach to Harbor's containers.</strong> Harbor starts every task with <code>docker compose</code>. Waypoint stages its own rootfs and PTY sessions, and <code>waypoint_attach</code> takes a Waypoint session id, not a container or a PID. The way in is a custom Harbor environment, loaded with <code>--env module:Class</code>, that builds each task with <code>waypoint build</code> from the task's Dockerfile and runs commands with <code>waypoint exec</code>. Harbor stays unpatched. Open risk: tasks that need several compose services or network isolation.</li>
+    <li><strong>The other CRIU routes are dead ends.</strong> StateFork's <code>docker_attach</code> is <code>docker commit</code> (<code>container_env_manager.py:120</code>). <code>hybrid_attach</code> captures memory, but only on Podman with runc and root, so Harbor runs would have to move off Docker. Docker's own <code>docker checkpoint</code> is still experimental and fails on containers with an external terminal, which is how agents run.</li>
+  </ul>
+  <p class="note">CRIU is also expensive at our granularity. Each dump is roughly as large as the process memory (about 1.7 s per 2 GB, arXiv:2510.05556), and we would take one for every state-changing tool call in every trial.</p>
+
+  <h2>What Harbor and Docker still record</h2>
+  <div class="cc">
+    <div>
+      <div class="h ok">Recorded on a Mac today</div>
+      <ul>
+        <li>The full ATIF trajectory for every trial (Harbor)</li>
+        <li>Grade, tokens, and cost per trial</li>
+        <li>An environment checkpoint after every tool call: hook, then watcher, then <code>docker commit</code></li>
+        <li>The join: each checkpoint keyed by <code>tool_call_id</code> and inserted into the trajectory</li>
+        <li>Each checkpoint is a runnable image, so <code>docker run</code> shows the filesystem at step N</li>
+      </ul>
+    </div>
+    <div>
+      <div class="h block">Lost without Waypoint</div>
+      <ul>
+        <li>Memory and running processes (servers, daemons)</li>
+        <li>Shell state: working directory, exported variables, background jobs</li>
+        <li>Native live branching: forking a running sandbox mid-trial into concurrent copies</li>
+        <li>Exact restore: a commit image restarts cold, with a fresh shell and no processes</li>
+      </ul>
+    </div>
+  </div>
+
+  <section class="keep">
+  <h2>What dropping Waypoint costs</h2>
+  <div class="tablewrap">
+  <table class="data">
+    <thead><tr><th>Dimension</th><th>docker commit (now)</th><th>Waypoint (CRIU)</th><th>Cost to us</th></tr></thead>
+    <tbody>
+      <tr><td>Filesystem state</td><td>Captured</td><td>Captured</td><td><span class="verdict low">None</span></td></tr>
+      <tr><td>Memory, processes, shell</td><td>Lost</td><td>Captured</td><td><span class="verdict low">Low.</span> Terminal-Bench grades files, and our analysis questions are framed around filesystem changes. Most shell side effects that matter end up on disk.</td></tr>
+      <tr><td>Branching</td><td>Cold only: start a new container from the step-N image</td><td>Concurrent live forks from any checkpoint</td><td><span class="verdict high">Crucial.</span> The project brief asks for branchable environment state. <code>docker commit</code> alone does not meet it.</td></tr>
+      <tr><td>Host</td><td>Mac or Linux without root</td><td>Root Linux only</td><td><span class="verdict high">Blocks our Macs.</span> None on a server.</td></tr>
+      <tr><td>Harbor integration</td><td>Attaches to its containers as they are</td><td>Needs a custom Harbor environment</td><td><span class="verdict mid">Medium.</span> Integration work. Harbor stays unpatched.</td></tr>
+      <tr><td>Storage per checkpoint</td><td>Re-tars the writable layer; commits do not dedupe</td><td>Memory-sized dump, about 1.7 s per 2 GB</td><td><span class="verdict low">Low</span> for Terminal-Bench-sized write sets</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">Dropping Waypoint fails the brief. ADR-0004 needs to be reopened. <code>SnapshotBackend</code> is pluggable, so the capture pipeline carries over, with a new <code>corpus_id</code>.</p>
+  </section>
+
+  <h2>Terminal-Bench on Apple Silicon</h2>
+  <p>This is a second, independent reason to get a Linux server. Harbor does not pin a platform, so on our M-series Macs the containers run as arm64. Some Terminal-Bench tasks are x86-only. The upstream tracker lists these as of Sep 23:</p>
+  <div class="tablewrap">
+  <table class="data">
+    <thead><tr><th>Task</th><th>Issue</th><th>Failure on arm64</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">fix-uautomizer-soundness</td><td>#1601</td><td>Silent: all verdicts UNKNOWN, even the reference solution scores 0. Looks like an ordinary agent failure.</td></tr>
+      <tr><td class="mono">coq-block-bound</td><td>#1802</td><td>Image not multi-platform</td></tr>
+      <tr><td class="mono">hof-topology-interpenetration</td><td>#1803</td><td>Image not multi-platform</td></tr>
+      <tr><td class="mono">math-eval-grader</td><td>#1804</td><td>Image not multi-platform</td></tr>
+      <tr><td class="mono">gsea-proteomics</td><td>#1805</td><td>Image not multi-platform</td></tr>
+      <tr><td class="mono">wdm-design</td><td>#1806</td><td>Image not multi-platform</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <ul class="plain" style="margin-top:12px">
+    <li><strong>The list is incomplete.</strong> Cross-platform CI is only proposed (#1793). Because #1601 fails silently, other broken tasks can hide in a Mac-recorded corpus as fake agent failures, and we cannot measure that bias.</li>
+    <li><strong>Emulation is for development only.</strong> <code>DOCKER_DEFAULT_PLATFORM=linux/amd64 harbor run ...</code> runs x86 images under emulation, and the #1601 reference solution then scores 1. Emulation distorts timing (checkpoint latency, task timeouts), so emulated runs cannot go into a recorded corpus.</li>
+  </ul>
+
+  <section class="keep">
+  <h3 style="font-size:1rem;margin:22px 0 4px">Our macOS run <span class="chip stale">pending</span></h3>
+  <p class="note" style="margin-top:0">Shawn is running the subset natively on arm64, then again under amd64 emulation. This table gets filled in before Friday.</p>
+  <div class="tablewrap">
+  <table class="data">
+    <thead><tr><th>Measure</th><th>arm64 native</th><th>amd64 emulated</th></tr></thead>
+    <tbody>
+      <tr><td>Tasks run</td><td class="pending">-</td><td class="pending">-</td></tr>
+      <tr><td>Fail to build or start</td><td class="pending">-</td><td class="pending">-</td></tr>
+      <tr><td>Reference solution scores 0</td><td class="pending">-</td><td class="pending">-</td></tr>
+      <tr><td>Tasks newly broken, not in the tracker</td><td class="pending">-</td><td class="pending">-</td></tr>
+    </tbody>
+  </table>
+  </div>
+  </section>
+
+  <section class="keep">
+  <h2>Request a Linux server on Friday</h2>
+  <p>One Linux machine fixes both problems. Root lets Waypoint branch live sandboxes, which the brief requires. x86_64 removes the architecture bias.</p>
+  <div class="ask">
+    <div class="k">Question for the professor</div>
+    <div class="q">Can the course or department provide or fund an x86_64 Linux server or VM with root access to record the corpus?</div>
+    <ul>
+      <li>x86_64, with root, running Docker Engine (not Docker Desktop)</li>
+      <li>Enough disk for one committed image per tool call in every trial</li>
+      <li>Can run long batch jobs unattended</li>
+      <li>A kernel that supports CRIU, which Waypoint needs for branching</li>
+      <li>Disk for CRIU dumps, which grow with process memory</li>
+    </ul>
+  </div>
+  <p class="note">Development stays on our Macs until the server arrives, with emulation for x86-only tasks. The server blocks branching and the recorded corpus, not the Sep 25 baseline (stock Harbor, no checkpoints). Team decision for Friday: reopen ADR-0004 and plan the Waypoint environment.</p>
+  </section>
+
+  <div class="foot">Sources: docs/project-brief.md, docs/decisions/0004-filesystem-only-checkpoints.md, docs/research/2026-09-23_checkpoint-platform-research.md, vendor/statefork and vendor/waypoint at v0.7.0, arXiv:2510.05556, docker/for-mac#1059, harbor-framework/terminal-bench issues #1601, #1793, #1802-#1806. Supersedes the StateFork section of the Sep 22 brief. State as of Sep 23, 2026.</div>
+</div>
+</body>
+</html>
