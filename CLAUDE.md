@@ -1,6 +1,6 @@
 # trajlab — context for Claude Code
 
-Read this file, then `@docs/harbor-facts.md`, before writing or moving anything. When a question about Harbor comes up, read the installed source in `.venv/lib/python3.12/site-packages/harbor/` before guessing; the facts file tells you which modules matter.
+Read this file, then `@docs/harbor-facts.md`, before writing or moving anything. Use the terms in `docs/glossary.md` with exactly the meanings given there. When a question about Harbor comes up, read the installed source in `.venv/lib/python3.12/site-packages/harbor/` before guessing; the facts file tells you which modules matter.
 
 ## What this repo is
 
@@ -27,7 +27,7 @@ configs/tasks/             task-name lists per subset
 src/trajlab/cli.py         typer app: run | watch | postprocess | manifest | validate
 src/trajlab/contracts/     CheckpointRecord, TrialRecord, ATIF step extras
 src/trajlab/capture/       harbor_runner, corpus manifest, trial/container discovery
-src/trajlab/checkpoint/    hook/ (script copied into the container), watcher, backends/, join
+src/trajlab/checkpoint/    hook/ (PostToolUse hook script; delivery per ADR-0003), watcher, backends/, join
 src/trajlab/atif/          load, compaction recovery, postprocess, validate
 scripts/                   dated one-offs (2026-09-25_baseline.py); never imported by src/
 tests/fixtures/hello-world-trial/   one small real trial dir; every test runs against it
