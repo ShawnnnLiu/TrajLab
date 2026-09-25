@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Waypoint Blocker Brief</title>
+<title>Sep 25 Team Brief</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{
@@ -40,6 +40,12 @@
   --ok:#7fcf9c; --ok-soft:#1d3527;
   --code-bg:#232b34;
 }
+/* survey chart series (validated: light #0a6f9c/#b4551f on #fff, dark #2a8fb6/#d07c3c on #1c232b) */
+:root{--s-reports:#0a6f9c;--s-papers:#b4551f;}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--s-reports:#2a8fb6;--s-papers:#d07c3c;}
+}
+:root[data-theme="dark"]{--s-reports:#2a8fb6;--s-papers:#d07c3c;}
 body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.55;margin:0;}
 .wrap{max-width:860px;margin:0 auto;padding-block:40px 72px;padding-inline:20px;}
 code{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.86em;background:var(--code-bg);padding:1px 5px;border-radius:3px;}
@@ -104,6 +110,22 @@ p{margin:0 0 12px;max-width:68ch;}
 .cc ul{margin:0;padding-left:18px;}
 .cc li{margin:4px 0;}
 
+/* version-adoption chart */
+.chart{margin:16px 0 4px;max-width:660px;}
+.crow{display:grid;grid-template-columns:118px 1fr;gap:2px 14px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);}
+.crow:last-child{border-bottom:0;}
+.crow .vlab{font-weight:600;font-size:0.9rem;line-height:1.25;}
+.crow .vlab small{display:block;font-weight:400;color:var(--muted);font-size:0.72rem;letter-spacing:0.01em;}
+.bars{display:flex;flex-direction:column;gap:3px;border-left:2px solid var(--line-strong);padding-left:2px;}
+.bar{display:flex;align-items:center;gap:8px;min-height:13px;}
+.bar i{display:block;height:11px;border-radius:2px 4px 4px 2px;flex:none;}
+.bar.reports i{background:var(--s-reports);}
+.bar.papers i{background:var(--s-papers);}
+.bar b{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:0.76rem;font-weight:500;color:var(--ink-2);font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap;}
+.bar.zero b{color:var(--block);font-weight:600;}
+.sw.reports{background:var(--s-reports);border-color:var(--s-reports);}
+.sw.papers{background:var(--s-papers);border-color:var(--s-papers);}
+
 ul.plain{padding-left:20px;margin:0;}
 ul.plain li{margin:8px 0;max-width:70ch;}
 .tablewrap{overflow-x:auto;margin-top:10px;}
@@ -140,6 +162,7 @@ table.data td.pending{color:var(--muted);text-align:center;font-family:"IBM Plex
     --block:#a8323a; --block-soft:#f6e1e2;
     --ok:#2f7a4b; --ok-soft:#e0f0e6;
     --code-bg:#eef1f4;
+    --s-reports:#0a6f9c; --s-papers:#b4551f;
   }
   html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   .wrap{max-width:none;padding-block:0;padding-inline:0;}
@@ -154,10 +177,10 @@ table.data td.pending{color:var(--muted);text-align:center;font-family:"IBM Plex
 
 <div class="wrap">
   <div class="eyebrow">COMS 6113 &middot; Project 16 &middot; Team brief &middot; Fri Sep 25, 2026</div>
-  <h1>Branching needs a Linux server</h1>
+  <h1>Branching needs Linux; comparison needs TB&nbsp;2.1</h1>
   <div class="callout">
-    <div class="k">Bottom line</div>
-    <div class="q">The project brief requires branchable environment state alongside agent trajectories. Only Waypoint branches a live sandbox, and it runs only on a root Linux host. Our Macs cannot meet the brief, so we need a Linux server.</div>
+    <div class="k">Two decisions on Friday</div>
+    <div class="q">1. The project brief requires branchable environment state. Only Waypoint branches a live sandbox, and it runs only on a root Linux host, so we need a Linux server. 2. Comparison is the core of our contribution, and a 52-source survey shows the field compares on Terminal-Bench 2.0/2.1 and never on 3.0/4.0, so the corpus should target TB&nbsp;2.1, not the live 4.0 set.</div>
   </div>
 
   <h2>Revised architecture</h2>
@@ -257,12 +280,12 @@ table.data td.pending{color:var(--muted);text-align:center;font-family:"IBM Plex
   </section>
 
   <h2>Terminal-Bench on Apple Silicon</h2>
-  <p>This is a second, independent reason to get a Linux server. Harbor does not pin a platform, so on our M-series Macs the containers run as arm64. Some Terminal-Bench tasks are x86-only. The upstream tracker lists these as of Sep 23:</p>
+  <p>This is a second, independent reason to get a Linux server. Harbor does not pin a platform, so on our M-series Macs the containers run as arm64. Some Terminal-Bench tasks are x86-only. Our Sep 24 static scan of the full registry (every Dockerfile, image manifest, and x86 payload) quantified it: 5 of the 66 tasks on current main are arm64-broken, about 8%. The sixth task below existed only in the v3.0.0 registry and is removed on main.</p>
   <div class="tablewrap">
   <table class="data">
     <thead><tr><th>Task</th><th>Issue</th><th>Failure on arm64</th></tr></thead>
     <tbody>
-      <tr><td class="mono">fix-uautomizer-soundness</td><td>#1601</td><td>Silent: all verdicts UNKNOWN, even the reference solution scores 0. Looks like an ordinary agent failure.</td></tr>
+      <tr><td class="mono">fix-uautomizer-soundness</td><td>#1601</td><td>Silent: all verdicts UNKNOWN, even the reference solution scores 0. Looks like an ordinary agent failure. v3.0.0 only; removed on main.</td></tr>
       <tr><td class="mono">coq-block-bound</td><td>#1802</td><td>Image not multi-platform</td></tr>
       <tr><td class="mono">hof-topology-interpenetration</td><td>#1803</td><td>Image not multi-platform</td></tr>
       <tr><td class="mono">math-eval-grader</td><td>#1804</td><td>Image not multi-platform</td></tr>
@@ -272,23 +295,102 @@ table.data td.pending{color:var(--muted);text-align:center;font-family:"IBM Plex
   </table>
   </div>
   <ul class="plain" style="margin-top:12px">
-    <li><strong>The list is incomplete.</strong> Cross-platform CI is only proposed (#1793). Because #1601 fails silently, other broken tasks can hide in a Mac-recorded corpus as fake agent failures, and we cannot measure that bias.</li>
+    <li><strong>The list is version-scoped.</strong> The scan covers the 3.0/4.0 registry only. TB&nbsp;2.1's 89 tasks have never been arm64-scanned, so if we adopt 2.1 this exclusion list does not transfer and Mac development runs need a fresh scan. The recorded corpus runs on x86_64 Linux either way, where none of this applies.</li>
+    <li><strong>Silent failures can hide.</strong> Cross-platform CI is only proposed (#1793). Because #1601 fails silently, other broken tasks can hide in a Mac-recorded corpus as fake agent failures, and we cannot measure that bias.</li>
     <li><strong>Emulation is for development only.</strong> <code>DOCKER_DEFAULT_PLATFORM=linux/amd64 harbor run ...</code> runs x86 images under emulation, and the #1601 reference solution then scores 1. Emulation distorts timing (checkpoint latency, task timeouts), so emulated runs cannot go into a recorded corpus.</li>
   </ul>
 
+  <h2>Which Terminal-Bench version: the Sep 24 survey</h2>
+  <p>Comparison is the core of our research contribution, so the corpus task set should be the version the field actually compares on. On Sep 24 we surveyed 52 primary sources - 34 model reports and system cards, 18 research papers - and verified every version claim against the primary document (arXiv full texts, system cards, HF cards, leaderboard snapshots). Full evidence tables: <code>docs/research/2026-09-24_tb-version-survey.md</code>.</p>
+  <p><span class="chip build">correction</span>&nbsp; TB&nbsp;2.1 exists. Our Sep 24 morning note said it had no released artifact; it shipped 2026-05-06 as Harbor Hub dataset <code>terminal-bench/terminal-bench-2-1</code> (no git tag, which is why a tag-only search missed it). It is TB&nbsp;2.0's 89 tasks with 28 broken tasks repaired, and it has its own frozen leaderboard.</p>
+
   <section class="keep">
-  <h3 style="font-size:1rem;margin:22px 0 4px">Our macOS run <span class="chip stale">pending</span></h3>
-  <p class="note" style="margin-top:0">Shawn is running the subset natively on arm64, then again under amd64 emulation. This table gets filled in before Friday.</p>
-  <div class="tablewrap">
-  <table class="data">
-    <thead><tr><th>Measure</th><th>arm64 native</th><th>amd64 emulated</th></tr></thead>
-    <tbody>
-      <tr><td>Tasks run</td><td class="pending">-</td><td class="pending">-</td></tr>
-      <tr><td>Fail to build or start</td><td class="pending">-</td><td class="pending">-</td></tr>
-      <tr><td>Reference solution scores 0</td><td class="pending">-</td><td class="pending">-</td></tr>
-      <tr><td>Tasks newly broken, not in the tracker</td><td class="pending">-</td><td class="pending">-</td></tr>
-    </tbody>
-  </table>
+  <h3 style="font-size:1rem;margin:26px 0 2px">Who runs what (56 version calls across the 52 sources)</h3>
+  <div class="legend" style="margin:8px 0 0">
+    <span><i class="sw reports"></i>Model reports and cards (34)</span>
+    <span><i class="sw papers"></i>Research papers (18)</span>
+  </div>
+  <div class="chart">
+    <div class="crow">
+      <div class="vlab">TB 1.0 <small>~80 tasks &middot; May 2025</small></div>
+      <div class="bars">
+        <div class="bar reports" title="8 model reports"><i style="width:44%"></i><b>8</b></div>
+        <div class="bar papers" title="3 research papers"><i style="width:16.5%"></i><b>3</b></div>
+      </div>
+    </div>
+    <div class="crow">
+      <div class="vlab">TB 2.0 <small>89 tasks &middot; Nov 2025</small></div>
+      <div class="bars">
+        <div class="bar reports" title="16 model reports"><i style="width:88%"></i><b>16</b></div>
+        <div class="bar papers" title="13 research papers"><i style="width:71.5%"></i><b>13</b></div>
+      </div>
+    </div>
+    <div class="crow">
+      <div class="vlab">TB 2.1 <small>89 tasks, 28 fixed &middot; May 2026</small></div>
+      <div class="bars">
+        <div class="bar reports" title="5 model reports"><i style="width:27.5%"></i><b>5</b></div>
+        <div class="bar papers" title="4 research papers"><i style="width:22%"></i><b>4</b></div>
+      </div>
+    </div>
+    <div class="crow">
+      <div class="vlab">TB 3.0 <small>74 tasks &middot; Jul 2026</small></div>
+      <div class="bars">
+        <div class="bar reports" title="1 model report"><i style="width:5.5%"></i><b>1</b></div>
+        <div class="bar papers zero" title="0 research papers"><b>0 papers</b></div>
+      </div>
+    </div>
+    <div class="crow">
+      <div class="vlab">TB 4.0 <small>66 tasks &middot; Aug 2026 &middot; live board</small></div>
+      <div class="bars">
+        <div class="bar reports" title="3 model reports"><i style="width:16.5%"></i><b>3</b></div>
+        <div class="bar papers zero" title="0 research papers"><b>0 papers</b></div>
+      </div>
+    </div>
+    <div class="crow">
+      <div class="vlab">Unresolvable <small>version not stated</small></div>
+      <div class="bars">
+        <div class="bar reports" title="2 model reports"><i style="width:11%"></i><b>2</b></div>
+        <div class="bar papers" title="1 research paper"><i style="width:5.5%"></i><b>1</b></div>
+      </div>
+    </div>
+  </div>
+  <p class="note">Four sources run two versions, so calls sum to 56. Zero academic papers have ever evaluated on 3.0 or 4.0; TB&nbsp;4.0 appears only in the three newest lab reports (all Sep 2026) and on the live leaderboard. The 89-task 2.0/2.1 family carries 38 of the 56 calls, and the newest RL and agent papers (T1, StateM, Tmax) plus the mid-2026 frontier claims (Claude Fable 5 at 84.3%, Grok 4.5, GLM-5.3) are on 2.1.</p>
+  </section>
+
+  <section class="keep">
+  <h3 style="font-size:1rem;margin:26px 0 4px">The two real contenders</h3>
+  <div class="cc">
+    <div>
+      <div class="h ok">TB 2.1 - recommended</div>
+      <ul>
+        <li>The 28 repaired tasks remove a known source of spurious failure trajectories in the corpus</li>
+        <li>Where recent papers and frontier claims live; its frozen leaderboard (top entries 78-83%) stays a stable anchor</li>
+        <li>GLM-5.3 already ran it under the Claude Code harness - exact precedent for our setup</li>
+        <li>Per-task timeouts (900 s / 1800 s tiers) keep docker-commit checkpoint chains bounded</li>
+        <li>Concern: near saturation (~84% frontier), so only ~15-20% failure trajectories, mostly in the 30-task hard tier</li>
+      </ul>
+    </div>
+    <div>
+      <div class="h block">TB 4.0 - live leaderboard</div>
+      <ul>
+        <li>Zero academic comparables; only three Sep 2026 lab reports</li>
+        <li>SOTA ~58%, so better headroom if our claim ever becomes "our method improves the agent"</li>
+        <li>Flat 8-hour agent timeout and GPU-requiring tasks multiply run cost and checkpoint storage</li>
+        <li>Leaderboard numbers are judge-filtered since Apr 2026, so self-run numbers are not exactly board-comparable either</li>
+      </ul>
+    </div>
+  </div>
+  <p class="note">Comparability rules that hold whichever we pick: harness choice alone is worth 6-10 points (T1 measured Opus 4.6 at 70.1 under Claude Code vs 63.8 under Terminus-2), 2.1 scores run ~10 points above 2.0-era numbers because of the repairs, and the leaderboard protocol is k=5 mean while Harbor's default is <code>n_attempts=1</code>. Any number we publish must pin harness, attempt count, and aggregation.</p>
+
+  <div class="ask">
+    <div class="k">Team decision for Friday</div>
+    <div class="q">Adopt TB 2.1 as the primary corpus version? Recommendation only so far - the repo rule requires an ADR and a new corpus_id before the first run. Open items before the ADR:</div>
+    <ul>
+      <li>Read the Claude Fable 5 system card PDF and confirm the harness behind the 84.3% claim (currently secondary-sourced)</li>
+      <li>Pin the Hub dataset <code>terminal-bench/terminal-bench-2-1</code> version against our pinned Harbor and record it in the job config</li>
+      <li>Choose the attempt protocol: k=5 mean (leaderboard) vs avg@3 (GLM-5.3's protocol)</li>
+      <li>Pilot the hard tier to count expected failure trajectories; keep a TB 4.0 hard-subset secondary corpus (own corpus_id) as fallback if failures come up thin</li>
+    </ul>
   </div>
   </section>
 
@@ -306,10 +408,10 @@ table.data td.pending{color:var(--muted);text-align:center;font-family:"IBM Plex
       <li>Disk for CRIU dumps, which grow with process memory</li>
     </ul>
   </div>
-  <p class="note">Development stays on our Macs until the server arrives, with emulation for x86-only tasks. The server blocks branching and the recorded corpus, not the Sep 25 baseline (stock Harbor, no checkpoints). Team decision for Friday: reopen ADR-0004 and plan the Waypoint environment.</p>
+  <p class="note">Development stays on our Macs until the server arrives, with emulation for x86-only tasks. The server blocks branching and the recorded corpus, not the Sep 25 baseline (stock Harbor, no checkpoints). Team decisions for Friday: reopen ADR-0004 and plan the Waypoint environment, and settle the corpus version (recommendation: TB 2.1, pending the open items above).</p>
   </section>
 
-  <div class="foot">Sources: docs/project-brief.md, docs/decisions/0004-filesystem-only-checkpoints.md, docs/research/2026-09-23_checkpoint-platform-research.md, vendor/statefork and vendor/waypoint at v0.7.0, arXiv:2510.05556, docker/for-mac#1059, harbor-framework/terminal-bench issues #1601, #1793, #1802-#1806. Supersedes the StateFork section of the Sep 22 brief. State as of Sep 23, 2026.</div>
+  <div class="foot">Sources: docs/project-brief.md, docs/decisions/0004-filesystem-only-checkpoints.md, docs/research/2026-09-23_checkpoint-platform-research.md, docs/research/2026-09-24_tb-version-survey.md and 2026-09-24_tb-version-recommendation.md, vendor/statefork and vendor/waypoint at v0.7.0, arXiv:2510.05556, docker/for-mac#1059, harbor-framework/terminal-bench issues #1601, #1793, #1802-#1806, tbench.ai news and leaderboards. Supersedes the StateFork section of the Sep 22 brief. State as of Sep 24, 2026.</div>
 </div>
 </body>
 </html>
