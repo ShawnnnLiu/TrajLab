@@ -1,5 +1,6 @@
 # Contributing
 
+- Read `docs/glossary.md` first; docs, code comments, and PRs use its terms with its meanings.
 - `uv sync`, then `uv run pre-commit install`. Ruff formats and lints on commit.
 - One branch per issue, named `<initials>/<short-topic>`. PRs into `main`, one reviewer, squash merge.
 - `make test` must pass. Tests run offline against `tests/fixtures/hello-world-trial/`, never against `corpus/`, Docker, or the network.
