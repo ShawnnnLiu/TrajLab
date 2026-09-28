@@ -8,6 +8,8 @@ One environment checkpoint per state-mutating tool call, taken synchronously bet
 
 ## Participants
 
+Vocabulary for these roles, and for everything else in this doc, is in `docs/glossary.md`.
+
 - **Hook** (inside the container): a Claude Code `PostToolUse` hook registered in `settings.hooks.json`, which Harbor passes through as `--settings`. Runs as the agent user with `CLAUDE_CONFIG_DIR=/logs/agent/sessions` set, so `/logs/agent` is `$CLAUDE_CONFIG_DIR/..`.
 - **Watcher** (on the host): `trajlab watch <jobs-dir> --backend <name>`. Watches `*/agent/checkpoints/*.req` under every trial dir with `watchdog`, one process per job.
 - **Backend** (on the host): implements `SnapshotBackend.snapshot(target, name) -> CheckpointRecord`. The only backend is `docker_commit` (ADR-0004; the planned `statefork` backend was dropped). `restore()` and `fork()` are declared on the protocol but raise `NotImplementedError` in this phase.
@@ -53,7 +55,7 @@ requested_at / captured_at   ISO 8601
 ## Constraints to design around
 
 - **Hook timeout budget**: Claude Code's per-hook `timeout` must exceed the worst-case snapshot time plus the ack wait; set it to 300 s in `settings.hooks.json`. Hook wall time counts toward Harbor's agent timeout (task-defined, scaled by `--timeout-multiplier`); corpus runs with checkpoints will need a larger multiplier. Record the multiplier in the corpus manifest.
-- **Tool coverage**: read-only tools (`Read`, `Grep`, `Glob`, `WebFetch`) are not matched. Postprocess joins those steps to the most recent earlier checkpoint. This is ADR-0001.
+- **Tool coverage**: read-only tools (`Read`, `Grep`, `Glob`, `WebFetch`, `WebSearch`, `Task`; ADR-0001 is the authoritative list) are not matched. Postprocess joins those steps to the most recent earlier checkpoint. This is ADR-0001.
 - **No jq/python guarantee** in task images. The hook is POSIX `sh` and extracts `tool_use_id` with `sed`. Test against an Alpine image.
 - **Watcher absent** (e.g. stock corpus run): no `.ack` ever arrives; every call writes `.timeout` after 240 s. So **do not pass `settings.hooks.json` unless the watcher is running.** `trajlab run --hooks` refuses to start if it cannot see a watcher pid file.
 - **docker commit** pauses the container briefly and captures the filesystem only; live memory and shell state are lost. This is a permanent, accepted limitation of the project (ADR-0004): no CRIU-capable backend attaches to the Docker containers Harbor runs, and CRIU's per-call cost exceeds our storage and compute budget. See `docs/research/2026-09-23_checkpoint-platform-research.md` Q1/Q3 for the evidence.
@@ -80,4 +82,8 @@ requested_at / captured_at   ISO 8601
 }
 ```
 
-The hook script itself must reach the container before the agent runs. Two options, pick one in ADR-0003: (a) inline the whole script in `command` so nothing needs uploading; (b) the watcher writes `agent/hook/post_tool_use.sh` into the trial dir the moment it appears (bind mount), which is before Claude Code finishes installing. Option (a) is safer; option (b) is more readable. Check the Claude Code hooks reference for the exact stdin fields (`tool_use_id`, `tool_name`, `session_id`, `cwd`) against the installed CLI version before relying on them.
+The hook script itself must reach the container before the agent runs. Two options, decided in the step-6 implementation PR and recorded in ADR-0003 as an amendment: (a) inline the whole script in `command` so nothing needs uploading; (b) the watcher writes `agent/hook/post_tool_use.sh` into the trial dir the moment it appears (bind mount), which is before Claude Code finishes installing. Option (a) is safer; option (b) is more readable. Check the Claude Code hooks reference for the exact stdin fields (`tool_use_id`, `tool_name`, `session_id`, `cwd`) against the installed CLI version before relying on them.
+
+## Open questions
+
+- **Representation of the read-only join.** ADR-0001 says postprocess joins read-only steps to the most recent earlier checkpoint, but ADR-0003 only inserts a system step after agent steps that own a checkpointed `tool_call_id`, so the enriched file does not yet say how a read-only step's join appears. Decide in the step-7 implementation PR and amend ADR-0003.
