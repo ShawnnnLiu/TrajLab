@@ -7,6 +7,9 @@ from pathlib import Path
 
 import typer
 
+from trajlab.atif.load import trajectory_path
+from trajlab.atif.validate import validate_trajectory
+
 app = typer.Typer(help="Capture Claude Code trajectories on Harbor with environment checkpoints.")
 
 
@@ -36,8 +39,15 @@ def manifest(job_dir: Path) -> None:
 
 @app.command()
 def validate(trial_dir: Path) -> None:
-    """Validate a trial's ATIF trajectory."""
-    raise typer.Exit(code=_not_implemented("validate"))
+    """Validate a trial's ATIF trajectory (agent/trajectory.json) against Harbor's schema."""
+    path = trajectory_path(trial_dir)
+    errors = validate_trajectory(path)
+    if errors:
+        typer.echo(f"invalid: {path}", err=True)
+        for error in errors:
+            typer.echo(f"  - {error}", err=True)
+        raise typer.Exit(code=1)
+    typer.echo(f"valid: {path}")
 
 
 def _not_implemented(name: str) -> int:
