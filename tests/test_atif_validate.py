@@ -127,6 +127,24 @@ def test_missing_file(tmp_path: Path) -> None:
     ]
 
 
+def test_directory_instead_of_file(fixture_trial: Path) -> None:
+    # Passing the trial dir itself is a likely slip; report it rather than crash in Harbor.
+    assert validate_trajectory(fixture_trial) == [f"File not found: {fixture_trial}"]
+
+
+def test_missing_referenced_image(trial_copy: Path) -> None:
+    def mutate(data: dict[str, Any]) -> None:
+        data["steps"][0]["message"] = [
+            {"type": "image", "source": {"media_type": "image/png", "path": "images/gone.png"}}
+        ]
+
+    errors = validate_trajectory(edit_trajectory(trial_copy, mutate))
+
+    assert len(errors) == 1
+    assert "steps[0].message[0].source.path" in errors[0]
+    assert "images/gone.png" in errors[0]
+
+
 def test_cli_valid_exits_zero(fixture_trial: Path) -> None:
     result = CliRunner().invoke(app, ["validate", str(fixture_trial)])
 
