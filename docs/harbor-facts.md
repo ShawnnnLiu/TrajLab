@@ -60,19 +60,7 @@ Claude Code's `tool_use_id` (in the session JSONL, and in the JSON that PreToolU
 - Step: `step_id` (1-based), `timestamp`, `source ∈ {system,user,agent}`, `message`, `reasoning_content`, `tool_calls[]{tool_call_id, function_name, arguments, extra}`, `observation.results[]{source_call_id, content, subagent_trajectory_ref, extra}`, `metrics`, `llm_call_count`, `is_copied_context`, `extra`.
 - System steps may carry `observation` for "environment resets, checkpoint creation" and `extra.context_management{type: compaction|pruning|injection, boundary: replace|append|truncate}`. **We use exactly these reserved slots** for checkpoint and compaction records, so enriched files stay valid ATIF.
 - Validator: `python -m harbor.utils.trajectory_validator <file>` or `harbor.utils.trajectory_validator.TrajectoryValidator`.
-- Step ids must stay sequential after insertion. Renumber on write; keep the original id in `extra.original_step_id`.
-- **Rules postprocess must respect [0.23.0]** (`trajectory.py`, `step.py`; each has a case in `tests/test_atif_validate.py`):
-  - `step_id` runs 1, 2, 3, … with no gaps (`Trajectory.validate_step_ids`).
-    Inserting a step renumbers every later one, so never store a `step_id` as a durable reference; key on `tool_call_id`.
-  - `observation.results[].source_call_id` must name a tool call in the *same* step (`validate_tool_call_references`).
-    A checkpoint system step cannot point back at the agent step's call that way; the link goes in `extra`.
-  - `model_name`, `reasoning_effort`, `reasoning_content`, `tool_calls`, `metrics` are rejected unless `source == "agent"` (`Step.validate_agent_only_fields`).
-  - Every model is `extra="forbid"`: anything we add goes inside an `extra` dict, never as a new key.
-  - `timestamp` must parse with `datetime.fromisoformat` after `Z` → `+00:00`; format hook times with `datetime.isoformat()`.
-- **Error reporting is partial.** `TrajectoryValidator` collects every field-level error, but the agent-only rule reports at most one field per step, and the two trajectory-level rules run only once every step is valid and stop at their first violation.
-  Fixing one error can surface another.
-- **Harbor's validator is lax; our load is strict.** Pydantic coerces `"step_id": "1"` to `1` and Harbor accepts it.
-  `trajlab.atif.load` uses strict mode, and `trajlab validate` runs the strict load after Harbor's check so the two never disagree.
+- Step ids must stay sequential after insertion. Renumber on write; keep the original id in `extra.trajlab.original_step_id` (ADR-0003).
 
 ## Other Harbor commands worth knowing
 
