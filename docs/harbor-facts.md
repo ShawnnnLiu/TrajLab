@@ -60,7 +60,7 @@ Claude Code's `tool_use_id` (in the session JSONL, and in the JSON that PreToolU
 - Step: `step_id` (1-based), `timestamp`, `source ∈ {system,user,agent}`, `message`, `reasoning_content`, `tool_calls[]{tool_call_id, function_name, arguments, extra}`, `observation.results[]{source_call_id, content, subagent_trajectory_ref, extra}`, `metrics`, `llm_call_count`, `is_copied_context`, `extra`.
 - System steps may carry `observation` for "environment resets, checkpoint creation" and `extra.context_management{type: compaction|pruning|injection, boundary: replace|append|truncate}`. **We use exactly these reserved slots** for checkpoint and compaction records, so enriched files stay valid ATIF.
 - Validator: `python -m harbor.utils.trajectory_validator <file>` or `harbor.utils.trajectory_validator.TrajectoryValidator`.
-- Step ids must stay sequential after insertion. Renumber on write; keep the original id in `extra.original_step_id`.
+- Step ids must stay sequential after insertion. Renumber on write; keep the original id in `extra.trajlab.original_step_id` (ADR-0003).
 
 ## Other Harbor commands worth knowing
 
