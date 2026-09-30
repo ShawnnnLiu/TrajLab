@@ -18,6 +18,8 @@ fmt:
 corpus:
 	uv run trajlab run configs/harbor/$(CONFIG).json
 
+BACKEND ?= docker_commit
+
 watch:
 	uv run trajlab watch corpus/jobs --backend $(BACKEND)
 

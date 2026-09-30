@@ -35,7 +35,7 @@ TRIAL_ID = UUID("e1eee115-a864-4c21-896b-5b60c8741d97")
 def _checkpoint_record(**overrides: Any) -> CheckpointRecord:
     fields: dict[str, Any] = {
         "checkpoint_id": "sha256:3f1c9e",
-        "trial_id": TRIAL_ID,
+        "trial_name": "hello-world__K3GBok3",
         "tool_call_id": FIXTURE_TOOL_CALL_ID,
         "seq": 1,
         "tool_name": "Bash",
@@ -110,7 +110,8 @@ def test_json_round_trip(instance: BaseModel) -> None:
 def test_checkpoint_record_json_shape() -> None:
     data = json.loads(_checkpoint_record().model_dump_json())
 
-    assert data["trial_id"] == str(TRIAL_ID)
+    assert data["trial_name"] == "hello-world__K3GBok3"
+    assert "trial_id" not in data
     assert data["backend"] == "docker_commit"
     assert data["physical"] is True
     assert datetime.fromisoformat(data["captured_at"]).tzinfo is not None
@@ -124,6 +125,8 @@ def test_checkpoint_record_json_shape() -> None:
         {"seq": 0},
         {"capture_ms": -1},
         {"tool_call_id": ""},
+        {"trial_name": ""},
+        {"trial_id": TRIAL_ID},
         {"requested_at": datetime(2026, 9, 29, 12, 0)},  # naive: ambiguous on the host
         {"image_tag": "x"},
     ],
