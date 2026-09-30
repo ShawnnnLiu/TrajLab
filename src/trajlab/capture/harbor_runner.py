@@ -4,11 +4,14 @@ Credentials stay in `.env`, which Harbor loads itself via `--env-file`; this mod
 reads, copies, or logs them.
 """
 
+import json
 import logging
 import subprocess
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from harbor.models.job.config import JobConfig
 from pydantic import ValidationError
@@ -43,6 +46,35 @@ class RunPlan:
     command: list[str]
 
 
+def claude_settings(config: JobConfig) -> list[dict[str, Any]]:
+    """The Claude Code settings each agent passes via `kwargs.config` (Harbor: `--ak config=`).
+
+    Harbor accepts a path, relative to its working directory (the same as ours), or an inline
+    object. Raises RunRefusedError if a named file cannot be read.
+    """
+    found = []
+    for agent in config.agents:
+        source = agent.kwargs.get("config")
+        if source is None:
+            continue
+        if isinstance(source, dict):
+            found.append(source)
+            continue
+        try:
+            settings = json.loads(Path(source).read_text())
+        except (OSError, json.JSONDecodeError) as error:
+            raise RunRefusedError(f"cannot read agent settings {source}: {error}") from error
+        if not isinstance(settings, dict):
+            raise RunRefusedError(f"agent settings {source} is not a JSON object")
+        found.append(settings)
+    return found
+
+
+def enables_hooks(config: JobConfig) -> bool:
+    """True if any agent's settings register a Claude Code hook, i.e. the run needs a watcher."""
+    return any(settings.get("hooks") for settings in claude_settings(config))
+
+
 def harbor_executable() -> Path:
     """The `harbor` script installed next to this interpreter: the pinned version."""
     return Path(sys.executable).parent / "harbor"
@@ -56,10 +88,14 @@ def plan_run(
     manifests_dir: Path,
     env_file: Path | None,
     allow_dirty: bool,
+    watcher_running: Callable[[Path], bool],
 ) -> RunPlan:
     """Check every precondition and build the `harbor run` command. Starts nothing.
 
     `repo_dir` is inside this repo (normally the cwd); the config must be committed in it.
+    `watcher_running(jobs_dir)` says whether a checkpoint watcher holds that jobs dir; a config
+    that enables hooks is refused without one, since every tool call would wait out the hook's
+    ack budget and record nothing (docs/checkpoint-protocol.md).
     """
     try:
         config = JobConfig.model_validate_json(config_path.read_text())
@@ -70,6 +106,11 @@ def plan_run(
     # Harbor resumes a job whose dir already holds a result.json; a corpus run must start fresh.
     if job_dir.exists():
         raise RunRefusedError(f"{job_dir} exists; pick a new job_name in {config_path}")
+    if enables_hooks(config) and not watcher_running(config.jobs_dir):
+        raise RunRefusedError(
+            f"{config_path} enables Claude Code hooks but no watcher holds {config.jobs_dir}; "
+            f"start `uv run trajlab watch {config.jobs_dir}` first"
+        )
     manifest = manifest_path(manifests_dir, corpus_id)
     if manifest.exists():
         raise RunRefusedError(f"{manifest} exists; corpus_id {corpus_id!r} is taken")

@@ -3,7 +3,8 @@ from pathlib import Path
 from typer.testing import CliRunner
 
 from tests.conftest import assemble_job_dir
-from trajlab.cli import app
+from trajlab.checkpoint.watcher import hold_watcher_lock
+from trajlab.cli import app, identify_trial
 from trajlab.contracts import CorpusManifest
 
 COMMANDS = {"run", "watch", "postprocess", "manifest", "validate"}
@@ -62,3 +63,22 @@ def test_run_refuses_without_starting_harbor(tmp_path: Path) -> None:
     result = CliRunner().invoke(app, ["run", str(config), "--manifests-dir", str(tmp_path)])
     assert result.exit_code == 1
     assert "new job_name" in result.output
+
+
+def test_watch_rejects_unknown_backend(tmp_path: Path) -> None:
+    result = CliRunner().invoke(app, ["watch", str(tmp_path), "--backend", "statefork"])
+    assert result.exit_code == 1
+    assert "unknown backend" in result.output
+
+
+def test_watch_refuses_second_watcher(tmp_path: Path) -> None:
+    with hold_watcher_lock(tmp_path):
+        result = CliRunner().invoke(app, ["watch", str(tmp_path)])
+    assert result.exit_code == 1
+    assert "already holds" in result.output
+
+
+def test_identify_trial_names_compose_project(fixture_trial: Path) -> None:
+    identity = identify_trial(fixture_trial)
+    assert identity.trial_name == "hello-world__K3GBok3"
+    assert identity.compose_project == "hello-world__k3gbok3__env"
