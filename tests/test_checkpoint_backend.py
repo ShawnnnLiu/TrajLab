@@ -19,7 +19,9 @@ class FakeDocker:
     def __call__(self, command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
         assert kwargs["check"] and kwargs["capture_output"] and kwargs["timeout"]
         self.calls.append(command)
-        key = command[1] if command[1] != "container" else "inspect"
+        key = command[1]
+        if command[1] == "container":
+            key = "labels" if "{{json .Config.Labels}}" in command else "inspect"
         answer = self.answers[key]
         if isinstance(answer, Exception):
             raise answer
@@ -49,8 +51,14 @@ def test_container_for_needs_exactly_one(stdout: str) -> None:
         DockerCommitBackend(runner=FakeDocker({"ps": stdout})).container_for("p")
 
 
+COMPOSE_LABELS = (
+    '{"com.docker.compose.project": "hello-world__k3gbok3__env", '
+    '"com.docker.compose.service": "main", "maintainer": "tb"}'
+)
+
+
 def test_snapshot_commits_with_labels_and_measures_layer() -> None:
-    docker = FakeDocker({"commit": IMAGE_ID, "inspect": "20975616"})
+    docker = FakeDocker({"labels": COMPOSE_LABELS, "commit": IMAGE_ID, "inspect": "20975616"})
     snapshot = DockerCommitBackend(runner=docker).snapshot(
         "c0ffee",
         tag="hello-world__K3GBok3.0001",
@@ -62,15 +70,25 @@ def test_snapshot_commits_with_labels_and_measures_layer() -> None:
     assert snapshot.capture_ms >= 0
     assert snapshot.captured_at.tzinfo is not None
     assert snapshot.path is None
-    assert docker.calls[0] == [
+    assert docker.calls[0][1:] == [
+        "container",
+        "inspect",
+        "--format",
+        "{{json .Config.Labels}}",
+        "c0ffee",
+    ]
+    # Compose labels are blanked so Harbor's `compose down --rmi local` keeps the image.
+    assert docker.calls[1] == [
         "docker",
         "commit",
+        '--change=LABEL com.docker.compose.project=""',
+        '--change=LABEL com.docker.compose.service=""',
         '--change=LABEL trajlab.trial_name="hello-world__K3GBok3"',
         '--change=LABEL trajlab.seq="1"',
         "c0ffee",
         "trajlab-checkpoint:hello-world__K3GBok3.0001",
     ]
-    assert docker.calls[1][1:] == [
+    assert docker.calls[2][1:] == [
         "container",
         "inspect",
         "--size",
@@ -82,7 +100,7 @@ def test_snapshot_commits_with_labels_and_measures_layer() -> None:
 
 def test_snapshot_without_size_still_succeeds() -> None:
     failure = subprocess.CalledProcessError(1, "docker", stderr="boom")
-    docker = FakeDocker({"commit": IMAGE_ID, "inspect": failure})
+    docker = FakeDocker({"labels": "{}", "commit": IMAGE_ID, "inspect": failure})
     assert DockerCommitBackend(runner=docker).snapshot("c", tag="t", labels={}).bytes is None
 
 
@@ -97,12 +115,16 @@ def test_snapshot_without_size_still_succeeds() -> None:
 )
 def test_snapshot_failures_are_backend_errors(answer: Exception) -> None:
     with pytest.raises(BackendError):
-        DockerCommitBackend(runner=FakeDocker({"commit": answer})).snapshot("c", tag="t", labels={})
+        DockerCommitBackend(runner=FakeDocker({"labels": "{}", "commit": answer})).snapshot(
+            "c", tag="t", labels={}
+        )
 
 
 def test_snapshot_rejects_unexpected_output() -> None:
     with pytest.raises(BackendError, match="not an image id"):
-        DockerCommitBackend(runner=FakeDocker({"commit": "oops"})).snapshot("c", tag="t", labels={})
+        DockerCommitBackend(runner=FakeDocker({"labels": "null", "commit": "oops"})).snapshot(
+            "c", tag="t", labels={}
+        )
 
 
 def test_discard_removes_image() -> None:
@@ -134,3 +156,11 @@ def test_image_tag_is_a_valid_docker_tag(trial_name: str, seq: int, expected: st
     tag = image_tag(trial_name, seq)
     assert tag == expected
     assert len(tag) <= 128
+
+
+def test_compose_labels_are_read_once_per_container() -> None:
+    docker = FakeDocker({"labels": COMPOSE_LABELS, "commit": IMAGE_ID, "inspect": "1"})
+    backend = DockerCommitBackend(runner=docker)
+    backend.snapshot("c0ffee", tag="a", labels={})
+    backend.snapshot("c0ffee", tag="b", labels={})
+    assert sum("{{json .Config.Labels}}" in call for call in docker.calls) == 1

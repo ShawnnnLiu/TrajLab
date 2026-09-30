@@ -145,6 +145,37 @@ def test_answered_requests_are_ignored(running_trial: Path) -> None:
     assert len(backend.snapshots) == 1
 
 
+def test_one_request_one_snapshot_whatever_the_path_spelling(
+    running_trial: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Regression, 2026-09-30 acceptance run: the observer reported an absolute path and the
+    # sweep a relative one, so two threads snapshotted the same call with the same seq.
+    monkeypatch.chdir(running_trial.parent.parent.parent)
+    relative_jobs = Path(running_trial.parent.parent.name)
+    backend = FakeBackend()
+    watcher = Watcher(relative_jobs, backend, identify)
+    req = _request(running_trial)
+    relative_req = req.relative_to(Path.cwd())
+    started = threading.Barrier(2)
+    backend.on_snapshot = lambda: time.sleep(0.2)
+
+    def process(path: Path) -> None:
+        started.wait()
+        watcher.process(path)
+
+    threads = [threading.Thread(target=process, args=(p,)) for p in (req, relative_req)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    assert len(backend.snapshots) == 1
+    assert [r.seq for r in read_records(req.parent)] == [1]
+    assert watcher.pending_requests() == []
+    log_lines = (req.parent / WATCHER_LOG_FILENAME).read_text().splitlines()
+    assert len([line for line in log_lines if "seq 1" in line]) == 1
+
+
 def test_late_snapshot_is_discarded(running_trial: Path) -> None:
     backend = FakeBackend()
     req = _request(running_trial)

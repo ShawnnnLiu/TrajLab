@@ -2,6 +2,11 @@
 
 `docker commit` pauses the container while it runs, so the hook waiting inside it cannot give
 up mid-snapshot. Bind mounts, including /logs/agent, are not part of the image.
+
+`docker commit` copies the container's labels onto the image, including Compose's project
+label, and Harbor tears a trial down with `docker compose down --rmi local`, which deletes every
+image carrying that label. Each checkpoint therefore blanks the container's
+`com.docker.compose.*` labels, or Harbor deletes it when the trial ends (ADR-0006).
 """
 
 import json
@@ -18,6 +23,7 @@ from trajlab.checkpoint.backends.base import BackendError, Snapshot, SnapshotBac
 logger = logging.getLogger(__name__)
 
 REPOSITORY = "trajlab-checkpoint"
+COMPOSE_LABEL_PREFIX = "com.docker.compose."
 # Below the hook's default 240 s ack wait: a slower commit would be discarded anyway.
 COMMAND_TIMEOUT_S = 230
 _TAG_INVALID = re.compile(r"[^A-Za-z0-9_.-]")
@@ -41,6 +47,7 @@ class DockerCommitBackend(SnapshotBackend):
     def __init__(self, docker: str = "docker", runner: Runner = subprocess.run) -> None:
         self._docker_bin = docker
         self._run = runner
+        self._compose_labels: dict[str, list[str]] = {}
 
     def _docker(self, *args: str) -> str:
         command = [self._docker_bin, *args]
@@ -71,8 +78,24 @@ class DockerCommitBackend(SnapshotBackend):
             )
         return ids[0]
 
+    def compose_labels(self, container: str) -> list[str]:
+        """The container's Compose label keys, which its images must not inherit. Cached."""
+        if container not in self._compose_labels:
+            raw = self._docker(
+                "container", "inspect", "--format", "{{json .Config.Labels}}", container
+            )
+            keys = json.loads(raw) or {}
+            self._compose_labels[container] = sorted(
+                key for key in keys if key.startswith(COMPOSE_LABEL_PREFIX)
+            )
+        return self._compose_labels[container]
+
     def snapshot(self, container: str, *, tag: str, labels: Mapping[str, str]) -> Snapshot:
-        changes = [f"--change=LABEL {key}={json.dumps(value)}" for key, value in labels.items()]
+        scrubbed = dict.fromkeys(self.compose_labels(container), "")
+        changes = [
+            f"--change=LABEL {key}={json.dumps(value)}"
+            for key, value in (scrubbed | dict(labels)).items()
+        ]
         start = time.monotonic()
         image_id = self._docker("commit", *changes, container, f"{REPOSITORY}:{tag}")
         capture_ms = round((time.monotonic() - start) * 1000)
