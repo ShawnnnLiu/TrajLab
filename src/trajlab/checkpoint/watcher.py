@@ -114,7 +114,9 @@ class Watcher:
         sweep_interval: float = DEFAULT_SWEEP_INTERVAL_S,
         workers: int = DEFAULT_WORKERS,
     ) -> None:
-        self.jobs_dir = jobs_dir
+        # Observers report absolute paths and the sweep reports paths under jobs_dir; both are
+        # resolved so one request and one trial have exactly one key.
+        self.jobs_dir = jobs_dir.resolve()
         self.backend = backend
         self.identify = identify
         self.sweep_interval = sweep_interval
@@ -134,6 +136,7 @@ class Watcher:
         Never raises for a problem with this request; problems are logged and the hook's
         wait budget turns them into a `.timeout`.
         """
+        req_path = req_path.resolve()
         if not is_pending(req_path):
             return None
         trial_dir = trial_dir_of(req_path)
@@ -255,6 +258,7 @@ class Watcher:
             self.submit(req)
 
     def submit(self, req_path: Path) -> None:
+        req_path = req_path.resolve()
         with self._in_flight_lock:
             if req_path in self._in_flight or self._executor is None:
                 return
