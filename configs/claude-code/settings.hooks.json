@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh -c 'mkdir -p \"$CLAUDE_CONFIG_DIR/../checkpoints\" && exec sh \"$CLAUDE_CONFIG_DIR/../hook/post_tool_use.sh\"'",
+            "command": "# trajlab PostToolUse hook: request a checkpoint and wait for it (docs/checkpoint-protocol.md).\n# POSIX sh only: task images may lack bash, jq, and python. Never exits non-zero.\nd=\"${CLAUDE_CONFIG_DIR:-/logs/agent/sessions}/../checkpoints\"\nmkdir -p \"$d\" 2>/dev/null || exit 0\nchmod a+rwx \"$d\" 2>/dev/null\ninput=$(cat)\nfield() {\n  printf '%s\\n' \"$input\" | grep -o \"\\\"$1\\\" *: *\\\"[^\\\"]*\\\"\" | head -n 1 | sed 's/.*: *\"\\([^\"]*\\)\"$/\\1/'\n}\nid=$(field tool_use_id)\ncase \"$id\" in\n  \"\" | *[!A-Za-z0-9_-]*)\n    printf '%s no usable tool_use_id: %.200s\\n' \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" \"$input\" >> \"$d/hook-errors.log\"\n    exit 0\n    ;;\nesac\ntool=$(field tool_name)\nsession=$(field session_id)\nagent=$(field agent_id)\nif [ -n \"$agent\" ]; then agent=\"\\\"$agent\\\"\"; else agent=null; fi\nprintf '{\"tool_use_id\":\"%s\",\"tool_name\":\"%s\",\"session_id\":\"%s\",\"agent_id\":%s}\\n' \\\n  \"$id\" \"$tool\" \"$session\" \"$agent\" > \"$d/$id.req.tmp\" && mv \"$d/$id.req.tmp\" \"$d/$id.req\" || exit 0\nwait_s=${TRAJLAB_ACK_WAIT:-240}\ncase \"$wait_s\" in \"\" | *[!0-9]*) wait_s=240 ;; esac\ndeadline=$(( $(date +%s) + wait_s ))\nwhile [ ! -e \"$d/$id.ack\" ]; do\n  if [ \"$(date +%s)\" -ge \"$deadline\" ]; then\n    : > \"$d/$id.timeout\"\n    if [ -e \"$d/$id.ack\" ]; then rm -f \"$d/$id.timeout\"; fi\n    exit 0\n  fi\n  sleep 0.2 2>/dev/null || sleep 1\ndone\nexit 0\n",
             "timeout": 300
           }
         ]

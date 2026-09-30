@@ -4,6 +4,8 @@ Each subcommand is a stub until its build-order step lands (see CLAUDE.md).
 """
 
 import logging
+import signal
+import threading
 from pathlib import Path
 from typing import Annotated
 
@@ -18,7 +20,17 @@ from trajlab.capture.corpus import (
     repo_state,
     write_manifest,
 )
+from trajlab.capture.discover import compose_project_name, load_trial_config
 from trajlab.capture.harbor_runner import RunRefusedError, execute, plan_run
+from trajlab.checkpoint.backends.docker_commit import DockerCommitBackend
+from trajlab.checkpoint.watcher import (
+    DEFAULT_SWEEP_INTERVAL_S,
+    TrialIdentity,
+    Watcher,
+    WatcherLockedError,
+    hold_watcher_lock,
+    watcher_running,
+)
 
 app = typer.Typer(help="Capture Claude Code trajectories on Harbor with environment checkpoints.")
 
@@ -65,6 +77,7 @@ def run(
             manifests_dir=manifests_dir,
             env_file=env_file,
             allow_dirty=allow_dirty,
+            watcher_running=watcher_running,
         )
     except RunRefusedError as error:
         typer.echo(f"trajlab run: {error}", err=True)
@@ -72,10 +85,42 @@ def run(
     raise typer.Exit(code=execute(plan, storage=storage))
 
 
+BACKENDS = {"docker_commit": DockerCommitBackend}
+
+
+def identify_trial(trial_dir: Path) -> TrialIdentity:
+    """Name a running trial and its compose project (capture's job, handed to the watcher)."""
+    return TrialIdentity(
+        trial_name=load_trial_config(trial_dir).trial_name,
+        compose_project=compose_project_name(trial_dir),
+    )
+
+
 @app.command()
-def watch(jobs_dir: Path, backend: str = "docker_commit") -> None:
-    """Watch running trials and take a checkpoint at every tool call."""
-    raise typer.Exit(code=_not_implemented("watch"))
+def watch(
+    jobs_dir: Annotated[Path, typer.Argument(help="Harbor jobs dir, e.g. corpus/jobs.")],
+    backend: Annotated[str, typer.Option(help="Snapshot backend.")] = "docker_commit",
+    sweep_interval: Annotated[
+        float, typer.Option(help="Seconds between rescans for missed requests.")
+    ] = DEFAULT_SWEEP_INTERVAL_S,
+) -> None:
+    """Watch running trials and take a checkpoint at every tool call. Stop with Ctrl-C."""
+    if backend not in BACKENDS:
+        typer.echo(
+            f"trajlab watch: unknown backend {backend!r}; one of {sorted(BACKENDS)}", err=True
+        )
+        raise typer.Exit(code=1)
+    stop = threading.Event()
+    for signum in (signal.SIGINT, signal.SIGTERM):
+        signal.signal(signum, lambda *_: stop.set())
+    try:
+        with hold_watcher_lock(jobs_dir):
+            Watcher(
+                jobs_dir, BACKENDS[backend](), identify_trial, sweep_interval=sweep_interval
+            ).run(stop)
+    except WatcherLockedError as error:
+        typer.echo(f"trajlab watch: {error}", err=True)
+        raise typer.Exit(code=1) from error
 
 
 @app.command()
