@@ -19,6 +19,9 @@ from trajlab.contracts import (
     CheckpointStepExtra,
     CompactionStepExtra,
     ContextManagementExtra,
+    CorpusJob,
+    CorpusManifest,
+    CorpusTask,
     OriginalStepExtra,
     TrajlabStepExtra,
     TrialRecord,
@@ -44,17 +47,51 @@ def _checkpoint_record(**overrides: Any) -> CheckpointRecord:
     return CheckpointRecord(**fields | overrides)
 
 
-INSTANCES: list[BaseModel] = [
-    _checkpoint_record(),
-    _checkpoint_record(bytes=None, path="/var/lib/trajlab/ckpt"),
-    TrialRecord(
+def _trial_record() -> TrialRecord:
+    return TrialRecord(
         trial_id=TRIAL_ID,
         trial_name="hello-world__K3GBok3",
         task_name="hello-world/hello-world",
         job_id=UUID("46eeee6e-8ffa-42b8-81da-b47efcf1407f"),
         job_dir="hello-world-smoke",
         claude_session_id="78b481c6-4620-425b-b2c0-ec60bce7422f",
-    ),
+    )
+
+
+def _corpus_manifest(**overrides: Any) -> CorpusManifest:
+    fields: dict[str, Any] = {
+        "corpus_id": "tb21-hard-v0",
+        "created_at": datetime(2026, 9, 30, 12, 0, tzinfo=UTC),
+        "harbor_version": "0.23.0",
+        "repo_sha": "973560e60524285a28ed0f83cf27981a47c6fd42",
+        "repo_dirty": False,
+        "config_path": "configs/harbor/tb21-hard-v0.json",
+        "agent_name": "claude-code",
+        "model_name": "anthropic/claude-sonnet-5-5",
+        "agent_kwargs": {"reasoning_effort": "high", "version": "2.1.278"},
+        "environment_type": "docker",
+        "n_attempts": 1,
+        "timeout_multiplier": 1.0,
+        "agent_timeout_multiplier": 2.0,
+        "tasks": [CorpusTask(name="hello-world/hello-world", digest="sha256:38d7")],
+        "jobs": [
+            CorpusJob(
+                job_name="hello-world-smoke",
+                job_id=UUID("46eeee6e-8ffa-42b8-81da-b47efcf1407f"),
+                job_config={"job_name": "hello-world-smoke", "n_concurrent_trials": 1},
+                trials=[_trial_record()],
+            )
+        ],
+    }
+    return CorpusManifest(**fields | overrides)
+
+
+INSTANCES: list[BaseModel] = [
+    _checkpoint_record(),
+    _checkpoint_record(bytes=None, path="/var/lib/trajlab/ckpt"),
+    _trial_record(),
+    _corpus_manifest(),
+    _corpus_manifest(config_path=None, agent_timeout_multiplier=None, storage="gs://bucket"),
     OriginalStepExtra(original_step_id=2),
     CheckpointStepExtra(tool_call_id=FIXTURE_TOOL_CALL_ID),
     CompactionStepExtra(),
@@ -95,6 +132,24 @@ def test_checkpoint_record_json_shape() -> None:
 def test_checkpoint_record_rejects(overrides: dict[str, Any]) -> None:
     with pytest.raises(ValidationError):
         _checkpoint_record(**overrides)
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"corpus_id": "../escape"},
+        {"corpus_id": ""},
+        {"repo_sha": "973560e"},
+        {"n_attempts": 0},
+        {"tasks": []},
+        {"jobs": []},
+        {"created_at": datetime(2026, 9, 30)},
+        {"unknown": 1},
+    ],
+)
+def test_corpus_manifest_rejects(overrides: dict[str, Any]) -> None:
+    with pytest.raises(ValidationError):
+        _corpus_manifest(**overrides)
 
 
 def test_records_are_frozen() -> None:
