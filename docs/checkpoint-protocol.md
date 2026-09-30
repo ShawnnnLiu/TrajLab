@@ -34,7 +34,7 @@ Vocabulary for these roles, and for everything else in this doc, is in `docs/glo
 
 ## Container resolution
 
-From the `.req` path, the trial dir is two levels up. Read `config.json` for `trial_name`; Harbor's Docker environment names the compose project from `session_id = f"{trial_name}__agent"`, sanitized. Do not rebuild the sanitizer; call `harbor.environments.docker.docker._sanitize_docker_compose_project_name` and then `docker ps --filter label=com.docker.compose.project=<name> --filter label=com.docker.compose.service=main --format '{{.ID}}'`. Cache per trial.
+From the `.req` path, the trial dir is two levels up. Read `config.json` for `trial_name`; Harbor's Docker environment names the compose project from `session_id = f"{trial_name}__env"`, sanitized (see `docs/harbor-facts.md`; `trajlab.capture.discover.compose_project_name` does this). Do not rebuild the sanitizer; call `harbor.environments.docker.docker._sanitize_docker_compose_project_name` and then `docker ps --filter label=com.docker.compose.project=<name> --filter label=com.docker.compose.service=main --format '{{.ID}}'`. Cache per trial.
 
 ## CheckpointRecord (in `contracts/checkpoint.py`)
 

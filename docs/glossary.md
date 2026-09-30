@@ -66,7 +66,8 @@ One trial is one task executed by one attempt.
   `source_call_id` is the field on an ATIF observation result that points back at the `tool_call_id` it answers.
 - **`session_id`** - two unrelated ids; always qualify which:
   - **Claude Code session id** - names the native session JSONL, arrives in the hook's stdin, and is the ATIF root `session_id`.
-  - **Harbor environment session id** - `"<trial_name>__agent"`, e.g. `hello-world__bZZeEkw__agent`; the sanitized source of the compose project name.
+  - **Harbor environment session id** - `"<trial_name>__env"`, e.g. `hello-world__bZZeEkw__env`; the sanitized (lowercased) source of the compose project name.
+    Not `"<trial_name>__agent"`, which is the session id Harbor gives the agent object and names no container.
 - **compaction** - Claude Code summarizing its context when it nears the limit.
   Harbor's converter drops the boundary, so postprocess recovers it from the native JSONL into `context_management` system steps.
 - **compose project** - the Docker Compose project Harbor names by sanitizing the environment session id; the main container is `<project>-main-1`.

@@ -30,6 +30,7 @@ dev = [
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+extend-exclude = ["vendor"]  # git submodules of third-party code; not ours to lint
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

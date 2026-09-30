@@ -49,7 +49,8 @@ Claude Code's `tool_use_id` (in the session JSONL, and in the JSON that PreToolU
 
 ## Docker environment (`harbor/environments/docker/docker.py`)
 
-- Compose project name = `_sanitize_docker_compose_project_name(session_id)`; `session_id` looks like `hello-world__bZZeEkw__agent`. The main container is `<project>-main-1`. Confirm with `docker ps --filter label=com.docker.compose.project=<project>` rather than string-building.
+- Compose project name = `_sanitize_docker_compose_project_name(session_id)`, where the environment's `session_id` is `f"{trial_name}__env"` (`Trial._init_agent_environment`) **[0.23.0]**. The sanitizer lowercases it, so `hello-world__bZZeEkw` runs as project `hello-world__bzzeekw__env`, main container `hello-world__bzzeekw__env-main-1`. Confirm with `docker ps --filter label=com.docker.compose.project=<project>` rather than string-building. (`f"{trial_name}__agent"` is the agent object's session id, not the environment's; an earlier version of this file conflated them. Corrected 2026-09-30 from the source and from leftover `regex-chess__kjsa4yc__env` containers.) `trajlab.capture.discover.compose_project_name` implements this.
+- **A running trial has no trial id on disk [0.23.0]:** `config.json` and `lock.json` are written when the trial starts, but `result.json`, the only file with the trial's `id`, is written in `Trial._finalize`. During the agent phase, only `trial_name` and `job_id` (both in `config.json`) are available.
 - `EnvironmentCapabilities.mounted = True` on Docker: `agent/` is a bind mount, so inotify on the host sees container writes immediately.
 - `--no-delete` keeps the container after the trial. Useful for debugging the hook; never for corpus runs.
 - `EnvironmentConfig.mounts: list[ServiceVolumeConfig]` allows extra bind mounts if we ever need a second channel.

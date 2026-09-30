@@ -1,0 +1,20 @@
+{
+    "job_name": "hello-world-e2e-v1",
+    "jobs_dir": "corpus/jobs",
+    "n_concurrent_trials": 1,
+    "agents": [
+        {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+                "version": "2.1.278"
+            }
+        }
+    ],
+    "tasks": [
+        {
+            "name": "hello-world/hello-world",
+            "ref": "latest"
+        }
+    ]
+}

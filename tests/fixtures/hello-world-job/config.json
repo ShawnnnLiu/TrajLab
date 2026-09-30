@@ -1,0 +1,17 @@
+{
+    "job_name": "hello-world-smoke",
+    "jobs_dir": "corpus/jobs",
+    "n_concurrent_trials": 1,
+    "agents": [
+        {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5"
+        }
+    ],
+    "tasks": [
+        {
+            "name": "hello-world/hello-world",
+            "ref": "latest"
+        }
+    ]
+}
