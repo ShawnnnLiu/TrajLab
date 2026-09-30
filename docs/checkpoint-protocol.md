@@ -38,7 +38,7 @@ Vocabulary for these roles, and for everything else in this doc, is in `docs/glo
 1. Claude Code finishes a tool call matched by the hook (`Bash|Write|Edit|MultiEdit|NotebookEdit`; `MultiEdit` is not a tool in current Claude Code and matches nothing).
    It runs the hook command with the event JSON on stdin.
 2. Hook writes `<tool_use_id>.req` atomically (write to `<tool_use_id>.req.tmp`, `mv`).
-3. Hook polls for `<tool_use_id>.ack` every 0.2 s, up to `TRAJLAB_ACK_WAIT` seconds (default 240).
+3. Hook polls for `<tool_use_id>.ack` every 0.2 s, up to `TRAJLAB_ACK_WAIT` seconds (default 240; Harbor forwards it only via `--ae`, not from `.env`).
    On ack: exit 0.
    On timeout: write `.timeout`, check for `.ack` once more (deleting `.timeout` if it is there), exit 0.
    **The hook never blocks the agent indefinitely and never exits non-zero**; a missing checkpoint is recorded, not fatal.
@@ -62,6 +62,7 @@ Cache per trial.
 - `docker commit --change 'LABEL ...' <container> trajlab-checkpoint:<tag>`; Docker pauses the container for the duration, hook included.
 - Tag: `<trial_name>.<seq:04d>`; image repository names must be lowercase but tags need not be.
   Labels: `trajlab.trial_name`, `trajlab.tool_call_id`, `trajlab.seq`, so `docker images --filter label=trajlab.trial_name=<name>` lists a trial's checkpoints.
+- Every `com.docker.compose.*` label the container carries is blanked on the image; `docker commit` would otherwise copy the compose project label, and Harbor's teardown (`docker compose down --rmi local`) deletes every image with that label (ADR-0006).
 - `checkpoint_id` is the image id (`sha256:...`).
 - `bytes` is `docker container inspect --size` `.SizeRw` right after the commit: the writable layer the commit captured.
   `docker image inspect .Size` is not used; under the containerd snapshotter it counts unpacked and compressed content together.
@@ -98,7 +99,7 @@ Start the watcher first: `uv run trajlab watch corpus/jobs`.
   This is ADR-0001.
 - **No jq/python guarantee** in task images.
   The hook is POSIX `sh` and extracts fields with `grep` and `sed`.
-  It is tested against an Alpine image (`scripts/2026-10-01_hook_alpine_check.sh`).
+  It is tested against an Alpine image (`scripts/2026-09-30_hook_alpine_check.sh`).
 - **Hook delivery is inline** (ADR-0003 amendment, ADR-0006): `settings.hooks.json` carries the whole script as the `command` string, generated from `src/trajlab/checkpoint/hook/post_tool_use.sh` by `uv run python -m trajlab.checkpoint.hook`.
   Edit the script, regenerate, commit both; a test enforces that they agree.
 - **Watcher absent** (e.g. stock corpus run): no `.ack` ever arrives; every call writes `.timeout` after 240 s.
@@ -112,6 +113,10 @@ Start the watcher first: `uv run trajlab watch corpus/jobs`.
   Watcher restart replays unacked `.req` files of trials without `result.json`; a `.req` whose `tool_use_id` is already in `checkpoints.jsonl` only gets its `.ack` rewritten.
 
 ## Open questions
+
+- **Checkpoint cost.**
+  Harbor installs the agent into the writable layer, so each checkpoint re-captures about 1.3 GB and takes about 36 s on the development Mac (ADR-0006, "Acceptance run").
+  Decide how to keep the install out of the checkpoints, or checkpoint less often, before any checkpointed corpus run.
 
 - **Representation of the read-only join.**
   ADR-0001 says postprocess joins read-only steps to the most recent earlier checkpoint, but ADR-0003 only inserts a system step after agent steps that own a checkpointed `tool_call_id`, so the enriched file does not yet say how a read-only step's join appears.

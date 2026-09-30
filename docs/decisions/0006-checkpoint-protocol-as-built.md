@@ -56,6 +56,9 @@ Planning the implementation against Harbor 0.23.0, Claude Code's hooks reference
 9. **Replay on watcher start** snapshots a `.req` that has neither `.ack` nor `.timeout` and whose trial has no `result.json`.
    A `.req` whose `tool_use_id` already has a record in `checkpoints.jsonl` only gets its `.ack` rewritten.
 10. **Permissions.** The hook makes `checkpoints/` world-writable, so a watcher that is not root can write `.ack` into a directory the container created (matters on a Linux host; a no-op on Docker Desktop).
+11. **Checkpoint images do not carry Compose labels.**
+    `docker commit` copies the container's labels onto the image, and Harbor ends every trial with `docker compose down --rmi local`, which deletes every image labelled with the trial's compose project.
+    The backend blanks each `com.docker.compose.*` label on commit; without that, every checkpoint of the first acceptance run was deleted at teardown.
 
 ## Consequences
 
@@ -64,4 +67,28 @@ Planning the implementation against Harbor 0.23.0, Claude Code's hooks reference
 - The first checkpointed run needs a new `corpus_id`, as every capture change does.
 - ADR-0003 is amended with the delivery decision.
 - Agent wall time grows by roughly the commit time plus up to 0.2 s of polling per state-mutating call; corpus configs with hooks raise `timeout_multiplier`, which the manifest records.
-- Open until the acceptance run: whether hook output appears in the stream-json `claude-code.txt` and whether Harbor's converter tolerates it, and whether `--print` fires PostToolUse for subagent calls.
+- Still unverified: whether `--print` fires PostToolUse for subagent tool calls; hello-world has no subagent.
+
+## Acceptance run (2026-09-30, `hello-world-checkpoint-v1`)
+
+Claude Code 2.1.278, arm64 Docker Desktop on the development Mac.
+One Write call, one `.req`, one `.ack`, one record, one image that survived teardown; reward 1.0.
+Hook activity does not appear in `claude-code.txt`, and Harbor's `trajectory.json` still validates.
+
+The first attempt found the two defects fixed above (duplicate snapshots from mixed path spellings, images deleted by Compose); its job dir is kept as `hello-world-checkpoint-v1.stale-2026-09-30`.
+
+**Cost is dominated by the agent install, not the task.**
+
+| Measure | Value |
+| --- | --- |
+| Writable layer per checkpoint | 1.33 GB |
+| `docker commit` time | 36 s |
+| Task image (Ubuntu 24.04 base) | 110 MB |
+
+Harbor installs Claude Code and its apt dependencies into the running container during `agent.setup()`, so they live in the writable layer, and `docker commit` re-captures them in every checkpoint.
+At this rate a trial with 50 state-mutating calls adds about 30 minutes of agent time and 65 GB of images, far above the "seconds" ADR-0001 assumed.
+This must be decided before any checkpointed corpus run; the options belong in their own ADR:
+
+- keep the install out of the writable layer, e.g. a custom environment (`--env module:Class`) that builds the task image with the agent pre-installed;
+- checkpoint every N calls, ADR-0001's stated fallback;
+- accept the cost for small corpora.
