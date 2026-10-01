@@ -31,7 +31,7 @@ One trial is one task executed by one attempt.
 
 ## Checkpoint machinery
 
-- **checkpoint** - the environment state captured for one tool call, plus the `CheckpointRecord` describing it.
+- **checkpoint** - the environment state captured after a tool call, plus the `CheckpointRecord` describing it; it covers that call and any calls deferred since the previous checkpoint (ADR-0007).
   With the `docker_commit` backend the state is a Docker image; the record's `checkpoint_id` is the image id.
   Keyed by `tool_use_id`.
 - **snapshot** - the *act* the backend performs to take a checkpoint (`SnapshotBackend.snapshot()`).
@@ -49,6 +49,9 @@ One trial is one task executed by one attempt.
   The only backend is `docker_commit` (ADR-0004).
   Write `docker_commit` (code) for the backend name and `docker commit` (two words) for the Docker command it wraps.
 - **`.req` / `.ack` / `.timeout`** - the request, acknowledgement, and give-up marker files under `<trial>/agent/checkpoints/`; see `docs/checkpoint-protocol.md`.
+- **every-N / `--every N`** - the watcher takes a checkpoint on every Nth state-mutating call of a trial (ADR-0007); N is recorded in each trial's `policy.json` and in the corpus manifest as `checkpoint_every`.
+- **covered call** - a state-mutating call whose effects first appear in a given checkpoint; listed in that record's `covered_tool_call_ids`.
+- **deferred ack** - the `.ack` the watcher writes, without a snapshot, for a call that does not reach N; its effects appear in the next checkpoint.
 - **`checkpoints.jsonl`** - append-only, one `CheckpointRecord` per line, in capture order; written by the watcher.
   Records are keyed by `trial_name`, not `trial_id`, because a running trial has no trial id on disk (ADR-0006).
 - **watcher lock** - `<jobs-dir>/.trajlab-watcher.lock`, held with `flock` by the one watcher of a jobs dir; `trajlab run` checks it before starting a job whose config enables hooks.

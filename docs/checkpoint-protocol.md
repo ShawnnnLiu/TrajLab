@@ -1,12 +1,13 @@
 # Checkpoint protocol: hook ↔ watcher ↔ backend
 
-Status: spec for build-order step 6, amended by ADR-0006 to match the implementation.
+Status: spec for build-order step 6, amended by ADR-0006 to match the implementation and by ADR-0007 for checkpoints every N calls.
 Governs `src/trajlab/checkpoint/` and `configs/claude-code/settings.hooks.json`.
 Changes here require an ADR.
 
 ## Goal
 
-One environment checkpoint per state-mutating tool call, taken synchronously between the tool's completion and the next model call, keyed by the same `tool_use_id` that ATIF records as `tool_call_id`.
+One environment checkpoint per N state-mutating tool calls, taken synchronously between the Nth call's completion and the next model call, keyed by the same `tool_use_id` that ATIF records as `tool_call_id`.
+Each checkpoint lists the calls it covers (ADR-0007); with N = 1 that is one checkpoint per call (ADR-0001).
 
 ## Participants
 
@@ -14,7 +15,7 @@ Vocabulary for these roles, and for everything else in this doc, is in `docs/glo
 
 - **Hook** (inside the container): a Claude Code `PostToolUse` hook registered in `settings.hooks.json`, which Harbor passes through as `--settings`.
   Claude Code runs it with `sh -c` as the agent user, with `CLAUDE_CONFIG_DIR=/logs/agent/sessions` set, so `/logs/agent` is `$CLAUDE_CONFIG_DIR/..`.
-- **Watcher** (on the host): `trajlab watch <jobs-dir>`.
+- **Watcher** (on the host): `trajlab watch <jobs-dir> --every N`.
   Watches `*/*/agent/checkpoints/*.req` under the jobs dir with `watchdog`, plus a periodic sweep for events the observer missed.
   One process per jobs dir, enforced by an exclusive `flock` on `<jobs-dir>/.trajlab-watcher.lock`.
 - **Backend** (on the host): implements `SnapshotBackend.snapshot(container, tag=..., labels=...) -> Snapshot`.
@@ -27,9 +28,10 @@ Vocabulary for these roles, and for everything else in this doc, is in `docs/glo
 | File | Written by | Content |
 | --- | --- | --- |
 | `<tool_use_id>.req` | hook | JSON `{tool_use_id, tool_name, session_id, agent_id}` extracted from the hook's stdin; its mtime is `requested_at` |
-| `<tool_use_id>.ack` | watcher | JSON: the `CheckpointRecord` |
+| `<tool_use_id>.ack` | watcher | JSON: the `CheckpointRecord` if this call triggered a checkpoint, else `{"tool_call_id": ..., "deferred": true}` |
 | `<tool_use_id>.timeout` | hook | written if no `.ack` arrived within the hook's wait budget; checkpoint is missing for this call |
 | `checkpoints.jsonl` | watcher | append-only, one `CheckpointRecord` per line, in capture order |
+| `policy.json` | watcher | the `CheckpointPolicy` (`backend`, `every`) this trial is captured under; written on first contact |
 | `watcher.log` | watcher | per-trial log |
 | `hook-errors.log` | hook | one line per hook invocation that could not extract a `tool_use_id` |
 
@@ -42,9 +44,11 @@ Vocabulary for these roles, and for everything else in this doc, is in `docs/glo
    On ack: exit 0.
    On timeout: write `.timeout`, check for `.ack` once more (deleting `.timeout` if it is there), exit 0.
    **The hook never blocks the agent indefinitely and never exits non-zero**; a missing checkpoint is recorded, not fatal.
-4. Watcher sees `.req`, resolves the container for that trial (see below), and calls `backend.snapshot(container, tag=f"{trial_name}.{seq:04d}", labels=...)`.
-   If `.timeout` exists once the snapshot returns, the watcher removes the image and records nothing (ADR-0006).
-   Otherwise it appends the record to `checkpoints.jsonl`, then writes `.ack`.
+4. Watcher sees `.req` and counts the trial's uncovered calls: answered `.req` files no record covers, plus this one (ADR-0007).
+   Below N, it writes a deferred `.ack` and takes no snapshot.
+   At N, it resolves the container for that trial (see below) and calls `backend.snapshot(container, tag=f"{trial_name}.{seq:04d}", labels=...)`.
+   If `.timeout` exists once the snapshot returns, the watcher removes the image and records nothing (ADR-0006); the calls stay uncovered.
+   Otherwise it appends the record, covering all those calls, to `checkpoints.jsonl`, then writes `.ack`.
 5. Claude Code continues to its next model call.
 
 Snapshots within one trial are serialized; parallel tool calls get one checkpoint each, in arrival order.
@@ -74,6 +78,7 @@ checkpoint_id   str    backend-specific handle (image id for docker_commit)
 trial_name      str    the trial dir name, from config.json; a running trial has no trial_id yet (ADR-0006)
 tool_call_id    str    == tool_use_id
 seq             int    capture order within the trial, from 1
+covered_tool_call_ids  list[str]  calls since the previous checkpoint, in request order, ending with tool_call_id (ADR-0007)
 tool_name       str
 backend         str    always "docker_commit"; kept as a field for per-snapshot provenance (ADR-0004)
 physical        bool   always True; docker commit has no virtual mode (ADR-0002, ADR-0004)
@@ -88,7 +93,8 @@ captured_at     ISO 8601     when docker commit returned
 
 A job config enables checkpointing by setting `agents[0].kwargs.config` to `configs/claude-code/settings.hooks.json`.
 `trajlab run` refuses such a config unless a watcher holds the lock on the config's `jobs_dir`.
-Start the watcher first: `uv run trajlab watch corpus/jobs`.
+Start the watcher first: `uv run trajlab watch corpus/jobs --every N`.
+The watcher writes N into each trial's `policy.json`, and the corpus manifest records it as `checkpoint_every`.
 
 ## Constraints to design around
 
@@ -109,14 +115,17 @@ Start the watcher first: `uv run trajlab watch corpus/jobs`.
   Bind mounts, including `/logs/agent`, are not in the image.
   This is a permanent, accepted limitation of the project (ADR-0004): no CRIU-capable backend attaches to the Docker containers Harbor runs, and CRIU's per-call cost exceeds our storage and compute budget.
   See `docs/research/2026-09-23_checkpoint-platform-research.md` Q1/Q3 for the evidence.
+- **Final state**: with N > 1, up to N-1 calls after the last checkpoint are covered by none (ADR-0007).
 - **Idempotence**: a `.req` with an existing `.ack` or `.timeout` is ignored.
-  Watcher restart replays unacked `.req` files of trials without `result.json`; a `.req` whose `tool_use_id` is already in `checkpoints.jsonl` only gets its `.ack` rewritten.
+  Watcher restart replays unacked `.req` files of trials without `result.json`; a `.req` whose `tool_use_id` a record already covers only gets its `.ack` rewritten.
+  The every-N count is derived from the files, so a restart resumes it exactly; a watcher whose N differs from a trial's `policy.json` refuses that trial.
 
 ## Open questions
 
 - **Checkpoint cost.**
   Harbor installs the agent into the writable layer, so each checkpoint re-captures about 1.3 GB and takes about 36 s on the development Mac (ADR-0006, "Acceptance run").
-  Decide how to keep the install out of the checkpoints, or checkpoint less often, before any checkpointed corpus run.
+  ADR-0007 reduces the number of checkpoints; the per-checkpoint cost stays until the install is kept out of the writable layer.
+- **Final checkpoint.** A Claude Code `Stop` hook could capture the state after the last call, which every-N leaves uncovered.
 
 - **Representation of the read-only join.**
   ADR-0001 says postprocess joins read-only steps to the most recent earlier checkpoint, but ADR-0003 only inserts a system step after agent steps that own a checkpointed `tool_call_id`, so the enriched file does not yet say how a read-only step's join appears.

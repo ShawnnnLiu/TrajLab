@@ -16,10 +16,18 @@ from typing import Any
 from harbor.models.job.config import JobConfig
 from harbor.models.job.lock import JobLock, TrialLock
 from harbor.models.job.result import JobResult
+from harbor.models.trial.paths import TrialPaths
 from pydantic import ValidationError
 
 from trajlab.capture.discover import TrialNotFinishedError, iter_trial_dirs, trial_record
-from trajlab.contracts import CorpusJob, CorpusManifest, CorpusTask
+from trajlab.contracts import (
+    CHECKPOINTS_DIRNAME,
+    POLICY_FILENAME,
+    CheckpointPolicy,
+    CorpusJob,
+    CorpusManifest,
+    CorpusTask,
+)
 
 # Harbor's Job hardcodes these names (harbor/job.py, _job_config_path etc.).
 JOB_CONFIG_FILENAME = "config.json"
@@ -138,6 +146,17 @@ def _corpus_job(job: _Job) -> CorpusJob:
     )
 
 
+def _checkpoint_every(trial_dir: Path) -> int | None:
+    """N from the watcher's policy.json, or None for a trial captured without checkpoints."""
+    path = TrialPaths(trial_dir).agent_dir / CHECKPOINTS_DIRNAME / POLICY_FILENAME
+    if not path.is_file():
+        return None
+    try:
+        return CheckpointPolicy.model_validate_json(path.read_text()).every
+    except ValidationError as error:
+        raise ManifestError(f"{path}: {error}") from error
+
+
 def _tasks(jobs: list[_Job]) -> list[CorpusTask]:
     digests: dict[str, set[str]] = {}
     for job in jobs:
@@ -181,6 +200,14 @@ def build_manifest(
         {job.dir.name: job.lock.harbor.version or version("harbor") for job in jobs},
     )
     n_attempts = _single_value("n_attempts", {job.dir.name: job.config.n_attempts for job in jobs})
+    checkpoint_every = _single_value(
+        "checkpoint_every",
+        {
+            f"{job.dir.name}/{trial_dir.name}": _checkpoint_every(trial_dir)
+            for job in jobs
+            for trial_dir in iter_trial_dirs(job.dir)
+        },
+    )
 
     return CorpusManifest(
         corpus_id=corpus_id,
@@ -190,6 +217,7 @@ def build_manifest(
         repo_dirty=repo.dirty,
         config_path=config_path,
         n_attempts=n_attempts,
+        checkpoint_every=checkpoint_every,
         tasks=_tasks(jobs),
         jobs=[_corpus_job(job) for job in jobs],
         storage=storage,

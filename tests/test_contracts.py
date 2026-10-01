@@ -15,6 +15,7 @@ from trajlab.contracts import (
     CHECKPOINT_STEP_MESSAGE,
     CONTEXT_MANAGEMENT_EXTRA_KEY,
     TRAJLAB_EXTRA_KEY,
+    CheckpointPolicy,
     CheckpointRecord,
     CheckpointStepExtra,
     CompactionStepExtra,
@@ -38,6 +39,7 @@ def _checkpoint_record(**overrides: Any) -> CheckpointRecord:
         "trial_name": "hello-world__K3GBok3",
         "tool_call_id": FIXTURE_TOOL_CALL_ID,
         "seq": 1,
+        "covered_tool_call_ids": (FIXTURE_TOOL_CALL_ID,),
         "tool_name": "Bash",
         "capture_ms": 1840,
         "bytes": 52_428_800,
@@ -73,6 +75,7 @@ def _corpus_manifest(**overrides: Any) -> CorpusManifest:
         "n_attempts": 1,
         "timeout_multiplier": 1.0,
         "agent_timeout_multiplier": 2.0,
+        "checkpoint_every": 5,
         "tasks": [CorpusTask(name="hello-world/hello-world", digest="sha256:38d7")],
         "jobs": [
             CorpusJob(
@@ -89,9 +92,14 @@ def _corpus_manifest(**overrides: Any) -> CorpusManifest:
 INSTANCES: list[BaseModel] = [
     _checkpoint_record(),
     _checkpoint_record(bytes=None, path="/var/lib/trajlab/ckpt"),
+    _checkpoint_record(covered_tool_call_ids=("toolu_a", "toolu_b", FIXTURE_TOOL_CALL_ID)),
+    CheckpointPolicy(every=1),
+    CheckpointPolicy(every=5),
     _trial_record(),
     _corpus_manifest(),
-    _corpus_manifest(config_path=None, agent_timeout_multiplier=None, storage="gs://bucket"),
+    _corpus_manifest(
+        config_path=None, agent_timeout_multiplier=None, checkpoint_every=None, storage="gs://b"
+    ),
     OriginalStepExtra(original_step_id=2),
     CheckpointStepExtra(tool_call_id=FIXTURE_TOOL_CALL_ID),
     CompactionStepExtra(),
@@ -129,8 +137,11 @@ def test_checkpoint_record_json_shape() -> None:
         {"trial_id": TRIAL_ID},
         {"requested_at": datetime(2026, 9, 29, 12, 0)},  # naive: ambiguous on the host
         {"image_tag": "x"},
+        {"covered_tool_call_ids": ()},
+        {"covered_tool_call_ids": ("toolu_other",)},
+        {"covered_tool_call_ids": (FIXTURE_TOOL_CALL_ID, FIXTURE_TOOL_CALL_ID)},
     ],
-    ids=lambda o: next(iter(o)),
+    ids=lambda o: f"{next(iter(o))}={next(iter(o.values()))!r}"[:60],
 )
 def test_checkpoint_record_rejects(overrides: dict[str, Any]) -> None:
     with pytest.raises(ValidationError):
@@ -146,6 +157,7 @@ def test_checkpoint_record_rejects(overrides: dict[str, Any]) -> None:
         {"n_attempts": 0},
         {"tasks": []},
         {"jobs": []},
+        {"checkpoint_every": 0},
         {"created_at": datetime(2026, 9, 30)},
         {"unknown": 1},
     ],
@@ -153,6 +165,12 @@ def test_checkpoint_record_rejects(overrides: dict[str, Any]) -> None:
 def test_corpus_manifest_rejects(overrides: dict[str, Any]) -> None:
     with pytest.raises(ValidationError):
         _corpus_manifest(**overrides)
+
+
+@pytest.mark.parametrize("data", [{"every": 0}, {"every": 2, "backend": "statefork"}, {}])
+def test_checkpoint_policy_rejects(data: dict[str, Any]) -> None:
+    with pytest.raises(ValidationError):
+        CheckpointPolicy.model_validate(data)
 
 
 def test_records_are_frozen() -> None:

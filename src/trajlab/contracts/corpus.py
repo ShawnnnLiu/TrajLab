@@ -58,6 +58,10 @@ class CorpusManifest(_ManifestModel):
     n_attempts: int = Field(ge=1)
     timeout_multiplier: float = Field(gt=0)
     agent_timeout_multiplier: float | None = Field(default=None, gt=0)
+    checkpoint_every: int | None = Field(
+        ge=1,
+        description="N from the trials' policy.json (ADR-0007); null without checkpoints.",
+    )
     tasks: list[CorpusTask] = Field(min_length=1)
     jobs: list[CorpusJob] = Field(min_length=1)
     storage: str | None = Field(

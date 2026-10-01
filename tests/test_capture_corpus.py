@@ -14,7 +14,7 @@ from trajlab.capture.corpus import (
     repo_state,
     write_manifest,
 )
-from trajlab.contracts import CorpusManifest, CorpusTask
+from trajlab.contracts import CheckpointPolicy, CorpusManifest, CorpusTask
 
 REPO = RepoState(sha="a" * 40, dirty=False)
 HELLO_DIGEST = "sha256:38d7a077f07fbee8efc78db5dec9a72f82e727510ad1dcfeac0b55fa845256b7"
@@ -44,6 +44,7 @@ def test_build_manifest_from_fixture_job(job_dir: Path) -> None:
     assert manifest.n_attempts == 1
     assert manifest.timeout_multiplier == 1.0
     assert manifest.agent_timeout_multiplier is None
+    assert manifest.checkpoint_every is None  # the fixture trial ran without checkpoints
     assert manifest.tasks == [CorpusTask(name="hello-world/hello-world", digest=HELLO_DIGEST)]
     [job] = manifest.jobs
     assert job.job_name == "hello-world-smoke"
@@ -67,6 +68,41 @@ def test_build_manifest_refuses_jobs_that_disagree(tmp_path: Path) -> None:
     )
     with pytest.raises(ManifestError, match=r"disagree on model_name: .*job-b/lock.json"):
         build_manifest([job_a, job_b], corpus_id="bad", repo=REPO)
+
+
+def _set_policy(job_dir: Path, every: int) -> None:
+    [trial] = [d for d in job_dir.iterdir() if d.is_dir()]
+    (trial / "agent" / "checkpoints").mkdir()
+    policy = CheckpointPolicy(every=every).model_dump_json()
+    (trial / "agent" / "checkpoints" / "policy.json").write_text(policy)
+
+
+def test_build_manifest_records_checkpoint_every(tmp_path: Path) -> None:
+    jobs = [assemble_job_dir(tmp_path, name) for name in ("job-a", "job-b")]
+    for job in jobs:
+        _set_policy(job, 5)
+    assert build_manifest(jobs, corpus_id="every5", repo=REPO).checkpoint_every == 5
+
+
+@pytest.mark.parametrize("other", [2, None])
+def test_build_manifest_refuses_mixed_checkpoint_policies(
+    tmp_path: Path, other: int | None
+) -> None:
+    job_a = assemble_job_dir(tmp_path, "job-a")
+    job_b = assemble_job_dir(tmp_path, "job-b")
+    _set_policy(job_a, 5)
+    if other is not None:
+        _set_policy(job_b, other)
+    with pytest.raises(ManifestError, match=r"disagree on checkpoint_every: .*job-b/"):
+        build_manifest([job_a, job_b], corpus_id="mixed", repo=REPO)
+
+
+def test_build_manifest_reports_malformed_policy(job_dir: Path) -> None:
+    _set_policy(job_dir, 5)
+    [policy] = job_dir.glob("*/agent/checkpoints/policy.json")
+    policy.write_text('{"every": 0}')
+    with pytest.raises(ManifestError, match="policy.json"):
+        build_manifest([job_dir], corpus_id="bad", repo=REPO)
 
 
 def test_build_manifest_refuses_one_task_with_two_digests(tmp_path: Path) -> None:
