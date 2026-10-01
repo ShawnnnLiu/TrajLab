@@ -47,6 +47,7 @@ def _plan(repo: Path, **overrides: object) -> RunPlan:
         "manifests_dir": repo / "corpus" / "manifests",
         "env_file": repo / ".env",
         "allow_dirty": False,
+        "watcher_running": lambda jobs_dir: False,
     }
     kwargs.update(overrides)
     config = kwargs.pop("config_path", repo / "configs" / "harbor" / "hello.json")
@@ -158,3 +159,49 @@ def test_execute_fails_when_job_dir_is_unusable(
     monkeypatch.setattr(harbor_runner, "run_harbor", lambda command: 0)
     assert execute(plan, storage=None) == 1
     assert not plan.manifest_path.exists()
+
+
+def _enable_hooks(repo: Path, settings: object) -> None:
+    config = repo / "configs" / "harbor" / "hello.json"
+    data = json.loads(config.read_text())
+    data["agents"][0]["kwargs"] = {"config": settings}
+    config.write_text(json.dumps(data))
+    _git(repo, "commit", "-q", "-am", "hooks")
+
+
+HOOKS = {"hooks": {"PostToolUse": [{"matcher": "Bash", "hooks": []}]}}
+
+
+@pytest.mark.parametrize("inline", [True, False], ids=["inline", "file"])
+def test_plan_run_refuses_hooks_without_watcher(
+    repo: Path, tmp_path: Path, inline: bool, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(repo)  # Harbor resolves a settings path against its cwd, which is ours
+    if inline:
+        _enable_hooks(repo, HOOKS)
+    else:
+        (repo / "settings.json").write_text(json.dumps(HOOKS))
+        _git(repo, "add", "settings.json")
+        _enable_hooks(repo, "settings.json")
+    asked: list[Path] = []
+
+    def running(jobs_dir: Path) -> bool:
+        asked.append(jobs_dir)
+        return False
+
+    with pytest.raises(RunRefusedError, match="trajlab watch"):
+        _plan(repo, watcher_running=running)
+    assert asked == [tmp_path / "jobs"]
+    assert _plan(repo, watcher_running=lambda jobs_dir: True).corpus_id == "hello"
+
+
+def test_plan_run_ignores_settings_without_hooks(repo: Path) -> None:
+    _enable_hooks(repo, {"model": "x"})
+    assert _plan(repo).corpus_id == "hello"
+
+
+def test_plan_run_refuses_unreadable_settings(repo: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(repo)
+    _enable_hooks(repo, "missing.json")
+    with pytest.raises(RunRefusedError, match="cannot read agent settings"):
+        _plan(repo)
