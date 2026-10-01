@@ -40,3 +40,36 @@ Measured on 2026-09-30 on derived images with about 46,000 files: a full `find /
 - The detector is validated against an independent ground truth: in an audit run, consecutive checkpoint images are compared by the contents of their top layers (`docker image save`), which share no code with `find`.
 - Threats to state in the paper: process and memory state are not captured (ADR-0004), so a call that only starts a server counts as unchanged; files written by background processes between calls are attributed to the next measured call; a root agent that rewinds the system clock could evade change-time comparison.
 - A new capture policy: corpora that use it need a new `corpus_id`.
+
+## Validation (2026-10-01)
+
+**Probes on real overlayfs** (`scripts/2026-09-30_change_gate_check.py`, hello-world arm64 and regex-chess amd64 derived images): 11 scripted calls, each probing one rule, all judged as designed on both images.
+A back-dated `touch` and an identical rewrite were caught through change time; a file created and deleted within one call, a write under `/tmp/claude-0`, and a program that writes nothing were judged unchanged; a new empty directory and a `chmod` were changes.
+Detection took 0.18 to 0.31 s per call after the first.
+
+**Ground truth on real agent calls** (`--gate audit`, `tb21-audit-v1`: kv-store-grpc, write-compressor, schemelike-metacircular-eval; Claude Code 2.1.278; all three rewards 1.0).
+Each call after a trial's baseline was compared with the top layers of the checkpoints before and after it, by path, metadata, and content hash (`scripts/2026-09-30_audit_detector.py`):
+
+| Detector \ truth | content changed | only times changed | nothing changed |
+| --- | --- | --- | --- |
+| changed | 9 | 1 | 0 |
+| unchanged | 0 | 0 | 4 |
+
+No misses: the detector never called a call unchanged when its contents differed, so the join for unchanged calls held in every case.
+The one conservative disagreement was a Bash call that rewrote a file with identical bytes.
+4 of the 10 Bash calls compared changed nothing.
+
+The sample is small (14 calls, 3 tasks); the audit is meant to be rerun on a larger slice before the corpus and reported in the paper.
+Running Python writes `__pycache__` files, even under `/usr/local/lib`; they are real changes to the environment and stay counted.
+
+**Production mode** (`--gate change`, `tb21-change-gate-v1`, same three tasks, all rewards 1.0): 15 hooked calls in the trajectories, 13 answered, 11 checkpoints, 2 calls answered unchanged.
+Detection took 0.4 to 2.5 s per call there, against 0.2 to 0.3 s in the probes: three concurrent amd64 trials under emulation on the development Mac share the CPU with each other's commits.
+
+## Amendment (2026-10-01): failed tool calls are hooked too
+
+The production run found two hooked calls with no record and no timeout.
+Both were Bash calls that wrote a file and then exited non-zero; Claude Code reports those as errors and fires `PostToolUseFailure`, not `PostToolUse`, so the hook never ran and the next measured call was blamed for their writes.
+This gap existed since build-order step 6.
+The hook is now registered for both events (Claude Code 2.1.278 sends `tool_use_id` and `tool_name` on both), the `.req` records which event fired, and `CallRecord.tool_failed` marks failed calls.
+Verified on a real trial whose first call was `echo probe > /app/probe.txt && exit 3`: the call was answered and marked failed, and all three of the trial's calls had records.
+`tb21-audit-v1` and `tb21-change-gate-v1` predate this fix; corpora must be captured after it.

@@ -37,6 +37,7 @@ class CheckpointRequest(BaseModel):
     tool_name: str = Field(min_length=1)
     session_id: str | None = None
     agent_id: str | None = None
+    event: str | None = Field(default=None, description="PostToolUse or PostToolUseFailure.")
 
 
 def checkpoints_dir(trial_dir: Path) -> Path:

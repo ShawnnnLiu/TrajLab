@@ -14,7 +14,8 @@ The older policy, a checkpoint every N calls without measuring (ADR-0007, `--gat
 
 Vocabulary for these roles, and for everything else in this doc, is in `docs/glossary.md`.
 
-- **Hook** (inside the container): a Claude Code `PostToolUse` hook registered in `settings.hooks.json`, which Harbor passes through as `--settings`.
+- **Hook** (inside the container): a Claude Code hook registered for `PostToolUse` and `PostToolUseFailure` in `settings.hooks.json`, which Harbor passes through as `--settings`.
+  A call that ends in error (e.g. Bash exiting non-zero) fires only `PostToolUseFailure` and may still have changed files (ADR-0010).
   Claude Code runs it with `sh -c` as the agent user, with `CLAUDE_CONFIG_DIR=/logs/agent/sessions` set, so `/logs/agent` is `$CLAUDE_CONFIG_DIR/..`.
 - **Watcher** (on the host): `trajlab watch <jobs-dir> --every 1 --gate change`.
   Watches `*/*/agent/checkpoints/*.req` under the jobs dir with `watchdog`, plus a periodic sweep for events the observer missed.
@@ -28,7 +29,7 @@ Vocabulary for these roles, and for everything else in this doc, is in `docs/glo
 
 | File | Written by | Content |
 | --- | --- | --- |
-| `<tool_use_id>.req` | hook | JSON `{tool_use_id, tool_name, session_id, agent_id}` extracted from the hook's stdin; its mtime is `requested_at` |
+| `<tool_use_id>.req` | hook | JSON `{tool_use_id, tool_name, session_id, agent_id, event}` extracted from the hook's stdin; its mtime is `requested_at` |
 | `<tool_use_id>.ack` | watcher | JSON: the call's `CallRecord` (outcome `checkpoint`, `unchanged`, or `deferred`) |
 | `calls.jsonl` | watcher | append-only, one `CallRecord` per answered call, in answer order |
 | `<tool_use_id>.timeout` | hook | written if no `.ack` arrived within the hook's wait budget; checkpoint is missing for this call |

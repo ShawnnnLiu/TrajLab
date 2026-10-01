@@ -39,7 +39,7 @@ One trial is one task executed by one attempt.
   (Accepted ADRs sometimes say "snapshot" for the artifact; they are historical records and stay as written.)
 - **physical / virtual** - a physical snapshot copies the state in full; a virtual snapshot is a copy-on-write reference (StateFork's terminology).
   Every trajlab checkpoint is physical (ADR-0002, ADR-0004).
-- **hook** - unqualified, the Claude Code `PostToolUse` hook registered by `configs/claude-code/settings.hooks.json`, running inside the container.
+- **hook** - unqualified, the Claude Code hook registered for `PostToolUse` and `PostToolUseFailure` by `configs/claude-code/settings.hooks.json`, running inside the container.
   It writes `<tool_use_id>.req` and waits for `.ack`.
   Qualify the other senses: the **hook script** (`post_tool_use.sh`, delivered inline as the settings file's `command`), and **Harbor lifecycle hooks** (trial events; none fire during the agent phase, which is why we use Claude Code's).
 - **watcher** - the host process started by `trajlab watch <jobs-dir> --backend <name>`.

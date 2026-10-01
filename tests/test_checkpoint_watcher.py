@@ -112,11 +112,17 @@ def _watcher(trial: Path, backend: SnapshotBackend, **policy: object) -> Watcher
 _CLOCK = iter(range(1_790_000_000, 1_800_000_000))
 
 
-def _request(trial: Path, tool_use_id: str = FIXTURE_TOOL_CALL_ID, tool: str = "Bash") -> Path:
+def _request(
+    trial: Path,
+    tool_use_id: str = FIXTURE_TOOL_CALL_ID,
+    tool: str = "Bash",
+    event: str = "PostToolUse",
+) -> Path:
     directory = checkpoints_dir(trial)
     directory.mkdir(parents=True, exist_ok=True)
     req = directory / f"{tool_use_id}.req"
-    req.write_text(json.dumps({"tool_use_id": tool_use_id, "tool_name": tool, "agent_id": None}))
+    fields = {"tool_use_id": tool_use_id, "tool_name": tool, "agent_id": None, "event": event}
+    req.write_text(json.dumps(fields))
     stamp = next(_CLOCK)
     os.utime(req, (stamp, stamp))  # request order is mtime order; make it unambiguous
     return req
@@ -314,7 +320,9 @@ def test_pending_requests_skip_finished_trials(running_trial: Path, fixture_tria
 def test_request_file_round_trip(running_trial: Path) -> None:
     req = _request(running_trial, tool="Edit")
     request, requested_at = read_request(req)
-    assert request == CheckpointRequest(tool_use_id=FIXTURE_TOOL_CALL_ID, tool_name="Edit")
+    assert request == CheckpointRequest(
+        tool_use_id=FIXTURE_TOOL_CALL_ID, tool_name="Edit", event="PostToolUse"
+    )
     assert requested_at.tzinfo is not None
     assert abs(requested_at.timestamp() - os.stat(req).st_mtime) < 0.001
 
@@ -571,3 +579,22 @@ def test_policy_mismatch_names_both_policies(running_trial: Path) -> None:
     watcher = _watcher(running_trial, FakeBackend(), gate="audit")
     with pytest.raises(PolicyMismatchError, match="gate='change'"):
         watcher._trial(running_trial.resolve())
+
+
+def test_failed_calls_are_measured_and_marked(running_trial: Path) -> None:
+    # Regression, 2026-10-01: a Bash call that wrote a script and then exited 1 fired no
+    # PostToolUse hook, so its changes were blamed on the next call.
+    backend = FakeBackend()
+    watcher = _watcher(running_trial, backend, gate="change")
+    watcher.process(_request(running_trial, "toolu_baseline"))
+    backend.write("/app/enc.py")
+    failed = watcher.process(_request(running_trial, "toolu_failed", event="PostToolUseFailure"))
+    ok = watcher.process(_request(running_trial, "toolu_ok"))
+
+    assert failed is not None and ok is not None
+    assert (failed.tool_failed, failed.outcome, failed.changed_paths) == (
+        True,
+        "checkpoint",
+        ("+/app/enc.py",),
+    )
+    assert (ok.tool_failed, ok.outcome) == (False, "unchanged")

@@ -53,9 +53,13 @@ def test_committed_settings_match_script() -> None:
         "settings.hooks.json is stale; run "
         "`uv run python -m trajlab.checkpoint.hook > configs/claude-code/settings.hooks.json`"
     )
-    hook = json.loads(committed)["hooks"]["PostToolUse"][0]
-    assert hook["matcher"] == HOOK_MATCHER
-    assert hook["hooks"][0]["timeout"] > 240
+    hooks = json.loads(committed)["hooks"]
+    # Failed calls can change files too, and only PostToolUseFailure fires for them.
+    assert sorted(hooks) == ["PostToolUse", "PostToolUseFailure"]
+    for event in hooks.values():
+        assert event[0]["matcher"] == HOOK_MATCHER
+        assert event[0]["hooks"][0]["timeout"] > 240
+        assert event[0]["hooks"][0]["command"] == hook_script()
 
 
 def test_hook_waits_for_ack(tmp_path: Path) -> None:
@@ -86,6 +90,7 @@ def test_hook_waits_for_ack(tmp_path: Path) -> None:
         tool_name="Bash",
         session_id="78b481c6-4620-425b-b2c0-ec60bce7422f",
         agent_id=None,
+        event="PostToolUse",
     )
     assert checkpoints.stat().st_mode & 0o777 == 0o777
 
@@ -133,3 +138,14 @@ def test_hook_accepts_pretty_printed_input(tmp_path: Path) -> None:
     stdin = json.dumps(json.loads(_stdin()), indent=2)
     assert _run_hook(tmp_path, stdin).returncode == 0
     assert (tmp_path / "checkpoints" / f"{TOOL_USE_ID}.req").exists()
+
+
+def test_hook_records_failed_calls(tmp_path: Path) -> None:
+    stdin = _stdin(hook_event_name="PostToolUseFailure", error="Exit code 1", is_interrupt=False)
+    stdin = json.loads(stdin)
+    del stdin["tool_response"]  # a failure event carries `error` instead
+    assert _run_hook(tmp_path, json.dumps(stdin)).returncode == 0
+    request = CheckpointRequest.model_validate_json(
+        (tmp_path / "checkpoints" / f"{TOOL_USE_ID}.req").read_text()
+    )
+    assert request.event == "PostToolUseFailure"

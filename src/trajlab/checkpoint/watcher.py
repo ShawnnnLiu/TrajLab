@@ -235,6 +235,7 @@ class Watcher:
                 trial_name=trial.identity.trial_name,
                 tool_name=request.tool_name,
                 call_seq=len(trial.calls) + 1,
+                tool_failed=request.event == "PostToolUseFailure",
                 outcome=outcome,  # type: ignore[arg-type]
                 change=change,  # type: ignore[arg-type]
                 changed_paths=measured.own[:MAX_LISTED_PATHS] if measured and measured.own else (),

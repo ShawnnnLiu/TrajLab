@@ -87,6 +87,11 @@ class CallRecord(BaseModel):
     trial_name: str = Field(min_length=1)
     tool_name: str = Field(min_length=1)
     call_seq: int = Field(ge=1, description="Order among the trial's answered calls, from 1.")
+    tool_failed: bool = Field(
+        default=False,
+        description="The call ended in error (PostToolUseFailure); it may still "
+        "have changed files.",
+    )
     outcome: Literal["checkpoint", "unchanged", "deferred"] = Field(
         description="checkpoint: this call triggered one; unchanged: the filesystem equals the "
         "last checkpoint's; deferred: below N under every-N, covered by a later checkpoint."
