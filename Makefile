@@ -18,8 +18,12 @@ fmt:
 corpus:
 	uv run trajlab run configs/harbor/$(CONFIG).json
 
+BACKEND ?= docker_commit
+# Required: checkpoint every Nth state-mutating call (ADR-0007), e.g. make watch EVERY=5.
+EVERY ?=
+
 watch:
-	uv run trajlab watch corpus/jobs --backend $(BACKEND)
+	uv run trajlab watch corpus/jobs --backend $(BACKEND) --every $(EVERY)
 
 postprocess:
 	uv run trajlab postprocess corpus/jobs/$(JOB)

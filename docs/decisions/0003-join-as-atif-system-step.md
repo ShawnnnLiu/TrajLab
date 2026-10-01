@@ -33,3 +33,10 @@ Writing them down made the ADR precise in two places the original text left open
 
 `tests/test_contracts.py` builds this shape from the models and checks it passes Harbor's validator.
 Postprocess has not produced any output yet, so no corpus is affected.
+
+## Amendment (2026-09-30): hook delivery, build-order step 6
+
+The hook script is delivered inline (option a in `docs/checkpoint-protocol.md`): `configs/claude-code/settings.hooks.json` carries the whole script as the hook's `command` string.
+The script's source is `src/trajlab/checkpoint/hook/post_tool_use.sh`, and the settings file is generated from it; a test fails if the two disagree.
+Nothing is uploaded into the container and nothing races the watcher.
+ADR-0006 records this together with the other step-6 protocol changes.

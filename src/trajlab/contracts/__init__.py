@@ -3,7 +3,12 @@
 Models only: no I/O, no imports from other trajlab modules.
 """
 
-from trajlab.contracts.checkpoint import CheckpointRecord
+from trajlab.contracts.checkpoint import (
+    CHECKPOINTS_DIRNAME,
+    POLICY_FILENAME,
+    CheckpointPolicy,
+    CheckpointRecord,
+)
 from trajlab.contracts.corpus import CorpusJob, CorpusManifest, CorpusTask
 from trajlab.contracts.steps import (
     CHECKPOINT_STEP_MESSAGE,
@@ -18,9 +23,12 @@ from trajlab.contracts.steps import (
 from trajlab.contracts.trial import TrialRecord
 
 __all__ = [
+    "CHECKPOINTS_DIRNAME",
+    "POLICY_FILENAME",
     "CHECKPOINT_STEP_MESSAGE",
     "CONTEXT_MANAGEMENT_EXTRA_KEY",
     "TRAJLAB_EXTRA_KEY",
+    "CheckpointPolicy",
     "CheckpointRecord",
     "CheckpointStepExtra",
     "CompactionStepExtra",

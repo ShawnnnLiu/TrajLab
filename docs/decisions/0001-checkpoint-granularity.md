@@ -12,3 +12,8 @@ Checkpoint after every state-mutating tool call: Bash, Write, Edit, MultiEdit, N
 - Every mutating step has exactly one checkpoint; the join is total.
 - Agent wall time grows by (snapshot time + ack latency) per mutating call; corpus manifests must record `timeout_multiplier`.
 - Revisit if snapshot cost makes a 20-task corpus exceed budget; the fallback is checkpoint-every-N with N recorded.
+
+## Amendment (2026-09-30, ADR-0007)
+
+The fallback is taken: the watcher checkpoints every Nth state-mutating call, with N recorded per trial and in the corpus manifest.
+Each checkpoint lists the calls it covers, so the join stays total, but at a granularity of N calls rather than one.

@@ -31,7 +31,7 @@ One trial is one task executed by one attempt.
 
 ## Checkpoint machinery
 
-- **checkpoint** - the environment state captured for one tool call, plus the `CheckpointRecord` describing it.
+- **checkpoint** - the environment state captured after a tool call, plus the `CheckpointRecord` describing it; it covers that call and any calls deferred since the previous checkpoint (ADR-0007).
   With the `docker_commit` backend the state is a Docker image; the record's `checkpoint_id` is the image id.
   Keyed by `tool_use_id`.
 - **snapshot** - the *act* the backend performs to take a checkpoint (`SnapshotBackend.snapshot()`).
@@ -41,7 +41,7 @@ One trial is one task executed by one attempt.
   Every trajlab checkpoint is physical (ADR-0002, ADR-0004).
 - **hook** - unqualified, the Claude Code `PostToolUse` hook registered by `configs/claude-code/settings.hooks.json`, running inside the container.
   It writes `<tool_use_id>.req` and waits for `.ack`.
-  Qualify the other senses: the **hook script** (`post_tool_use.sh`), the **`--hooks` flag** (`trajlab run --hooks`), and **Harbor lifecycle hooks** (trial events; none fire during the agent phase, which is why we use Claude Code's).
+  Qualify the other senses: the **hook script** (`post_tool_use.sh`, delivered inline as the settings file's `command`), and **Harbor lifecycle hooks** (trial events; none fire during the agent phase, which is why we use Claude Code's).
 - **watcher** - the host process started by `trajlab watch <jobs-dir> --backend <name>`.
   It sees `.req` files through the bind mount, resolves the trial's container, calls the backend, appends to `checkpoints.jsonl`, and writes `.ack`.
   "Host-side watcher" means this process, not the snapshots it takes.
@@ -49,7 +49,12 @@ One trial is one task executed by one attempt.
   The only backend is `docker_commit` (ADR-0004).
   Write `docker_commit` (code) for the backend name and `docker commit` (two words) for the Docker command it wraps.
 - **`.req` / `.ack` / `.timeout`** - the request, acknowledgement, and give-up marker files under `<trial>/agent/checkpoints/`; see `docs/checkpoint-protocol.md`.
+- **every-N / `--every N`** - the watcher takes a checkpoint on every Nth state-mutating call of a trial (ADR-0007); N is recorded in each trial's `policy.json` and in the corpus manifest as `checkpoint_every`.
+- **covered call** - a state-mutating call whose effects first appear in a given checkpoint; listed in that record's `covered_tool_call_ids`.
+- **deferred ack** - the `.ack` the watcher writes, without a snapshot, for a call that does not reach N; its effects appear in the next checkpoint.
 - **`checkpoints.jsonl`** - append-only, one `CheckpointRecord` per line, in capture order; written by the watcher.
+  Records are keyed by `trial_name`, not `trial_id`, because a running trial has no trial id on disk (ADR-0006).
+- **watcher lock** - `<jobs-dir>/.trajlab-watcher.lock`, held with `flock` by the one watcher of a jobs dir; `trajlab run` checks it before starting a job whose config enables hooks.
 
 ## Trajectory
 
@@ -91,7 +96,7 @@ One trial is one task executed by one attempt.
 - **bind mount** - Harbor mounts the trial's `agent/` dir at `/logs/agent` in the container, so container writes appear on the host immediately; this is the hook-to-watcher channel.
 - **manifest** - unqualified, the corpus manifest.
   Qualify Harbor's `artifacts/manifest.json` and any dataset manifest.
-- **state-mutating / read-only tool** - state-mutating: `Bash`, `Write`, `Edit`, `MultiEdit`, `NotebookEdit` (the hook matcher; checkpointed).
+- **state-mutating / read-only tool** - state-mutating: `Bash`, `Write`, `Edit`, `MultiEdit`, `NotebookEdit` (the hook matcher; checkpointed; `MultiEdit` no longer exists in current Claude Code and matches nothing).
   Read-only: `Read`, `Grep`, `Glob`, `WebFetch`, `WebSearch`, `Task` (not checkpointed).
   ADR-0001 is the authoritative list; do not restate a different one.
 - **timeout multiplier** - Harbor's `--timeout-multiplier`, scaling each task's agent timeout; checkpointed runs need a larger one, recorded in the corpus manifest.
