@@ -50,6 +50,11 @@ One trial is one task executed by one attempt.
   Write `docker_commit` (code) for the backend name and `docker commit` (two words) for the Docker command it wraps.
 - **`.req` / `.ack` / `.timeout`** - the request, acknowledgement, and give-up marker files under `<trial>/agent/checkpoints/`; see `docs/checkpoint-protocol.md`.
 - **every-N / `--every N`** - the watcher takes a checkpoint on every Nth state-mutating call of a trial (ADR-0007); N is recorded in each trial's `policy.json` and in the corpus manifest as `checkpoint_every`.
+- **gate / change-gated** - which hooked calls get a checkpoint (`--gate`, ADR-0010): `change` checkpoints only calls that changed the filesystem; `audit` checkpoints all of them but records the change verdict; `none` is every-N (ADR-0007).
+- **unchanged call** - a hooked call after which the container's filesystem equals the last checkpoint's, outside the harness exclusions; it gets no checkpoint, and its `CallRecord` names the previous one.
+  Not: "minor" or "small" call; the paper never classifies calls by size.
+- **baseline** - the first measured call of a trial (or after a watcher restart), always checkpointed because there is nothing to compare it with.
+- **call record** - the `CallRecord` the watcher writes per answered hooked call, in `calls.jsonl` and `.ack`.
 - **covered call** - a state-mutating call whose effects first appear in a given checkpoint; listed in that record's `covered_tool_call_ids`.
 - **deferred ack** - the `.ack` the watcher writes, without a snapshot, for a call that does not reach N; its effects appear in the next checkpoint.
 - **`checkpoints.jsonl`** - append-only, one `CheckpointRecord` per line, in capture order; written by the watcher.

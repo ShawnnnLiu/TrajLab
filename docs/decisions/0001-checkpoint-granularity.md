@@ -17,3 +17,8 @@ Checkpoint after every state-mutating tool call: Bash, Write, Edit, MultiEdit, N
 
 The fallback is taken: the watcher checkpoints every Nth state-mutating call, with N recorded per trial and in the corpus manifest.
 Each checkpoint lists the calls it covers, so the join stays total, but at a granularity of N calls rather than one.
+
+## Amendment (2026-10-01, ADR-0010)
+
+The tool list now decides only which calls are hooked.
+Whether a hooked call gets a checkpoint is measured: only calls after which the filesystem differs from the last checkpoint get one.
