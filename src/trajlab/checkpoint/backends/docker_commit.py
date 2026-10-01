@@ -19,6 +19,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from trajlab.checkpoint.backends.base import BackendError, Snapshot, SnapshotBackend
+from trajlab.checkpoint.changes import FIND_PRINTF
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,7 @@ class DockerCommitBackend(SnapshotBackend):
         self._docker_bin = docker
         self._run = runner
         self._compose_labels: dict[str, list[str]] = {}
+        self._has_gnu_find: dict[str, bool] = {}
 
     def _docker(self, *args: str) -> str:
         command = [self._docker_bin, *args]
@@ -119,6 +121,41 @@ class DockerCommitBackend(SnapshotBackend):
         except (BackendError, ValueError):
             logger.warning("could not read the writable-layer size of %s", container)
             return None
+
+    def listing(self, container: str) -> str | None:
+        if container not in self._has_gnu_find:
+            try:
+                version = self._docker("exec", "-u", "0", container, "find", "--version")
+            except BackendError:
+                version = ""
+            self._has_gnu_find[container] = "GNU findutils" in version
+            if not self._has_gnu_find[container]:
+                logger.warning("%s has no GNU find; every call will be checkpointed", container)
+        if not self._has_gnu_find[container]:
+            return None
+        command = [
+            self._docker_bin, "exec", "-u", "0", container,
+            "find", "/", "-xdev", "-printf", FIND_PRINTF,
+        ]  # fmt: skip
+        try:
+            completed: Any = self._run(
+                command,
+                check=False,
+                capture_output=True,
+                text=True,
+                errors="surrogateescape",
+                timeout=COMMAND_TIMEOUT_S,
+            )
+        except (OSError, subprocess.TimeoutExpired) as error:
+            raise BackendError(f"find in {container}: {error}") from error
+        # find exits 1 when a file vanishes mid-walk; the rest of the listing is still valid.
+        if completed.returncode not in (0, 1) or not completed.stdout:
+            raise BackendError(
+                f"find in {container} exited {completed.returncode}: {completed.stderr}"
+            )
+        if completed.returncode == 1:
+            logger.info("find in %s: %s", container, completed.stderr.strip()[:200])
+        return completed.stdout
 
     def discard(self, snapshot: Snapshot) -> None:
         self._docker("image", "rm", "--force", snapshot.checkpoint_id)

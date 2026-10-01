@@ -1,7 +1,9 @@
-"""The host-side watcher: answers every `.req` with a checkpoint (docs/checkpoint-protocol.md).
+"""The host-side watcher: answers every `.req` (docs/checkpoint-protocol.md).
 
 One watcher per jobs dir, enforced by a `flock` on `<jobs-dir>/.trajlab-watcher.lock`.
-It checkpoints every Nth state-mutating call of a trial and defers the others (ADR-0007).
+Under gate `change` it checkpoints only calls that changed the filesystem (ADR-0010); under
+gate `none` it checkpoints every Nth call and defers the others (ADR-0007). Every answered call
+gets a `CallRecord`.
 `checkpoint/` does not import `capture/` (CLAUDE.md constraint 3), so the caller supplies how a
 trial dir maps to its name and compose project.
 """
@@ -10,10 +12,12 @@ import fcntl
 import logging
 import os
 import threading
+import time
 from collections.abc import Callable, Iterator
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 
 from harbor.models.trial.paths import TrialPaths
@@ -22,22 +26,25 @@ from watchdog.observers import Observer
 
 from trajlab.checkpoint.backends.base import BackendError, SnapshotBackend
 from trajlab.checkpoint.backends.docker_commit import image_tag
+from trajlab.checkpoint.changes import Listing, changed_paths, parse_listing
 from trajlab.checkpoint.join import (
     REQ_SUFFIX,
     WATCHER_LOG_FILENAME,
+    CheckpointRequest,
     answered_requests,
+    append_call,
     append_record,
     is_pending,
+    read_calls,
     read_policy,
     read_records,
     read_request,
     timed_out,
     trial_dir_of,
     write_ack,
-    write_deferred_ack,
     write_policy,
 )
-from trajlab.contracts import CheckpointPolicy, CheckpointRecord
+from trajlab.contracts import MAX_LISTED_PATHS, CallRecord, CheckpointPolicy, CheckpointRecord
 
 logger = logging.getLogger(__name__)
 
@@ -101,14 +108,26 @@ def watcher_running(jobs_dir: Path) -> bool:
         return False
 
 
+@dataclass(frozen=True)
+class _Measurement:
+    change: str
+    own: tuple[str, ...] | None  # this call's changes against the previous measured call
+    current: Listing | None
+    detect_ms: int | None
+
+
 @dataclass
 class _Trial:
     identity: TrialIdentity
     log: logging.Logger
     handler: logging.Handler
     records: list[CheckpointRecord]
+    calls: dict[str, CallRecord]
     lock: threading.Lock = field(default_factory=threading.Lock)
     container: str | None = None
+    # Filesystem listings (ADR-0010), in memory only: a restarted watcher starts a new baseline.
+    reference: Listing | None = None  # at the last checkpoint
+    previous: Listing | None = None  # after the last measured call
 
     def covering(self, tool_call_id: str) -> CheckpointRecord | None:
         """The record whose checkpoint first shows this call's effects, if any."""
@@ -128,6 +147,7 @@ class Watcher:
         identify: Identify,
         *,
         every: int,
+        gate: str = "none",
         sweep_interval: float = DEFAULT_SWEEP_INTERVAL_S,
         workers: int = DEFAULT_WORKERS,
     ) -> None:
@@ -135,7 +155,7 @@ class Watcher:
         # resolved so one request and one trial have exactly one key.
         self.jobs_dir = jobs_dir.resolve()
         self.backend = backend
-        self.policy = CheckpointPolicy(backend=backend.name, every=every)  # type: ignore[arg-type]
+        self.policy = CheckpointPolicy(backend=backend.name, every=every, gate=gate)  # type: ignore[arg-type]
         self.identify = identify
         self.sweep_interval = sweep_interval
         self.workers = workers
@@ -148,8 +168,8 @@ class Watcher:
 
     # One request -------------------------------------------------------------------------
 
-    def process(self, req_path: Path) -> CheckpointRecord | None:
-        """Answer one `.req`. Returns the record covering it, or None if none (yet).
+    def process(self, req_path: Path) -> CallRecord | None:
+        """Answer one `.req`. Returns the call's record, or None if it was not answered.
 
         Never raises for a problem with this request; problems are logged and the hook's
         wait budget turns them into a `.timeout`.
@@ -172,27 +192,77 @@ class Watcher:
                 self._report(req_path, trial.log, "no checkpoint for %s", req_path.name)
                 return None
 
-    def _checkpoint(self, req_path: Path, trial: _Trial) -> CheckpointRecord | None:
+    def _checkpoint(self, req_path: Path, trial: _Trial) -> CallRecord | None:
         directory = req_path.parent
         request, requested_at = read_request(req_path)
-        existing = trial.covering(request.tool_use_id)
-        if existing is not None:
-            # Recorded before a crash but never acknowledged.
-            if existing.tool_call_id == request.tool_use_id:
-                write_ack(directory, existing)
-            else:
-                write_deferred_ack(directory, request.tool_use_id)
-            trial.log.info("re-acked %s (seq %d)", request.tool_use_id, existing.seq)
-            return existing
-        # Derived from the files, so a restarted watcher resumes the count exactly.
-        uncovered = [
-            tool_call_id
-            for tool_call_id in answered_requests(directory)
-            if trial.covering(tool_call_id) is None and tool_call_id != request.tool_use_id
-        ]
-        uncovered.append(request.tool_use_id)
+        recorded = trial.calls.get(request.tool_use_id)
+        if recorded is not None:
+            # Answered before a crash, but the ack never landed.
+            write_ack(directory, recorded)
+            trial.log.info("re-acked %s", request.tool_use_id)
+            return recorded
+        covering = trial.covering(request.tool_use_id)
+        if covering is not None:
+            # Checkpointed before a crash that came before its call record.
+            call = CallRecord(
+                tool_call_id=request.tool_use_id,
+                trial_name=trial.identity.trial_name,
+                tool_name=request.tool_name,
+                call_seq=len(trial.calls) + 1,
+                outcome="checkpoint"
+                if covering.tool_call_id == request.tool_use_id
+                else "deferred",
+                change="unknown",
+                checkpoint_seq=covering.seq
+                if covering.tool_call_id == request.tool_use_id
+                else None,
+                requested_at=requested_at,
+                answered_at=datetime.now(UTC),
+            )
+            append_call(directory, call)
+            trial.calls[call.tool_call_id] = call
+            write_ack(directory, call)
+            trial.log.info("recovered %s from seq %d", request.tool_use_id, covering.seq)
+            return call
+        if trial.container is None:
+            trial.container = self.backend.container_for(trial.identity.compose_project)
+        measured = self._measure(trial) if self.policy.gate != "none" else None
+        change = measured.change if measured else "not_checked"
+
+        def answer(outcome: str, checkpoint_seq: int | None) -> CallRecord:
+            call = CallRecord(
+                tool_call_id=request.tool_use_id,
+                trial_name=trial.identity.trial_name,
+                tool_name=request.tool_name,
+                call_seq=len(trial.calls) + 1,
+                outcome=outcome,  # type: ignore[arg-type]
+                change=change,  # type: ignore[arg-type]
+                changed_paths=measured.own[:MAX_LISTED_PATHS] if measured and measured.own else (),
+                changed_paths_total=len(measured.own)
+                if measured and measured.own is not None
+                else None,
+                detect_ms=measured.detect_ms if measured else None,
+                checkpoint_seq=checkpoint_seq,
+                requested_at=requested_at,
+                answered_at=datetime.now(UTC),
+            )
+            append_call(directory, call)
+            trial.calls[call.tool_call_id] = call
+            write_ack(directory, call)
+            return call
+
+        if self.policy.gate == "change" and change == "unchanged":
+            call = answer("unchanged", trial.records[-1].seq if trial.records else None)
+            trial.log.info(
+                "unchanged %s %s (state of seq %s)",
+                request.tool_name,
+                request.tool_use_id,
+                call.checkpoint_seq,
+            )
+            return call
+        uncovered = self._uncovered(directory, trial, request)
         if len(uncovered) < self.policy.every:
-            write_deferred_ack(directory, request.tool_use_id)
+            call = answer("deferred", None)
             trial.log.info(
                 "deferred %s %s (%d of %d)",
                 request.tool_name,
@@ -200,9 +270,69 @@ class Watcher:
                 len(uncovered),
                 self.policy.every,
             )
+            return call
+        record = self._snapshot(req_path, trial, request, requested_at, uncovered)
+        if record is None:
             return None
-        if trial.container is None:
-            trial.container = self.backend.container_for(trial.identity.compose_project)
+        if measured and measured.current is not None:
+            trial.reference = measured.current
+        call = answer("checkpoint", record.seq)
+        trial.log.info(
+            "seq %d %s %s: %s in %d ms, change %s, %s path(s), covers %d call(s)",
+            record.seq,
+            request.tool_name,
+            request.tool_use_id,
+            record.checkpoint_id[:19],
+            record.capture_ms,
+            change,
+            call.changed_paths_total,
+            len(uncovered),
+        )
+        return call
+
+    def _measure(self, trial: _Trial) -> "_Measurement":
+        """List the filesystem and judge it against the last checkpoint (ADR-0010)."""
+        assert trial.container is not None
+        start = time.monotonic()
+        raw = self.backend.listing(trial.container)
+        if raw is None:
+            return _Measurement(change="unknown", own=None, current=None, detect_ms=None)
+        current = parse_listing(raw)
+        detect_ms = round((time.monotonic() - start) * 1000)
+        own = tuple(changed_paths(trial.previous, current)) if trial.previous is not None else None
+        trial.previous = current
+        if trial.reference is None:
+            change = "baseline"
+        else:
+            change = "changed" if changed_paths(trial.reference, current) else "unchanged"
+        return _Measurement(change=change, own=own, current=current, detect_ms=detect_ms)
+
+    def _uncovered(self, directory: Path, trial: _Trial, request: CheckpointRequest) -> list[str]:
+        """Calls since the last checkpoint whose effects no checkpoint holds yet, then this one.
+
+        Derived from the files, so a restarted watcher resumes the count exactly. Calls
+        measured unchanged hold no effects and never count.
+        """
+        uncovered = []
+        for tool_call_id in answered_requests(directory):
+            if tool_call_id == request.tool_use_id or trial.covering(tool_call_id) is not None:
+                continue
+            call = trial.calls.get(tool_call_id)
+            if call is not None and call.outcome == "unchanged":
+                continue
+            uncovered.append(tool_call_id)
+        uncovered.append(request.tool_use_id)
+        return uncovered
+
+    def _snapshot(
+        self,
+        req_path: Path,
+        trial: _Trial,
+        request: CheckpointRequest,
+        requested_at: datetime,
+        uncovered: list[str],
+    ) -> CheckpointRecord | None:
+        assert trial.container is not None
         seq = len(trial.records) + 1
         try:
             snapshot = self.backend.snapshot(
@@ -220,7 +350,8 @@ class Watcher:
             raise
         if timed_out(req_path):
             # The agent resumed before the snapshot finished; the image is not this call's state.
-            # The calls stay uncovered and the next checkpoint covers them.
+            # The calls stay uncovered, and the reference stays at the last kept checkpoint, so
+            # the next call is measured as changed and its checkpoint covers them.
             self.backend.discard(snapshot)
             trial.log.warning("discarded late snapshot for %s", request.tool_use_id)
             return None
@@ -238,18 +369,8 @@ class Watcher:
             requested_at=requested_at,
             captured_at=snapshot.captured_at,
         )
-        append_record(directory, record)
+        append_record(req_path.parent, record)
         trial.records.append(record)
-        write_ack(directory, record)
-        trial.log.info(
-            "seq %d %s %s: %s in %d ms, covers %d call(s)",
-            seq,
-            request.tool_name,
-            request.tool_use_id,
-            snapshot.checkpoint_id[:19],
-            snapshot.capture_ms,
-            len(uncovered),
-        )
         return record
 
     def _report(self, req_path: Path, log: logging.Logger, message: str, *args: object) -> None:
@@ -279,10 +400,15 @@ class Watcher:
                     handler.close()
                     raise PolicyMismatchError(
                         f"{trial_dir} was captured under {policy!r}; this watcher uses "
-                        f"{self.policy!r}. One trial never mixes policies (ADR-0007)."
+                        f"{self.policy!r}. One trial never mixes policies (ADR-0007, ADR-0010)."
                     )
-                records = read_records(directory)
-                trial = _Trial(identity=identity, log=log, handler=handler, records=records)
+                trial = _Trial(
+                    identity=identity,
+                    log=log,
+                    handler=handler,
+                    records=read_records(directory),
+                    calls={c.tool_call_id: c for c in read_calls(directory)},
+                )
                 self._trials[trial_dir] = trial
             return trial
 

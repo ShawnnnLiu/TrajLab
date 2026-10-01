@@ -15,6 +15,7 @@ from trajlab.contracts import (
     CHECKPOINT_STEP_MESSAGE,
     CONTEXT_MANAGEMENT_EXTRA_KEY,
     TRAJLAB_EXTRA_KEY,
+    CallRecord,
     CheckpointPolicy,
     CheckpointRecord,
     CheckpointStepExtra,
@@ -49,6 +50,24 @@ def _checkpoint_record(**overrides: Any) -> CheckpointRecord:
     return CheckpointRecord(**fields | overrides)
 
 
+def _call_record(**overrides: Any) -> CallRecord:
+    fields: dict[str, Any] = {
+        "tool_call_id": FIXTURE_TOOL_CALL_ID,
+        "trial_name": "hello-world__K3GBok3",
+        "tool_name": "Write",
+        "call_seq": 1,
+        "outcome": "checkpoint",
+        "change": "changed",
+        "changed_paths": ("+/app/hello.txt", "~/app"),
+        "changed_paths_total": 2,
+        "detect_ms": 310,
+        "checkpoint_seq": 1,
+        "requested_at": datetime(2026, 9, 30, 12, 0, tzinfo=UTC),
+        "answered_at": datetime(2026, 9, 30, 12, 0, 3, tzinfo=UTC),
+    }
+    return CallRecord(**fields | overrides)
+
+
 def _trial_record() -> TrialRecord:
     return TrialRecord(
         trial_id=TRIAL_ID,
@@ -75,7 +94,8 @@ def _corpus_manifest(**overrides: Any) -> CorpusManifest:
         "n_attempts": 1,
         "timeout_multiplier": 1.0,
         "agent_timeout_multiplier": 2.0,
-        "checkpoint_every": 5,
+        "checkpoint_every": 1,
+        "checkpoint_gate": "change",
         "tasks": [CorpusTask(name="hello-world/hello-world", digest="sha256:38d7")],
         "jobs": [
             CorpusJob(
@@ -95,10 +115,19 @@ INSTANCES: list[BaseModel] = [
     _checkpoint_record(covered_tool_call_ids=("toolu_a", "toolu_b", FIXTURE_TOOL_CALL_ID)),
     CheckpointPolicy(every=1),
     CheckpointPolicy(every=5),
+    CheckpointPolicy(every=1, gate="change"),
+    CheckpointPolicy(every=1, gate="audit"),
+    _call_record(),
+    _call_record(outcome="unchanged", change="unchanged", changed_paths=(), checkpoint_seq=2),
+    _call_record(outcome="deferred", change="not_checked", checkpoint_seq=None),
     _trial_record(),
     _corpus_manifest(),
     _corpus_manifest(
-        config_path=None, agent_timeout_multiplier=None, checkpoint_every=None, storage="gs://b"
+        config_path=None,
+        agent_timeout_multiplier=None,
+        checkpoint_every=None,
+        checkpoint_gate=None,
+        storage="gs://b",
     ),
     OriginalStepExtra(original_step_id=2),
     CheckpointStepExtra(tool_call_id=FIXTURE_TOOL_CALL_ID),
@@ -167,7 +196,16 @@ def test_corpus_manifest_rejects(overrides: dict[str, Any]) -> None:
         _corpus_manifest(**overrides)
 
 
-@pytest.mark.parametrize("data", [{"every": 0}, {"every": 2, "backend": "statefork"}, {}])
+@pytest.mark.parametrize(
+    "data",
+    [
+        {"every": 0},
+        {"every": 2, "backend": "statefork"},
+        {},
+        {"every": 2, "gate": "change"},
+        {"every": 1, "gate": "sometimes"},
+    ],
+)
 def test_checkpoint_policy_rejects(data: dict[str, Any]) -> None:
     with pytest.raises(ValidationError):
         CheckpointPolicy.model_validate(data)
@@ -290,3 +328,20 @@ def test_contracts_import_only_pydantic_and_stdlib() -> None:
             for name in names:
                 permitted = any(name == a or name.startswith(f"{a}.") for a in allowed)
                 assert permitted, f"{source.name} imports {name}"
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"checkpoint_seq": None},  # a checkpoint outcome must name its checkpoint
+        {"outcome": "unchanged", "change": "changed"},
+        {"outcome": "unchanged", "change": "baseline"},
+        {"changed_paths": tuple(f"+/f{i}" for i in range(101))},
+        {"call_seq": 0},
+        {"outcome": "skipped"},
+    ],
+    ids=lambda o: next(iter(o)),
+)
+def test_call_record_rejects(overrides: dict[str, Any]) -> None:
+    with pytest.raises(ValidationError):
+        _call_record(**overrides)

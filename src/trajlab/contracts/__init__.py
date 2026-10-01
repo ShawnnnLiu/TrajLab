@@ -4,8 +4,11 @@ Models only: no I/O, no imports from other trajlab modules.
 """
 
 from trajlab.contracts.checkpoint import (
+    CALLS_FILENAME,
     CHECKPOINTS_DIRNAME,
+    MAX_LISTED_PATHS,
     POLICY_FILENAME,
+    CallRecord,
     CheckpointPolicy,
     CheckpointRecord,
 )
@@ -24,6 +27,9 @@ from trajlab.contracts.steps import (
 from trajlab.contracts.trial import TrialRecord
 
 __all__ = [
+    "CALLS_FILENAME",
+    "MAX_LISTED_PATHS",
+    "CallRecord",
     "CHECKPOINTS_DIRNAME",
     "POLICY_FILENAME",
     "PREINSTALL_RECORD_FILENAME",

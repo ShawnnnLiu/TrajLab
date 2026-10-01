@@ -45,6 +45,7 @@ def test_build_manifest_from_fixture_job(job_dir: Path) -> None:
     assert manifest.timeout_multiplier == 1.0
     assert manifest.agent_timeout_multiplier is None
     assert manifest.checkpoint_every is None  # the fixture trial ran without checkpoints
+    assert manifest.checkpoint_gate is None
     assert manifest.tasks == [CorpusTask(name="hello-world/hello-world", digest=HELLO_DIGEST)]
     [job] = manifest.jobs
     assert job.job_name == "hello-world-smoke"
@@ -70,10 +71,10 @@ def test_build_manifest_refuses_jobs_that_disagree(tmp_path: Path) -> None:
         build_manifest([job_a, job_b], corpus_id="bad", repo=REPO)
 
 
-def _set_policy(job_dir: Path, every: int) -> None:
+def _set_policy(job_dir: Path, every: int, gate: str = "none") -> None:
     [trial] = [d for d in job_dir.iterdir() if d.is_dir()]
     (trial / "agent" / "checkpoints").mkdir()
-    policy = CheckpointPolicy(every=every).model_dump_json()
+    policy = CheckpointPolicy(every=every, gate=gate).model_dump_json()  # type: ignore[arg-type]
     (trial / "agent" / "checkpoints" / "policy.json").write_text(policy)
 
 
@@ -81,7 +82,25 @@ def test_build_manifest_records_checkpoint_every(tmp_path: Path) -> None:
     jobs = [assemble_job_dir(tmp_path, name) for name in ("job-a", "job-b")]
     for job in jobs:
         _set_policy(job, 5)
-    assert build_manifest(jobs, corpus_id="every5", repo=REPO).checkpoint_every == 5
+    manifest = build_manifest(jobs, corpus_id="every5", repo=REPO)
+    assert (manifest.checkpoint_every, manifest.checkpoint_gate) == (5, "none")
+
+
+def test_build_manifest_records_checkpoint_gate(tmp_path: Path) -> None:
+    jobs = [assemble_job_dir(tmp_path, name) for name in ("job-a", "job-b")]
+    for job in jobs:
+        _set_policy(job, 1, "change")
+    manifest = build_manifest(jobs, corpus_id="gated", repo=REPO)
+    assert (manifest.checkpoint_every, manifest.checkpoint_gate) == (1, "change")
+
+
+def test_build_manifest_refuses_mixed_gates(tmp_path: Path) -> None:
+    job_a = assemble_job_dir(tmp_path, "job-a")
+    job_b = assemble_job_dir(tmp_path, "job-b")
+    _set_policy(job_a, 1, "change")
+    _set_policy(job_b, 1, "audit")
+    with pytest.raises(ManifestError, match="disagree on checkpoint_gate"):
+        build_manifest([job_a, job_b], corpus_id="mixed", repo=REPO)
 
 
 @pytest.mark.parametrize("other", [2, None])

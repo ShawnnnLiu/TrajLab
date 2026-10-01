@@ -4,7 +4,6 @@
 turns it into ATIF system steps (ADR-0003).
 """
 
-import json
 import os
 from datetime import UTC, datetime
 from pathlib import Path
@@ -12,8 +11,10 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict, Field
 
 from trajlab.contracts import (
+    CALLS_FILENAME,
     CHECKPOINTS_DIRNAME,
     POLICY_FILENAME,
+    CallRecord,
     CheckpointPolicy,
     CheckpointRecord,
 )
@@ -106,11 +107,30 @@ def read_records(directory: Path) -> list[CheckpointRecord]:
     ]
 
 
-def append_record(directory: Path, record: CheckpointRecord) -> None:
-    with (directory / RECORDS_FILENAME).open("a") as stream:
-        stream.write(record.model_dump_json() + "\n")
+def _append_line(path: Path, line: str) -> None:
+    with path.open("a") as stream:
+        stream.write(line + "\n")
         stream.flush()
         os.fsync(stream.fileno())
+
+
+def append_record(directory: Path, record: CheckpointRecord) -> None:
+    _append_line(directory / RECORDS_FILENAME, record.model_dump_json())
+
+
+def read_calls(directory: Path) -> list[CallRecord]:
+    path = directory / CALLS_FILENAME
+    if not path.is_file():
+        return []
+    return [
+        CallRecord.model_validate_json(line)
+        for line in path.read_text().splitlines()
+        if line.strip()
+    ]
+
+
+def append_call(directory: Path, call: CallRecord) -> None:
+    _append_line(directory / CALLS_FILENAME, call.model_dump_json())
 
 
 def _write_atomic(path: Path, text: str) -> None:
@@ -119,15 +139,8 @@ def _write_atomic(path: Path, text: str) -> None:
     tmp.replace(path)
 
 
-def write_ack(directory: Path, record: CheckpointRecord) -> Path:
-    """Write `<tool_call_id>.ack` atomically; its appearance releases the hook."""
-    path = directory / f"{record.tool_call_id}{ACK_SUFFIX}"
-    _write_atomic(path, record.model_dump_json() + "\n")
-    return path
-
-
-def write_deferred_ack(directory: Path, tool_use_id: str) -> Path:
-    """Release the hook for a call the next checkpoint will cover (ADR-0007)."""
-    path = directory / f"{tool_use_id}{ACK_SUFFIX}"
-    _write_atomic(path, json.dumps({"tool_call_id": tool_use_id, "deferred": True}) + "\n")
+def write_ack(directory: Path, call: CallRecord) -> Path:
+    """Write `<tool_call_id>.ack`, the call's record, atomically; it releases the hook."""
+    path = directory / f"{call.tool_call_id}{ACK_SUFFIX}"
+    _write_atomic(path, call.model_dump_json() + "\n")
     return path

@@ -146,13 +146,13 @@ def _corpus_job(job: _Job) -> CorpusJob:
     )
 
 
-def _checkpoint_every(trial_dir: Path) -> int | None:
-    """N from the watcher's policy.json, or None for a trial captured without checkpoints."""
+def _checkpoint_policy(trial_dir: Path) -> CheckpointPolicy | None:
+    """The watcher's policy.json, or None for a trial captured without checkpoints."""
     path = TrialPaths(trial_dir).agent_dir / CHECKPOINTS_DIRNAME / POLICY_FILENAME
     if not path.is_file():
         return None
     try:
-        return CheckpointPolicy.model_validate_json(path.read_text()).every
+        return CheckpointPolicy.model_validate_json(path.read_text())
     except ValidationError as error:
         raise ManifestError(f"{path}: {error}") from error
 
@@ -200,13 +200,16 @@ def build_manifest(
         {job.dir.name: job.lock.harbor.version or version("harbor") for job in jobs},
     )
     n_attempts = _single_value("n_attempts", {job.dir.name: job.config.n_attempts for job in jobs})
+    policies = {
+        f"{job.dir.name}/{trial_dir.name}": _checkpoint_policy(trial_dir)
+        for job in jobs
+        for trial_dir in iter_trial_dirs(job.dir)
+    }
     checkpoint_every = _single_value(
-        "checkpoint_every",
-        {
-            f"{job.dir.name}/{trial_dir.name}": _checkpoint_every(trial_dir)
-            for job in jobs
-            for trial_dir in iter_trial_dirs(job.dir)
-        },
+        "checkpoint_every", {k: p.every if p else None for k, p in policies.items()}
+    )
+    checkpoint_gate = _single_value(
+        "checkpoint_gate", {k: p.gate if p else None for k, p in policies.items()}
     )
 
     return CorpusManifest(
@@ -218,6 +221,7 @@ def build_manifest(
         config_path=config_path,
         n_attempts=n_attempts,
         checkpoint_every=checkpoint_every,
+        checkpoint_gate=checkpoint_gate,
         tasks=_tasks(jobs),
         jobs=[_corpus_job(job) for job in jobs],
         storage=storage,

@@ -6,6 +6,7 @@ Each subcommand is a stub until its build-order step lands (see CLAUDE.md).
 import logging
 import signal
 import threading
+from enum import StrEnum
 from pathlib import Path
 from typing import Annotated
 
@@ -88,6 +89,12 @@ def run(
 BACKENDS = {"docker_commit": DockerCommitBackend}
 
 
+class Gate(StrEnum):
+    change = "change"
+    audit = "audit"
+    none = "none"
+
+
 def identify_trial(trial_dir: Path) -> TrialIdentity:
     """Name a running trial and its compose project (capture's job, handed to the watcher)."""
     return TrialIdentity(
@@ -105,12 +112,22 @@ def watch(
             min=1, help="Checkpoint every Nth state-mutating call (ADR-0007); 1 means every call."
         ),
     ],
+    gate: Annotated[
+        Gate,
+        typer.Option(
+            help="change: checkpoint only calls that changed the filesystem (ADR-0010); "
+            "audit: measure every call but checkpoint all of them; none: every Nth call."
+        ),
+    ],
     backend: Annotated[str, typer.Option(help="Snapshot backend.")] = "docker_commit",
     sweep_interval: Annotated[
         float, typer.Option(help="Seconds between rescans for missed requests.")
     ] = DEFAULT_SWEEP_INTERVAL_S,
 ) -> None:
-    """Watch running trials and checkpoint every Nth state-mutating call. Stop with Ctrl-C."""
+    """Watch running trials and checkpoint their state-mutating calls. Stop with Ctrl-C."""
+    if gate is not Gate.none and every != 1:
+        typer.echo(f"trajlab watch: --gate {gate.value} requires --every 1 (ADR-0010)", err=True)
+        raise typer.Exit(code=1)
     if backend not in BACKENDS:
         typer.echo(
             f"trajlab watch: unknown backend {backend!r}; one of {sorted(BACKENDS)}", err=True
@@ -126,6 +143,7 @@ def watch(
                 BACKENDS[backend](),
                 identify_trial,
                 every=every,
+                gate=gate.value,
                 sweep_interval=sweep_interval,
             ).run(stop)
     except WatcherLockedError as error:
