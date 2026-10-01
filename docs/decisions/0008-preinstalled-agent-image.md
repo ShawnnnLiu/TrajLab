@@ -62,3 +62,9 @@ It failed for qemu-alpine-ssh, because Debian's bullseye-security mirror returns
 Committing a one-file change took 0.7 s on a 13 MB Alpine base, 1.7 s on hello-world's 110 MB task image, and 2.3 to 5.9 s on its 1.4 GB derived image, with Docker Desktop's containerd image store.
 Per-call checkpoints are now affordable in storage; their time cost is seconds per call.
 Whether the classic overlay2 store commits faster is untested.
+
+## Amendment (2026-09-30, ADR-0009)
+
+The agent version is locked project-wide to `trajlab.capture.pins.CLAUDE_CODE_VERSION`.
+The derived image records the installed binary's sha256, and each trial container is checked against both the version and the hash before the agent runs.
+`RECIPE_VERSION` is 2; images from recipe 1 are not reused.

@@ -4,12 +4,14 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from harbor.environments.base import ExecResult
 from harbor.environments.docker.docker import DockerEnvironment
 from harbor.models.task.config import TaskConfig
 from harbor.models.trial.config import TrialConfig
 from harbor.models.trial.paths import TrialPaths
 
 from trajlab.capture import preinstall
+from trajlab.capture.pins import CLAUDE_CODE_VERSION
 from trajlab.capture.preinstall import (
     REPOSITORY,
     AgentSpec,
@@ -24,7 +26,8 @@ from trajlab.capture.preinstall import (
 )
 from trajlab.contracts import PREINSTALL_RECORD_FILENAME, PreinstallRecord
 
-VERSION = "2.1.278"
+VERSION = CLAUDE_CODE_VERSION
+BINARY_SHA256 = "ab" * 32
 TASK_IMAGE = "alexgshaw/regex-chess:20251031"
 
 
@@ -40,6 +43,7 @@ class FakeDocker:
         self.calls: list[list[str]] = []
         self.commits = 0
         self.slow_commit = 0.0
+        self.labels: dict[str, dict[str, str]] = {}
 
     async def __call__(self, args: list[str], timeout: float | None) -> CommandResult:
         assert args[0] == "docker"
@@ -52,6 +56,9 @@ class FakeDocker:
                 return CommandResult(1, "", f"No such image: {image}")
             case ["image", "inspect", "--format", fmt, image] if "RootFS" in fmt:
                 return CommandResult(0, f'["layers-of-{image}"]{{"Cmd":["python3"]}}', "")
+            case ["image", "inspect", "--format", fmt, image] if "index .Config.Labels" in fmt:
+                key = fmt.split('"')[1]
+                return CommandResult(0, self.labels.get(image, {}).get(key, "") + "\n", "")
             case ["image", "inspect", "--format", "{{json .Config.Cmd}}", _]:
                 return CommandResult(0, '["python3"]\n', "")
             case ["pull", image]:
@@ -64,6 +71,8 @@ class FakeDocker:
                 return CommandResult(0, "builder1\n", "")
             case ["exec", *rest]:
                 command = rest[-1]
+                if "sha256sum" in command:
+                    return CommandResult(0, BINARY_SHA256 + "\n", "")
                 if "bootstrap.sh" in command or "apt-get" in command:
                     if self.install_ok:
                         return CommandResult(0, f"{VERSION} (Claude Code)\n", "")
@@ -73,10 +82,16 @@ class FakeDocker:
                         return CommandResult(0, f"{VERSION} (Claude Code)\n", "")
                     return CommandResult(127, "", "claude: not found")
                 return CommandResult(0, "", "")
-            case ["commit", *_, _, image]:
+            case ["commit", *changes, _, image]:
                 await asyncio.sleep(self.slow_commit)
                 self.commits += 1
                 self.images.add(image)
+                self.labels[image] = dict(
+                    change.removeprefix("--change=LABEL ").split("=", 1)
+                    for change in changes
+                    if change.startswith("--change=LABEL ")
+                )
+                self.labels[image] = {k: json.loads(v) for k, v in self.labels[image].items()}
                 return CommandResult(0, f"sha256:id-of-{image}\n", "")
             case ["rm", "--force", _]:
                 return CommandResult(0, "", "")
@@ -151,6 +166,8 @@ def test_builds_derived_image_from_prebuilt_task_image(
     commit = next(call for call in fake.calls if call[0] == "commit")
     assert '--change=CMD ["python3"]' in commit
     assert f'--change=LABEL trajlab.preinstall.agent_version="{VERSION}"' in commit
+    assert f'--change=LABEL trajlab.preinstall.agent_sha256="{BINARY_SHA256}"' in commit
+    assert record.agent_sha256 == BINARY_SHA256
     # Harbor's setup step, then its install check, ran as the task's agent user or root.
     execs = [call for call in fake.calls if call[0] == "exec"]
     assert execs[0][execs[0].index("-u") + 1] == "root"
@@ -267,6 +284,7 @@ def test_unverifiable_install_fails_and_cleans_up(
         ({"name": "claude-code"}, "pinned agent version"),
         ({"name": "claude-code", "kwargs": {"version": ""}}, "pinned agent version"),
         ({"name": "codex", "kwargs": {"version": "1"}}, "Claude Code only"),
+        ({"name": "claude-code", "kwargs": {"version": "2.1.285"}}, "not the pinned"),
         ({"import_path": "pathlib:Path", "kwargs": {"version": "1"}}, "not a subclass"),
     ],
 )
@@ -350,7 +368,10 @@ def test_start_runs_trial_on_derived_image(tmp_path: Path, monkeypatch: pytest.M
         )
 
     monkeypatch.setattr(DockerEnvironment, "start", harbor_start)
+    execs = _fake_trial_exec(env, monkeypatch, stub_harbor_start=False)
     asyncio.run(env.start(force_build=True))
+    # Both checks ran in the trial container, as the task's agent user.
+    assert [user for _, user in execs] == ["agent", "agent"]
 
     record = PreinstallRecord.model_validate_json(
         (env.trial_paths.trial_dir / PREINSTALL_RECORD_FILENAME).read_text()
@@ -362,3 +383,60 @@ def test_start_runs_trial_on_derived_image(tmp_path: Path, monkeypatch: pytest.M
     }
     # The task's own config object, which the verifier environment reads, is untouched.
     assert original_config.docker_image == TASK_IMAGE
+
+
+def _fake_trial_exec(
+    env: PreinstalledDockerEnvironment,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    version: str = VERSION,
+    sha256: str = BINARY_SHA256,
+    stub_harbor_start: bool = True,
+) -> list[tuple[str, Any]]:
+    """Stand in for Harbor's exec into the trial container."""
+    calls: list[tuple[str, Any]] = []
+
+    async def exec_(command: str, user: Any = None, **_: Any) -> ExecResult:
+        calls.append((command, user))
+        if "sha256sum" in command:
+            return ExecResult(stdout=sha256 + "\n", return_code=0)
+        return ExecResult(stdout=f"{version} (Claude Code)\n", return_code=0)
+
+    monkeypatch.setattr(env, "exec", exec_)
+    if not stub_harbor_start:
+        return calls
+
+    async def harbor_start(self: DockerEnvironment, force_build: bool) -> None:
+        return None
+
+    monkeypatch.setattr(DockerEnvironment, "start", harbor_start)
+    return calls
+
+
+@pytest.mark.parametrize(
+    ("version", "sha256", "message"),
+    [
+        ("2.1.300", BINARY_SHA256, "reports Claude Code '2.1.300'"),
+        (VERSION, "cd" * 32, "binary has sha256"),
+    ],
+    ids=["version-drift", "binary-drift"],
+)
+def test_start_refuses_trial_container_off_the_pin(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, version: str, sha256: str, message: str
+) -> None:
+    env = _environment(tmp_path, FakeDocker(), monkeypatch)
+    _fake_trial_exec(env, monkeypatch, version=version, sha256=sha256)
+    with pytest.raises(PreinstallError, match=message):
+        asyncio.run(env.start(force_build=False))
+
+
+def test_cached_image_without_hash_label_is_refused(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake = FakeDocker()
+    env = _environment(tmp_path, fake, monkeypatch)
+    record = asyncio.run(env.prepare_image(force_build=False))
+    fake.labels[record.image].pop("trajlab.preinstall.agent_sha256")
+
+    with pytest.raises(PreinstallError, match="agent_sha256"):
+        asyncio.run(_environment(tmp_path / "again", fake, monkeypatch).prepare_image(False))

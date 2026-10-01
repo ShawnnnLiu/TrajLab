@@ -60,6 +60,8 @@ One trial is one task executed by one attempt.
   "Pre-install" names the whole mechanism.
   Not: "base image", which the Dockerfile `FROM` line already means.
 
+- **pin** - `trajlab.capture.pins.CLAUDE_CODE_VERSION`, the one Claude Code version every capture runs (ADR-0009); enforced by `trajlab run`, by the derived-image build, and in every trial container.
+
 ## Trajectory
 
 - **ATIF** - Agent Trajectory Interchange Format, Harbor RFC 0001; models in `harbor.models.trajectories`.

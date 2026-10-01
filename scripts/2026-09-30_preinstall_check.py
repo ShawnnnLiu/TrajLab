@@ -32,10 +32,11 @@ from harbor.models.task.paths import TaskPaths
 from harbor.models.trial.paths import TrialPaths
 
 from trajlab.capture.discover import compose_project_name
+from trajlab.capture.pins import CLAUDE_CODE_VERSION
 from trajlab.capture.preinstall import PreinstalledDockerEnvironment
 from trajlab.contracts import PREINSTALL_RECORD_FILENAME, PreinstallRecord
 
-VERSION = "2.1.278"
+VERSION = CLAUDE_CODE_VERSION
 CACHE = Path.home() / ".cache/harbor/tasks/packages"
 # The install is about 1.3 GB; anything near that means Harbor installed at trial time.
 MAX_TRIAL_LAYER_BYTES = 50_000_000
@@ -102,11 +103,13 @@ async def check(name: str) -> None:
         docker("image", "inspect", "--format", "{{json .Config.Labels}}", record.image)
     )
     assert labels["trajlab.preinstall.agent_version"] == VERSION, labels
+    assert labels["trajlab.preinstall.agent_sha256"] == record.agent_sha256, labels
     print(f"2. CMD kept ({task_cmd.strip()}), provenance labels present")
 
     env = environment()
-    await env.start(force_build=False)
     try:
+        # Inside the try, like Harbor's trial: a refused start still tears the project down.
+        await env.start(force_build=False)
         written = PreinstallRecord.model_validate_json(
             (paths.trial_dir / PREINSTALL_RECORD_FILENAME).read_text()
         )
@@ -119,6 +122,9 @@ async def check(name: str) -> None:
         image = docker("container", "inspect", "--format", "{{.Config.Image}}", container).strip()
         assert image == record.image, image
         print(f"3. trial container {container} runs {image}")
+        print(
+            f"   pinned Claude Code {VERSION}, binary sha256 {record.agent_sha256[:16]}... verified"
+        )
 
         before = writable_layer(container)
         agent = ClaudeCode(logs_dir=paths.agent_dir, version=VERSION)

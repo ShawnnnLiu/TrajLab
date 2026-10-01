@@ -20,6 +20,9 @@ class PreinstallRecord(BaseModel):
     image_id: str = Field(min_length=1)
     agent_name: str = Field(min_length=1)
     agent_version: str = Field(min_length=1)
+    agent_sha256: str = Field(
+        pattern=r"^[0-9a-f]{64}$", description="sha256 of the installed agent binary (ADR-0009)."
+    )
     harbor_version: str = Field(min_length=1)
     recipe_version: int = Field(ge=1)
     cache_hit: bool = Field(description="True if the derived image already existed.")

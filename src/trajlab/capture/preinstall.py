@@ -36,13 +36,21 @@ from harbor.models.task.paths import TaskPaths
 from harbor.models.trial.config import TrialConfig
 from harbor.utils.import_path import import_symbol
 
+from trajlab.capture.pins import CLAUDE_CODE_VERSION
 from trajlab.contracts import PREINSTALL_RECORD_FILENAME, PreinstallRecord
 
 logger = logging.getLogger(__name__)
 
 REPOSITORY = "trajlab-preinstalled"
 # Bump when the way derived images are made changes; it is part of every derived tag.
-RECIPE_VERSION = 1
+# 2: derived images carry the agent binary's sha256 (ADR-0009).
+RECIPE_VERSION = 2
+SHA256_LABEL = "trajlab.preinstall.agent_sha256"
+# Run as the agent user, with the PATH Harbor's own version check uses.
+AGENT_SHA256_COMMAND = (
+    'export PATH="$HOME/.local/bin:$PATH"; '
+    'sha256sum "$(readlink -f "$(command -v claude)")" | cut -d " " -f 1'
+)
 # Harbor's compose files run the main service with this command (docker-compose-*.yaml).
 KEEPALIVE_COMMAND = ("sh", "-c", "sleep infinity")
 INSTALL_EXEC_TIMEOUT_S = 900.0
@@ -136,6 +144,11 @@ def agent_spec(config: TrialConfig) -> AgentSpec:
         raise PreinstallError(
             "pre-install needs a pinned agent version: set agents[0].kwargs.version"
         )
+    if version != CLAUDE_CODE_VERSION:
+        raise PreinstallError(
+            f"agent version {version!r} is not the pinned Claude Code {CLAUDE_CODE_VERSION} "
+            "(trajlab.capture.pins, ADR-0009)"
+        )
     return AgentSpec(agent_class=agent_class, name=agent_class.name(), version=version)
 
 
@@ -214,6 +227,7 @@ class PreinstalledDockerEnvironment(DockerEnvironment):
     """Harbor's Docker environment, started from a derived image holding the agent (ADR-0008)."""
 
     docker: ClassVar[Docker] = Docker()
+    _agent_user: str | int | None = None  # the task's agent user, set by prepare_image
     # Harbor runs a job's trials as tasks in one event loop; one build or pull per image.
     # Keyed by loop as well, since an asyncio.Lock belongs to the loop that first uses it.
     _locks: ClassVar[dict[tuple[int, str], asyncio.Lock]] = {}
@@ -235,6 +249,30 @@ class PreinstalledDockerEnvironment(DockerEnvironment):
             record.model_dump_json(indent=2) + "\n"
         )
         await super().start(force_build=False)
+        await self.verify_trial_agent(record)
+
+    async def verify_trial_agent(self, record: PreinstallRecord) -> None:
+        """Check the trial container runs exactly the pinned agent binary (ADR-0009).
+
+        Harbor would otherwise reinstall silently on a version mismatch, putting the install
+        back into the writable layer and the agent off the pin.
+        """
+        user = self._agent_user
+        result = await self.exec(ClaudeCode._INSTALL_VERSION_COMMAND, user=user)
+        match = re.search(r"\d+\.\d+\.\d+", result.stdout or "")
+        found = match.group(0) if match else None
+        if result.return_code != 0 or found != record.agent_version:
+            raise PreinstallError(
+                f"trial container reports Claude Code {found!r} "
+                f"(exit {result.return_code}); expected {record.agent_version}"
+            )
+        result = await self.exec(AGENT_SHA256_COMMAND, user=user)
+        digest = (result.stdout or "").strip()
+        if result.return_code != 0 or digest != record.agent_sha256:
+            raise PreinstallError(
+                f"trial container's Claude Code binary has sha256 {digest!r}; "
+                f"the derived image recorded {record.agent_sha256}"
+            )
 
     async def prepare_image(self, force_build: bool) -> PreinstallRecord:
         """Make sure the derived image exists, building it if needed. Starts no trial container."""
@@ -250,6 +288,7 @@ class PreinstalledDockerEnvironment(DockerEnvironment):
         task_config = TaskConfig.model_validate_toml(
             TaskPaths(self.environment_dir.parent).config_path.read_text()
         )
+        self._agent_user = task_config.agent.user
         harbor = package_version("harbor")
         task_image = await self._task_image(force_build)
         task_image_id = await self.docker.image_id(task_image)
@@ -267,6 +306,15 @@ class PreinstalledDockerEnvironment(DockerEnvironment):
                 )
                 build_seconds = round(time.monotonic() - start, 1)
                 logger.info("built %s from %s in %.0f s", image, task_image, build_seconds)
+            agent_sha256 = await self.docker(
+                "image",
+                "inspect",
+                "--format",
+                f'{{{{index .Config.Labels "{SHA256_LABEL}"}}}}',
+                image,
+            )
+            if not re.fullmatch(r"[0-9a-f]{64}", agent_sha256):
+                raise PreinstallError(f"{image} has no valid {SHA256_LABEL} label")
         return PreinstallRecord(
             task_image=task_image,
             task_image_id=task_image_id,
@@ -275,6 +323,7 @@ class PreinstalledDockerEnvironment(DockerEnvironment):
             image_id=image_id,
             agent_name=spec.name,
             agent_version=spec.version,
+            agent_sha256=agent_sha256,
             harbor_version=harbor,
             recipe_version=RECIPE_VERSION,
             cache_hit=build_seconds is None,
@@ -340,12 +389,18 @@ class PreinstalledDockerEnvironment(DockerEnvironment):
                     raise PreinstallError(
                         f"{spec.name} {spec.version} installed but Harbor would not detect it"
                     )
-            changes = await self._commit_changes(task_image, spec, harbor)
+            result = await shim.exec(AGENT_SHA256_COMMAND)
+            agent_sha256 = (result.stdout or "").strip()
+            if result.return_code != 0 or not re.fullmatch(r"[0-9a-f]{64}", agent_sha256):
+                raise PreinstallError(f"cannot hash the installed agent binary: {result.stderr}")
+            changes = await self._commit_changes(task_image, spec, harbor, agent_sha256)
             return await self.docker("commit", *changes, container, image)
         finally:
             await self.docker.run("rm", "--force", container)
 
-    async def _commit_changes(self, task_image: str, spec: AgentSpec, harbor: str) -> list[str]:
+    async def _commit_changes(
+        self, task_image: str, spec: AgentSpec, harbor: str, agent_sha256: str
+    ) -> list[str]:
         """Keep the task image's CMD (the builder ran a keepalive) and label the provenance."""
         cmd = await self.docker("image", "inspect", "--format", "{{json .Config.Cmd}}", task_image)
         labels: dict[str, Any] = {
@@ -354,6 +409,7 @@ class PreinstalledDockerEnvironment(DockerEnvironment):
             "trajlab.preinstall.agent_version": spec.version,
             "trajlab.preinstall.harbor_version": harbor,
             "trajlab.preinstall.recipe_version": str(RECIPE_VERSION),
+            SHA256_LABEL: agent_sha256,
         }
         changes = [f"--change=CMD {cmd if cmd != 'null' else '[]'}"]
         changes += [f"--change=LABEL {key}={json.dumps(value)}" for key, value in labels.items()]
