@@ -40,3 +40,25 @@ A trial container started from an image that already holds the install therefore
   A Harbor version bump must re-run `tests/test_capture_preinstall.py` and `scripts/2026-09-30_preinstall_check.py`.
 - Running on the derived image is a capture change: corpora that use it need a new `corpus_id`, and the manifest's `environment_type` records the import path.
 - Derived images accumulate locally, one per task and agent version; `docker images trajlab-preinstalled` lists them.
+
+## Acceptance (2026-09-30)
+
+Claude Code 2.1.278, Harbor 0.23.0, Docker Desktop on the development Mac (amd64 tasks under Rosetta), checkpoints on every call.
+
+| Trial | Reward | Agent setup | Checkpoints | Layer per checkpoint | Commit time |
+| --- | --- | --- | --- | --- | --- |
+| hello-world, stock image (ADR-0006) | 1.0 | 44 to 68 s | 1 | 1.33 GB | 36 s |
+| hello-world, derived image | 1.0 | 0.3 s | 1 | 100 KB | 5.3 s |
+| kv-store-grpc, derived image | 1.0 | 1 s | 4 of 4 calls | 57 MB (the agent's own installs) | 5.5 to 15.6 s |
+| write-compressor, derived image | 1.0 | 1 s | 4 of 4 calls | 106 to 147 KB | 3.7 to 6.1 s |
+
+Both Terminal-Bench tasks scored 1.0 in the earlier stock run too (`dev-tb21-strict-check`), where agent setup took 137 s and 156 s.
+Building a derived image took 88 s for hello-world and 246 to 293 s for the two amd64 Terminal-Bench images, once per task and agent version.
+
+`scripts/2026-09-30_preinstall_check.py` passed for hello-world (build path), regex-chess (prebuilt path, amd64), an Alpine task (Harbor's npm install path), and a task with a non-root agent user and a custom working directory: Harbor's setup at trial time took 0.2 to 0.5 s and left the writable layer at 4 KB, and the derived image survived Harbor's teardown.
+It failed for qemu-alpine-ssh, because Debian's bullseye-security mirror returns 404 for packages its index lists; Harbor's own install command fails the same way on the unmodified image, so stock trials of that task currently fail at agent setup too.
+
+**Commit time now follows the base image, not the change.**
+Committing a one-file change took 0.7 s on a 13 MB Alpine base, 1.7 s on hello-world's 110 MB task image, and 2.3 to 5.9 s on its 1.4 GB derived image, with Docker Desktop's containerd image store.
+Per-call checkpoints are now affordable in storage; their time cost is seconds per call.
+Whether the classic overlay2 store commits faster is untested.

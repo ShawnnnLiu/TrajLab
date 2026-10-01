@@ -13,5 +13,5 @@ Upstream option: remove only images Compose built for the project, e.g. by also 
 ## 2026-09-30: The agent install lands in every snapshot
 
 Installed agents are set up inside the running container, so the install (about 1.3 GB for Claude Code on Ubuntu 24.04) sits in the container's writable layer and inflates every filesystem snapshot.
-Workaround: undecided; see ADR-0006, "Acceptance run".
+Workaround: `trajlab.capture.preinstall:PreinstalledDockerEnvironment` runs Harbor's install once into a cached derived image and starts trials from it (ADR-0008).
 Upstream option: an option to install the agent into a derived image before the trial container starts.

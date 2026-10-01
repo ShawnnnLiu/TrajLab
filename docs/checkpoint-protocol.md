@@ -123,8 +123,9 @@ The watcher writes N into each trial's `policy.json`, and the corpus manifest re
 ## Open questions
 
 - **Checkpoint cost.**
-  Harbor installs the agent into the writable layer, so each checkpoint re-captures about 1.3 GB and takes about 36 s on the development Mac (ADR-0006, "Acceptance run").
-  ADR-0007 reduces the number of checkpoints; the per-checkpoint cost stays until the install is kept out of the writable layer.
+  On Harbor's stock image each checkpoint re-captures the agent install, about 1.3 GB and 36 s (ADR-0006).
+  On the pre-installed image (ADR-0008) a checkpoint holds only the trial's changes, 0.1 to 57 MB in the acceptance runs, but `docker commit` still takes 4 to 16 s, growing with the base image's size under Docker Desktop's containerd image store.
+  Choose N (ADR-0007) with that time cost in mind.
 - **Final checkpoint.** A Claude Code `Stop` hook could capture the state after the last call, which every-N leaves uncovered.
 
 - **Representation of the read-only join.**
