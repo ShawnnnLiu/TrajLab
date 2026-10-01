@@ -99,12 +99,18 @@ def identify_trial(trial_dir: Path) -> TrialIdentity:
 @app.command()
 def watch(
     jobs_dir: Annotated[Path, typer.Argument(help="Harbor jobs dir, e.g. corpus/jobs.")],
+    every: Annotated[
+        int,
+        typer.Option(
+            min=1, help="Checkpoint every Nth state-mutating call (ADR-0007); 1 means every call."
+        ),
+    ],
     backend: Annotated[str, typer.Option(help="Snapshot backend.")] = "docker_commit",
     sweep_interval: Annotated[
         float, typer.Option(help="Seconds between rescans for missed requests.")
     ] = DEFAULT_SWEEP_INTERVAL_S,
 ) -> None:
-    """Watch running trials and take a checkpoint at every tool call. Stop with Ctrl-C."""
+    """Watch running trials and checkpoint every Nth state-mutating call. Stop with Ctrl-C."""
     if backend not in BACKENDS:
         typer.echo(
             f"trajlab watch: unknown backend {backend!r}; one of {sorted(BACKENDS)}", err=True
@@ -116,7 +122,11 @@ def watch(
     try:
         with hold_watcher_lock(jobs_dir):
             Watcher(
-                jobs_dir, BACKENDS[backend](), identify_trial, sweep_interval=sweep_interval
+                jobs_dir,
+                BACKENDS[backend](),
+                identify_trial,
+                every=every,
+                sweep_interval=sweep_interval,
             ).run(stop)
     except WatcherLockedError as error:
         typer.echo(f"trajlab watch: {error}", err=True)

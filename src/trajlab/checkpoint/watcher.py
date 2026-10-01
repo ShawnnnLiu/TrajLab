@@ -1,6 +1,7 @@
 """The host-side watcher: answers every `.req` with a checkpoint (docs/checkpoint-protocol.md).
 
 One watcher per jobs dir, enforced by a `flock` on `<jobs-dir>/.trajlab-watcher.lock`.
+It checkpoints every Nth state-mutating call of a trial and defers the others (ADR-0007).
 `checkpoint/` does not import `capture/` (CLAUDE.md constraint 3), so the caller supplies how a
 trial dir maps to its name and compose project.
 """
@@ -24,15 +25,19 @@ from trajlab.checkpoint.backends.docker_commit import image_tag
 from trajlab.checkpoint.join import (
     REQ_SUFFIX,
     WATCHER_LOG_FILENAME,
+    answered_requests,
     append_record,
     is_pending,
+    read_policy,
     read_records,
     read_request,
     timed_out,
     trial_dir_of,
     write_ack,
+    write_deferred_ack,
+    write_policy,
 )
-from trajlab.contracts import CheckpointRecord
+from trajlab.contracts import CheckpointPolicy, CheckpointRecord
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +45,10 @@ LOCK_FILENAME = ".trajlab-watcher.lock"
 REQ_GLOB = f"*/*/agent/checkpoints/*{REQ_SUFFIX}"
 DEFAULT_SWEEP_INTERVAL_S = 2.0
 DEFAULT_WORKERS = 8
+
+
+class PolicyMismatchError(RuntimeError):
+    """A trial was started under a different checkpoint policy than this watcher's."""
 
 
 class WatcherLockedError(RuntimeError):
@@ -97,9 +106,16 @@ class _Trial:
     identity: TrialIdentity
     log: logging.Logger
     handler: logging.Handler
-    records: dict[str, CheckpointRecord]
+    records: list[CheckpointRecord]
     lock: threading.Lock = field(default_factory=threading.Lock)
     container: str | None = None
+
+    def covering(self, tool_call_id: str) -> CheckpointRecord | None:
+        """The record whose checkpoint first shows this call's effects, if any."""
+        for record in self.records:
+            if tool_call_id in record.covered_tool_call_ids:
+                return record
+        return None
 
 
 class Watcher:
@@ -111,6 +127,7 @@ class Watcher:
         backend: SnapshotBackend,
         identify: Identify,
         *,
+        every: int,
         sweep_interval: float = DEFAULT_SWEEP_INTERVAL_S,
         workers: int = DEFAULT_WORKERS,
     ) -> None:
@@ -118,6 +135,7 @@ class Watcher:
         # resolved so one request and one trial have exactly one key.
         self.jobs_dir = jobs_dir.resolve()
         self.backend = backend
+        self.policy = CheckpointPolicy(backend=backend.name, every=every)  # type: ignore[arg-type]
         self.identify = identify
         self.sweep_interval = sweep_interval
         self.workers = workers
@@ -131,7 +149,7 @@ class Watcher:
     # One request -------------------------------------------------------------------------
 
     def process(self, req_path: Path) -> CheckpointRecord | None:
-        """Answer one `.req`. Returns the record, or None if nothing was recorded.
+        """Answer one `.req`. Returns the record covering it, or None if none (yet).
 
         Never raises for a problem with this request; problems are logged and the hook's
         wait budget turns them into a `.timeout`.
@@ -143,7 +161,7 @@ class Watcher:
         try:
             trial = self._trial(trial_dir)
         except Exception:
-            self._report(req_path, logger, "cannot identify the trial for %s", req_path)
+            self._report(req_path, logger, "cannot take on the trial of %s", req_path)
             return None
         with trial.lock:
             if not is_pending(req_path):
@@ -157,12 +175,32 @@ class Watcher:
     def _checkpoint(self, req_path: Path, trial: _Trial) -> CheckpointRecord | None:
         directory = req_path.parent
         request, requested_at = read_request(req_path)
-        existing = trial.records.get(request.tool_use_id)
+        existing = trial.covering(request.tool_use_id)
         if existing is not None:
             # Recorded before a crash but never acknowledged.
-            write_ack(directory, existing)
+            if existing.tool_call_id == request.tool_use_id:
+                write_ack(directory, existing)
+            else:
+                write_deferred_ack(directory, request.tool_use_id)
             trial.log.info("re-acked %s (seq %d)", request.tool_use_id, existing.seq)
             return existing
+        # Derived from the files, so a restarted watcher resumes the count exactly.
+        uncovered = [
+            tool_call_id
+            for tool_call_id in answered_requests(directory)
+            if trial.covering(tool_call_id) is None and tool_call_id != request.tool_use_id
+        ]
+        uncovered.append(request.tool_use_id)
+        if len(uncovered) < self.policy.every:
+            write_deferred_ack(directory, request.tool_use_id)
+            trial.log.info(
+                "deferred %s %s (%d of %d)",
+                request.tool_name,
+                request.tool_use_id,
+                len(uncovered),
+                self.policy.every,
+            )
+            return None
         if trial.container is None:
             trial.container = self.backend.container_for(trial.identity.compose_project)
         seq = len(trial.records) + 1
@@ -182,6 +220,7 @@ class Watcher:
             raise
         if timed_out(req_path):
             # The agent resumed before the snapshot finished; the image is not this call's state.
+            # The calls stay uncovered and the next checkpoint covers them.
             self.backend.discard(snapshot)
             trial.log.warning("discarded late snapshot for %s", request.tool_use_id)
             return None
@@ -190,6 +229,7 @@ class Watcher:
             trial_name=trial.identity.trial_name,
             tool_call_id=request.tool_use_id,
             seq=seq,
+            covered_tool_call_ids=tuple(uncovered),
             tool_name=request.tool_name,
             backend="docker_commit",
             capture_ms=snapshot.capture_ms,
@@ -199,15 +239,16 @@ class Watcher:
             captured_at=snapshot.captured_at,
         )
         append_record(directory, record)
-        trial.records[record.tool_call_id] = record
+        trial.records.append(record)
         write_ack(directory, record)
         trial.log.info(
-            "seq %d %s %s: %s in %d ms",
+            "seq %d %s %s: %s in %d ms, covers %d call(s)",
             seq,
             request.tool_name,
             request.tool_use_id,
             snapshot.checkpoint_id[:19],
             snapshot.capture_ms,
+            len(uncovered),
         )
         return record
 
@@ -230,7 +271,17 @@ class Watcher:
                 handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
                 log.addHandler(handler)
                 log.setLevel(logging.DEBUG)
-                records = {r.tool_call_id: r for r in read_records(directory)}
+                policy = read_policy(directory)
+                if policy is None:
+                    write_policy(directory, self.policy)
+                elif policy != self.policy:
+                    log.removeHandler(handler)
+                    handler.close()
+                    raise PolicyMismatchError(
+                        f"{trial_dir} was captured under {policy!r}; this watcher uses "
+                        f"{self.policy!r}. One trial never mixes policies (ADR-0007)."
+                    )
+                records = read_records(directory)
                 trial = _Trial(identity=identity, log=log, handler=handler, records=records)
                 self._trials[trial_dir] = trial
             return trial

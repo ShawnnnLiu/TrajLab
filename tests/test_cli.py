@@ -66,16 +66,22 @@ def test_run_refuses_without_starting_harbor(tmp_path: Path) -> None:
 
 
 def test_watch_rejects_unknown_backend(tmp_path: Path) -> None:
-    result = CliRunner().invoke(app, ["watch", str(tmp_path), "--backend", "statefork"])
+    args = ["watch", str(tmp_path), "--every", "1", "--backend", "statefork"]
+    result = CliRunner().invoke(app, args)
     assert result.exit_code == 1
     assert "unknown backend" in result.output
 
 
 def test_watch_refuses_second_watcher(tmp_path: Path) -> None:
     with hold_watcher_lock(tmp_path):
-        result = CliRunner().invoke(app, ["watch", str(tmp_path)])
+        result = CliRunner().invoke(app, ["watch", str(tmp_path), "--every", "1"])
     assert result.exit_code == 1
     assert "already holds" in result.output
+
+
+def test_watch_requires_every(tmp_path: Path) -> None:
+    assert CliRunner().invoke(app, ["watch", str(tmp_path)]).exit_code != 0
+    assert CliRunner().invoke(app, ["watch", str(tmp_path), "--every", "0"]).exit_code != 0
 
 
 def test_identify_trial_names_compose_project(fixture_trial: Path) -> None:

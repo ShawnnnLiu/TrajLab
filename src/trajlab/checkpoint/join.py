@@ -4,15 +4,20 @@
 turns it into ATIF system steps (ADR-0003).
 """
 
+import json
 import os
 from datetime import UTC, datetime
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from trajlab.contracts import CheckpointRecord
+from trajlab.contracts import (
+    CHECKPOINTS_DIRNAME,
+    POLICY_FILENAME,
+    CheckpointPolicy,
+    CheckpointRecord,
+)
 
-CHECKPOINTS_DIRNAME = "checkpoints"
 RECORDS_FILENAME = "checkpoints.jsonl"
 WATCHER_LOG_FILENAME = "watcher.log"
 REQ_SUFFIX = ".req"
@@ -68,6 +73,28 @@ def read_request(req_path: Path) -> tuple[CheckpointRequest, datetime]:
     return request, requested_at
 
 
+def answered_requests(directory: Path) -> list[str]:
+    """tool_use_ids of `.req` files with an `.ack` or a `.timeout`, in request order."""
+    answered = [
+        req
+        for req in directory.glob(f"*{REQ_SUFFIX}")
+        if sibling(req, ACK_SUFFIX).exists() or sibling(req, TIMEOUT_SUFFIX).exists()
+    ]
+    answered.sort(key=lambda req: (req.stat().st_mtime_ns, req.name))
+    return [req.name.removesuffix(REQ_SUFFIX) for req in answered]
+
+
+def read_policy(directory: Path) -> CheckpointPolicy | None:
+    path = directory / POLICY_FILENAME
+    if not path.is_file():
+        return None
+    return CheckpointPolicy.model_validate_json(path.read_text())
+
+
+def write_policy(directory: Path, policy: CheckpointPolicy) -> None:
+    _write_atomic(directory / POLICY_FILENAME, policy.model_dump_json() + "\n")
+
+
 def read_records(directory: Path) -> list[CheckpointRecord]:
     path = directory / RECORDS_FILENAME
     if not path.is_file():
@@ -86,10 +113,21 @@ def append_record(directory: Path, record: CheckpointRecord) -> None:
         os.fsync(stream.fileno())
 
 
+def _write_atomic(path: Path, text: str) -> None:
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(text)
+    tmp.replace(path)
+
+
 def write_ack(directory: Path, record: CheckpointRecord) -> Path:
     """Write `<tool_call_id>.ack` atomically; its appearance releases the hook."""
     path = directory / f"{record.tool_call_id}{ACK_SUFFIX}"
-    tmp = path.with_name(path.name + ".tmp")
-    tmp.write_text(record.model_dump_json() + "\n")
-    tmp.replace(path)
+    _write_atomic(path, record.model_dump_json() + "\n")
+    return path
+
+
+def write_deferred_ack(directory: Path, tool_use_id: str) -> Path:
+    """Release the hook for a call the next checkpoint will cover (ADR-0007)."""
+    path = directory / f"{tool_use_id}{ACK_SUFFIX}"
+    _write_atomic(path, json.dumps({"tool_call_id": tool_use_id, "deferred": True}) + "\n")
     return path

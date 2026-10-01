@@ -1,5 +1,5 @@
 {
-    "job_name": "hello-world-checkpoint-v1",
+    "job_name": "hello-world-checkpoint-v2",
     "jobs_dir": "corpus/jobs",
     "n_concurrent_trials": 1,
     "agent_timeout_multiplier": 2.0,
