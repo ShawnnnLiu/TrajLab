@@ -45,6 +45,37 @@ MANIFESTS_DIR = Path("corpus/manifests")
 HOOKS = "configs/claude-code/settings.hooks.json"
 ARMS = ("fresh", "state", "state-traj", "traj")
 POLL_S = 30
+# Host disk guard (the Docker VM's disk image lives on the host volume).
+PRUNE_BELOW_GB = 8.0
+HOLD_BELOW_GB = 4.0
+
+
+def free_gb() -> float:
+    return shutil.disk_usage(JOBS_DIR).free / 1e9
+
+
+def prune_intermediate_checkpoints(job_dirs: list[Path]) -> None:
+    """Remove all but the final checkpoint image of every finished trial in these jobs.
+
+    Repair arms need only a failed trial's final checkpoint, and the records in
+    checkpoints.jsonl stay; only the intermediate images go.
+    """
+    for job in job_dirs:
+        for trial in (p for p in job.iterdir() if p.is_dir()):
+            final = final_checkpoint(trial)
+            if final is None or not (trial / "result.json").exists():
+                continue
+            path = trial / "agent/checkpoints/checkpoints.jsonl"
+            for line in path.read_text().splitlines():
+                if not line.strip():
+                    continue
+                record = CheckpointRecord.model_validate_json(line)
+                if record.seq == final.seq:
+                    continue
+                image = f"trajlab-checkpoint:{record.trial_name}.{record.seq:04d}"
+                removed = subprocess.run(["docker", "rmi", image], capture_output=True, text=True)
+                if removed.returncode == 0:
+                    logger.info("disk guard: removed %s", image)
 
 
 def final_checkpoint(trial: Path) -> CheckpointRecord | None:
@@ -171,6 +202,15 @@ def main() -> int:
             if process.poll() is not None:
                 logger.info("%s exited %s", name, process.returncode)
                 del running[name]
+        if free_gb() < PRUNE_BELOW_GB:
+            logger.warning("disk guard: %.1f GB free; pruning intermediate checkpoints", free_gb())
+            prune_intermediate_checkpoints(
+                [source, *sorted(p for p in JOBS_DIR.glob(f"{args.prefix}-*") if p.is_dir())]
+            )
+        if free_gb() < HOLD_BELOW_GB:
+            logger.warning("disk guard: %.1f GB free; holding new launches", free_gb())
+            time.sleep(POLL_S)
+            continue
         while pending and source_running + len(running) < args.max_running:
             trial, arm = pending.pop(0)
             task = trial.name.split("__")[0]
