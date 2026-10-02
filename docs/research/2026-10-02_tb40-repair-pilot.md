@@ -32,16 +32,19 @@ First attempts: 6 of 14 passed (43%); cost $8.56 at list prices.
 Passed: embedding-drift-monitor, production-planning, sound-change-cascade, interleaved-vigenere, risk-scorer-replay, fin-saccr-rwa.
 Failed: wal-recovery-ordering, mvcc-lsm-compaction, cargo-flight-dispatch, session-window-debug, foodstuff-beta-activity, music-harmony, roy-polymorph-cn, layout-config-recreation2 (agent timeout).
 
-Repairs of the seven failures whose four arms all finished (layout-config-recreation2 below):
+Repairs of all eight failures (32 repair trials, $6.19 own cost in total):
 
 | Arm | Passed | Fewer tests failing | Same | More | Agent s | API calls | Tool calls | Output tokens | Own cost |
 |---|---|---|---|---|---|---|---|---|---|
-| `fresh` | 0/7 | 3 | 3 | 1 | 1086 | 37 | 31 | 63,577 | $1.42 |
-| `state` | 0/7 | 1 | 5 | 1 | 917 | 41 | 35 | 45,759 | $1.16 |
-| `state-traj` | 0/7 | 3 | 3 | 1 | 677 | 24 | 19 | 33,079 | $0.71 |
-| `traj` | 0/7 | 2 | 5 | 0 | 780 | 36 | 29 | 37,633 | $0.86 |
+| `fresh` | 0/8 | 3 | 4 | 1 | 8286 | 85 | 94 | 94,705 | $2.61 |
+| `state` | 1/8 | 2 | 5 | 1 | 3707 | 60 | 57 | 52,984 | $1.50 |
+| `state-traj` | 1/8 | 4 | 3 | 1 | 3312 | 36 | 29 | 37,857 | $1.01 |
+| `traj` | 0/8 | 2 | 6 | 0 | 1156 | 44 | 35 | 42,629 | $1.07 |
 
-Per task, tests failing after the first attempt and after each repair:
+"Fewer tests failing" counts a pass.
+`fresh`'s agent time is dominated by one 2 h timeout (layout-config-recreation2); without that task the ordering of the arms by time and cost is the same.
+
+Per task, tests failing after the first attempt and after each repair (bold: passed):
 
 | Task | First attempt | `fresh` | `state` | `state-traj` | `traj` |
 |---|---|---|---|---|---|
@@ -52,18 +55,23 @@ Per task, tests failing after the first attempt and after each repair:
 | foodstuff-beta-activity (13) | 2 | 3 | 2 | 3 | 2 |
 | music-harmony (rule violations) | 13 | 10 | 16 | 8 | 8 |
 | roy-polymorph-cn (3) | 1 | 1 | 1 | 1 | 1 |
+| layout-config-recreation2 (9) | 1 (2 h timeout) | 1 (2 h timeout) | **0** (46 min) | **0** (44 min) | 1 (6 min) |
 
 Full per-trial rows, including tokens by kind: `corpus/jobs/<source job>/repair-report.json` (not in git); regenerate with the report script.
 
 ## What the pilot shows
 
-- **No arm repaired anything.** 0 of 28 repairs passed; the arms cannot be ranked on completion at this size.
-- **The repair inherits the first attempt's failure mode.** Most first-attempt failures were short: in 5 of 8 the agent ended its turn within 3 minutes (51-172 s), typically after one or two patches and without running the task's tests; the passes ran 6-17 minutes.
-  The repairs mostly did the same, whatever they started from, and the "previous attempt failed" note did not change that.
-- **Loading the trajectory makes repairs shorter and cheaper.** `state-traj` used the fewest API calls (24 vs 37 for `fresh`), the least agent time, and half the own cost of `fresh`, with the same number of partial improvements.
-  This is the clearest signal in the pilot, and it is an efficiency result, not a completion one.
-- **`traj` saw the mismatch.** In wal-recovery-ordering the `traj` agent noticed "the files are back to their original state" and reapplied its earlier fixes from memory; the arm's premise (history without its state) is visible to the agent.
-- **`state` without history did worst on partial credit.** Starting in the failed state with no conversation, the agent improved only one task and made music-harmony worse (13 to 16 violations); in wal-recovery-ordering it said it "couldn't find why the previous attempt failed".
+- **Two repairs passed, both on the one failure that had made real progress, and both started from its final checkpoint.** layout-config-recreation2 ran its full 2 h and left near-finished work on disk (8 of 9 tests passing, plus its own fitting scripts and intermediate data in `/tmp`).
+  `state-traj` opened those files first (`/tmp/E.json`, `/tmp/opt.py`), kept running the first attempt's optimizer, and reached a pixel-exact match in 44 min for $0.30.
+  `state`, with no conversation, found the existing `config.json`, diffed its rendering against the target, and refined the image positions to pass in 46 min.
+  `traj` had the conversation but a fresh environment: the files were gone, it rebuilt the layout from memory, declared 99.3% pixel agreement after 6 min, and failed the same test as the first attempt.
+  `fresh` started over and hit the 2 h cap again with the same test failing.
+  This is the case the checkpoint exists for: state the agent built up and that the conversation alone cannot restore.
+- **Early-stop failures are not repaired by any arm.** In 5 of 8 failures the first attempt ended its turn within 3 minutes (51-172 s), typically after one or two patches and without running the task's tests; the passes ran 6-17 minutes.
+  The repairs of those mostly did the same, whatever they started from, and the "previous attempt failed" note did not change that: 0 of 20 passed.
+- **Loading the trajectory makes repairs shorter and cheaper.** `state-traj` used the fewest API calls in total (36 vs 85 for `fresh`) and the lowest own cost ($1.01 vs $2.61), and had the most partial improvements (4 of 8).
+- **`traj` sees the mismatch between history and state.** In wal-recovery-ordering the `traj` agent noticed "the files are back to their original state" and reapplied its earlier fixes from memory; in layout-config-recreation2 it could not recover the working files its history referred to.
+- **`state` without history is uneven.** It passed layout-config-recreation2 but improved only one other task, made music-harmony worse (13 to 16 violations), and in wal-recovery-ordering said it "couldn't find why the previous attempt failed".
 
 ## Accounting facts found on the way
 
@@ -74,7 +82,7 @@ Full per-trial rows, including tokens by kind: `corpus/jobs/<source job>/repair-
 
 ## Problems with the design to fix before the real run
 
-1. **Too few repairable failures.** With Sonnet 5.5 at medium effort, failures are mostly early stops at high partial credit, and every arm stops early again.
+1. **Too few repairable failures.** With Sonnet 5.5 at medium effort, failures are mostly early stops at high partial credit, and every arm stops early again; only the one long failure was repairable.
    A useful run needs failures that a repair can plausibly fix: higher effort for the repair, a larger task set, or tasks chosen by measured pass rate rather than expert-time estimate.
 2. **n = 1 per cell.** At this size only discordant pairs mean anything (exact McNemar); the real run needs several tasks' worth of discordance, which means many more failures.
 3. **The note is a confound across arms only in what it means.** In `fresh` it is information about a run the agent cannot see; in the resumed arms it follows a full transcript. Keep it identical, but state this.
