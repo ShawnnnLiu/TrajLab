@@ -1,7 +1,8 @@
 """The record of one checkpoint, as the watcher writes it to `checkpoints.jsonl` and `.ack`,
 and the policy a trial's checkpoints were taken under.
 
-Spec: `docs/checkpoint-protocol.md`, "CheckpointRecord"; ADR-0007 for every-N.
+Spec: `docs/checkpoint-protocol.md`, "CheckpointRecord"; ADR-0007 for every-N; ADR-0010 for
+change gating and `CallRecord`.
 """
 
 from typing import Literal, Self
@@ -12,6 +13,17 @@ Backend = Literal["docker_commit"]
 # Under the trial's agent/ dir; the hook, the watcher, and the manifest builder agree on these.
 CHECKPOINTS_DIRNAME = "checkpoints"
 POLICY_FILENAME = "policy.json"
+CALLS_FILENAME = "calls.jsonl"
+CHECKPOINT_RECORDS_FILENAME = "checkpoints.jsonl"
+# `<tool_call_id>.timeout`: the hook gave up waiting; that call has no record (protocol, "Files").
+TIMEOUT_SUFFIX = ".timeout"
+# How many of a call's own changed paths a CallRecord lists; the total is always recorded.
+MAX_LISTED_PATHS = 100
+
+Gate = Literal["none", "change", "audit"]
+# What asked for the checkpoint: a hooked tool call, or the end of the agent's turn (ADR-0011).
+Trigger = Literal["tool_call", "stop"]
+STOP_ID_PREFIX = "stop_"
 
 
 class CheckpointPolicy(BaseModel):
@@ -21,6 +33,17 @@ class CheckpointPolicy(BaseModel):
 
     backend: Backend = "docker_commit"
     every: int = Field(ge=1, description="Checkpoint every Nth state-mutating call (ADR-0007).")
+    gate: Gate = Field(
+        default="none",
+        description="none: every-N by count; change: only calls that changed the filesystem; "
+        "audit: measure every call but checkpoint all of them (ADR-0010).",
+    )
+
+    @model_validator(mode="after")
+    def _gate_needs_every_one(self) -> Self:
+        if self.gate != "none" and self.every != 1:
+            raise ValueError(f"gate {self.gate!r} requires every=1 (ADR-0010)")
+        return self
 
 
 class CheckpointRecord(BaseModel):
@@ -32,7 +55,12 @@ class CheckpointRecord(BaseModel):
     # Not trial_id: Harbor writes the trial id only when the trial ends, after every checkpoint
     # is taken (ADR-0006). TrialRecord joins trial_name to trial_id.
     trial_name: str = Field(min_length=1, description="The trial dir name, from config.json.")
-    tool_call_id: str = Field(min_length=1, description="Claude Code's tool_use_id; the join key.")
+    tool_call_id: str = Field(
+        min_length=1,
+        description="Claude Code's tool_use_id, the join key; for a stop checkpoint, the hook's "
+        "`stop_<epoch>_<pid>` request id (ADR-0011).",
+    )
+    trigger: Trigger = "tool_call"
     seq: int = Field(ge=1, description="Capture order within the trial, from 1.")
     covered_tool_call_ids: tuple[str, ...] = Field(
         min_length=1,
@@ -58,4 +86,56 @@ class CheckpointRecord(BaseModel):
             raise ValueError("covered_tool_call_ids must end with tool_call_id")
         if len(set(self.covered_tool_call_ids)) != len(self.covered_tool_call_ids):
             raise ValueError("covered_tool_call_ids has duplicates")
+        return self
+
+
+class CallRecord(BaseModel):
+    """What the watcher did for one hooked tool call (ADR-0010); in `calls.jsonl` and `.ack`."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    tool_call_id: str = Field(min_length=1, description="tool_use_id, or the stop request id.")
+    trial_name: str = Field(min_length=1)
+    tool_name: str = Field(min_length=1, description="The tool, or Stop / StopFailure.")
+    trigger: Trigger = "tool_call"
+    call_seq: int = Field(ge=1, description="Order among the trial's answered calls, from 1.")
+    tool_failed: bool = Field(
+        default=False,
+        description="The call ended in error (PostToolUseFailure); it may still "
+        "have changed files.",
+    )
+    outcome: Literal["checkpoint", "unchanged", "deferred"] = Field(
+        description="checkpoint: this call triggered one; unchanged: the filesystem equals the "
+        "last checkpoint's; deferred: below N under every-N, covered by a later checkpoint."
+    )
+    change: Literal["changed", "unchanged", "baseline", "unknown", "not_checked"] = Field(
+        description="The detector's verdict against the last checkpoint. baseline: no reference "
+        "yet; unknown: no detector in this image; not_checked: gate none."
+    )
+    changed_paths: tuple[str, ...] = Field(
+        default=(),
+        description="This call's own changes against the previous call, as +added, -removed, "
+        f"~modified paths; at most {MAX_LISTED_PATHS}.",
+    )
+    changed_paths_total: int | None = Field(
+        default=None, ge=0, description="How many paths this call changed; null if unmeasured."
+    )
+    detect_ms: int | None = Field(default=None, ge=0)
+    checkpoint_seq: int | None = Field(
+        default=None,
+        ge=1,
+        description="The checkpoint holding the state after this call; null for deferred calls "
+        "(the covering checkpoint names them) and for unchanged calls before any checkpoint.",
+    )
+    requested_at: AwareDatetime
+    answered_at: AwareDatetime
+
+    @model_validator(mode="after")
+    def _consistent(self) -> Self:
+        if self.outcome == "checkpoint" and self.checkpoint_seq is None:
+            raise ValueError("a checkpoint outcome names its checkpoint_seq")
+        if self.outcome == "unchanged" and self.change not in ("unchanged",):
+            raise ValueError("an unchanged outcome needs the detector's unchanged verdict")
+        if len(self.changed_paths) > MAX_LISTED_PATHS:
+            raise ValueError(f"at most {MAX_LISTED_PATHS} changed paths are listed")
         return self

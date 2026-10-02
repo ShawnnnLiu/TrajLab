@@ -13,7 +13,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from harbor.agents.installed.claude_code import ClaudeCode
+from harbor.models.agent.name import AgentName
 from harbor.models.job.config import JobConfig
+from harbor.utils.import_path import import_symbol
 from pydantic import ValidationError
 
 from trajlab.capture.corpus import (
@@ -25,6 +28,7 @@ from trajlab.capture.corpus import (
     repo_state,
     write_manifest,
 )
+from trajlab.capture.pins import CLAUDE_CODE_VERSION
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +74,30 @@ def claude_settings(config: JobConfig) -> list[dict[str, Any]]:
     return found
 
 
+def is_claude_code(name: str | None, import_path: str | None) -> bool:
+    """Harbor's claude-code agent, or an import path naming a subclass of it."""
+    if import_path:
+        try:
+            agent_class = import_symbol(import_path)
+        except ValueError as error:
+            raise RunRefusedError(f"cannot import agent {import_path}: {error}") from error
+        return isinstance(agent_class, type) and issubclass(agent_class, ClaudeCode)
+    return name == AgentName.CLAUDE_CODE.value
+
+
+def check_version_pins(config: JobConfig) -> None:
+    """Refuse a Claude Code agent not pinned to the project's version (ADR-0009)."""
+    for agent in config.agents:
+        if not is_claude_code(agent.name, agent.import_path):
+            continue
+        version = agent.kwargs.get("version")
+        if version != CLAUDE_CODE_VERSION:
+            raise RunRefusedError(
+                f"agent {agent.name or agent.import_path} has version {version!r}; every trajlab "
+                f"run pins Claude Code {CLAUDE_CODE_VERSION} (trajlab.capture.pins, ADR-0009)"
+            )
+
+
 def enables_hooks(config: JobConfig) -> bool:
     """True if any agent's settings register a Claude Code hook, i.e. the run needs a watcher."""
     return any(settings.get("hooks") for settings in claude_settings(config))
@@ -101,6 +129,7 @@ def plan_run(
         config = JobConfig.model_validate_json(config_path.read_text())
     except (OSError, ValidationError) as error:
         raise RunRefusedError(f"cannot load job config {config_path}: {error}") from error
+    check_version_pins(config)
     corpus_id = corpus_id or config_path.stem
     job_dir = config.jobs_dir / config.job_name
     # Harbor resumes a job whose dir already holds a result.json; a corpus run must start fresh.

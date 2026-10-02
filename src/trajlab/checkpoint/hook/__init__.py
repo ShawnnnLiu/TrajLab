@@ -20,18 +20,23 @@ def hook_script() -> str:
     return files(__package__).joinpath("post_tool_use.sh").read_text()
 
 
+# PostToolUse does not fire for a call that ends in error (e.g. Bash exiting non-zero), which
+# can still have changed files; PostToolUseFailure does (ADR-0010). Stop and StopFailure end the
+# agent's turn, normally or on an API error; their checkpoint is the state the agent leaves
+# behind (ADR-0011). All four checked in Claude Code 2.1.278.
+TOOL_EVENTS = ("PostToolUse", "PostToolUseFailure")
+STOP_EVENTS = ("Stop", "StopFailure")
+HOOK_EVENTS = TOOL_EVENTS + STOP_EVENTS
+
+
 def render_settings() -> str:
     """The Claude Code settings JSON that runs the hook script inline, as committed."""
+    command = {"type": "command", "command": hook_script(), "timeout": HOOK_TIMEOUT_S}
+    # Stop events take no matcher.
     settings = {
         "hooks": {
-            "PostToolUse": [
-                {
-                    "matcher": HOOK_MATCHER,
-                    "hooks": [
-                        {"type": "command", "command": hook_script(), "timeout": HOOK_TIMEOUT_S}
-                    ],
-                }
-            ]
+            **{event: [{"matcher": HOOK_MATCHER, "hooks": [command]}] for event in TOOL_EVENTS},
+            **{event: [{"hooks": [command]}] for event in STOP_EVENTS},
         }
     }
     return json.dumps(settings, indent=2) + "\n"

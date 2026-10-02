@@ -39,7 +39,7 @@ One trial is one task executed by one attempt.
   (Accepted ADRs sometimes say "snapshot" for the artifact; they are historical records and stay as written.)
 - **physical / virtual** - a physical snapshot copies the state in full; a virtual snapshot is a copy-on-write reference (StateFork's terminology).
   Every trajlab checkpoint is physical (ADR-0002, ADR-0004).
-- **hook** - unqualified, the Claude Code `PostToolUse` hook registered by `configs/claude-code/settings.hooks.json`, running inside the container.
+- **hook** - unqualified, the Claude Code hook registered for `PostToolUse` and `PostToolUseFailure` by `configs/claude-code/settings.hooks.json`, running inside the container.
   It writes `<tool_use_id>.req` and waits for `.ack`.
   Qualify the other senses: the **hook script** (`post_tool_use.sh`, delivered inline as the settings file's `command`), and **Harbor lifecycle hooks** (trial events; none fire during the agent phase, which is why we use Claude Code's).
 - **watcher** - the host process started by `trajlab watch <jobs-dir> --backend <name>`.
@@ -50,11 +50,23 @@ One trial is one task executed by one attempt.
   Write `docker_commit` (code) for the backend name and `docker commit` (two words) for the Docker command it wraps.
 - **`.req` / `.ack` / `.timeout`** - the request, acknowledgement, and give-up marker files under `<trial>/agent/checkpoints/`; see `docs/checkpoint-protocol.md`.
 - **every-N / `--every N`** - the watcher takes a checkpoint on every Nth state-mutating call of a trial (ADR-0007); N is recorded in each trial's `policy.json` and in the corpus manifest as `checkpoint_every`.
+- **gate / change-gated** - which hooked calls get a checkpoint (`--gate`, ADR-0010): `change` checkpoints only calls that changed the filesystem; `audit` checkpoints all of them but records the change verdict; `none` is every-N (ADR-0007).
+- **unchanged call** - a hooked call after which the container's filesystem equals the last checkpoint's, outside the harness exclusions; it gets no checkpoint, and its `CallRecord` names the previous one.
+  Not: "minor" or "small" call; the paper never classifies calls by size.
+- **stop checkpoint / stop record** - the checkpoint or `CallRecord` for the end of the agent's turn (`Stop` or `StopFailure`), with `trigger: "stop"` and a `stop_<epoch>_<pid>` id instead of a `tool_use_id` (ADR-0011).
+- **baseline** - the first measured call of a trial (or after a watcher restart), always checkpointed because there is nothing to compare it with.
+- **call record** - the `CallRecord` the watcher writes per answered hooked call, in `calls.jsonl` and `.ack`.
 - **covered call** - a state-mutating call whose effects first appear in a given checkpoint; listed in that record's `covered_tool_call_ids`.
 - **deferred ack** - the `.ack` the watcher writes, without a snapshot, for a call that does not reach N; its effects appear in the next checkpoint.
 - **`checkpoints.jsonl`** - append-only, one `CheckpointRecord` per line, in capture order; written by the watcher.
   Records are keyed by `trial_name`, not `trial_id`, because a running trial has no trial id on disk (ADR-0006).
 - **watcher lock** - `<jobs-dir>/.trajlab-watcher.lock`, held with `flock` by the one watcher of a jobs dir; `trajlab run` checks it before starting a job whose config enables hooks.
+
+- **task image / derived image** - the task image is what Harbor would run the trial on, pulled (`docker_image`) or built from the task's `environment/`; the derived image is the task image plus Harbor's agent install, made and cached by `PreinstalledDockerEnvironment` as `trajlab-preinstalled:<tag>` (ADR-0008).
+  "Pre-install" names the whole mechanism.
+  Not: "base image", which the Dockerfile `FROM` line already means.
+
+- **pin** - `trajlab.capture.pins.CLAUDE_CODE_VERSION`, the one Claude Code version every capture runs (ADR-0009); enforced by `trajlab run`, by the derived-image build, and in every trial container.
 
 ## Trajectory
 
@@ -84,7 +96,8 @@ One trial is one task executed by one attempt.
 - **enriched trajectory** - `agent/trajectory.enriched.json`, the postprocess output; valid ATIF.
   The only sanctioned use of "enrich*".
 - **join** - the association between a checkpoint and the trajectory step that caused it, keyed by `tool_use_id`; realized as ATIF system steps (ADR-0003).
-  Steps of read-only tools join to the most recent earlier checkpoint (ADR-0001); their representation in the enriched file is an open question (see `docs/checkpoint-protocol.md`).
+  Steps of read-only tools join to the most recent earlier checkpoint (ADR-0001), which in the enriched file is the last checkpoint step before them; each hooked call's `CallRecord` sits on its step as `extra.trajlab.calls` (ADR-0003, 2026-10-01 amendment).
+- **compaction record** - the `CompactionRecord` postprocess builds from one native `compact_boundary` event; it is the `observation.results[0].extra` of a compaction step.
 
 ## Everything else
 

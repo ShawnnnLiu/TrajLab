@@ -1,3 +1,4 @@
+import json
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -7,6 +8,7 @@ from typer.testing import CliRunner
 
 from tests.conftest import FIXTURE_TOOL_CALL_ID, edit_trajectory
 from trajlab.atif.load import trajectory_path
+from trajlab.atif.postprocess import postprocess_trial
 from trajlab.atif.validate import validate_trajectory
 from trajlab.cli import app
 
@@ -169,3 +171,16 @@ def test_cli_missing_trajectory_exits_one(tmp_path: Path) -> None:
 
     assert result.exit_code == 1
     assert "File not found" in result.output
+
+
+def test_cli_validates_enriched_trajectory_too(trial_copy: Path) -> None:
+    enriched = postprocess_trial(trial_copy).path
+
+    assert CliRunner().invoke(app, ["validate", str(trial_copy)]).exit_code == 0
+    data = json.loads(enriched.read_text())
+    data["steps"][0]["step_id"] = 7
+    enriched.write_text(json.dumps(data))
+    result = CliRunner().invoke(app, ["validate", str(trial_copy)])
+
+    assert result.exit_code == 1
+    assert "valid: " in result.output and f"invalid: {enriched}" in result.output

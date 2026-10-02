@@ -35,6 +35,14 @@ class SnapshotBackend(ABC):
         """Capture the container's state now. Raises BackendError."""
 
     @abstractmethod
+    def listing(self, container: str) -> str | None:
+        """The container's root filesystem as `trajlab.checkpoint.changes` find output.
+
+        None if the container has no GNU find; the watcher then checkpoints every call.
+        Raises BackendError if the listing fails.
+        """
+
+    @abstractmethod
     def discard(self, snapshot: Snapshot) -> None:
         """Delete a snapshot that will not be recorded. Raises BackendError."""
 

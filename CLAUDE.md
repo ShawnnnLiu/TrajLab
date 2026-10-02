@@ -26,8 +26,8 @@ configs/claude-code/       settings.hooks.json: PostToolUse hook wiring
 configs/tasks/             task-name lists per subset
 src/trajlab/cli.py         typer app: run | watch | postprocess | manifest | validate
 src/trajlab/contracts/     CheckpointRecord, TrialRecord, ATIF step extras
-src/trajlab/capture/       harbor_runner, corpus manifest, trial/container discovery
-src/trajlab/checkpoint/    hook/ (PostToolUse hook script; delivery per ADR-0003), watcher, backends/, join
+src/trajlab/capture/       harbor_runner, corpus manifest, trial/container discovery, preinstall (custom environment, ADR-0008)
+src/trajlab/checkpoint/    hook/ (PostToolUse hook script; delivery per ADR-0003), watcher, changes (ADR-0010), backends/, join
 src/trajlab/atif/          load, compaction recovery, postprocess, validate
 scripts/                   dated one-offs (2026-09-25_baseline.py); never imported by src/
 tests/fixtures/hello-world-trial/   one small real trial dir; every test runs against it

@@ -1,0 +1,67 @@
+{
+  "corpus_id": "hello-world-preinstall-v1",
+  "created_at": "2026-10-01T02:13:48.728588Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "405fafe29a0a1a56b8ae8a3a8b3b08f48a99f3ac",
+  "repo_dirty": false,
+  "config_path": "configs/harbor/hello-world-preinstall-v1.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 1,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 2.0,
+  "checkpoint_every": 1,
+  "tasks": [
+    {
+      "name": "hello-world/hello-world",
+      "digest": "sha256:38d7a077f07fbee8efc78db5dec9a72f82e727510ad1dcfeac0b55fa845256b7"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "hello-world-preinstall-v1",
+      "job_id": "dd66b443-fc46-4422-a044-f5f124b06ae2",
+      "job_config": {
+        "job_name": "hello-world-preinstall-v1",
+        "jobs_dir": "corpus/jobs",
+        "agent_timeout_multiplier": 2.0,
+        "n_concurrent_trials": 1,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "tasks": [
+          {
+            "name": "hello-world/hello-world",
+            "ref": "latest"
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "3b18066d-9ebc-42eb-811f-71815f27464f",
+          "trial_name": "hello-world__eDpxaav",
+          "task_name": "hello-world/hello-world",
+          "job_id": "dd66b443-fc46-4422-a044-f5f124b06ae2",
+          "job_dir": "hello-world-preinstall-v1",
+          "claude_session_id": "b2761372-187c-4186-a554-ac8fe7b40651"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}
