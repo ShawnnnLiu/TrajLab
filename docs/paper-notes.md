@@ -101,5 +101,5 @@ Last updated 2026-10-02; add to it as evidence changes, and do not delete supers
 4. **Linux numbers.** Repeat the C4 table and detection timings on the Linux server.
 5. **Final-state checkpoint.** Done in ADR-0011 (`Stop` and `StopFailure` hooks); report how often the stop checkpoint differs from the last call's, i.e. how often background work changed the final state.
 6. **Join in the trajectory.** Done in build-order step 7 (ADR-0003, 2026-10-01 amendment): `trajlab postprocess` writes `trajectory.enriched.json` with checkpoint and compaction steps and each call's `CallRecord`, and refuses a trial whose records do not all join; the paper's figures should come from that file.
-8. **Agent resume from a checkpoint.** Start Claude Code through Harbor on a checkpoint image, seeded with `--load-trajectory`; both experiment arms depend on it.
 7. **Compaction on real data.** No trial so far has compacted, so compaction recovery is tested only on synthetic events run through Harbor's converter; confirm it on the first long trial that does.
+8. **Agent resume from a checkpoint.** Start Claude Code through Harbor on a checkpoint image, seeded with `--load-trajectory`; both experiment arms depend on it.
