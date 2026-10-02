@@ -96,7 +96,8 @@ One trial is one task executed by one attempt.
 - **enriched trajectory** - `agent/trajectory.enriched.json`, the postprocess output; valid ATIF.
   The only sanctioned use of "enrich*".
 - **join** - the association between a checkpoint and the trajectory step that caused it, keyed by `tool_use_id`; realized as ATIF system steps (ADR-0003).
-  Steps of read-only tools join to the most recent earlier checkpoint (ADR-0001); their representation in the enriched file is an open question (see `docs/checkpoint-protocol.md`).
+  Steps of read-only tools join to the most recent earlier checkpoint (ADR-0001), which in the enriched file is the last checkpoint step before them; each hooked call's `CallRecord` sits on its step as `extra.trajlab.calls` (ADR-0003, 2026-10-01 amendment).
+- **compaction record** - the `CompactionRecord` postprocess builds from one native `compact_boundary` event; it is the `observation.results[0].extra` of a compaction step.
 
 ## Everything else
 

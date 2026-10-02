@@ -2,7 +2,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from tests.conftest import assemble_job_dir
+from tests.conftest import assemble_job_dir, make_checkpoint, write_capture
 from trajlab.checkpoint.watcher import hold_watcher_lock
 from trajlab.cli import app, identify_trial
 from trajlab.contracts import CorpusManifest
@@ -99,3 +99,41 @@ def test_identify_trial_names_compose_project(fixture_trial: Path) -> None:
     identity = identify_trial(fixture_trial)
     assert identity.trial_name == "hello-world__K3GBok3"
     assert identity.compose_project == "hello-world__k3gbok3__env"
+
+
+def test_postprocess_job_dir_writes_each_trial(job_dir: Path) -> None:
+    result = CliRunner().invoke(app, ["postprocess", str(job_dir)])
+
+    assert result.exit_code == 0, result.output
+    assert "3 steps, 0 checkpoints, 0 compactions" in result.output
+    assert (job_dir / "hello-world__K3GBok3/agent/trajectory.enriched.json").is_file()
+
+
+def test_postprocess_trial_dir(trial_copy: Path) -> None:
+    write_capture(trial_copy, [make_checkpoint(1)])
+
+    result = CliRunner().invoke(app, ["postprocess", str(trial_copy)])
+
+    assert result.exit_code == 0, result.output
+    assert "4 steps, 1 checkpoints" in result.output
+
+
+def test_postprocess_reports_failures_and_skips(job_dir: Path) -> None:
+    trial = job_dir / "hello-world__K3GBok3"
+    write_capture(trial, [make_checkpoint(1, "toolu_nowhere")])
+    unfinished = job_dir / "hello-world__Unfinish"
+    (unfinished / "agent").mkdir(parents=True)
+    (unfinished / "config.json").write_text((trial / "config.json").read_text())
+
+    result = CliRunner().invoke(app, ["postprocess", str(job_dir)])
+
+    assert result.exit_code == 1
+    assert "skipped" in result.output and "no agent/trajectory.json" in result.output
+    assert "failed" in result.output and "toolu_nowhere" in result.output
+
+
+def test_postprocess_rejects_empty_dir(tmp_path: Path) -> None:
+    result = CliRunner().invoke(app, ["postprocess", str(tmp_path)])
+
+    assert result.exit_code == 1
+    assert "no trial dirs" in result.output

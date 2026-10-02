@@ -14,6 +14,9 @@ Backend = Literal["docker_commit"]
 CHECKPOINTS_DIRNAME = "checkpoints"
 POLICY_FILENAME = "policy.json"
 CALLS_FILENAME = "calls.jsonl"
+CHECKPOINT_RECORDS_FILENAME = "checkpoints.jsonl"
+# `<tool_call_id>.timeout`: the hook gave up waiting; that call has no record (protocol, "Files").
+TIMEOUT_SUFFIX = ".timeout"
 # How many of a call's own changed paths a CallRecord lists; the total is always recorded.
 MAX_LISTED_PATHS = 100
 

@@ -132,8 +132,7 @@ The watcher writes its policy into each trial's `policy.json`, and the corpus ma
   On Harbor's stock image each checkpoint re-captures the agent install, about 1.3 GB and 36 s (ADR-0006).
   On the pre-installed image (ADR-0008) a checkpoint holds only the trial's changes, 0.1 to 57 MB in the acceptance runs, but `docker commit` still takes 4 to 16 s, growing with the base image's size under Docker Desktop's containerd image store.
   Choose N (ADR-0007) with that time cost in mind.
-- **Final checkpoint.** A Claude Code `Stop` hook could capture the state after the last call, which every-N leaves uncovered.
+- **Final checkpoint.** Resolved by ADR-0011: the `Stop` and `StopFailure` hooks record the state after the last call.
 
 - **Representation of the read-only join.**
-  ADR-0001 says postprocess joins read-only steps to the most recent earlier checkpoint, but ADR-0003 only inserts a system step after agent steps that own a checkpointed `tool_call_id`, so the enriched file does not yet say how a read-only step's join appears.
-  Decide in the step-7 implementation PR and amend ADR-0003.
+  Resolved in the ADR-0003 amendment of 2026-10-01: a read-only step joins to the last checkpoint step before it in the enriched file, and every hooked call's `CallRecord` sits on its own step.

@@ -3,7 +3,7 @@
 What the Dec 4 paper can claim about how trajectories and checkpoints are captured, the evidence for each claim, and what is still missing.
 Every number here points at the ADR, script, or corpus manifest it comes from, so a sentence in the paper can be traced to data.
 Terms follow `docs/glossary.md`.
-Last updated 2026-10-01; add to it as evidence changes, and do not delete superseded entries, mark them.
+Last updated 2026-10-02; add to it as evidence changes, and do not delete superseded entries, mark them.
 
 ## Claims and their evidence
 
@@ -12,6 +12,7 @@ Last updated 2026-10-01; add to it as evidence changes, and do not delete supers
 - **Mechanism:** a Claude Code hook on `PostToolUse` and `PostToolUseFailure` blocks the agent until the host watcher has measured the container and, if needed, committed it (ADR-0006, ADR-0010, `docs/checkpoint-protocol.md`).
 - **Join key:** Claude Code's `tool_use_id`, which is also ATIF's `tool_call_id` (`docs/harbor-facts.md`, "The join key").
 - **Evidence:** in the acceptance runs every `.req` got an `.ack` with no timeouts (ADR-0006 and ADR-0008 acceptance sections; `tb21-preinstall-check-v1`: 8 of 8 hooked calls). Since ADR-0010 each answered call also has a `CallRecord`; the failing-call probe had records for all 3 of its calls.
+- **In the enriched trajectory:** every checkpoint of every finished trial in `tb21-audit-v1`, `tb21-change-gate-v1`, and `tb21-preinstall-check-v1` joined to the agent step owning its `tool_call_id`; postprocess refuses a trial otherwise (ADR-0003, 2026-10-01 amendment).
 - **Caveat to state:** before 2026-10-01 a tool call that ended in error was not hooked; `tb21-audit-v1` and `tb21-change-gate-v1` predate the fix (ADR-0010, amendment). Only corpora captured after commit `06e2061` support C1 without that caveat.
 
 ### C1b. The state the agent leaves behind is always recorded
@@ -64,6 +65,23 @@ Last updated 2026-10-01; add to it as evidence changes, and do not delete supers
 - The binary hash differs by platform and install path for the same version (arm64, amd64, npm on Alpine); report the hash per platform.
 - Verified by tampering: an altered recorded hash failed the trial at environment start (ADR-0009, Consequences).
 
+### C6. A checkpoint restores to a state the task's verifier grades like the live one
+
+- **Method:** start a fresh container from each checkpoint image, with no Harbor and no agent; check that every path the calls added up to that checkpoint is present and every path added later is absent, compare `Write` contents byte for byte, and run the task's own `tests/test.sh` (`scripts/2026-10-02_restore_check.py`).
+- **Evidence** (`tb21-demo-v1`, `schemelike-metacircular-eval`, 1 trial): all 5 checkpoints restored in 0.1 to 0.24 s and passed the path checks; the verifier scored 0.0 on checkpoint 1, 1.0 on checkpoint 3, and 1.0 on checkpoint 5, matching Harbor's reward of 1.0.
+- **By-product:** checkpoint 3, 4 min 53 s into a 6.6 min agent run, already passes the verifier; the rest was the agent checking its work.
+- **Superseded 2026-10-02:** agent resume was then untested; C7 below now covers it.
+
+### C7. An agent resumed from a checkpoint continues the work
+
+- **Method:** the resumed trial starts from the checkpoint image (`trajlab.capture.resume:CheckpointResumeEnvironment`) and from Claude Code's native session cut right after the checkpointed call, loaded with Harbor's `load_trajectory` (`claude --resume`); `scripts/2026-10-02_resume_trial.py`.
+- **Evidence:** 4 of 4 resumed trials passed.
+  `resume-demo-v1`: Sonnet from #3 of its own schemelike trial, 1.0.
+  `resume-kv-sonnet-v1` and `resume-kv-haiku-v1`: Sonnet and Haiku from #6 of Haiku's failed kv-store-grpc trial (`tb21-haiku-v1`, 0.0), both 1.0.
+  `resume-scheme-sonnet-v1`: Sonnet from #10 of 16 of Haiku's failed schemelike trial (0.0, 10 of 63 tests), 1.0 with 63 of 63; its first act was to revert Haiku's edit to the reference `interp.py`.
+- **Confound to state:** a resumed agent sees messages the original did not: Claude Code's notices about stopped background tasks, its "Continue from where you left off" turn, and Harbor's re-sent instruction. The kv-store failure was a server run as a Claude Code background task, which dies when the agent exits; the stopped-task notice alone led both models to restart it, so that pair shows a resume effect, not model strength.
+- **Cost:** Claude Code reports $0 for a `--resume` run and Harbor counts the loaded history (`docs/upstream-notes.md`); resumed costs here count only messages after the cut.
+
 ## Reproducibility facts to report
 
 - Harbor 0.23.0, pinned, unpatched; all custom pieces attach from outside (CLAUDE.md constraint 1).
@@ -82,6 +100,7 @@ Last updated 2026-10-01; add to it as evidence changes, and do not delete supers
 - **`__pycache__`.** Running Python writes bytecode caches, even under `/usr/local/lib`; they count as changes. State this, and consider reporting change counts with and without them.
 - **Derived image timing.** The install runs at image-build time, not trial time; package versions could differ if a mirror changed in between (ADR-0008, Consequences).
 - **Excluded tasks.** `qemu-alpine-ssh` and `qemu-startup` (Debian 11) cannot install Claude Code at all since Debian 11's LTS ended; they are out of any corpus (`docs/upstream-notes.md`). Report the task count as 87 of 89.
+- **Capture overhead grows with trial length.** The hook held the agent 3.7% of a 7-minute Sonnet trial but 16% of Haiku's 24-minute `write-compressor` trial (64 checkpoints, about 2.2 s each; `tb21-haiku-v1`). Report it per trial.
 - **Platform.** All measurements so far are from one Mac running amd64 tasks under emulation. Commit and detection times are expected to differ on the Linux server.
 - **Final state.** Since ADR-0011 the end-of-turn state is recorded, including background writes before the turn ends; anything a background process writes after that, and the verifier's own effects, are not.
 
@@ -92,4 +111,6 @@ Last updated 2026-10-01; add to it as evidence changes, and do not delete supers
 3. **Per-tool change rates.** From `calls.jsonl`: the share of Bash, Write, and Edit calls that changed the filesystem; a likely result in its own right.
 4. **Linux numbers.** Repeat the C4 table and detection timings on the Linux server.
 5. **Final-state checkpoint.** Done in ADR-0011 (`Stop` and `StopFailure` hooks); report how often the stop checkpoint differs from the last call's, i.e. how often background work changed the final state.
-6. **Join in the trajectory.** Build-order step 7 writes the join into `trajectory.enriched.json`; the paper's figures should come from that file.
+6. **Join in the trajectory.** Done in build-order step 7 (ADR-0003, 2026-10-01 amendment): `trajlab postprocess` writes `trajectory.enriched.json` with checkpoint and compaction steps and each call's `CallRecord`, and refuses a trial whose records do not all join; the paper's figures should come from that file.
+7. **Compaction on real data.** No trial so far has compacted, so compaction recovery is tested only on synthetic events run through Harbor's converter; confirm it on the first long trial that does.
+8. **Agent resume from a checkpoint.** Done (C7); open: a resume protocol that controls for the added messages, and resumed-run cost accounting in the pipeline.

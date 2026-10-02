@@ -12,18 +12,19 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from trajlab.contracts import (
     CALLS_FILENAME,
+    CHECKPOINT_RECORDS_FILENAME,
     CHECKPOINTS_DIRNAME,
     POLICY_FILENAME,
+    TIMEOUT_SUFFIX,
     CallRecord,
     CheckpointPolicy,
     CheckpointRecord,
 )
 
-RECORDS_FILENAME = "checkpoints.jsonl"
+RECORDS_FILENAME = CHECKPOINT_RECORDS_FILENAME
 WATCHER_LOG_FILENAME = "watcher.log"
 REQ_SUFFIX = ".req"
 ACK_SUFFIX = ".ack"
-TIMEOUT_SUFFIX = ".timeout"
 # The hook refuses anything else, so a tool_use_id is always a safe file name.
 TOOL_USE_ID_PATTERN = r"^[A-Za-z0-9_-]+$"
 

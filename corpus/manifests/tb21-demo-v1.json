@@ -1,0 +1,73 @@
+{
+  "corpus_id": "tb21-demo-v1",
+  "created_at": "2026-10-02T03:26:56.901169Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "92c9c0f34591b8c57b06e55a7ca5baea43e04ec9",
+  "repo_dirty": false,
+  "config_path": "configs/harbor/tb21-demo-v1.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "high",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 1,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 2.0,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "tasks": [
+    {
+      "name": "terminal-bench/schemelike-metacircular-eval",
+      "digest": "sha256:58130c2166c3115276dc8592f358e326ff2d81ea852e3d88636c82fd1dff57e6"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb21-demo-v1",
+      "job_id": "15ea1440-58ad-4278-8fca-f56a013724a5",
+      "job_config": {
+        "job_name": "tb21-demo-v1",
+        "jobs_dir": "corpus/jobs",
+        "agent_timeout_multiplier": 2.0,
+        "n_concurrent_trials": 1,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "high",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench-2-1",
+            "ref": "sha256:7d7bdc1cbedad549fc1140404bd4dc45e5fd0ea7c4186773687d177ad3a0699a",
+            "task_names": [
+              "terminal-bench/schemelike-metacircular-eval"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "359efd6c-1ae6-4c5d-805d-7f490713e0bf",
+          "trial_name": "schemelike-metacircular-eval__vWdtSkY",
+          "task_name": "terminal-bench/schemelike-metacircular-eval",
+          "job_id": "15ea1440-58ad-4278-8fca-f56a013724a5",
+          "job_dir": "tb21-demo-v1",
+          "claude_session_id": "b9697893-60cc-42e0-b342-4af9febe32fc"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}
