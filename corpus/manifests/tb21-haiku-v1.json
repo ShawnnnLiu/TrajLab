@@ -1,0 +1,99 @@
+{
+  "corpus_id": "tb21-haiku-v1",
+  "created_at": "2026-10-02T04:11:17.330581Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "cec50de417a9bfa3c3b57b9f9455c544c9ac850a",
+  "repo_dirty": false,
+  "config_path": "configs/harbor/tb21-haiku-v1.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-haiku-4-5-20251001",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 1,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 2.0,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "tasks": [
+    {
+      "name": "terminal-bench/kv-store-grpc",
+      "digest": "sha256:973c5d4c111fb61a344457936f1c36400acd2d9e44389e7b319586fe23a7a307"
+    },
+    {
+      "name": "terminal-bench/schemelike-metacircular-eval",
+      "digest": "sha256:58130c2166c3115276dc8592f358e326ff2d81ea852e3d88636c82fd1dff57e6"
+    },
+    {
+      "name": "terminal-bench/write-compressor",
+      "digest": "sha256:d9ddd9a8e925e2c566b37b2492cbf995afecefe58874e4043ef78d7f3c892c7e"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb21-haiku-v1",
+      "job_id": "42c71e01-7acf-46ad-889d-4026ec280374",
+      "job_config": {
+        "job_name": "tb21-haiku-v1",
+        "jobs_dir": "corpus/jobs",
+        "agent_timeout_multiplier": 2.0,
+        "n_concurrent_trials": 3,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-haiku-4-5-20251001",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench-2-1",
+            "ref": "sha256:7d7bdc1cbedad549fc1140404bd4dc45e5fd0ea7c4186773687d177ad3a0699a",
+            "task_names": [
+              "terminal-bench/kv-store-grpc",
+              "terminal-bench/write-compressor",
+              "terminal-bench/schemelike-metacircular-eval"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "43678b84-d49a-4d95-81e7-302795d392da",
+          "trial_name": "kv-store-grpc__Zb523oy",
+          "task_name": "terminal-bench/kv-store-grpc",
+          "job_id": "42c71e01-7acf-46ad-889d-4026ec280374",
+          "job_dir": "tb21-haiku-v1",
+          "claude_session_id": "4f449764-55f8-4506-855d-1f3eb23521b4"
+        },
+        {
+          "trial_id": "322d0f8b-77bd-416d-9afe-de41b4cadfc7",
+          "trial_name": "schemelike-metacircular-eval__gnMH2Mu",
+          "task_name": "terminal-bench/schemelike-metacircular-eval",
+          "job_id": "42c71e01-7acf-46ad-889d-4026ec280374",
+          "job_dir": "tb21-haiku-v1",
+          "claude_session_id": "0935d0ef-b911-48be-965f-8e30a962dcec"
+        },
+        {
+          "trial_id": "25a2a3f6-c589-4ce5-a5bc-d4499b7c20e3",
+          "trial_name": "write-compressor__DBSxwUL",
+          "task_name": "terminal-bench/write-compressor",
+          "job_id": "42c71e01-7acf-46ad-889d-4026ec280374",
+          "job_dir": "tb21-haiku-v1",
+          "claude_session_id": "d4932d72-11c7-4ce5-a747-a03a165bef2e"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}
