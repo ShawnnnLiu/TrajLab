@@ -27,6 +27,7 @@ from trajlab.contracts import (
     CorpusTask,
     EnrichedTrajectoryExtra,
     OriginalStepExtra,
+    ResumeRecord,
     TrajlabStepExtra,
     TrialRecord,
 )
@@ -146,6 +147,12 @@ INSTANCES: list[BaseModel] = [
         pre_tokens=167_000,
     ),
     EnrichedTrajectoryExtra(source_sha256="0" * 64, policy=None),
+    ResumeRecord(
+        checkpoint_image="trajlab-checkpoint:hello-world__K3GBok3.0001",
+        checkpoint_image_id="sha256:3f1c9e",
+        derived_image="trajlab-preinstalled:hello-world",
+        recorded_at=datetime(2026, 10, 2, 3, 44, tzinfo=UTC),
+    ),
     EnrichedTrajectoryExtra(
         source_sha256="a" * 64,
         policy=CheckpointPolicy(every=1, gate="change"),
