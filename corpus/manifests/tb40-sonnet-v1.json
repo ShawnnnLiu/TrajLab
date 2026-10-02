@@ -1,0 +1,138 @@
+{
+  "corpus_id": "tb40-sonnet-v1",
+  "created_at": "2026-10-02T06:59:35.240410Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "dd3419192b92eee55ee4eef850b67a1af02f624f",
+  "repo_dirty": false,
+  "config_path": "configs/harbor/tb40-sonnet-v1.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 1,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 0.25,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "tasks": [
+    {
+      "name": "terminal-bench/embedding-drift-monitor",
+      "digest": "sha256:6907ffce9ad5c8a8b41fe9c0a076a9aeb9754a2f8083c52f9aede5481a4f4c59"
+    },
+    {
+      "name": "terminal-bench/layout-config-recreation2",
+      "digest": "sha256:193312b14b1dcb6ef551efff691cbb708b2032f58879b0b19efe88a2cddc9deb"
+    },
+    {
+      "name": "terminal-bench/mvcc-lsm-compaction",
+      "digest": "sha256:370406dd79cc164e50b73568de37c34eba1b0e30782d7dc03f87c38c68123137"
+    },
+    {
+      "name": "terminal-bench/production-planning",
+      "digest": "sha256:1958ac51553517b79e3a642ed4f3bd9affb5b42166dcbacaa4c32f4b040edaff"
+    },
+    {
+      "name": "terminal-bench/sound-change-cascade",
+      "digest": "sha256:6214ceb80aaa657d72658a6f39a44fa11ea51f443822b6a1212eef1ba65bf91d"
+    },
+    {
+      "name": "terminal-bench/wal-recovery-ordering",
+      "digest": "sha256:8eb700419711e0d5eba317b8f6dec41aa3411e03e320e82b8da8070974ff3aae"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb40-sonnet-v1",
+      "job_id": "f8e41783-a054-4477-8122-df0c3559b3ec",
+      "job_config": {
+        "job_name": "tb40-sonnet-v1",
+        "jobs_dir": "corpus/jobs",
+        "agent_timeout_multiplier": 0.25,
+        "n_concurrent_trials": 3,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "sha256:39d9f44b40420cde8fdcc087579c0d72a7e14fa3656d603c3f0d22fb35e27732",
+            "task_names": [
+              "terminal-bench/mvcc-lsm-compaction",
+              "terminal-bench/sound-change-cascade",
+              "terminal-bench/wal-recovery-ordering",
+              "terminal-bench/production-planning",
+              "terminal-bench/embedding-drift-monitor",
+              "terminal-bench/layout-config-recreation2"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "053d7d76-25ea-4b58-856a-19dfadfb9f3a",
+          "trial_name": "embedding-drift-monitor__s8yKaop",
+          "task_name": "terminal-bench/embedding-drift-monitor",
+          "job_id": "f8e41783-a054-4477-8122-df0c3559b3ec",
+          "job_dir": "tb40-sonnet-v1",
+          "claude_session_id": "b8d2bcda-b7dd-4e53-aefc-c7ba8690bef8"
+        },
+        {
+          "trial_id": "aafe9bc5-5b85-49d8-947e-91d80093ff6e",
+          "trial_name": "layout-config-recreation2__9DeEmm9",
+          "task_name": "terminal-bench/layout-config-recreation2",
+          "job_id": "f8e41783-a054-4477-8122-df0c3559b3ec",
+          "job_dir": "tb40-sonnet-v1",
+          "claude_session_id": "4111e935-3ce6-4a95-9bed-79f92582c962"
+        },
+        {
+          "trial_id": "5da54072-59d9-4578-9ee0-821aa07afeeb",
+          "trial_name": "mvcc-lsm-compaction__aG8Zova",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "f8e41783-a054-4477-8122-df0c3559b3ec",
+          "job_dir": "tb40-sonnet-v1",
+          "claude_session_id": "dcfb8586-afcd-401f-8c4d-c8f37cf531f7"
+        },
+        {
+          "trial_id": "a19bef2d-52f4-497c-8851-69280ba44bbd",
+          "trial_name": "production-planning__iSbkMKL",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "f8e41783-a054-4477-8122-df0c3559b3ec",
+          "job_dir": "tb40-sonnet-v1",
+          "claude_session_id": "4abb7034-d6bd-4255-a1f3-bfe56fd4883b"
+        },
+        {
+          "trial_id": "d68f4884-14b5-4c50-8b50-486bbfcec5cc",
+          "trial_name": "sound-change-cascade__fPontBc",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "f8e41783-a054-4477-8122-df0c3559b3ec",
+          "job_dir": "tb40-sonnet-v1",
+          "claude_session_id": "e5c1c409-e348-4c5e-adc1-ee0f6e8b9611"
+        },
+        {
+          "trial_id": "cfcc77ea-8caa-4d2e-84b2-56825df868ae",
+          "trial_name": "wal-recovery-ordering__rwzCF4L",
+          "task_name": "terminal-bench/wal-recovery-ordering",
+          "job_id": "f8e41783-a054-4477-8122-df0c3559b3ec",
+          "job_dir": "tb40-sonnet-v1",
+          "claude_session_id": "94fb8f15-e36d-43f7-b6ad-60ea81dbe766"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}
