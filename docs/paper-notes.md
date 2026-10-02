@@ -3,7 +3,7 @@
 What the Dec 4 paper can claim about how trajectories and checkpoints are captured, the evidence for each claim, and what is still missing.
 Every number here points at the ADR, script, or corpus manifest it comes from, so a sentence in the paper can be traced to data.
 Terms follow `docs/glossary.md`.
-Last updated 2026-10-01; add to it as evidence changes, and do not delete superseded entries, mark them.
+Last updated 2026-10-02; add to it as evidence changes, and do not delete superseded entries, mark them.
 
 ## Claims and their evidence
 
@@ -65,6 +65,13 @@ Last updated 2026-10-01; add to it as evidence changes, and do not delete supers
 - The binary hash differs by platform and install path for the same version (arm64, amd64, npm on Alpine); report the hash per platform.
 - Verified by tampering: an altered recorded hash failed the trial at environment start (ADR-0009, Consequences).
 
+### C6. A checkpoint restores to a state the task's verifier grades like the live one
+
+- **Method:** start a fresh container from each checkpoint image, with no Harbor and no agent; check that every path the calls added up to that checkpoint is present and every path added later is absent, compare `Write` contents byte for byte, and run the task's own `tests/test.sh` (`scripts/2026-10-02_restore_check.py`).
+- **Evidence** (`tb21-demo-v1`, `schemelike-metacircular-eval`, 1 trial): all 5 checkpoints restored in 0.1 to 0.24 s and passed the path checks; the verifier scored 0.0 on checkpoint 1, 1.0 on checkpoint 3, and 1.0 on checkpoint 5, matching Harbor's reward of 1.0.
+- **By-product:** checkpoint 3, 4 min 53 s into a 6.6 min agent run, already passes the verifier; the rest was the agent checking its work.
+- **Not yet supported:** resuming an agent inside a restored container; only the state has been restored and graded.
+
 ## Reproducibility facts to report
 
 - Harbor 0.23.0, pinned, unpatched; all custom pieces attach from outside (CLAUDE.md constraint 1).
@@ -94,4 +101,5 @@ Last updated 2026-10-01; add to it as evidence changes, and do not delete supers
 4. **Linux numbers.** Repeat the C4 table and detection timings on the Linux server.
 5. **Final-state checkpoint.** Done in ADR-0011 (`Stop` and `StopFailure` hooks); report how often the stop checkpoint differs from the last call's, i.e. how often background work changed the final state.
 6. **Join in the trajectory.** Done in build-order step 7 (ADR-0003, 2026-10-01 amendment): `trajlab postprocess` writes `trajectory.enriched.json` with checkpoint and compaction steps and each call's `CallRecord`, and refuses a trial whose records do not all join; the paper's figures should come from that file.
+8. **Agent resume from a checkpoint.** Start Claude Code through Harbor on a checkpoint image, seeded with `--load-trajectory`; both experiment arms depend on it.
 7. **Compaction on real data.** No trial so far has compacted, so compaction recovery is tested only on synthetic events run through Harbor's converter; confirm it on the first long trial that does.
