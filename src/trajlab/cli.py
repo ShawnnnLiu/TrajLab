@@ -3,6 +3,7 @@
 import logging
 import signal
 import threading
+import time
 from enum import StrEnum
 from pathlib import Path
 from typing import Annotated
@@ -113,17 +114,31 @@ def repair(
         int, typer.Option(min=0, help="Resumes per repair job for unfinished or infra trials.")
     ] = 3,
     poll: Annotated[float, typer.Option(help="Seconds between passes.")] = 30.0,
+    per_task: Annotated[
+        int | None,
+        typer.Option(
+            min=1,
+            help="Repair this many failures per task, drawn at random once all its attempts "
+            "end (ADR-0012 amendment). Default: every failure.",
+        ),
+    ] = None,
+    prune: Annotated[
+        bool,
+        typer.Option(
+            help="Remove a finished repair trial's checkpoint images except its final one; "
+            "records stay."
+        ),
+    ] = True,
     storage: StorageOption = None,
     manifests_dir: ManifestsDirOption = MANIFESTS_DIR,
 ) -> None:
     """Repair every failed trial of the source jobs under four arms (ADR-0012). Restartable."""
     if env_file is None and DEFAULT_ENV_FILE.is_file():
         env_file = DEFAULT_ENV_FILE
-    problems = check_sources(source_jobs)
-    if problems:
-        for problem in problems:
-            typer.echo(f"trajlab repair: {problem}", err=True)
-        raise typer.Exit(code=1)
+    # The source job may have been started a moment ago; Harbor writes its config.json first.
+    while problems := check_sources(source_jobs):
+        logging.getLogger(__name__).warning("waiting: %s", "; ".join(problems))
+        time.sleep(poll)
     Launcher(
         source_jobs=source_jobs,
         prefix=prefix,
@@ -136,6 +151,8 @@ def repair(
         usage_backoff_s=usage_backoff,
         max_resumes=max_resumes,
         storage=storage,
+        per_task=per_task,
+        prune=prune,
         watcher_running=watcher_running,
     ).run(poll_s=poll)
 

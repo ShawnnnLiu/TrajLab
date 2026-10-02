@@ -1,4 +1,5 @@
 import json
+import shutil
 import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
@@ -375,3 +376,73 @@ def test_repair_source_requires_arm_inputs() -> None:
     with pytest.raises(ValueError, match="not repaired"):
         RepairSource(**fields | {"failure_kind": "infra_error", "checkpoint_image": TAG})
     assert RepairSource(**fields | {"checkpoint_image": TAG}).arm in CHECKPOINT_ARMS
+
+
+def add_attempt(job_dir: Path, name: str, reward: float) -> Path:
+    trial = Path(shutil.copytree(job_dir / FIXTURE_TRIAL_NAME, job_dir / name))
+    for path in (trial / "config.json", trial / "result.json"):
+        path.write_text(path.read_text().replace(FIXTURE_TRIAL_NAME, name))
+    set_result(trial, reward)
+    return trial
+
+
+def three_attempts(failed_job: Path, rewards: tuple[float, float]) -> None:
+    config = json.loads((failed_job / "config.json").read_text())
+    (failed_job / "config.json").write_text(json.dumps(config | {"n_attempts": 3}))
+    for index, reward in enumerate(rewards):
+        add_attempt(failed_job, f"hello-world__Extra{index}", reward)
+
+
+def test_per_task_waits_for_every_attempt(failed_job: Path) -> None:
+    data = json.loads((failed_job / "result.json").read_text())
+    (failed_job / "result.json").write_text(json.dumps(data | {"finished_at": None}))
+    config = json.loads((failed_job / "config.json").read_text())
+    (failed_job / "config.json").write_text(json.dumps(config | {"n_attempts": 3}))
+    runner = launcher(failed_job, per_task=1)
+    runner.inputs_root.mkdir(parents=True)
+    runner.discover()
+    assert runner.pending == [] and runner.selection == {}
+
+
+def test_per_task_draws_one_failure_reproducibly(failed_job: Path) -> None:
+    three_attempts(failed_job, (0.0, 1.0))
+    runner = launcher(failed_job, per_task=1)
+    runner.inputs_root.mkdir(parents=True)
+    runner.discover()
+    (selection,) = runner.selection.values()
+    assert selection["candidates"] == ["hello-world__Extra0", FIXTURE_TRIAL_NAME]
+    assert selection["not_candidates"] == {"hello-world__Extra1": "passed"}
+    (chosen,) = selection["chosen"]
+    assert {job.source.source_trial for job in runner.pending} == {chosen}
+    assert len(runner.pending) == 4
+    other = next(c for c in selection["candidates"] if c != chosen)
+    assert runner.skipped[other] == "not drawn"
+    # A restarted launcher reads the recorded draw and queues the same jobs.
+    again = launcher(failed_job, per_task=1)
+    again.discover()
+    assert [job.name for job in again.pending] == [job.name for job in runner.pending]
+
+
+def test_finished_repair_job_keeps_only_final_images(failed_job: Path) -> None:
+    removed: list[str] = []
+
+    def remove(tag: str) -> bool:
+        removed.append(tag)
+        return True
+
+    runner = launcher(
+        failed_job,
+        tag_lookup=lambda image_id: f"trajlab-checkpoint:{image_id[-4:]}",
+        remove_image=remove,
+    )
+    runner.discover()
+    job = runner.pending.pop(0)
+    repair = finished_repair_job(failed_job, job, None)
+    write_capture(repair / FIXTURE_TRIAL_NAME, [make_checkpoint(1), make_checkpoint(2)])
+    runner.check_finished(job.name)
+    assert removed == ["trajlab-checkpoint:0001"]
+    pruned = json.loads((repair / FIXTURE_TRIAL_NAME / "agent/checkpoints/pruned.json").read_text())
+    assert pruned["kept_seq"] == 2 and [r["seq"] for r in pruned["removed"]] == [1]
+    # Pruning happens once per trial.
+    runner.check_finished(job.name)
+    assert removed == ["trajlab-checkpoint:0001"]

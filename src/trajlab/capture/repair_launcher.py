@@ -24,6 +24,7 @@ exists and exactly one native session. Otherwise no arm runs, so the arms stay p
 
 import json
 import logging
+import random
 import shutil
 import subprocess
 import sys
@@ -71,6 +72,7 @@ PREINSTALLED_ENV = "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
 RESUME_ENV = "trajlab.capture.resume:CheckpointResumeEnvironment"
 CHECKPOINT_REPOSITORY = "trajlab-checkpoint"
 PID_FILENAME = "launcher.pid"
+PRUNED_FILENAME = "pruned.json"
 RESUMES_FILENAME = "resumes.json"
 
 # Exceptions that end a trial because of the agent's own behavior: a failed attempt.
@@ -308,6 +310,13 @@ def checkpoint_tag(image_id: str, runner: Callable[..., Any] = subprocess.run) -
     return tags[0] if tags else None
 
 
+def remove_checkpoint_image(tag: str, runner: Callable[..., Any] = subprocess.run) -> bool:
+    removed = runner(["docker", "rmi", tag], capture_output=True, text=True)
+    if removed.returncode != 0:
+        logger.warning("could not remove %s: %s", tag, removed.stderr.strip())
+    return removed.returncode == 0
+
+
 @dataclass
 class RepairJob:
     name: str
@@ -330,8 +339,11 @@ class Launcher:
     usage_backoff_s: float = 1800.0
     max_resumes: int = 3
     storage: str | None = None
+    per_task: int | None = None
+    prune: bool = True
     watcher_running: Callable[[Path], bool] = lambda _: True
     tag_lookup: Callable[[str], str | None] = checkpoint_tag
+    remove_image: Callable[[str], bool] = lambda tag: remove_checkpoint_image(tag)
     clock: Callable[[], float] = time.time
     pending: list[RepairJob] = field(default_factory=list)
     queued_trials: set[str] = field(default_factory=set)
@@ -340,6 +352,7 @@ class Launcher:
     resume_due: dict[str, float] = field(default_factory=dict)
     refusals: dict[str, int] = field(default_factory=dict)
     paused_until: float = 0.0
+    selection: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     @property
     def inputs_root(self) -> Path:
@@ -347,8 +360,8 @@ class Launcher:
 
     # -- planning -----------------------------------------------------------------------------
 
-    def plan_failure(self, trial_dir: Path, result: TrialResult) -> list[RepairJob] | str:
-        """The four repair jobs for one failed trial, or why it is not repaired."""
+    def blocker(self, trial_dir: Path, result: TrialResult) -> str | None:
+        """Why this finished trial cannot be repaired under every arm, or None if it can."""
         kind = classify_failure(result)
         if kind is None:
             return "passed"
@@ -358,12 +371,24 @@ class Launcher:
         record = final_checkpoint(trial_dir)
         if record is None:
             return "no checkpoint"
-        tag = self.tag_lookup(record.checkpoint_id)
-        if tag is None:
+        if self.tag_lookup(record.checkpoint_id) is None:
             return f"checkpoint image {record.checkpoint_id} is gone"
         sessions = native_sessions(trial_dir)
         if len(sessions) != 1:
             return f"expected one native session, found {len(sessions)}"
+        return None
+
+    def plan_failure(self, trial_dir: Path, result: TrialResult) -> list[RepairJob] | str:
+        """The four repair jobs for one failed trial, or why it is not repaired."""
+        reason = self.blocker(trial_dir, result)
+        if reason is not None:
+            return reason
+        kind = classify_failure(result)
+        assert kind is not None
+        record = final_checkpoint(trial_dir)
+        assert record is not None
+        tag = self.tag_lookup(record.checkpoint_id)
+        sessions = native_sessions(trial_dir)
         source_config = json.loads((trial_dir.parent / "config.json").read_text())
         task_name = load_trial_config(trial_dir).task.name
         jobs = []
@@ -408,26 +433,94 @@ class Launcher:
             jobs.append(RepairJob(name, source, inputs / "config.json"))
         return jobs
 
+    @property
+    def selection_path(self) -> Path:
+        return self.inputs_root / f"{self.prefix}.selection.json"
+
     def discover(self) -> None:
         """Queue repairs for source trials that finished since the last pass."""
+        if self.per_task is not None:
+            self.discover_per_task(self.per_task)
+            return
         for source_job in self.source_jobs:
             for trial_dir, result in finished_trials(source_job):
                 if result.trial_name in self.queued_trials or result.trial_name in self.skipped:
                     continue
-                if (
-                    result.exception_info is not None
-                    and result.exception_info.exception_type == USAGE_LIMIT_EXCEPTION
-                ):
-                    self.pause("source trial hit the usage limit")
-                planned = self.plan_failure(trial_dir, result)
-                if isinstance(planned, str):
-                    self.skipped[result.trial_name] = planned
-                    if planned != "passed":
-                        logger.warning("%s not repaired: %s", result.trial_name, planned)
-                    continue
-                self.queued_trials.add(result.trial_name)
-                for job in planned:
-                    self.adopt_or_queue(job)
+                self.check_usage_limit(result)
+                self.queue_failure(trial_dir, result)
+
+    def check_usage_limit(self, result: TrialResult) -> None:
+        if (
+            result.exception_info is not None
+            and result.exception_info.exception_type == USAGE_LIMIT_EXCEPTION
+        ):
+            self.pause("source trial hit the usage limit")
+
+    def discover_per_task(self, per_task: int) -> None:
+        """Repair `per_task` failures of each task, drawn at random once all its attempts end.
+
+        Waiting for every attempt keeps the draw from favoring early failures. A task with a
+        harness-failed attempt waits for its rerun, unless the source job has finished. The draw
+        is seeded by prefix and task and written to `<prefix>.selection.json`; a recorded draw is
+        reused on restart.
+        """
+        if not self.selection and self.selection_path.is_file():
+            self.selection = json.loads(self.selection_path.read_text())
+        for source_job in self.source_jobs:
+            attempts = int(
+                json.loads((source_job / "config.json").read_text()).get("n_attempts", 1)
+            )
+            source_done = job_finished(source_job)
+            by_task: dict[str, list[tuple[Path, TrialResult]]] = {}
+            for trial_dir, result in finished_trials(source_job):
+                self.check_usage_limit(result)
+                by_task.setdefault(load_trial_config(trial_dir).task.name, []).append(
+                    (trial_dir, result)
+                )
+            for task, trials in sorted(by_task.items()):
+                key = f"{source_job.name}:{task}"
+                if key not in self.selection:
+                    unsettled = any(
+                        classify_failure(r) in ("infra_error", "unclassified") for _, r in trials
+                    )
+                    if not source_done and (len(trials) < attempts or unsettled):
+                        continue
+                    blockers = {r.trial_name: self.blocker(d, r) for d, r in trials}
+                    candidates = sorted(name for name, why in blockers.items() if why is None)
+                    seed = f"{self.prefix}:{task}"
+                    chosen = sorted(
+                        random.Random(seed).sample(candidates, min(per_task, len(candidates)))
+                    )
+                    self.selection[key] = {
+                        "task": task,
+                        "seed": seed,
+                        "candidates": candidates,
+                        "chosen": chosen,
+                        "not_candidates": {k: v for k, v in blockers.items() if v is not None},
+                    }
+                    self.selection_path.write_text(json.dumps(self.selection, indent=2) + "\n")
+                    logger.info("%s: repairing %s of %s", task, chosen, candidates)
+                chosen = set(self.selection[key]["chosen"])
+                for trial_dir, result in trials:
+                    name = result.trial_name
+                    if name in self.queued_trials or name in self.skipped:
+                        continue
+                    if name in chosen:
+                        self.queue_failure(trial_dir, result)
+                    else:
+                        reason = self.selection[key]["not_candidates"].get(name, "not drawn")
+                        self.skipped[name] = reason
+
+    def queue_failure(self, trial_dir: Path, result: TrialResult) -> None:
+        planned = self.plan_failure(trial_dir, result)
+        if isinstance(planned, str):
+            self.skipped[result.trial_name] = planned
+            if planned != "passed":
+                logger.warning("%s not repaired: %s", result.trial_name, planned)
+            return
+        self.queued_trials.add(result.trial_name)
+        for job in planned:
+            self.adopt_or_queue(job)
 
     def adopt_or_queue(self, job: RepairJob) -> None:
         job_dir = self.jobs_dir / job.name
@@ -463,6 +556,8 @@ class Launcher:
         job_dir = self.jobs_dir / name
         failed = infra_failed(job_dir)
         if job_finished(job_dir) and not failed:
+            if self.prune:
+                self.prune_job(job_dir)
             return
         if self.resumes(name) >= self.max_resumes:
             logger.error("%s still incomplete or has %s after resumes; leaving it", name, failed)
@@ -472,6 +567,41 @@ class Launcher:
             self.pause(f"{name} hit the usage limit")
         self.resume_due[name] = self.clock() + delay
         logger.warning("%s: resume scheduled in %.0f s (%s)", name, delay, failed or "unfinished")
+
+    def prune_job(self, job_dir: Path) -> None:
+        """Remove every checkpoint image of a finished repair job except each trial's final one.
+
+        Repairs are scored on outcome, so only their final state is kept as an image; every
+        checkpoint record stays, and `agent/checkpoints/pruned.json` lists the removed ones.
+        """
+        for trial_dir in iter_trial_dirs(job_dir):
+            directory = TrialPaths(trial_dir).agent_dir / CHECKPOINTS_DIRNAME
+            pruned_path = directory / PRUNED_FILENAME
+            final = final_checkpoint(trial_dir)
+            if final is None or pruned_path.is_file():
+                continue
+            removed = []
+            for line in (directory / CHECKPOINT_RECORDS_FILENAME).read_text().splitlines():
+                if not line.strip():
+                    continue
+                record = CheckpointRecord.model_validate_json(line)
+                if record.seq == final.seq:
+                    continue
+                tag = self.tag_lookup(record.checkpoint_id)
+                if tag is not None and self.remove_image(tag):
+                    removed.append({"seq": record.seq, "checkpoint_id": record.checkpoint_id})
+            pruned_path.write_text(
+                json.dumps(
+                    {
+                        "kept_seq": final.seq,
+                        "removed": removed,
+                        "at": datetime.now(UTC).isoformat(),
+                    },
+                    indent=2,
+                )
+                + "\n"
+            )
+            logger.info("pruned %d checkpoint images of %s", len(removed), trial_dir.name)
 
     def reap(self) -> None:
         for name, process in list(self.running.items()):
@@ -604,6 +734,7 @@ class Launcher:
             "paused_until": self.paused_until or None,
             "queued_failures": sorted(self.queued_trials),
             "not_repaired": {k: v for k, v in self.skipped.items() if v != "passed"},
+            "selected": {v["task"]: v["chosen"] for v in self.selection.values()},
         }
         (self.inputs_root / f"{self.prefix}.status.json").write_text(json.dumps(status, indent=2))
 
