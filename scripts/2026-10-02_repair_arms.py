@@ -55,15 +55,17 @@ def free_gb() -> float:
 
 
 def prune_intermediate_checkpoints(job_dirs: list[Path]) -> None:
-    """Remove all but the final checkpoint image of every finished trial in these jobs.
+    """Remove all but the latest checkpoint image of every trial in these jobs.
 
     Repair arms need only a failed trial's final checkpoint, and the records in
-    checkpoints.jsonl stay; only the intermediate images go.
+    checkpoints.jsonl stay; only the intermediate images go. Running trials are pruned too: the
+    change gate compares file listings, not images (trajlab.checkpoint.changes), and any later
+    checkpoint is a new image.
     """
     for job in job_dirs:
         for trial in (p for p in job.iterdir() if p.is_dir()):
             final = final_checkpoint(trial)
-            if final is None or not (trial / "result.json").exists():
+            if final is None:
                 continue
             path = trial / "agent/checkpoints/checkpoints.jsonl"
             for line in path.read_text().splitlines():
@@ -205,7 +207,10 @@ def main() -> int:
         if free_gb() < PRUNE_BELOW_GB:
             logger.warning("disk guard: %.1f GB free; pruning intermediate checkpoints", free_gb())
             prune_intermediate_checkpoints(
-                [source, *sorted(p for p in JOBS_DIR.glob(f"{args.prefix}-*") if p.is_dir())]
+                [
+                    *sorted(p for p in JOBS_DIR.glob("tb40-sonnet-*") if p.is_dir()),
+                    *sorted(p for p in JOBS_DIR.glob(f"{args.prefix}-*") if p.is_dir()),
+                ]
             )
         if free_gb() < HOLD_BELOW_GB:
             logger.warning("disk guard: %.1f GB free; holding new launches", free_gb())
