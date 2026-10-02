@@ -7,7 +7,7 @@ from trajlab.checkpoint.watcher import hold_watcher_lock
 from trajlab.cli import app, identify_trial
 from trajlab.contracts import CorpusManifest
 
-COMMANDS = {"run", "watch", "postprocess", "manifest", "validate"}
+COMMANDS = {"run", "watch", "repair", "postprocess", "manifest", "validate"}
 
 
 def test_help_lists_all_commands() -> None:

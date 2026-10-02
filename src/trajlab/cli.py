@@ -21,6 +21,7 @@ from trajlab.capture.corpus import (
 )
 from trajlab.capture.discover import compose_project_name, iter_trial_dirs, load_trial_config
 from trajlab.capture.harbor_runner import RunRefusedError, execute, plan_run
+from trajlab.capture.repair_launcher import Launcher, check_sources
 from trajlab.checkpoint.backends.docker_commit import DockerCommitBackend
 from trajlab.checkpoint.watcher import (
     DEFAULT_SWEEP_INTERVAL_S,
@@ -82,6 +83,59 @@ def run(
         typer.echo(f"trajlab run: {error}", err=True)
         raise typer.Exit(code=1) from error
     raise typer.Exit(code=execute(plan, storage=storage))
+
+
+@app.command()
+def repair(
+    source_jobs: Annotated[
+        list[Path], typer.Argument(help="Source job dirs whose failed trials are repaired.")
+    ],
+    prefix: Annotated[str, typer.Option(help="Repair job names: <prefix>-<trial>-<arm>.")],
+    attempts: Annotated[int, typer.Option(min=1, help="Repair trials per failure per arm.")] = 3,
+    max_running: Annotated[
+        int,
+        typer.Option(min=1, help="Trials at once, source jobs' remaining concurrency included."),
+    ] = 6,
+    jobs_dir: Annotated[Path, typer.Option(help="Where repair jobs are written.")] = Path(
+        "corpus/jobs"
+    ),
+    env_file: Annotated[
+        Path | None,
+        typer.Option(help="Credentials file passed to Harbor. Default: .env if it exists."),
+    ] = None,
+    hold_below_gb: Annotated[
+        float, typer.Option(help="Start nothing while the jobs dir's disk has less free.")
+    ] = 50.0,
+    usage_backoff: Annotated[
+        float, typer.Option(help="Seconds to pause launches after a usage-limit error.")
+    ] = 1800.0,
+    max_resumes: Annotated[
+        int, typer.Option(min=0, help="Resumes per repair job for unfinished or infra trials.")
+    ] = 3,
+    poll: Annotated[float, typer.Option(help="Seconds between passes.")] = 30.0,
+    manifests_dir: ManifestsDirOption = MANIFESTS_DIR,
+) -> None:
+    """Repair every failed trial of the source jobs under four arms (ADR-0012). Restartable."""
+    if env_file is None and DEFAULT_ENV_FILE.is_file():
+        env_file = DEFAULT_ENV_FILE
+    problems = check_sources(source_jobs)
+    if problems:
+        for problem in problems:
+            typer.echo(f"trajlab repair: {problem}", err=True)
+        raise typer.Exit(code=1)
+    Launcher(
+        source_jobs=source_jobs,
+        prefix=prefix,
+        attempts=attempts,
+        max_running=max_running,
+        jobs_dir=jobs_dir,
+        manifests_dir=manifests_dir,
+        env_file=env_file,
+        hold_below_gb=hold_below_gb,
+        usage_backoff_s=usage_backoff,
+        max_resumes=max_resumes,
+        watcher_running=watcher_running,
+    ).run(poll_s=poll)
 
 
 BACKENDS = {"docker_commit": DockerCommitBackend}
