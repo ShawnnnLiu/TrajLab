@@ -8,6 +8,7 @@ from trajlab.contracts.checkpoint import (
     CHECKPOINTS_DIRNAME,
     MAX_LISTED_PATHS,
     POLICY_FILENAME,
+    STOP_ID_PREFIX,
     CallRecord,
     CheckpointPolicy,
     CheckpointRecord,
@@ -29,6 +30,7 @@ from trajlab.contracts.trial import TrialRecord
 __all__ = [
     "CALLS_FILENAME",
     "MAX_LISTED_PATHS",
+    "STOP_ID_PREFIX",
     "CallRecord",
     "CHECKPOINTS_DIRNAME",
     "POLICY_FILENAME",

@@ -2,8 +2,9 @@
 
 One watcher per jobs dir, enforced by a `flock` on `<jobs-dir>/.trajlab-watcher.lock`.
 Under gate `change` it checkpoints only calls that changed the filesystem (ADR-0010); under
-gate `none` it checkpoints every Nth call and defers the others (ADR-0007). Every answered call
-gets a `CallRecord`.
+gate `none` it checkpoints every Nth call and defers the others (ADR-0007). The end of the
+agent's turn (Stop, StopFailure) is answered like a call, but under gate `none` it always gets a
+checkpoint (ADR-0011). Every answered request gets a `CallRecord`.
 `checkpoint/` does not import `capture/` (CLAUDE.md constraint 3), so the caller supplies how a
 trial dir maps to its name and compose project.
 """
@@ -49,6 +50,8 @@ from trajlab.contracts import MAX_LISTED_PATHS, CallRecord, CheckpointPolicy, Ch
 logger = logging.getLogger(__name__)
 
 LOCK_FILENAME = ".trajlab-watcher.lock"
+# Hook events that end the agent's turn rather than report a tool call (ADR-0011).
+STOP_EVENTS = ("Stop", "StopFailure")
 REQ_GLOB = f"*/*/agent/checkpoints/*{REQ_SUFFIX}"
 DEFAULT_SWEEP_INTERVAL_S = 2.0
 DEFAULT_WORKERS = 8
@@ -226,6 +229,8 @@ class Watcher:
             return call
         if trial.container is None:
             trial.container = self.backend.container_for(trial.identity.compose_project)
+        stop = request.event in STOP_EVENTS
+        trigger = "stop" if stop else "tool_call"
         measured = self._measure(trial) if self.policy.gate != "none" else None
         change = measured.change if measured else "not_checked"
 
@@ -234,6 +239,7 @@ class Watcher:
                 tool_call_id=request.tool_use_id,
                 trial_name=trial.identity.trial_name,
                 tool_name=request.tool_name,
+                trigger=trigger,  # type: ignore[arg-type]
                 call_seq=len(trial.calls) + 1,
                 tool_failed=request.event == "PostToolUseFailure",
                 outcome=outcome,  # type: ignore[arg-type]
@@ -262,7 +268,8 @@ class Watcher:
             )
             return call
         uncovered = self._uncovered(directory, trial, request)
-        if len(uncovered) < self.policy.every:
+        # The end of the turn is never deferred: there is no later call to cover it.
+        if not stop and len(uncovered) < self.policy.every:
             call = answer("deferred", None)
             trial.log.info(
                 "deferred %s %s (%d of %d)",
@@ -272,7 +279,7 @@ class Watcher:
                 self.policy.every,
             )
             return call
-        record = self._snapshot(req_path, trial, request, requested_at, uncovered)
+        record = self._snapshot(req_path, trial, request, requested_at, uncovered, trigger)
         if record is None:
             return None
         if measured and measured.current is not None:
@@ -332,6 +339,7 @@ class Watcher:
         request: CheckpointRequest,
         requested_at: datetime,
         uncovered: list[str],
+        trigger: str,
     ) -> CheckpointRecord | None:
         assert trial.container is not None
         seq = len(trial.records) + 1
@@ -360,6 +368,7 @@ class Watcher:
             checkpoint_id=snapshot.checkpoint_id,
             trial_name=trial.identity.trial_name,
             tool_call_id=request.tool_use_id,
+            trigger=trigger,  # type: ignore[arg-type]
             seq=seq,
             covered_tool_call_ids=tuple(uncovered),
             tool_name=request.tool_name,

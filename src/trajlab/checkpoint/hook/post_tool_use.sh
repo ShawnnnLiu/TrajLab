@@ -1,5 +1,6 @@
-# trajlab hook for PostToolUse and PostToolUseFailure: request a checkpoint and wait for it
-# (docs/checkpoint-protocol.md). A failed call can still have changed files (ADR-0010).
+# trajlab hook for PostToolUse, PostToolUseFailure, Stop, and StopFailure: request a checkpoint
+# and wait for it (docs/checkpoint-protocol.md). A failed call can still have changed files
+# (ADR-0010); Stop captures the state the agent leaves behind (ADR-0011).
 # POSIX sh only: task images may lack bash, jq, and python. Never exits non-zero.
 d="${CLAUDE_CONFIG_DIR:-/logs/agent/sessions}/../checkpoints"
 mkdir -p "$d" 2>/dev/null || exit 0
@@ -8,7 +9,14 @@ input=$(cat)
 field() {
   printf '%s\n' "$input" | grep -o "\"$1\" *: *\"[^\"]*\"" | head -n 1 | sed 's/.*: *"\([^"]*\)"$/\1/'
 }
+event=$(field hook_event_name)
 id=$(field tool_use_id)
+case "$event" in
+  Stop | StopFailure)
+    # No tool call to key on: name the request after the end of the turn.
+    id="stop_$(date +%s)_$$"
+    ;;
+esac
 case "$id" in
   "" | *[!A-Za-z0-9_-]*)
     printf '%s no usable tool_use_id: %.200s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$input" >> "$d/hook-errors.log"
@@ -16,9 +24,9 @@ case "$id" in
     ;;
 esac
 tool=$(field tool_name)
+if [ -z "$tool" ]; then tool="$event"; fi
 session=$(field session_id)
 agent=$(field agent_id)
-event=$(field hook_event_name)
 if [ -n "$agent" ]; then agent="\"$agent\""; else agent=null; fi
 printf '{"tool_use_id":"%s","tool_name":"%s","session_id":"%s","agent_id":%s,"event":"%s"}\n' \
   "$id" "$tool" "$session" "$agent" "$event" > "$d/$id.req.tmp" && mv "$d/$id.req.tmp" "$d/$id.req" || exit 0

@@ -14,6 +14,12 @@ Last updated 2026-10-01; add to it as evidence changes, and do not delete supers
 - **Evidence:** in the acceptance runs every `.req` got an `.ack` with no timeouts (ADR-0006 and ADR-0008 acceptance sections; `tb21-preinstall-check-v1`: 8 of 8 hooked calls). Since ADR-0010 each answered call also has a `CallRecord`; the failing-call probe had records for all 3 of its calls.
 - **Caveat to state:** before 2026-10-01 a tool call that ended in error was not hooked; `tb21-audit-v1` and `tb21-change-gate-v1` predate the fix (ADR-0010, amendment). Only corpora captured after commit `06e2061` support C1 without that caveat.
 
+### C1b. The state the agent leaves behind is always recorded
+
+- **Mechanism:** the hook also fires on `Stop` and `StopFailure`; the watcher records the end-of-turn state as a stop checkpoint, or as a stop record naming the checkpoint that already holds it (ADR-0011).
+- **Why it matters:** this is the state the verifier grades, and it includes writes by background jobs that outlive the last hooked call.
+- **Evidence:** offline tests; real-trial verification in ADR-0011 once recorded.
+
 ### C2. A call gets a checkpoint only if it changed the filesystem, and this is measured, not inferred
 
 - **Why not by tool name or command text:** in our TB 2.1 trials Claude Code made 32 Bash calls and no `Read` or `Grep` calls, inspecting files through Bash and mixing reads and writes in one call (ADR-0010, Context). Parsing Bash would be an unverifiable heuristic.
@@ -77,7 +83,7 @@ Last updated 2026-10-01; add to it as evidence changes, and do not delete supers
 - **Derived image timing.** The install runs at image-build time, not trial time; package versions could differ if a mirror changed in between (ADR-0008, Consequences).
 - **Excluded tasks.** `qemu-alpine-ssh` and `qemu-startup` (Debian 11) cannot install Claude Code at all since Debian 11's LTS ended; they are out of any corpus (`docs/upstream-notes.md`). Report the task count as 87 of 89.
 - **Platform.** All measurements so far are from one Mac running amd64 tasks under emulation. Commit and detection times are expected to differ on the Linux server.
-- **Final state.** Under `--gate change` the state after the last hooked call is always in a checkpoint unless that call timed out; anything after it (e.g. a background process finishing) is not.
+- **Final state.** Since ADR-0011 the end-of-turn state is recorded, including background writes before the turn ends; anything a background process writes after that, and the verifier's own effects, are not.
 
 ## Open work before claims are paper-ready
 
@@ -85,5 +91,5 @@ Last updated 2026-10-01; add to it as evidence changes, and do not delete supers
 2. **Exclusion sensitivity.** Recompute the audit table with an empty exclusion list.
 3. **Per-tool change rates.** From `calls.jsonl`: the share of Bash, Write, and Edit calls that changed the filesystem; a likely result in its own right.
 4. **Linux numbers.** Repeat the C4 table and detection timings on the Linux server.
-5. **Final-state checkpoint.** Decide whether to add a `Stop` hook; Claude Code 2.1.278 supports the event.
+5. **Final-state checkpoint.** Done in ADR-0011 (`Stop` and `StopFailure` hooks); report how often the stop checkpoint differs from the last call's, i.e. how often background work changed the final state.
 6. **Join in the trajectory.** Build-order step 7 writes the join into `trajectory.enriched.json`; the paper's figures should come from that file.

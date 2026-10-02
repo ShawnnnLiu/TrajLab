@@ -18,6 +18,9 @@ CALLS_FILENAME = "calls.jsonl"
 MAX_LISTED_PATHS = 100
 
 Gate = Literal["none", "change", "audit"]
+# What asked for the checkpoint: a hooked tool call, or the end of the agent's turn (ADR-0011).
+Trigger = Literal["tool_call", "stop"]
+STOP_ID_PREFIX = "stop_"
 
 
 class CheckpointPolicy(BaseModel):
@@ -49,7 +52,12 @@ class CheckpointRecord(BaseModel):
     # Not trial_id: Harbor writes the trial id only when the trial ends, after every checkpoint
     # is taken (ADR-0006). TrialRecord joins trial_name to trial_id.
     trial_name: str = Field(min_length=1, description="The trial dir name, from config.json.")
-    tool_call_id: str = Field(min_length=1, description="Claude Code's tool_use_id; the join key.")
+    tool_call_id: str = Field(
+        min_length=1,
+        description="Claude Code's tool_use_id, the join key; for a stop checkpoint, the hook's "
+        "`stop_<epoch>_<pid>` request id (ADR-0011).",
+    )
+    trigger: Trigger = "tool_call"
     seq: int = Field(ge=1, description="Capture order within the trial, from 1.")
     covered_tool_call_ids: tuple[str, ...] = Field(
         min_length=1,
@@ -83,9 +91,10 @@ class CallRecord(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    tool_call_id: str = Field(min_length=1)
+    tool_call_id: str = Field(min_length=1, description="tool_use_id, or the stop request id.")
     trial_name: str = Field(min_length=1)
-    tool_name: str = Field(min_length=1)
+    tool_name: str = Field(min_length=1, description="The tool, or Stop / StopFailure.")
+    trigger: Trigger = "tool_call"
     call_seq: int = Field(ge=1, description="Order among the trial's answered calls, from 1.")
     tool_failed: bool = Field(
         default=False,

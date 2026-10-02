@@ -598,3 +598,61 @@ def test_failed_calls_are_measured_and_marked(running_trial: Path) -> None:
         ("+/app/enc.py",),
     )
     assert (ok.tool_failed, ok.outcome) == (False, "unchanged")
+
+
+# The end of the turn (ADR-0011) ------------------------------------------------------------
+
+
+def _stop(trial: Path, n: int = 1, event: str = "Stop") -> Path:
+    return _request(trial, f"stop_179000000{n}_42", tool=event, event=event)
+
+
+def test_stop_checkpoints_what_happened_after_the_last_call(running_trial: Path) -> None:
+    backend = FakeBackend()
+    watcher = _watcher(running_trial, backend, gate="change")
+    watcher.process(_request(running_trial, "toolu_baseline"))
+    backend.write("/app/late.txt")  # a background job finished after the last hooked call
+
+    stop = watcher.process(_stop(running_trial))
+
+    assert stop is not None
+    assert (stop.trigger, stop.outcome, stop.change, stop.tool_name) == (
+        "stop",
+        "checkpoint",
+        "changed",
+        "Stop",
+    )
+    record = _records(running_trial)[-1]
+    assert (record.trigger, record.tool_call_id) == ("stop", stop.tool_call_id)
+
+
+def test_stop_with_nothing_new_points_at_the_last_checkpoint(running_trial: Path) -> None:
+    backend = FakeBackend()
+    watcher = _watcher(running_trial, backend, gate="change")
+    watcher.process(_request(running_trial, "toolu_baseline"))
+
+    stop = watcher.process(_stop(running_trial))
+
+    assert stop is not None
+    assert (stop.trigger, stop.outcome, stop.checkpoint_seq) == ("stop", "unchanged", 1)
+    assert len(backend.snapshots) == 1
+
+
+def test_stop_without_any_hooked_call_is_the_baseline(running_trial: Path) -> None:
+    # An agent that only read files still leaves a final checkpoint.
+    stop = _watcher(running_trial, FakeBackend(), gate="change").process(_stop(running_trial))
+    assert stop is not None and (stop.outcome, stop.change) == ("checkpoint", "baseline")
+
+
+def test_stop_is_never_deferred_under_every_n(running_trial: Path) -> None:
+    backend = FakeBackend()
+    watcher = _watcher(running_trial, backend, every=5)
+    watcher.process(_request(running_trial, "toolu_1"))
+    watcher.process(_request(running_trial, "toolu_2"))
+
+    stop = watcher.process(_stop(running_trial, event="StopFailure"))
+
+    assert stop is not None and (stop.outcome, stop.tool_failed) == ("checkpoint", False)
+    [record] = _records(running_trial)
+    assert record.covered_tool_call_ids == ("toolu_1", "toolu_2", stop.tool_call_id)
+    assert record.trigger == "stop"
