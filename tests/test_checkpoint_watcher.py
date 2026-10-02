@@ -16,32 +16,47 @@ from trajlab.checkpoint.join import (
     CheckpointRequest,
     append_record,
     checkpoints_dir,
+    read_calls,
     read_records,
     read_request,
 )
 from trajlab.checkpoint.watcher import (
+    PolicyMismatchError,
     TrialIdentity,
     Watcher,
     WatcherLockedError,
     hold_watcher_lock,
     watcher_running,
 )
-from trajlab.contracts import CheckpointPolicy, CheckpointRecord
+from trajlab.contracts import CallRecord, CheckpointPolicy, CheckpointRecord
 
 TRIAL_NAME = "hello-world__K3GBok3"
 PROJECT = "hello-world__k3gbok3__env"
 
 
 class FakeBackend(SnapshotBackend):
+    """A container with an in-memory filesystem: path -> (type, change time)."""
+
     name = "docker_commit"
 
     def __init__(self) -> None:
         self.snapshots: list[tuple[str, str, dict[str, str]]] = []
         self.discarded: list[str] = []
         self.lookups = 0
+        self.listings = 0
         self.fail_lookup = False
         self.fail_snapshot = False
+        self.gnu_find = True
         self.on_snapshot: object = None
+        self.fs: dict[str, tuple[str, float]] = {"/": ("d", 1.0), "/app": ("d", 1.0)}
+        self.clock = 100.0
+
+    def write(self, path: str, kind: str = "f") -> None:
+        self.clock += 1
+        self.fs[path] = (kind, self.clock)
+
+    def remove(self, path: str) -> None:
+        del self.fs[path]
 
     def container_for(self, compose_project: str) -> str:
         assert compose_project == PROJECT
@@ -49,6 +64,15 @@ class FakeBackend(SnapshotBackend):
         if self.fail_lookup:
             raise BackendError("no container")
         return "c0ffee"
+
+    def listing(self, container: str) -> str | None:
+        self.listings += 1
+        if not self.gnu_find:
+            return None
+        return "".join(
+            "\0".join((kind, "644", "0", "0", "1", str(ctime), "", path)) + "\0"
+            for path, (kind, ctime) in self.fs.items()
+        )
 
     def snapshot(self, container: str, *, tag: str, labels: Mapping[str, str]) -> Snapshot:
         if self.fail_snapshot:
@@ -80,38 +104,65 @@ def running_trial(job_dir: Path) -> Path:
     return trial
 
 
+def _watcher(trial: Path, backend: SnapshotBackend, **policy: object) -> Watcher:
+    policy = {"every": 1} | policy
+    return Watcher(trial.parent.parent, backend, identify, **policy)  # type: ignore[arg-type]
+
+
 _CLOCK = iter(range(1_790_000_000, 1_800_000_000))
 
 
-def _request(trial: Path, tool_use_id: str = FIXTURE_TOOL_CALL_ID, tool: str = "Bash") -> Path:
+def _request(
+    trial: Path,
+    tool_use_id: str = FIXTURE_TOOL_CALL_ID,
+    tool: str = "Bash",
+    event: str = "PostToolUse",
+) -> Path:
     directory = checkpoints_dir(trial)
     directory.mkdir(parents=True, exist_ok=True)
     req = directory / f"{tool_use_id}.req"
-    req.write_text(json.dumps({"tool_use_id": tool_use_id, "tool_name": tool, "agent_id": None}))
+    fields = {"tool_use_id": tool_use_id, "tool_name": tool, "agent_id": None, "event": event}
+    req.write_text(json.dumps(fields))
     stamp = next(_CLOCK)
     os.utime(req, (stamp, stamp))  # request order is mtime order; make it unambiguous
     return req
+
+
+def _ack(req: Path) -> CallRecord:
+    return CallRecord.model_validate_json(req.with_suffix(".ack").read_text())
+
+
+def _records(trial: Path) -> list[CheckpointRecord]:
+    return read_records(checkpoints_dir(trial))
+
+
+# Every call (gate none) ------------------------------------------------------------------
 
 
 def test_process_records_and_acks(running_trial: Path) -> None:
     backend = FakeBackend()
     req = _request(running_trial)
 
-    record = Watcher(running_trial.parent.parent, backend, identify, every=1).process(req)
+    call = _watcher(running_trial, backend).process(req)
 
-    assert record is not None
+    assert call is not None
+    assert (call.outcome, call.change, call.checkpoint_seq, call.call_seq) == (
+        "checkpoint",
+        "not_checked",
+        1,
+        1,
+    )
+    assert call.detect_ms is None
+    assert backend.listings == 0  # gate none never lists the filesystem
+    [record] = _records(running_trial)
     assert record.seq == 1
     assert record.trial_name == TRIAL_NAME
     assert record.tool_call_id == FIXTURE_TOOL_CALL_ID
     assert record.tool_name == "Bash"
     assert record.bytes == 1000
-    assert record.requested_at == read_request(req)[1]
-    directory = req.parent
-    assert read_records(directory) == [record]
-    ack = CheckpointRecord.model_validate_json(
-        (directory / f"{FIXTURE_TOOL_CALL_ID}.ack").read_text()
-    )
-    assert ack == record
+    assert record.requested_at == read_request(req)[1] == call.requested_at
+    assert _ack(req) == call
+    assert read_calls(req.parent) == [call]
     assert backend.snapshots == [
         (
             "c0ffee",
@@ -123,30 +174,31 @@ def test_process_records_and_acks(running_trial: Path) -> None:
             },
         )
     ]
-    assert "seq 1 Bash" in (directory / WATCHER_LOG_FILENAME).read_text()
+    assert "seq 1 Bash" in (req.parent / WATCHER_LOG_FILENAME).read_text()
 
 
 def test_seq_counts_up_and_container_is_cached(running_trial: Path) -> None:
     backend = FakeBackend()
-    watcher = Watcher(running_trial.parent.parent, backend, identify, every=1)
+    watcher = _watcher(running_trial, backend)
 
-    seqs = [watcher.process(_request(running_trial, f"toolu_{i}")).seq for i in range(3)]  # type: ignore[union-attr]
+    calls = [watcher.process(_request(running_trial, f"toolu_{i}")) for i in range(3)]
 
-    assert seqs == [1, 2, 3]
+    assert [c.checkpoint_seq for c in calls] == [1, 2, 3]  # type: ignore[union-attr]
+    assert [c.call_seq for c in calls] == [1, 2, 3]  # type: ignore[union-attr]
     assert backend.lookups == 1
-    assert [r.seq for r in read_records(checkpoints_dir(running_trial))] == [1, 2, 3]
+    assert [r.seq for r in _records(running_trial)] == [1, 2, 3]
 
 
 def test_answered_requests_are_ignored(running_trial: Path) -> None:
     backend = FakeBackend()
-    watcher = Watcher(running_trial.parent.parent, backend, identify, every=1)
+    watcher = _watcher(running_trial, backend)
     req = _request(running_trial)
     watcher.process(req)
 
     assert watcher.process(req) is None
-    _request(running_trial, "toolu_gaveup")
-    (req.parent / "toolu_gaveup.timeout").touch()
-    assert watcher.process(req.parent / "toolu_gaveup.req") is None
+    gave_up = _request(running_trial, "toolu_gaveup")
+    gave_up.with_suffix(".timeout").touch()
+    assert watcher.process(gave_up) is None
     assert len(backend.snapshots) == 1
 
 
@@ -175,10 +227,9 @@ def test_one_request_one_snapshot_whatever_the_path_spelling(
         thread.join()
 
     assert len(backend.snapshots) == 1
-    assert [r.seq for r in read_records(req.parent)] == [1]
+    assert [r.seq for r in _records(running_trial)] == [1]
+    assert len(read_calls(req.parent)) == 1
     assert watcher.pending_requests() == []
-    log_lines = (req.parent / WATCHER_LOG_FILENAME).read_text().splitlines()
-    assert len([line for line in log_lines if "seq 1" in line]) == 1
 
 
 def test_late_snapshot_is_discarded(running_trial: Path) -> None:
@@ -187,14 +238,26 @@ def test_late_snapshot_is_discarded(running_trial: Path) -> None:
     # The hook gives up while the snapshot is being taken.
     backend.on_snapshot = lambda: req.with_suffix(".timeout").touch()
 
-    assert Watcher(running_trial.parent.parent, backend, identify, every=1).process(req) is None
+    assert _watcher(running_trial, backend).process(req) is None
     assert backend.discarded == ["sha256:" + f"{1:064x}"]
     assert not req.with_suffix(".ack").exists()
     assert not (req.parent / RECORDS_FILENAME).exists()
+    assert read_calls(req.parent) == []
 
 
-def test_restart_reacks_recorded_request(running_trial: Path) -> None:
-    # A previous watcher appended the record and died before writing the ack.
+def test_restart_reacks_recorded_call(running_trial: Path) -> None:
+    backend = FakeBackend()
+    req = _request(running_trial)
+    call = _watcher(running_trial, backend).process(req)
+    req.with_suffix(".ack").unlink()  # lost, e.g. a crash before the write reached disk
+
+    assert _watcher(running_trial, backend).process(req) == call
+    assert _ack(req) == call
+    assert len(backend.snapshots) == 1
+
+
+def test_restart_recovers_checkpoint_without_call_record(running_trial: Path) -> None:
+    # A previous watcher appended the checkpoint and died before the call record and ack.
     req = _request(running_trial)
     earlier = CheckpointRecord(
         checkpoint_id="sha256:" + "a" * 64,
@@ -210,10 +273,12 @@ def test_restart_reacks_recorded_request(running_trial: Path) -> None:
     append_record(req.parent, earlier)
     backend = FakeBackend()
 
-    assert Watcher(running_trial.parent.parent, backend, identify, every=1).process(req) == earlier
+    call = _watcher(running_trial, backend).process(req)
+
+    assert call is not None
+    assert (call.outcome, call.checkpoint_seq, call.change) == ("checkpoint", 1, "unknown")
     assert backend.snapshots == []
-    assert req.with_suffix(".ack").exists()
-    assert read_records(req.parent) == [earlier]
+    assert _records(running_trial) == [earlier]
 
 
 @pytest.mark.parametrize("failure", ["fail_lookup", "fail_snapshot"])
@@ -222,7 +287,7 @@ def test_backend_failure_leaves_request_unanswered(
 ) -> None:
     backend = FakeBackend()
     setattr(backend, failure, True)
-    watcher = Watcher(running_trial.parent.parent, backend, identify, every=1)
+    watcher = _watcher(running_trial, backend)
     req = _request(running_trial)
 
     assert watcher.process(req) is None
@@ -237,14 +302,12 @@ def test_backend_failure_leaves_request_unanswered(
 def test_malformed_request_is_logged(running_trial: Path) -> None:
     req = _request(running_trial)
     req.write_text('{"tool_use_id": "toolu_other", "tool_name": "Bash"}')
-    assert (
-        Watcher(running_trial.parent.parent, FakeBackend(), identify, every=1).process(req) is None
-    )
+    assert _watcher(running_trial, FakeBackend()).process(req) is None
     assert "no checkpoint" in (req.parent / WATCHER_LOG_FILENAME).read_text()
 
 
 def test_pending_requests_skip_finished_trials(running_trial: Path, fixture_trial: Path) -> None:
-    watcher = Watcher(running_trial.parent.parent, FakeBackend(), identify, every=1)
+    watcher = _watcher(running_trial, FakeBackend())
     req = _request(running_trial)
     answered = _request(running_trial, "toolu_done")
     answered.with_suffix(".ack").touch()
@@ -257,7 +320,9 @@ def test_pending_requests_skip_finished_trials(running_trial: Path, fixture_tria
 def test_request_file_round_trip(running_trial: Path) -> None:
     req = _request(running_trial, tool="Edit")
     request, requested_at = read_request(req)
-    assert request == CheckpointRequest(tool_use_id=FIXTURE_TOOL_CALL_ID, tool_name="Edit")
+    assert request == CheckpointRequest(
+        tool_use_id=FIXTURE_TOOL_CALL_ID, tool_name="Edit", event="PostToolUse"
+    )
     assert requested_at.tzinfo is not None
     assert abs(requested_at.timestamp() - os.stat(req).st_mtime) < 0.001
 
@@ -295,98 +360,241 @@ def test_run_answers_requests_as_they_appear(running_trial: Path) -> None:
 
     assert all(a.exists() for a in acks)
     assert not thread.is_alive()
-    records = read_records(directory)
+    records = _records(running_trial)
     assert sorted(r.tool_call_id for r in records) == ["toolu_after", "toolu_before"]
     assert [r.seq for r in records] == [1, 2]
 
 
-def _ack(req: Path) -> dict:
-    return json.loads(req.with_suffix(".ack").read_text())
+# Every Nth call (ADR-0007) ---------------------------------------------------------------
 
 
 def test_every_n_defers_then_covers(running_trial: Path) -> None:
     backend = FakeBackend()
-    watcher = Watcher(running_trial.parent.parent, backend, identify, every=3)
+    watcher = _watcher(running_trial, backend, every=3)
     reqs = [_request(running_trial, f"toolu_{i}") for i in range(1, 7)]
 
-    results = [watcher.process(req) for req in reqs]
+    calls = [watcher.process(req) for req in reqs]
 
-    assert [r.seq if r else None for r in results] == [None, None, 1, None, None, 2]
-    first, second = read_records(reqs[0].parent)
+    assert [c.outcome for c in calls] == ["deferred", "deferred", "checkpoint"] * 2  # type: ignore[union-attr]
+    assert [c.checkpoint_seq for c in calls] == [None, None, 1, None, None, 2]  # type: ignore[union-attr]
+    first, second = _records(running_trial)
     assert first.covered_tool_call_ids == ("toolu_1", "toolu_2", "toolu_3")
     assert second.covered_tool_call_ids == ("toolu_4", "toolu_5", "toolu_6")
-    assert _ack(reqs[0]) == {"tool_call_id": "toolu_1", "deferred": True}
-    assert CheckpointRecord.model_validate(_ack(reqs[2])) == first
+    assert _ack(reqs[0]).outcome == "deferred"
     assert [labels["trajlab.tool_call_id"] for _, _, labels in backend.snapshots] == [
         "toolu_3",
         "toolu_6",
     ]
-    assert backend.lookups == 1
 
 
 def test_every_n_count_survives_restart(running_trial: Path) -> None:
-    jobs = running_trial.parent.parent
-    Watcher(jobs, FakeBackend(), identify, every=3).process(_request(running_trial, "toolu_1"))
-    Watcher(jobs, FakeBackend(), identify, every=3).process(_request(running_trial, "toolu_2"))
+    for i in (1, 2):
+        _watcher(running_trial, FakeBackend(), every=3).process(_request(running_trial, f"t_{i}"))
 
-    record = Watcher(jobs, FakeBackend(), identify, every=3).process(
-        _request(running_trial, "toolu_3")
-    )
+    _watcher(running_trial, FakeBackend(), every=3).process(_request(running_trial, "t_3"))
 
-    assert record is not None
-    assert record.covered_tool_call_ids == ("toolu_1", "toolu_2", "toolu_3")
+    [record] = _records(running_trial)
+    assert record.covered_tool_call_ids == ("t_1", "t_2", "t_3")
 
 
 def test_timed_out_calls_are_covered_by_the_next_checkpoint(running_trial: Path) -> None:
-    watcher = Watcher(running_trial.parent.parent, FakeBackend(), identify, every=2)
+    watcher = _watcher(running_trial, FakeBackend(), every=2)
     # The hook gave up on this call while no watcher was running.
     _request(running_trial, "toolu_missed").with_suffix(".timeout").touch()
 
-    record = watcher.process(_request(running_trial, "toolu_next"))
+    watcher.process(_request(running_trial, "toolu_next"))
 
-    assert record is not None
+    [record] = _records(running_trial)
     assert record.covered_tool_call_ids == ("toolu_missed", "toolu_next")
 
 
 def test_discarded_snapshot_leaves_calls_for_the_next(running_trial: Path) -> None:
     backend = FakeBackend()
-    watcher = Watcher(running_trial.parent.parent, backend, identify, every=1)
+    watcher = _watcher(running_trial, backend)
     late = _request(running_trial, "toolu_late")
     backend.on_snapshot = lambda: late.with_suffix(".timeout").touch()
     assert watcher.process(late) is None
 
     backend.on_snapshot = None
-    record = watcher.process(_request(running_trial, "toolu_next"))
+    watcher.process(_request(running_trial, "toolu_next"))
 
-    assert record is not None
+    [record] = _records(running_trial)
     assert record.seq == 1
     assert record.covered_tool_call_ids == ("toolu_late", "toolu_next")
 
 
-def test_restart_reacks_a_deferred_call_as_deferred(running_trial: Path) -> None:
-    jobs = running_trial.parent.parent
-    watcher = Watcher(jobs, FakeBackend(), identify, every=2)
-    first = _request(running_trial, "toolu_1")
-    watcher.process(first)
-    watcher.process(_request(running_trial, "toolu_2"))
-    first.with_suffix(".ack").unlink()  # lost, e.g. a crash before the write reached disk
-
-    covering = Watcher(jobs, FakeBackend(), identify, every=2).process(first)
-
-    assert covering is not None
-    assert covering.tool_call_id == "toolu_2"
-    assert _ack(first) == {"tool_call_id": "toolu_1", "deferred": True}
-
-
 def test_policy_is_written_once_and_enforced(running_trial: Path) -> None:
-    jobs = running_trial.parent.parent
-    Watcher(jobs, FakeBackend(), identify, every=2).process(_request(running_trial, "toolu_1"))
+    _watcher(running_trial, FakeBackend(), every=2).process(_request(running_trial, "toolu_1"))
     policy = checkpoints_dir(running_trial) / "policy.json"
     assert CheckpointPolicy.model_validate_json(policy.read_text()) == CheckpointPolicy(every=2)
 
     backend = FakeBackend()
     req = _request(running_trial, "toolu_2")
-    assert Watcher(jobs, backend, identify, every=3).process(req) is None
+    assert _watcher(running_trial, backend, every=1, gate="change").process(req) is None
     assert not req.with_suffix(".ack").exists()
     assert backend.snapshots == []
     assert CheckpointPolicy.model_validate_json(policy.read_text()).every == 2
+
+
+def test_gate_requires_every_one(running_trial: Path) -> None:
+    with pytest.raises(ValueError, match="requires every=1"):
+        _watcher(running_trial, FakeBackend(), every=2, gate="change")
+
+
+# Only calls that changed the filesystem (ADR-0010) ----------------------------------------
+
+
+def test_first_call_is_the_baseline(running_trial: Path) -> None:
+    backend = FakeBackend()
+    call = _watcher(running_trial, backend, gate="change").process(_request(running_trial))
+
+    assert call is not None
+    assert (call.outcome, call.change, call.checkpoint_seq) == ("checkpoint", "baseline", 1)
+    assert call.changed_paths == ()
+    assert call.changed_paths_total is None  # nothing to compare this call with
+    assert call.detect_ms is not None
+    assert len(backend.snapshots) == 1
+
+
+def test_unchanged_calls_are_not_checkpointed(running_trial: Path) -> None:
+    backend = FakeBackend()
+    watcher = _watcher(running_trial, backend, gate="change")
+    watcher.process(_request(running_trial, "toolu_baseline"))
+
+    # `ls; cat` changes nothing; harness paths do not count either.
+    backend.write("/tmp/claude-0/-app/tasks/x.output")
+    backend.write("/root/.local/state/claude/locks/2.1.278.lock")
+    read = watcher.process(_request(running_trial, "toolu_read"))
+    backend.write("/app/out.txt")
+    write = watcher.process(_request(running_trial, "toolu_write", tool="Write"))
+    again = watcher.process(_request(running_trial, "toolu_read_again"))
+
+    assert read is not None and write is not None and again is not None
+    assert (read.outcome, read.change, read.checkpoint_seq) == ("unchanged", "unchanged", 1)
+    assert read.changed_paths == () and read.changed_paths_total == 0
+    assert (write.outcome, write.change, write.checkpoint_seq) == ("checkpoint", "changed", 2)
+    assert write.changed_paths == ("+/app/out.txt",)
+    assert (again.outcome, again.checkpoint_seq) == ("unchanged", 2)
+    assert [labels["trajlab.tool_call_id"] for _, _, labels in backend.snapshots] == [
+        "toolu_baseline",
+        "toolu_write",
+    ]
+    assert [r.covered_tool_call_ids for r in _records(running_trial)] == [
+        ("toolu_baseline",),
+        ("toolu_write",),  # the unchanged call holds no effects and is covered by nothing
+    ]
+    assert [c.call_seq for c in read_calls(checkpoints_dir(running_trial))] == [1, 2, 3, 4]
+
+
+def test_modifying_and_deleting_count_as_changes(running_trial: Path) -> None:
+    backend = FakeBackend()
+    backend.write("/app/data.txt")
+    backend.write("/app/old.txt")
+    watcher = _watcher(running_trial, backend, gate="change")
+    watcher.process(_request(running_trial, "toolu_baseline"))
+
+    backend.write("/app/data.txt")  # same path, new change time
+    edit = watcher.process(_request(running_trial, "toolu_edit", tool="Edit"))
+    backend.remove("/app/old.txt")
+    delete = watcher.process(_request(running_trial, "toolu_rm"))
+
+    assert edit is not None and delete is not None
+    assert (edit.outcome, edit.changed_paths) == ("checkpoint", ("~/app/data.txt",))
+    assert (delete.outcome, delete.changed_paths) == ("checkpoint", ("-/app/old.txt",))
+
+
+def test_reverting_a_change_is_unchanged_against_the_checkpoint(running_trial: Path) -> None:
+    backend = FakeBackend()
+    watcher = _watcher(running_trial, backend, gate="change")
+    watcher.process(_request(running_trial, "toolu_baseline"))
+    backend.write("/app/tmp.txt")
+    watcher.process(_request(running_trial, "toolu_create"))
+
+    backend.remove("/app/tmp.txt")
+    removed = watcher.process(_request(running_trial, "toolu_remove"))
+    backend.write("/app/tmp2.txt")
+    backend.remove("/app/tmp2.txt")
+    churn = watcher.process(_request(running_trial, "toolu_churn"))
+
+    assert removed is not None and removed.outcome == "checkpoint"
+    # Created and deleted within one call: the state equals the last checkpoint's.
+    assert churn is not None and (churn.outcome, churn.checkpoint_seq) == ("unchanged", 3)
+
+
+def test_discarded_snapshot_keeps_the_old_reference(running_trial: Path) -> None:
+    backend = FakeBackend()
+    watcher = _watcher(running_trial, backend, gate="change")
+    watcher.process(_request(running_trial, "toolu_baseline"))
+    backend.write("/app/a.txt")
+    late = _request(running_trial, "toolu_late")
+    backend.on_snapshot = lambda: late.with_suffix(".timeout").touch()
+    assert watcher.process(late) is None
+
+    backend.on_snapshot = None
+    # This call writes nothing, but the state still differs from the last kept checkpoint.
+    call = watcher.process(_request(running_trial, "toolu_quiet"))
+
+    assert call is not None
+    assert (call.outcome, call.change, call.changed_paths_total) == ("checkpoint", "changed", 0)
+    assert _records(running_trial)[-1].covered_tool_call_ids == ("toolu_late", "toolu_quiet")
+
+
+def test_no_gnu_find_checkpoints_every_call(running_trial: Path) -> None:
+    backend = FakeBackend()
+    backend.gnu_find = False
+    watcher = _watcher(running_trial, backend, gate="change")
+
+    calls = [watcher.process(_request(running_trial, f"toolu_{i}")) for i in range(2)]
+
+    assert [(c.outcome, c.change) for c in calls] == [("checkpoint", "unknown")] * 2  # type: ignore[union-attr]
+    assert len(backend.snapshots) == 2
+
+
+def test_restart_starts_a_new_baseline(running_trial: Path) -> None:
+    backend = FakeBackend()
+    _watcher(running_trial, backend, gate="change").process(_request(running_trial, "t_1"))
+
+    call = _watcher(running_trial, backend, gate="change").process(_request(running_trial, "t_2"))
+
+    assert call is not None and (call.outcome, call.change) == ("checkpoint", "baseline")
+
+
+def test_audit_measures_but_checkpoints_every_call(running_trial: Path) -> None:
+    backend = FakeBackend()
+    watcher = _watcher(running_trial, backend, gate="audit")
+    watcher.process(_request(running_trial, "toolu_baseline"))
+
+    read = watcher.process(_request(running_trial, "toolu_read"))
+    backend.write("/app/x")
+    write = watcher.process(_request(running_trial, "toolu_write"))
+
+    assert read is not None and write is not None
+    assert (read.outcome, read.change) == ("checkpoint", "unchanged")
+    assert (write.outcome, write.change) == ("checkpoint", "changed")
+    assert len(backend.snapshots) == 3
+
+
+def test_policy_mismatch_names_both_policies(running_trial: Path) -> None:
+    _watcher(running_trial, FakeBackend(), gate="change").process(_request(running_trial, "t_1"))
+    watcher = _watcher(running_trial, FakeBackend(), gate="audit")
+    with pytest.raises(PolicyMismatchError, match="gate='change'"):
+        watcher._trial(running_trial.resolve())
+
+
+def test_failed_calls_are_measured_and_marked(running_trial: Path) -> None:
+    # Regression, 2026-10-01: a Bash call that wrote a script and then exited 1 fired no
+    # PostToolUse hook, so its changes were blamed on the next call.
+    backend = FakeBackend()
+    watcher = _watcher(running_trial, backend, gate="change")
+    watcher.process(_request(running_trial, "toolu_baseline"))
+    backend.write("/app/enc.py")
+    failed = watcher.process(_request(running_trial, "toolu_failed", event="PostToolUseFailure"))
+    ok = watcher.process(_request(running_trial, "toolu_ok"))
+
+    assert failed is not None and ok is not None
+    assert (failed.tool_failed, failed.outcome, failed.changed_paths) == (
+        True,
+        "checkpoint",
+        ("+/app/enc.py",),
+    )
+    assert (ok.tool_failed, ok.outcome) == (False, "unchanged")

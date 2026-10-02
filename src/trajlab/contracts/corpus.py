@@ -62,6 +62,9 @@ class CorpusManifest(_ManifestModel):
         ge=1,
         description="N from the trials' policy.json (ADR-0007); null without checkpoints.",
     )
+    checkpoint_gate: str | None = Field(
+        description="gate from the trials' policy.json (ADR-0010); null without checkpoints.",
+    )
     tasks: list[CorpusTask] = Field(min_length=1)
     jobs: list[CorpusJob] = Field(min_length=1)
     storage: str | None = Field(

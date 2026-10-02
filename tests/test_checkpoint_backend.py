@@ -164,3 +164,46 @@ def test_compose_labels_are_read_once_per_container() -> None:
     backend.snapshot("c0ffee", tag="a", labels={})
     backend.snapshot("c0ffee", tag="b", labels={})
     assert sum("{{json .Config.Labels}}" in call for call in docker.calls) == 1
+
+
+def test_listing_runs_gnu_find_as_root_and_caches_the_check() -> None:
+    from trajlab.checkpoint.changes import FIND_PRINTF
+
+    calls: list[tuple[list[str], dict[str, Any]]] = []
+
+    def runner(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        calls.append((command, kwargs))
+        if command[-1] == "--version":
+            return subprocess.CompletedProcess(command, 0, "find (GNU findutils) 4.9.0\n", "")
+        # A file vanished mid-walk: find exits 1 but the listing is still whole.
+        return subprocess.CompletedProcess(command, 1, "f\0listing\0", "find: '/x': gone")
+
+    backend = DockerCommitBackend(runner=runner)
+    assert backend.listing("c1") == "f\0listing\0"
+    assert backend.listing("c1") == "f\0listing\0"
+
+    version_checks = [c for c, _ in calls if c[-1] == "--version"]
+    assert version_checks == [["docker", "exec", "-u", "0", "c1", "find", "--version"]]
+    command, kwargs = calls[-1]
+    assert command == [
+        "docker", "exec", "-u", "0", "c1", "find", "/", "-xdev", "-printf", FIND_PRINTF,
+    ]  # fmt: skip
+    assert kwargs["errors"] == "surrogateescape"
+
+
+def test_listing_is_none_without_gnu_find() -> None:
+    docker = FakeDocker({"exec": "BusyBox v1.36.1 multi-call binary."})
+    backend = DockerCommitBackend(runner=docker)
+    assert backend.listing("c1") is None
+    assert backend.listing("c1") is None
+    assert len(docker.calls) == 1
+
+
+def test_listing_failure_is_a_backend_error() -> None:
+    def runner(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        if command[-1] == "--version":
+            return subprocess.CompletedProcess(command, 0, "GNU findutils", "")
+        return subprocess.CompletedProcess(command, 125, "", "container not running")
+
+    with pytest.raises(BackendError, match="exited 125"):
+        DockerCommitBackend(runner=runner).listing("c1")

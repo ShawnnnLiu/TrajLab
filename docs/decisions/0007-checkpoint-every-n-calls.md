@@ -1,6 +1,6 @@
 # ADR-0007: Checkpoint every N state-mutating calls
 
-Status: proposed (2026-09-30).
+Status: proposed (2026-09-30); superseded as the default by ADR-0010 (2026-10-01), still available as `--gate none`.
 Amends ADR-0001.
 
 ## Context

@@ -1,0 +1,99 @@
+{
+  "corpus_id": "tb21-change-gate-v1",
+  "created_at": "2026-10-01T04:24:12.376640Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "8a72f3926c91419a94707b5917d41f5613cc1290",
+  "repo_dirty": false,
+  "config_path": "configs/harbor/tb21-change-gate-v1.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "high",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 1,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 2.0,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "tasks": [
+    {
+      "name": "terminal-bench/kv-store-grpc",
+      "digest": "sha256:973c5d4c111fb61a344457936f1c36400acd2d9e44389e7b319586fe23a7a307"
+    },
+    {
+      "name": "terminal-bench/schemelike-metacircular-eval",
+      "digest": "sha256:58130c2166c3115276dc8592f358e326ff2d81ea852e3d88636c82fd1dff57e6"
+    },
+    {
+      "name": "terminal-bench/write-compressor",
+      "digest": "sha256:d9ddd9a8e925e2c566b37b2492cbf995afecefe58874e4043ef78d7f3c892c7e"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb21-change-gate-v1",
+      "job_id": "772037aa-4a7d-4d51-917a-00eaa0a7f4a3",
+      "job_config": {
+        "job_name": "tb21-change-gate-v1",
+        "jobs_dir": "corpus/jobs",
+        "agent_timeout_multiplier": 2.0,
+        "n_concurrent_trials": 3,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "high",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench-2-1",
+            "ref": "sha256:7d7bdc1cbedad549fc1140404bd4dc45e5fd0ea7c4186773687d177ad3a0699a",
+            "task_names": [
+              "terminal-bench/kv-store-grpc",
+              "terminal-bench/write-compressor",
+              "terminal-bench/schemelike-metacircular-eval"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "c8a69b74-4170-4d82-877d-fac259cb98d9",
+          "trial_name": "kv-store-grpc__wcEBdzx",
+          "task_name": "terminal-bench/kv-store-grpc",
+          "job_id": "772037aa-4a7d-4d51-917a-00eaa0a7f4a3",
+          "job_dir": "tb21-change-gate-v1",
+          "claude_session_id": "fa6f6cff-4e70-4b30-82d3-04a3f5ff82b8"
+        },
+        {
+          "trial_id": "91749b28-06cf-459b-bc12-e3be685f7a83",
+          "trial_name": "schemelike-metacircular-eval__FsR7SRS",
+          "task_name": "terminal-bench/schemelike-metacircular-eval",
+          "job_id": "772037aa-4a7d-4d51-917a-00eaa0a7f4a3",
+          "job_dir": "tb21-change-gate-v1",
+          "claude_session_id": "d221a1f5-6d49-41de-a4ea-400d6322dd93"
+        },
+        {
+          "trial_id": "8b1ee43f-97b5-4a57-84fb-8b8b69b0d894",
+          "trial_name": "write-compressor__xv3Qtyo",
+          "task_name": "terminal-bench/write-compressor",
+          "job_id": "772037aa-4a7d-4d51-917a-00eaa0a7f4a3",
+          "job_dir": "tb21-change-gate-v1",
+          "claude_session_id": "49bb5f72-378c-4a65-9093-7c7a7750c504"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}

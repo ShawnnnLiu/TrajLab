@@ -1,0 +1,99 @@
+{
+  "corpus_id": "tb21-audit-v1",
+  "created_at": "2026-10-01T04:13:05.376131Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "4678c750b7d5ec1487ef40936e447e584ce49265",
+  "repo_dirty": false,
+  "config_path": "configs/harbor/tb21-audit-v1.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "high",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 1,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 2.0,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "audit",
+  "tasks": [
+    {
+      "name": "terminal-bench/kv-store-grpc",
+      "digest": "sha256:973c5d4c111fb61a344457936f1c36400acd2d9e44389e7b319586fe23a7a307"
+    },
+    {
+      "name": "terminal-bench/schemelike-metacircular-eval",
+      "digest": "sha256:58130c2166c3115276dc8592f358e326ff2d81ea852e3d88636c82fd1dff57e6"
+    },
+    {
+      "name": "terminal-bench/write-compressor",
+      "digest": "sha256:d9ddd9a8e925e2c566b37b2492cbf995afecefe58874e4043ef78d7f3c892c7e"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb21-audit-v1",
+      "job_id": "e5ec0f5d-60ff-4b72-a17f-d8e525c8bcf7",
+      "job_config": {
+        "job_name": "tb21-audit-v1",
+        "jobs_dir": "corpus/jobs",
+        "agent_timeout_multiplier": 2.0,
+        "n_concurrent_trials": 3,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "high",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench-2-1",
+            "ref": "sha256:7d7bdc1cbedad549fc1140404bd4dc45e5fd0ea7c4186773687d177ad3a0699a",
+            "task_names": [
+              "terminal-bench/kv-store-grpc",
+              "terminal-bench/write-compressor",
+              "terminal-bench/schemelike-metacircular-eval"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "53fb06c8-b96b-4448-87a5-d0da5f255ea6",
+          "trial_name": "kv-store-grpc__d4af6mE",
+          "task_name": "terminal-bench/kv-store-grpc",
+          "job_id": "e5ec0f5d-60ff-4b72-a17f-d8e525c8bcf7",
+          "job_dir": "tb21-audit-v1",
+          "claude_session_id": "07ffec58-d179-48ac-a4a7-eec9c3929957"
+        },
+        {
+          "trial_id": "0e7190f5-f371-455f-8358-bdd7fd63e76a",
+          "trial_name": "schemelike-metacircular-eval__nwfDCMQ",
+          "task_name": "terminal-bench/schemelike-metacircular-eval",
+          "job_id": "e5ec0f5d-60ff-4b72-a17f-d8e525c8bcf7",
+          "job_dir": "tb21-audit-v1",
+          "claude_session_id": "1aa7d11f-3298-4a76-9a19-54d73043d0cc"
+        },
+        {
+          "trial_id": "0629e3c1-a294-446d-b4d6-cd2625c443bc",
+          "trial_name": "write-compressor__MZHnoY6",
+          "task_name": "terminal-bench/write-compressor",
+          "job_id": "e5ec0f5d-60ff-4b72-a17f-d8e525c8bcf7",
+          "job_dir": "tb21-audit-v1",
+          "claude_session_id": "df2c934d-fa12-4eed-bc4e-a3de06db5524"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}

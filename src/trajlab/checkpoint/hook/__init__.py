@@ -20,18 +20,16 @@ def hook_script() -> str:
     return files(__package__).joinpath("post_tool_use.sh").read_text()
 
 
+# PostToolUse does not fire for a call that ends in error (e.g. Bash exiting non-zero), which
+# can still have changed files; PostToolUseFailure does (ADR-0010, checked in Claude Code 2.1.278).
+HOOK_EVENTS = ("PostToolUse", "PostToolUseFailure")
+
+
 def render_settings() -> str:
     """The Claude Code settings JSON that runs the hook script inline, as committed."""
-    settings = {
-        "hooks": {
-            "PostToolUse": [
-                {
-                    "matcher": HOOK_MATCHER,
-                    "hooks": [
-                        {"type": "command", "command": hook_script(), "timeout": HOOK_TIMEOUT_S}
-                    ],
-                }
-            ]
-        }
+    entry = {
+        "matcher": HOOK_MATCHER,
+        "hooks": [{"type": "command", "command": hook_script(), "timeout": HOOK_TIMEOUT_S}],
     }
+    settings = {"hooks": {event: [entry] for event in HOOK_EVENTS}}
     return json.dumps(settings, indent=2) + "\n"
