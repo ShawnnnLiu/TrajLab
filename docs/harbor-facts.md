@@ -38,7 +38,7 @@ In-container contract: `/logs/agent`, `/logs/verifier`, `/logs/artifacts` are mo
 - Capabilities: `atif, resume, load_native_trajectory, load_atif_trajectory, handoff, native_config, skills, mcp_servers`.
 - **Schema version [0.23.0]:** the Claude Code converter stamps `schema_version="ATIF-v1.7"` even though `Trajectory` defaults to v1.8 and accepts both. Do not assert v1.8 on Harbor's file; the enriched file may use either.
 - **`context_management` is not a typed field [0.23.0]:** nothing under `harbor/models/trajectories/` defines it. It is a convention inside step `extra`, exactly as the RFC reserves it, so our `ContextManagementExtra` model in `contracts/` is the only schema for it.
-- **The converter emits no `context_management` system steps.** It dedups tool calls "replayed after compaction" (`_convert_events_to_trajectory`). Compaction boundaries must be recovered from the native JSONL. Only the `vibe` agent's converter emits `context_management`.
+- **The converter emits no `context_management` system steps.** It dedups tool calls "replayed after compaction" (`_convert_events_to_trajectory`). Compaction boundaries must be recovered from the native JSONL. Only the `vibe` agent's converter emits `context_management`. **[0.23.0]** The converter skips Claude Code's `{"type": "system", "subtype": "compact_boundary"}` event (it has no `message`) but keeps the following `isCompactSummary` user event as an ordinary user step whose message is the summary text; it reads `<session dir>/*.jsonl` plus `subagents/*.jsonl`, dedups events by `uuid`, and sorts them by `timestamp`. Format checked in the Claude Code 2.1.278 binary on 2026-10-01: the boundary carries `uuid`, `timestamp`, `logicalParentUuid`, and `compactMetadata{trigger, preTokens, postTokens, durationMs}`; the summary's `parentUuid` is the boundary's `uuid`.
 - Per-step ATIF `metrics`: `prompt_tokens = input + cache_read + cache_creation`, `cached_tokens = cache_read`, raw usage dict in `metrics.extra`. Trajectory `total_cost_usd` is parsed from the stream-json `result` event in `claude-code.txt`.
 - Observations: `content` is `[stdout]…[stderr]…[exit_code] N…`; `extra.tool_use_result` keeps Claude Code's structured result; `extra.raw_tool_result` the untouched block; `is_error` preserved.
 - Step `extra` carries `id`, `agent_id`, `cwd`, `user_type`, `is_sidechain`. `agent.extra` carries `cwds`, `git_branches`, `agent_ids`, `version`.
@@ -69,10 +69,10 @@ Claude Code's `tool_use_id` (in the session JSONL, and in the JSON that PreToolU
 
 ## Other Harbor commands worth knowing
 
-- `harbor view jobs` — local viewer on :8080; reads `agent/trajectory.json`. It will not show `trajectory.enriched.json`; that is fine.
-- `harbor analyze <trial|job>` — an agent (default claude-code) reads `result.json`, `trajectory.json`, `test-stdout.txt`, `exception.txt` and grades a rubric. This is a **baseline** for the analysis phase, not a component.
-- `harbor trial regrade` — reruns only the verifier from recorded artifacts. `--load-trajectory` — seeds a new run's conversation from an ATIF or native file; restores no files.
-- `harbor datasets list` — confirm dataset names and versions before writing a job config; do not assume `terminal-bench@2.1` exists under that exact name.
+- `harbor view jobs` - local viewer on :8080; reads `agent/trajectory.json`. It will not show `trajectory.enriched.json`; that is fine.
+- `harbor analyze <trial|job>` - an agent (default claude-code) reads `result.json`, `trajectory.json`, `test-stdout.txt`, `exception.txt` and grades a rubric. This is a **baseline** for the analysis phase, not a component.
+- `harbor trial regrade` - reruns only the verifier from recorded artifacts. `--load-trajectory` - seeds a new run's conversation from an ATIF or native file; restores no files.
+- `harbor datasets list` - confirm dataset names and versions before writing a job config; do not assume `terminal-bench@2.1` exists under that exact name.
 
 ## Things Harbor does not have (do not go looking)
 

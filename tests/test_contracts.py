@@ -19,11 +19,13 @@ from trajlab.contracts import (
     CheckpointPolicy,
     CheckpointRecord,
     CheckpointStepExtra,
+    CompactionRecord,
     CompactionStepExtra,
     ContextManagementExtra,
     CorpusJob,
     CorpusManifest,
     CorpusTask,
+    EnrichedTrajectoryExtra,
     OriginalStepExtra,
     TrajlabStepExtra,
     TrialRecord,
@@ -130,9 +132,26 @@ INSTANCES: list[BaseModel] = [
         storage="gs://b",
     ),
     OriginalStepExtra(original_step_id=2),
+    OriginalStepExtra(
+        original_step_id=2, calls=(_call_record(),), timed_out_tool_call_ids=("toolu_b",)
+    ),
     CheckpointStepExtra(tool_call_id=FIXTURE_TOOL_CALL_ID),
     CompactionStepExtra(),
     ContextManagementExtra(type="compaction", boundary="replace"),
+    CompactionRecord(
+        uuid="0b5e1d0a",
+        timestamp=datetime(2026, 9, 22, 0, 49, 17, tzinfo=UTC),
+        native_file="sessions/projects/-app/78b481c6.jsonl",
+        trigger="auto",
+        pre_tokens=167_000,
+    ),
+    EnrichedTrajectoryExtra(source_sha256="0" * 64, policy=None),
+    EnrichedTrajectoryExtra(
+        source_sha256="a" * 64,
+        policy=CheckpointPolicy(every=1, gate="change"),
+        stop_calls=(_call_record(tool_call_id="stop_1_2", trigger="stop", tool_name="Stop"),),
+        timed_out_stop_ids=("stop_3_4",),
+    ),
 ]
 
 
@@ -251,8 +270,8 @@ def test_context_management_rejects_unknown_values() -> None:
 
 
 def test_enriched_shape_is_valid_atif(tmp_path: Path) -> None:
-    # The ADR-0003 shape, built from these contracts, must pass Harbor's validator and our
-    # strict load. Step 7 will build the same thing from checkpoints.jsonl.
+    # The ADR-0003 shape, built from these contracts by hand, must pass Harbor's validator and
+    # our strict load; tests/test_atif_postprocess.py checks what postprocess builds.
     data = json.loads(FIXTURE_TRAJECTORY.read_text())
     record = _checkpoint_record()
     compaction_step = {

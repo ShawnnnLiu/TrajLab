@@ -12,6 +12,7 @@ Last updated 2026-10-01; add to it as evidence changes, and do not delete supers
 - **Mechanism:** a Claude Code hook on `PostToolUse` and `PostToolUseFailure` blocks the agent until the host watcher has measured the container and, if needed, committed it (ADR-0006, ADR-0010, `docs/checkpoint-protocol.md`).
 - **Join key:** Claude Code's `tool_use_id`, which is also ATIF's `tool_call_id` (`docs/harbor-facts.md`, "The join key").
 - **Evidence:** in the acceptance runs every `.req` got an `.ack` with no timeouts (ADR-0006 and ADR-0008 acceptance sections; `tb21-preinstall-check-v1`: 8 of 8 hooked calls). Since ADR-0010 each answered call also has a `CallRecord`; the failing-call probe had records for all 3 of its calls.
+- **In the enriched trajectory:** every checkpoint of every finished trial in `tb21-audit-v1`, `tb21-change-gate-v1`, and `tb21-preinstall-check-v1` joined to the agent step owning its `tool_call_id`; postprocess refuses a trial otherwise (ADR-0003, 2026-10-01 amendment).
 - **Caveat to state:** before 2026-10-01 a tool call that ended in error was not hooked; `tb21-audit-v1` and `tb21-change-gate-v1` predate the fix (ADR-0010, amendment). Only corpora captured after commit `06e2061` support C1 without that caveat.
 
 ### C1b. The state the agent leaves behind is always recorded
@@ -92,4 +93,5 @@ Last updated 2026-10-01; add to it as evidence changes, and do not delete supers
 3. **Per-tool change rates.** From `calls.jsonl`: the share of Bash, Write, and Edit calls that changed the filesystem; a likely result in its own right.
 4. **Linux numbers.** Repeat the C4 table and detection timings on the Linux server.
 5. **Final-state checkpoint.** Done in ADR-0011 (`Stop` and `StopFailure` hooks); report how often the stop checkpoint differs from the last call's, i.e. how often background work changed the final state.
-6. **Join in the trajectory.** Build-order step 7 writes the join into `trajectory.enriched.json`; the paper's figures should come from that file.
+6. **Join in the trajectory.** Done in build-order step 7 (ADR-0003, 2026-10-01 amendment): `trajlab postprocess` writes `trajectory.enriched.json` with checkpoint and compaction steps and each call's `CallRecord`, and refuses a trial whose records do not all join; the paper's figures should come from that file.
+7. **Compaction on real data.** No trial so far has compacted, so compaction recovery is tested only on synthetic events run through Harbor's converter; confirm it on the first long trial that does.

@@ -1,7 +1,4 @@
-"""trajlab command line entry point.
-
-Each subcommand is a stub until its build-order step lands (see CLAUDE.md).
-"""
+"""trajlab command line entry point."""
 
 import logging
 import signal
@@ -13,6 +10,7 @@ from typing import Annotated
 import typer
 
 from trajlab.atif.load import trajectory_path
+from trajlab.atif.postprocess import enriched_trajectory_path, postprocess_trial
 from trajlab.atif.validate import validate_trajectory
 from trajlab.capture.corpus import (
     ManifestError,
@@ -21,7 +19,7 @@ from trajlab.capture.corpus import (
     repo_state,
     write_manifest,
 )
-from trajlab.capture.discover import compose_project_name, load_trial_config
+from trajlab.capture.discover import compose_project_name, iter_trial_dirs, load_trial_config
 from trajlab.capture.harbor_runner import RunRefusedError, execute, plan_run
 from trajlab.checkpoint.backends.docker_commit import DockerCommitBackend
 from trajlab.checkpoint.watcher import (
@@ -151,10 +149,46 @@ def watch(
         raise typer.Exit(code=1) from error
 
 
+def _trial_dirs(path: Path) -> list[Path]:
+    """A trial dir as given, or every trial dir of a job dir."""
+    if (path / "agent").is_dir():
+        return [path]
+    return list(iter_trial_dirs(path))
+
+
 @app.command()
-def postprocess(job_dir: Path) -> None:
-    """Join checkpoints into the ATIF trajectory and write trajectory.enriched.json."""
-    raise typer.Exit(code=_not_implemented("postprocess"))
+def postprocess(
+    paths: Annotated[list[Path], typer.Argument(help="Job dirs or trial dirs.")],
+) -> None:
+    """Join checkpoints and compactions into each trial's agent/trajectory.enriched.json."""
+    failed = 0
+    for path in paths:
+        if not path.is_dir():
+            typer.echo(f"trajlab postprocess: {path}: not a directory", err=True)
+            failed += 1
+            continue
+        trial_dirs = _trial_dirs(path)
+        if not trial_dirs:
+            typer.echo(f"trajlab postprocess: {path}: no trial dirs", err=True)
+            failed += 1
+        for trial_dir in trial_dirs:
+            if not trajectory_path(trial_dir).is_file():
+                typer.echo(f"skipped {trial_dir}: no agent/trajectory.json", err=True)
+                continue
+            try:
+                result = postprocess_trial(trial_dir)
+            # Every error postprocess reports is a ValueError: unjoinable records, invalid ATIF,
+            # malformed capture files.
+            except ValueError as error:
+                typer.echo(f"failed {trial_dir}: {error}", err=True)
+                failed += 1
+                continue
+            typer.echo(
+                f"wrote {result.path}: {result.steps} steps, "
+                f"{result.checkpoints} checkpoints, {result.compactions} compactions"
+            )
+    if failed:
+        raise typer.Exit(code=1)
 
 
 @app.command()
@@ -203,17 +237,19 @@ def manifest(
 
 @app.command()
 def validate(trial_dir: Path) -> None:
-    """Validate a trial's ATIF trajectory (agent/trajectory.json) against Harbor's schema."""
-    path = trajectory_path(trial_dir)
-    errors = validate_trajectory(path)
-    if errors:
-        typer.echo(f"invalid: {path}", err=True)
-        for error in errors:
-            typer.echo(f"  - {error}", err=True)
+    """Validate a trial's agent/trajectory.json, and its enriched trajectory if postprocessed."""
+    paths = [trajectory_path(trial_dir)]
+    if enriched_trajectory_path(trial_dir).is_file():
+        paths.append(enriched_trajectory_path(trial_dir))
+    invalid = False
+    for path in paths:
+        errors = validate_trajectory(path)
+        if errors:
+            invalid = True
+            typer.echo(f"invalid: {path}", err=True)
+            for error in errors:
+                typer.echo(f"  - {error}", err=True)
+        else:
+            typer.echo(f"valid: {path}")
+    if invalid:
         raise typer.Exit(code=1)
-    typer.echo(f"valid: {path}")
-
-
-def _not_implemented(name: str) -> int:
-    typer.echo(f"trajlab {name}: not implemented yet", err=True)
-    return 2
