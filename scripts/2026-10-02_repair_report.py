@@ -72,8 +72,13 @@ def tests(trial: Path) -> str | None:
     path = trial / "verifier/test-stdout.txt"
     if not path.exists():
         return None
-    found = SUMMARY.findall(path.read_text())
-    return found[-1] if found else None
+    text = path.read_text()
+    found = SUMMARY.findall(text)
+    if found:
+        return found[-1]
+    # Some verifiers print one `FAIL [rule] ...` line per violation instead of a pytest summary.
+    violations = sum(1 for line in text.splitlines() if line.strip().startswith("FAIL "))
+    return f"{violations} violations" if violations else None
 
 
 def seconds(phase: dict[str, Any] | None) -> float | None:
