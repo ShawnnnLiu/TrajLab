@@ -237,8 +237,20 @@ class PreinstalledDockerEnvironment(DockerEnvironment):
         key = (id(asyncio.get_running_loop()), name)
         return cls._locks.setdefault(key, asyncio.Lock())
 
+    def is_agent_environment(self) -> bool:
+        """False for a task's separate verifier environment, which Harbor builds from `tests/`.
+
+        Harbor creates that environment from the trial's own environment config, so it is an
+        instance of this class too; it must start exactly as Harbor would start it.
+        """
+        task_dir = self.environment_dir.parent
+        return self.environment_dir.resolve() == TaskPaths(task_dir).environment_dir.resolve()
+
     @override
     async def start(self, force_build: bool) -> None:
+        if not self.is_agent_environment():
+            await DockerEnvironment.start(self, force_build=force_build)
+            return
         record = await self.prepare_image(force_build)
         # A copy: Harbor's verifier environment reads the task's own config object.
         self.task_env_config = self.task_env_config.model_copy(
