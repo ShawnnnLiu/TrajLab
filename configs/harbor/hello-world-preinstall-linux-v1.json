@@ -1,0 +1,25 @@
+{
+    "job_name": "hello-world-preinstall-linux-v1",
+    "jobs_dir": "corpus/jobs",
+    "n_concurrent_trials": 1,
+    "agent_timeout_multiplier": 2.0,
+    "agents": [
+        {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+                "version": "2.1.278",
+                "config": "configs/claude-code/settings.hooks.json"
+            }
+        }
+    ],
+    "tasks": [
+        {
+            "name": "hello-world/hello-world",
+            "ref": "latest"
+        }
+    ],
+    "environment": {
+        "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+    }
+}
