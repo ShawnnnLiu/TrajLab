@@ -17,6 +17,7 @@ from trajlab.contracts.checkpoint import (
 )
 from trajlab.contracts.corpus import CorpusJob, CorpusManifest, CorpusTask
 from trajlab.contracts.preinstall import PREINSTALL_RECORD_FILENAME, PreinstallRecord
+from trajlab.contracts.resume import RESUME_RECORD_FILENAME, ResumeRecord
 from trajlab.contracts.steps import (
     CHECKPOINT_STEP_MESSAGE,
     COMPACTION_STEP_MESSAGE,
@@ -60,6 +61,8 @@ __all__ = [
     "CorpusTask",
     "OriginalStepExtra",
     "PreinstallRecord",
+    "RESUME_RECORD_FILENAME",
+    "ResumeRecord",
     "TrajlabStepExtra",
     "TrialRecord",
 ]
