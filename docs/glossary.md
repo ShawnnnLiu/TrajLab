@@ -53,6 +53,7 @@ One trial is one task executed by one attempt.
 - **gate / change-gated** - which hooked calls get a checkpoint (`--gate`, ADR-0010): `change` checkpoints only calls that changed the filesystem; `audit` checkpoints all of them but records the change verdict; `none` is every-N (ADR-0007).
 - **unchanged call** - a hooked call after which the container's filesystem equals the last checkpoint's, outside the harness exclusions; it gets no checkpoint, and its `CallRecord` names the previous one.
   Not: "minor" or "small" call; the paper never classifies calls by size.
+- **stop checkpoint / stop record** - the checkpoint or `CallRecord` for the end of the agent's turn (`Stop` or `StopFailure`), with `trigger: "stop"` and a `stop_<epoch>_<pid>` id instead of a `tool_use_id` (ADR-0011).
 - **baseline** - the first measured call of a trial (or after a watcher restart), always checkpointed because there is nothing to compare it with.
 - **call record** - the `CallRecord` the watcher writes per answered hooked call, in `calls.jsonl` and `.ack`.
 - **covered call** - a state-mutating call whose effects first appear in a given checkpoint; listed in that record's `covered_tool_call_ids`.

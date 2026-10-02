@@ -14,8 +14,9 @@ The older policy, a checkpoint every N calls without measuring (ADR-0007, `--gat
 
 Vocabulary for these roles, and for everything else in this doc, is in `docs/glossary.md`.
 
-- **Hook** (inside the container): a Claude Code hook registered for `PostToolUse` and `PostToolUseFailure` in `settings.hooks.json`, which Harbor passes through as `--settings`.
+- **Hook** (inside the container): a Claude Code hook registered for `PostToolUse`, `PostToolUseFailure`, `Stop`, and `StopFailure` in `settings.hooks.json`, which Harbor passes through as `--settings`.
   A call that ends in error (e.g. Bash exiting non-zero) fires only `PostToolUseFailure` and may still have changed files (ADR-0010).
+  `Stop` and `StopFailure` end the agent's turn; the hook names their request `stop_<epoch>_<pid>` and the watcher answers it with `trigger: "stop"`, so the state the agent leaves behind is always recorded (ADR-0011).
   Claude Code runs it with `sh -c` as the agent user, with `CLAUDE_CONFIG_DIR=/logs/agent/sessions` set, so `/logs/agent` is `$CLAUDE_CONFIG_DIR/..`.
 - **Watcher** (on the host): `trajlab watch <jobs-dir> --every 1 --gate change`.
   Watches `*/*/agent/checkpoints/*.req` under the jobs dir with `watchdog`, plus a periodic sweep for events the observer missed.
@@ -119,7 +120,7 @@ The watcher writes its policy into each trial's `policy.json`, and the corpus ma
   Bind mounts, including `/logs/agent`, are not in the image.
   This is a permanent, accepted limitation of the project (ADR-0004): no CRIU-capable backend attaches to the Docker containers Harbor runs, and CRIU's per-call cost exceeds our storage and compute budget.
   See `docs/research/2026-09-23_checkpoint-platform-research.md` Q1/Q3 for the evidence.
-- **Final state**: under `--gate change` the state after the last call is always in a checkpoint, either its own or, if it changed nothing, the previous one, unless that call timed out. With `--gate none` and N > 1, up to N-1 calls after the last checkpoint are covered by none (ADR-0007).
+- **Final state**: the stop request records the state at the end of the agent's turn, including writes by background jobs after the last hooked call (ADR-0011); under `--gate none` it is always checkpointed, so every-N leaves no trailing calls uncovered. It is missing only if the stop request itself timed out.
 - **Change detection** (ADR-0010): GNU `find / -xdev` per call, about 0.2 to 0.3 s; files compare by type, mode, owner, size, change time, and link target, directories by type, mode, and owner; harness paths are excluded from the decision but not from checkpoints. An image without GNU `find` is checkpointed on every call. The first measured call of a trial, and the first after a watcher restart, is checkpointed as the baseline.
 - **Idempotence**: a `.req` with an existing `.ack` or `.timeout` is ignored.
   Watcher restart replays unacked `.req` files of trials without `result.json`; a `.req` whose `tool_use_id` a record already covers only gets its `.ack` rewritten.
