@@ -57,6 +57,14 @@ Last updated 2026-10-02 (overnight repair pilot); add to it as evidence changes,
 | write-compressor, derived image | 1.0 | 1 s | 106 to 147 KB | 3.7 to 6.1 s |
 
   Sources: `hello-world-checkpoint-v1` (stale job dir), `hello-world-preinstall-v1`, `tb21-preinstall-check-v1`; ADR-0008, Acceptance.
+- **Linux server (2026-10-02):** native amd64, Docker 29.8.2 with the containerd image store (overlayfs snapshotter), cgroup v2.
+
+| Trial | Reward | Agent setup | Layer per checkpoint | Commit |
+| --- | --- | --- | --- | --- |
+| hello-world, stock image | 1.0 | 99.5 s | 1.31 GB | 27.9 s |
+| hello-world, derived image | 1.0 | 0.1 s | 0.1 MB | 2.0 s |
+
+  Sources: `hello-world-checkpoint-linux-v1`, `hello-world-preinstall-linux-v1`. The derived trial's 136 s environment setup is the one-time build of the derived image, cached for later trials. Both manifests record a dirty tree: the only uncommitted file was the first run's new manifest.
 - **Task behavior unchanged:** both TB tasks scored 1.0 with and without the derived image (`dev-tb21-strict-check` vs `tb21-preinstall-check-v1`). This is 2 tasks, 1 attempt each: evidence of no breakage, not of equivalence.
 
 ### C5. Every trial runs one pinned agent binary
@@ -112,7 +120,7 @@ Last updated 2026-10-02 (overnight repair pilot); add to it as evidence changes,
 1. **Larger audit.** Rerun `--gate audit` on a slice of at least 10 to 20 TB 2.1 tasks after the failed-call fix, and report the confusion table with an interval for the miss rate.
 2. **Exclusion sensitivity.** Recompute the audit table with an empty exclusion list.
 3. **Per-tool change rates.** From `calls.jsonl`: the share of Bash, Write, and Edit calls that changed the filesystem; a likely result in its own right.
-4. **Linux numbers.** Repeat the C4 table and detection timings on the Linux server.
+4. **Linux numbers.** C4 hello-world rows done (2026-10-02); detection timings and TB 4.0 rows come from `tb40-sonnet-v2`.
 5. **Final-state checkpoint.** Done in ADR-0011 (`Stop` and `StopFailure` hooks); report how often the stop checkpoint differs from the last call's, i.e. how often background work changed the final state.
 6. **Join in the trajectory.** Done in build-order step 7 (ADR-0003, 2026-10-01 amendment): `trajlab postprocess` writes `trajectory.enriched.json` with checkpoint and compaction steps and each call's `CallRecord`, and refuses a trial whose records do not all join; the paper's figures should come from that file.
 7. **Compaction on real data.** No trial so far has compacted, so compaction recovery is tested only on synthetic events run through Harbor's converter; confirm it on the first long trial that does.
