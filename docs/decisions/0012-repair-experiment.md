@@ -43,3 +43,12 @@ The question is unchanged: does the failed trial's environment, its trajectory, 
 - `scripts/2026-10-02_repair_arms.py` is superseded by `trajlab repair`; the pilot's corpora keep pointing at it.
 - New corpus ids: `tb40-sonnet-v2` for first attempts, `tb40-repair-v2-<trial>-<arm>` for repairs.
 - Job dirs live in the shared folder `/srv/trajlab/jobs` on the Linux server (`corpus/jobs` is a symlink to it); every manifest of this experiment records it as `storage`.
+
+## Amendment (2026-10-02, 21:50): one failure per task, pruned repair checkpoints
+
+After 33 of 69 first attempts, 27 had failed (6 passed), against the planned half. Repairing every failure would have been about 720 repair trials, beyond the 48-hour budget, and at about 1.6 GB of checkpoint images per trial, beyond the disk.
+
+1. **One failure per task** (`trajlab repair --per-task 1`), replacing decision 5's "every repairable failed trial". Once all 3 of a task's attempts have ended, one of its repairable failures is drawn at random, seeded by `<prefix>:<task>`; the candidates, the draw, and why other trials were not candidates are in `_repair-inputs/<prefix>.selection.json`. Drawing only after every attempt ends keeps the choice from favoring fast failures. Tasks with no failure contribute no repair. About 20 failures x 4 arms x 3 repairs, about 240 repair trials.
+2. **Repair checkpoints are pruned** to each trial's final checkpoint image once its job finishes (`--prune`, the default); every `CheckpointRecord` stays, and `agent/checkpoints/pruned.json` lists the removed images. First-attempt checkpoints are all kept: they are the corpus.
+3. The unit of analysis becomes the task (one failure each); per-task 3-repair means, compared with `fresh`, are unchanged as the primary metric.
+4. The launcher started on 2026-10-02 at 19:47 queued every failure; it had launched no repair before it was restarted with these options, so no repair ran under the old rule.
