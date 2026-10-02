@@ -7,6 +7,7 @@ import pytest
 from tests.conftest import assemble_job_dir
 from trajlab.capture import harbor_runner
 from trajlab.capture.harbor_runner import RunPlan, RunRefusedError, execute, plan_run
+from trajlab.capture.pins import CLAUDE_CODE_VERSION
 from trajlab.contracts import CorpusManifest
 
 
@@ -27,7 +28,13 @@ def repo(tmp_path: Path) -> Path:
             {
                 "job_name": "hello-run",
                 "jobs_dir": str(tmp_path / "jobs"),
-                "agents": [{"name": "claude-code", "model_name": "anthropic/claude-sonnet-5"}],
+                "agents": [
+                    {
+                        "name": "claude-code",
+                        "model_name": "anthropic/claude-sonnet-5",
+                        "kwargs": {"version": CLAUDE_CODE_VERSION},
+                    }
+                ],
                 "tasks": [{"name": "hello-world/hello-world", "ref": "latest"}],
             }
         )
@@ -164,7 +171,7 @@ def test_execute_fails_when_job_dir_is_unusable(
 def _enable_hooks(repo: Path, settings: object) -> None:
     config = repo / "configs" / "harbor" / "hello.json"
     data = json.loads(config.read_text())
-    data["agents"][0]["kwargs"] = {"config": settings}
+    data["agents"][0]["kwargs"]["config"] = settings
     config.write_text(json.dumps(data))
     _git(repo, "commit", "-q", "-am", "hooks")
 
@@ -205,3 +212,52 @@ def test_plan_run_refuses_unreadable_settings(repo: Path, monkeypatch: pytest.Mo
     _enable_hooks(repo, "missing.json")
     with pytest.raises(RunRefusedError, match="cannot read agent settings"):
         _plan(repo)
+
+
+def _set_agent(repo: Path, agent: dict) -> None:
+    config = repo / "configs" / "harbor" / "hello.json"
+    data = json.loads(config.read_text())
+    data["agents"] = [agent]
+    config.write_text(json.dumps(data))
+    _git(repo, "commit", "-q", "-am", "agent")
+
+
+@pytest.mark.parametrize(
+    "agent",
+    [
+        {"name": "claude-code"},
+        {"name": "claude-code", "kwargs": {"version": "2.1.285"}},
+        {"name": "claude-code", "kwargs": {"version": "latest"}},
+        {
+            "import_path": "harbor.agents.installed.claude_code:ClaudeCode",
+            "kwargs": {"version": "2.1.0"},
+        },
+    ],
+    ids=["unpinned", "other-version", "latest", "subclass-other-version"],
+)
+def test_plan_run_refuses_claude_code_off_the_pin(repo: Path, agent: dict) -> None:
+    _set_agent(repo, agent)
+    with pytest.raises(RunRefusedError, match=f"pins Claude Code {CLAUDE_CODE_VERSION}"):
+        _plan(repo)
+
+
+def test_plan_run_leaves_other_agents_alone(repo: Path) -> None:
+    _set_agent(repo, {"name": "oracle"})
+    assert _plan(repo).corpus_id == "hello"
+
+
+def test_plan_run_refuses_unimportable_agent(repo: Path) -> None:
+    _set_agent(repo, {"import_path": "no.such.module:Agent"})
+    with pytest.raises(RunRefusedError, match="cannot import agent"):
+        _plan(repo)
+
+
+def test_committed_job_configs_use_the_pin() -> None:
+    from harbor.models.job.config import JobConfig
+
+    from trajlab.capture.harbor_runner import check_version_pins
+
+    configs = sorted((Path(__file__).parent.parent / "configs" / "harbor").glob("*.json"))
+    assert configs
+    for path in configs:
+        check_version_pins(JobConfig.model_validate_json(path.read_text()))

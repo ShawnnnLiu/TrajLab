@@ -56,6 +56,12 @@ One trial is one task executed by one attempt.
   Records are keyed by `trial_name`, not `trial_id`, because a running trial has no trial id on disk (ADR-0006).
 - **watcher lock** - `<jobs-dir>/.trajlab-watcher.lock`, held with `flock` by the one watcher of a jobs dir; `trajlab run` checks it before starting a job whose config enables hooks.
 
+- **task image / derived image** - the task image is what Harbor would run the trial on, pulled (`docker_image`) or built from the task's `environment/`; the derived image is the task image plus Harbor's agent install, made and cached by `PreinstalledDockerEnvironment` as `trajlab-preinstalled:<tag>` (ADR-0008).
+  "Pre-install" names the whole mechanism.
+  Not: "base image", which the Dockerfile `FROM` line already means.
+
+- **pin** - `trajlab.capture.pins.CLAUDE_CODE_VERSION`, the one Claude Code version every capture runs (ADR-0009); enforced by `trajlab run`, by the derived-image build, and in every trial container.
+
 ## Trajectory
 
 - **ATIF** - Agent Trajectory Interchange Format, Harbor RFC 0001; models in `harbor.models.trajectories`.

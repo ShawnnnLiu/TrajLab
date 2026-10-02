@@ -1,0 +1,85 @@
+{
+  "corpus_id": "tb21-preinstall-check-v1",
+  "created_at": "2026-10-01T02:21:00.957700Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "3a35ec42852debc3724cc811ce1a11e0c3dcb687",
+  "repo_dirty": false,
+  "config_path": "configs/harbor/tb21-preinstall-check-v1.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "high",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 1,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 2.0,
+  "checkpoint_every": 1,
+  "tasks": [
+    {
+      "name": "terminal-bench/kv-store-grpc",
+      "digest": "sha256:973c5d4c111fb61a344457936f1c36400acd2d9e44389e7b319586fe23a7a307"
+    },
+    {
+      "name": "terminal-bench/write-compressor",
+      "digest": "sha256:d9ddd9a8e925e2c566b37b2492cbf995afecefe58874e4043ef78d7f3c892c7e"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb21-preinstall-check-v1",
+      "job_id": "5ec2600b-6681-4acf-91cc-219926b9c4e5",
+      "job_config": {
+        "job_name": "tb21-preinstall-check-v1",
+        "jobs_dir": "corpus/jobs",
+        "agent_timeout_multiplier": 2.0,
+        "n_concurrent_trials": 2,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "high",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench-2-1",
+            "ref": "sha256:7d7bdc1cbedad549fc1140404bd4dc45e5fd0ea7c4186773687d177ad3a0699a",
+            "task_names": [
+              "terminal-bench/kv-store-grpc",
+              "terminal-bench/write-compressor"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "a42139e9-3e26-442f-a3e3-db562e7261a0",
+          "trial_name": "kv-store-grpc__EWb8gK3",
+          "task_name": "terminal-bench/kv-store-grpc",
+          "job_id": "5ec2600b-6681-4acf-91cc-219926b9c4e5",
+          "job_dir": "tb21-preinstall-check-v1",
+          "claude_session_id": "c2aef67e-cd5f-40a5-b2ec-6e2011555624"
+        },
+        {
+          "trial_id": "b8386615-0273-45f7-a6a4-689ef2a7750c",
+          "trial_name": "write-compressor__LRWRGNh",
+          "task_name": "terminal-bench/write-compressor",
+          "job_id": "5ec2600b-6681-4acf-91cc-219926b9c4e5",
+          "job_dir": "tb21-preinstall-check-v1",
+          "claude_session_id": "cc34a1a0-5734-4a22-a371-c71f6d7da583"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}
