@@ -227,7 +227,13 @@ def main() -> int:
             commit_new_manifests()
             log = (JOBS_DIR / f"{job_name}.log").open("wb")
             running[job_name] = subprocess.Popen(
-                [str(Path(sys.executable).parent / "trajlab"), "run", str(config_path)],
+                [
+                    str(Path(sys.executable).parent / "trajlab"),
+                    "run",
+                    str(config_path),
+                    "--corpus-id",
+                    job_name,
+                ],
                 stdout=log,
                 stderr=subprocess.STDOUT,
             )
