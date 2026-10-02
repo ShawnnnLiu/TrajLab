@@ -18,7 +18,7 @@ Last updated 2026-10-01; add to it as evidence changes, and do not delete supers
 
 - **Mechanism:** the hook also fires on `Stop` and `StopFailure`; the watcher records the end-of-turn state as a stop checkpoint, or as a stop record naming the checkpoint that already holds it (ADR-0011).
 - **Why it matters:** this is the state the verifier grades, and it includes writes by background jobs that outlive the last hooked call.
-- **Evidence:** offline tests; real-trial verification in ADR-0011 once recorded.
+- **Evidence:** a real trial whose background job kept writing after the last hooked call: the stop checkpoint caught `~/app/tick.txt` changing, which no other checkpoint held (ADR-0011, Verification).
 
 ### C2. A call gets a checkpoint only if it changed the filesystem, and this is measured, not inferred
 

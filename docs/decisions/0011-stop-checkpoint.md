@@ -24,3 +24,10 @@ Claude Code 2.1.278 fires `Stop` when the agent's turn ends and `StopFailure` wh
 - The final checkpoint is the state at the end of the agent's turn, before Harbor runs the verifier; the verifier's own effects are outside capture.
 - The stop request id is not an ATIF `tool_call_id`; build-order step 7 places stop checkpoints after the last agent step, keyed by `trigger`.
 - A capture change: corpora that use it need a new `corpus_id`.
+
+## Verification (2026-10-01)
+
+A real trial (Claude Code 2.1.278, `--gate change`, pre-installed hello-world image) whose only Bash call wrote `/app/hello.txt` and started `nohup` a job that rewrote `/app/tick.txt` every second, after which the agent ended its turn.
+`Stop` fired under Harbor's `--print` run; the watcher measured `~/app/tick.txt` as changed since the call's checkpoint and took stop checkpoint seq 2 (`trigger: "stop"`, id `stop_1790907280_166`); reward 1.0.
+Without this ADR that write would have been in no checkpoint.
+The hook script was also run under BusyBox `sh` with a `Stop` input whose `last_assistant_message` contained an escaped decoy id; it named the request `stop_...` and ignored the decoy.
