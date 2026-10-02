@@ -1,0 +1,112 @@
+{
+  "corpus_id": "tb40-sonnet-v1b",
+  "created_at": "2026-10-02T06:23:34.200661Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "232e78cf3aacc0c3e7e5fe61ce83d8e25479c91f",
+  "repo_dirty": false,
+  "config_path": "configs/harbor/tb40-sonnet-v1b.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 1,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 0.25,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "tasks": [
+    {
+      "name": "terminal-bench/cargo-flight-dispatch",
+      "digest": "sha256:18a1c2670ce4be0e6752f48ed6c750281d7f97db025f5e74edc6c8728f62f5b5"
+    },
+    {
+      "name": "terminal-bench/interleaved-vigenere",
+      "digest": "sha256:238a75a32aad5e60b33a22ac53087790e95b752c6272f41d724407f198df4a14"
+    },
+    {
+      "name": "terminal-bench/risk-scorer-replay",
+      "digest": "sha256:3645f552b5485633a67027130c9d471eb1a364f1451b6ada140bacd148f9cd87"
+    },
+    {
+      "name": "terminal-bench/session-window-debug",
+      "digest": "sha256:f7e05e0d4c0e90d7050445fd158db514158272c50aafa1b2446ef3f68bd01182"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb40-sonnet-v1b",
+      "job_id": "76d419a9-010f-46b4-8bed-9e60e33c7d78",
+      "job_config": {
+        "job_name": "tb40-sonnet-v1b",
+        "jobs_dir": "corpus/jobs",
+        "agent_timeout_multiplier": 0.25,
+        "n_concurrent_trials": 2,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "sha256:39d9f44b40420cde8fdcc087579c0d72a7e14fa3656d603c3f0d22fb35e27732",
+            "task_names": [
+              "terminal-bench/interleaved-vigenere",
+              "terminal-bench/risk-scorer-replay",
+              "terminal-bench/cargo-flight-dispatch",
+              "terminal-bench/session-window-debug"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "129b703e-e1bc-4925-86f0-d16ddb50d6f2",
+          "trial_name": "cargo-flight-dispatch__jLTyuYn",
+          "task_name": "terminal-bench/cargo-flight-dispatch",
+          "job_id": "76d419a9-010f-46b4-8bed-9e60e33c7d78",
+          "job_dir": "tb40-sonnet-v1b",
+          "claude_session_id": "dd489423-4b96-4818-918a-d3928bb3aeb9"
+        },
+        {
+          "trial_id": "84aae337-766d-474f-8a94-460456f22a1f",
+          "trial_name": "interleaved-vigenere__4ztHmZn",
+          "task_name": "terminal-bench/interleaved-vigenere",
+          "job_id": "76d419a9-010f-46b4-8bed-9e60e33c7d78",
+          "job_dir": "tb40-sonnet-v1b",
+          "claude_session_id": "13be5072-6a11-41ce-bae0-a7b9c96fcab1"
+        },
+        {
+          "trial_id": "5c47810a-7c63-48f8-9907-ea626ebcdb41",
+          "trial_name": "risk-scorer-replay__5UBbdJL",
+          "task_name": "terminal-bench/risk-scorer-replay",
+          "job_id": "76d419a9-010f-46b4-8bed-9e60e33c7d78",
+          "job_dir": "tb40-sonnet-v1b",
+          "claude_session_id": "2847ab0a-dc41-457f-817d-d9791eeec5ba"
+        },
+        {
+          "trial_id": "c57609ec-8703-4f61-b94a-5c50ca8ecc5a",
+          "trial_name": "session-window-debug__askuDp8",
+          "task_name": "terminal-bench/session-window-debug",
+          "job_id": "76d419a9-010f-46b4-8bed-9e60e33c7d78",
+          "job_dir": "tb40-sonnet-v1b",
+          "claude_session_id": "6b23c6d5-89ba-4546-8c13-8658507c0332"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}

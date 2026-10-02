@@ -440,3 +440,25 @@ def test_cached_image_without_hash_label_is_refused(
 
     with pytest.raises(PreinstallError, match="agent_sha256"):
         asyncio.run(_environment(tmp_path / "again", fake, monkeypatch).prepare_image(False))
+
+
+def test_separate_verifier_environment_starts_as_harbor_would(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake = FakeDocker()
+    env = _environment(tmp_path, fake, monkeypatch)
+    # Harbor builds a task's separate verifier environment from tests/, with the same class.
+    tests_dir = env.environment_dir.parent / "tests"
+    tests_dir.mkdir()
+    env.environment_dir = tests_dir
+    seen: dict[str, Any] = {}
+
+    async def harbor_start(self: DockerEnvironment, force_build: bool) -> None:
+        seen.update(force_build=force_build, docker_image=self.task_env_config.docker_image)
+
+    monkeypatch.setattr(DockerEnvironment, "start", harbor_start)
+    asyncio.run(env.start(force_build=False))
+
+    assert seen == {"force_build": False, "docker_image": TASK_IMAGE}
+    assert fake.calls == []
+    assert not (env.trial_paths.trial_dir / PREINSTALL_RECORD_FILENAME).exists()

@@ -47,6 +47,9 @@ class CheckpointResumeEnvironment(PreinstalledDockerEnvironment):
 
     @override
     async def start(self, force_build: bool) -> None:
+        if not self.is_agent_environment():
+            await DockerEnvironment.start(self, force_build=force_build)
+            return
         record = await self.prepare_image(force_build)
         checkpoint_id = await self.docker.image_id(self.checkpoint_image)
         if checkpoint_id is None:

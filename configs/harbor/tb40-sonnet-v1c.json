@@ -1,0 +1,32 @@
+{
+    "job_name": "tb40-sonnet-v1c",
+    "jobs_dir": "corpus/jobs",
+    "n_concurrent_trials": 2,
+    "agent_timeout_multiplier": 0.25,
+    "agents": [
+        {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+                "reasoning_effort": "medium",
+                "version": "2.1.278",
+                "config": "configs/claude-code/settings.hooks.json"
+            }
+        }
+    ],
+    "datasets": [
+        {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "4.0.0",
+            "task_names": [
+                "terminal-bench/fin-saccr-rwa",
+                "terminal-bench/music-harmony",
+                "terminal-bench/foodstuff-beta-activity",
+                "terminal-bench/roy-polymorph-cn"
+            ]
+        }
+    ],
+    "environment": {
+        "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+    }
+}

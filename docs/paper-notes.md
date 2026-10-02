@@ -3,7 +3,7 @@
 What the Dec 4 paper can claim about how trajectories and checkpoints are captured, the evidence for each claim, and what is still missing.
 Every number here points at the ADR, script, or corpus manifest it comes from, so a sentence in the paper can be traced to data.
 Terms follow `docs/glossary.md`.
-Last updated 2026-10-02; add to it as evidence changes, and do not delete superseded entries, mark them.
+Last updated 2026-10-02 (overnight repair pilot); add to it as evidence changes, and do not delete superseded entries, mark them.
 
 ## Claims and their evidence
 
@@ -81,6 +81,9 @@ Last updated 2026-10-02; add to it as evidence changes, and do not delete supers
   `resume-scheme-sonnet-v1`: Sonnet from #10 of 16 of Haiku's failed schemelike trial (0.0, 10 of 63 tests), 1.0 with 63 of 63; its first act was to revert Haiku's edit to the reference `interp.py`.
 - **Confound to state:** a resumed agent sees messages the original did not: Claude Code's notices about stopped background tasks, its "Continue from where you left off" turn, and Harbor's re-sent instruction. The kv-store failure was a server run as a Claude Code background task, which dies when the agent exits; the stopped-task notice alone led both models to restart it, so that pair shows a resume effect, not model strength.
 - **Cost:** Claude Code reports $0 for a `--resume` run and Harbor counts the loaded history (`docs/upstream-notes.md`); resumed costs here count only messages after the cut.
+  **Superseded in part (2026-10-02 overnight):** with Claude Code 2.1.278 on TB 4.0, `total_cost_usd` for a `--resume` run was the source trial's cost plus the new messages', not $0, on all 16 resumed repairs; count only messages whose `uuid` is not in the source session (`docs/research/2026-10-02_tb40-repair-pilot.md`).
+- **Repair pilot (2026-10-02 overnight):** 8 failed Sonnet 5.5 TB 4.0 trials, each repaired once under four arms (fresh, state, state-traj, traj); 2 of 32 passed, both from the final checkpoint of the one failure that had left near-finished work on disk (layout-config-recreation2: `state` and `state-traj` passed, `traj` and `fresh` did not).
+  Pilot only: n = 1 per cell, amd64 emulation, intermediate checkpoint images pruned for disk (`docs/research/2026-10-02_tb40-repair-pilot.md`).
 
 ## Reproducibility facts to report
 
