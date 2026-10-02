@@ -113,6 +113,7 @@ def repair(
         int, typer.Option(min=0, help="Resumes per repair job for unfinished or infra trials.")
     ] = 3,
     poll: Annotated[float, typer.Option(help="Seconds between passes.")] = 30.0,
+    storage: StorageOption = None,
     manifests_dir: ManifestsDirOption = MANIFESTS_DIR,
 ) -> None:
     """Repair every failed trial of the source jobs under four arms (ADR-0012). Restartable."""
@@ -134,6 +135,7 @@ def repair(
         hold_below_gb=hold_below_gb,
         usage_backoff_s=usage_backoff,
         max_resumes=max_resumes,
+        storage=storage,
         watcher_running=watcher_running,
     ).run(poll_s=poll)
 

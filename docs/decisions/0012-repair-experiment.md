@@ -10,6 +10,9 @@ The question is unchanged: does the failed trial's environment, its trajectory, 
 
 ## Decision
 
+0. **This is Experiment 1, and its checkpoints are `docker commit` only.** Every checkpoint is a filesystem snapshot of the trial container (ADR-0004); no CRIU, so no process, memory, or shell state is captured or restored, and neither StateFork nor Waypoint is used.
+   A `state` or `state-traj` repair therefore starts from the failed trial's files, not its running processes: anything the failed trial left running (a server, a background job) is gone.
+   A later experiment with CRIU-based state needs its own ADR superseding ADR-0004 and new corpus ids.
 1. **Benchmark:** Terminal-Bench 4.0 (`terminal-bench/terminal-bench@4.0.0`). This settles the version for this experiment; the TB 2.1 recommendation of 2026-09-24 stays a recommendation for any other corpus.
 2. **Tasks:** the 23 TB 4.0 tasks with `expert_time_estimate_hours` from 1.5 to 4, no GPU, a single container, at most 4 CPUs and 8 GB declared (`configs/harbor/tb40-sonnet-v2.json`). Compressed environment images are 0.04 to 3.6 GB on amd64.
 3. **First attempts:** 3 per task (`n_attempts: 3`), Claude Sonnet 5.5 at medium effort, Claude Code 2.1.278 (ADR-0009), agent cap 4 h (`agent_timeout_multiplier: 0.5` of TB 4.0's 8 h), captured with `trajlab watch --every 1 --gate change` on the pre-installed image (ADR-0008, ADR-0010, ADR-0011).
@@ -39,3 +42,4 @@ The question is unchanged: does the failed trial's environment, its trajectory, 
 - The pilot's confounds remain and are reported: the note's meaning differs across arms, and resumed arms see Harbor's re-sent instruction and Claude Code's notices.
 - `scripts/2026-10-02_repair_arms.py` is superseded by `trajlab repair`; the pilot's corpora keep pointing at it.
 - New corpus ids: `tb40-sonnet-v2` for first attempts, `tb40-repair-v2-<trial>-<arm>` for repairs.
+- Job dirs live in the shared folder `/srv/trajlab/jobs` on the Linux server (`corpus/jobs` is a symlink to it); every manifest of this experiment records it as `storage`.

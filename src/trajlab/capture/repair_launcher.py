@@ -329,6 +329,7 @@ class Launcher:
     hold_below_gb: float = 50.0
     usage_backoff_s: float = 1800.0
     max_resumes: int = 3
+    storage: str | None = None
     watcher_running: Callable[[Path], bool] = lambda _: True
     tag_lookup: Callable[[str], str | None] = checkpoint_tag
     clock: Callable[[], float] = time.time
@@ -556,6 +557,8 @@ class Launcher:
             job = self.pending.pop(0)
             command = [str(Path(sys.executable).parent / "trajlab"), "run", str(job.config_path)]
             command += ["--corpus-id", job.name, "--manifests-dir", str(self.manifests_dir)]
+            if self.storage is not None:
+                command += ["--storage", self.storage]
             if self.env_file is not None:
                 command += ["--env-file", str(self.env_file)]
             self.launch(job.name, command)
@@ -571,7 +574,7 @@ class Launcher:
                 corpus_id=name,
                 repo=repo_state(root),
                 config_path=config.as_posix(),
-                storage=None,
+                storage=self.storage,
             )
             write_manifest(manifest, self.manifests_dir, overwrite=True)
         except ManifestError:

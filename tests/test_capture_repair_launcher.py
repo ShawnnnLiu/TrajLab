@@ -277,13 +277,14 @@ def test_launch_respects_max_running(failed_job: Path, monkeypatch: pytest.Monke
         return FakeProcess()
 
     monkeypatch.setattr(subprocess, "Popen", popen)
-    runner = launcher(failed_job, hold_below_gb=0.0)
+    runner = launcher(failed_job, hold_below_gb=0.0, storage="/srv/trajlab/jobs")
     runner.inputs_root.mkdir(parents=True)
     runner.discover()
     runner.launch_ready()
     # 6 slots, 3 attempts per job, no repair trial finished yet: two jobs at once.
     assert len(launched) == 2 and len(runner.pending) == 2
     assert [c[1] for c in launched] == ["run", "run"]
+    assert launched[0][-2:] == ["--storage", "/srv/trajlab/jobs"]
     assert sorted(runner.running) == [
         repair_job_name("rep-v1", FIXTURE_TRIAL_NAME, arm) for arm in ("fresh", "state")
     ]
