@@ -32,3 +32,10 @@ Claude Code 2.1.278's final stream-json `result` event then reports `total_cost_
 Harbor's per-model `model_usage` counts every assistant message in the session file, including the loaded history, so it charges the resumed trial for the source trial's tokens (`resume-kv-sonnet-v1`: $0.036 of Haiku usage from the source trial).
 Workaround: price only the assistant messages after the cut point of the loaded session, deduplicated by message id, with litellm's table.
 Upstream option: Harbor counts usage only for messages written after the seeded session's last event.
+
+## 2026-10-03: No job-level network policy
+
+A task's network policy (`public`, `no-network`, `allowlist`) comes only from its `task.toml`. A job config has only `extra_allowed_hosts`, which merge into a non-public policy and are ignored with a warning on a `public` task (`harbor/trial/network_policy.py`, `merge_extra_allowlists`). All 23 TB 4.0 tasks of ADR-0012 are `public`, so a run cannot restrict the agent's network without changing the tasks.
+Claude Code runs inside the trial container, so a restricted run needs an allowlist with the Anthropic API host, applied to the agent phase only: two of the 23 verifiers install packages at verify time.
+Workaround: none yet; deferred to a later experiment (`docs/research/2026-10-03_tb40-setup-vs-anthropic.md`).
+Upstream option: a job-level override of the agent-phase policy, e.g. `agent.network_mode` plus `allowed_hosts` in the trial config.

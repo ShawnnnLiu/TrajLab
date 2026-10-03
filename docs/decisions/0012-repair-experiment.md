@@ -148,3 +148,11 @@ Round 1 finished on 2026-10-03 at 12:52 UTC (`docs/research/2026-10-03_tb40-repa
 - Disk: at launch, 218 GB free on the jobs disk. Round 1's 252 repairs keep 41.8 GB of checkpoint images after pruning (282 images); round 2 is expected to be similar. The launcher's 50 GB hold stays.
 - Repairs that follow the protocol are expected to run longer than round 1's (median agent time 138 to 292 s per arm), so wall time is the budget risk. Usage limits pause launches as before.
 - The first launch (2026-10-03, about 19:24 UTC) ran no trial: Harbor validates agent kwargs against the agent's `options_model` and rejected `repair_note` as an unknown option, so every job exited before creating its job dir. `RepairClaudeCode` now declares `RepairClaudeCodeOptions` (Claude Code's options plus `repair_note`, which maps to no command-line flag or environment variable). The failed-start logs are in `_repair-inputs/_superseded-2026-10-03-v3-kwarg/`.
+
+## Amendment (2026-10-03, night): setup differences from Anthropic's reported TB 4.0 setup
+
+Recorded, not changed. Every corpus of this experiment, round 1 and the running round 2 (`tb40-repair-v3`), runs Claude Code in normal mode at medium effort with public network, where the Claude Sonnet 5.5 system card (§8.5) reports `--bare` mode, max effort, and no internet egress with resources pre-cached into the images. The full list, with sources, is in `docs/research/2026-10-03_tb40-setup-vs-anthropic.md`.
+
+1. No run of this experiment changes; round 2 continues as launched.
+2. A custom agent-phase allowlist, `--bare`, and pre-caching are deferred to a later, larger experiment, which needs its own ADR and new corpus ids.
+3. Absolute pass rates from this experiment are not comparable with Anthropic's 70.6%; comparisons between arms are on a shared setup.
