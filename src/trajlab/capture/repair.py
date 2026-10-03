@@ -10,7 +10,7 @@ conversation they load, not in what the instruction says. Use it in a job config
 
 from typing import Any, override
 
-from harbor.agents.installed.claude_code import ClaudeCode
+from harbor.agents.installed.claude_code import ClaudeCode, ClaudeCodeOptions
 from harbor.environments.base import BaseEnvironment
 from harbor.models.agent.context import AgentContext
 
@@ -41,12 +41,23 @@ def repair_instruction(note: str, instruction: str) -> str:
     return f"{note}\n\n{instruction}"
 
 
+class RepairClaudeCodeOptions(ClaudeCodeOptions):
+    """Claude Code's options plus the note. Harbor validates job kwargs against this model before
+    a job starts and rejects unknown ones; with no `Cli` or `Env` annotation, the note never
+    reaches Claude Code's command line or environment."""
+
+    repair_note: str = REPAIR_NOTE
+
+
 class RepairClaudeCode(ClaudeCode):
     """Harbor's Claude Code agent; the instruction it pipes in starts with `repair_note`."""
 
-    def __init__(self, *args: Any, repair_note: str = REPAIR_NOTE, **kwargs: Any) -> None:
-        self.repair_note = repair_note
+    options_model = RepairClaudeCodeOptions
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
+        assert isinstance(self.options, RepairClaudeCodeOptions)
+        self.repair_note = self.options.repair_note
 
     @override
     async def run(
