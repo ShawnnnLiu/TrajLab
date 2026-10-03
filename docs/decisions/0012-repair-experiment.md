@@ -52,3 +52,58 @@ After 33 of 69 first attempts, 27 had failed (6 passed), against the planned hal
 2. **Repair checkpoints are pruned** to each trial's final checkpoint image once its job finishes (`--prune`, the default); every `CheckpointRecord` stays, and `agent/checkpoints/pruned.json` lists the removed images. First-attempt checkpoints are all kept: they are the corpus.
 3. The unit of analysis becomes the task (one failure each); per-task 3-repair means, compared with `fresh`, are unchanged as the primary metric.
 4. The launcher started on 2026-10-02 at 19:47 queued every failure; it had launched no repair before it was restarted with these options, so no repair ran under the old rule.
+
+## Amendment (2026-10-03): three additions after round 1; to be built once the round 1 runs finish
+
+Nothing below is implemented yet. The round 1 runs (`tb40-repair-v2`, decisions 0-8 and the 2026-10-02 amendment) continue unchanged; these are built after they finish.
+
+### Context: round 1 so far
+
+Interim counts as of 2026-10-03 00:43, runs still going (repair trials passed / repair trials finished):
+
+| `fresh` | `state` | `state-traj` | `traj` |
+|---|---|---|---|
+| 1/33 | 4/35 | 7/33 | 10/33 |
+
+The ordering so far: the prior conversation helps, and starting from the failed state hurts once the conversation is there (`traj` 10 vs `state-traj` 7); without a conversation, the failed state beats a restart (`state` 4 vs `fresh` 1), on tasks with partial work worth keeping. Small n: a direction, not a significant result.
+
+This is the opposite of Recovery-Bench (letta-ai/recovery-bench), where giving the full history made recovery worst. Two differences could explain it, and round 1 cannot separate them:
+1. **Delivery.** Recovery-Bench puts a transcript in the prompt; `traj` resumes the native conversation (`claude --resume`).
+2. **Hidden reasoning.** A resumed conversation passes the model's own earlier thinking blocks back to the API (they are encrypted in the session file, but sent), which no transcript can contain.
+
+Six tasks are 0/3 in every arm so far, mostly from first attempts that ended their turn in under a minute.
+
+### Decision
+
+1. **New arm `traj-text`: the history as a plain transcript.**
+   - Task image, new conversation, `RepairClaudeCode` with the same note; after the note and before the instruction, the failed trial rendered as text: the instruction, then per agent step the agent's message, its tool calls, and their outputs.
+   - Rendered from Harbor's `agent/trajectory.json` (`harbor.models.trajectories`), never from thinking blocks, which are encrypted.
+   - Each tool output is truncated by one fixed rule: its first and last 2,000 characters, with a marker giving the number of characters cut. The rule, and per failure the rendered size and the number of outputs cut, go in the `RepairSource` record and the corpus manifest.
+   - The transcript is in the prompt, not a file in the environment, so the treatment is "the agent has read it", as in Recovery-Bench.
+   - Same failures as round 1 (the draw in `_repair-inputs/tb40-repair-v2.selection.json`), 3 repairs each, so `traj-text` pairs with the existing arms. About 66 repair trials.
+   - No `state-traj-text` arm: round 1 already answers fresh versus state.
+   - **What `traj` has that `traj-text` lacks.** Both carry the same failed attempt; they differ in how it is delivered, and the difference is not only format. `traj` resumes the native conversation, so the repair agent gets (a) its own earlier reasoning, as thinking blocks sent back to the API, which a transcript cannot contain; (b) every tool output in full, where `traj-text` truncates; and (c) the history as its own multi-turn conversation, its assistant turns and tool results, where `traj-text` gets one user message describing someone's attempt. These three together are the treatment "conversation versus document"; the arms cannot separate them, and results are reported as that bundle, not as format alone.
+   - Reading: if `traj-text` matches `traj`, the Recovery-Bench disagreement is about tasks, model, or harness; if it falls toward `fresh`, delivery as a conversation matters, through one or more of (a) to (c).
+2. **New arm `traj-ckpt`: the checkpoints as a tool, on a fresh environment.** This is the headline checkpoint arm, compared with `traj`.
+   - Task image, the failed trial's native session resumed (as `traj`), plus a read-only tool to inspect the failed trial's checkpoints (all of them, which ADR-0012's amendment keeps for first attempts).
+   - The tool inspects; it does not set the starting state. Round 1 says starting from the failed state costs repairs, so the planned "resume-state + conversation + checkpoint tool" arm is demoted to secondary: `state-traj-ckpt`, run only if budget allows.
+   - The note is unchanged; the tool is announced only by its own description, so `traj-ckpt` differs from `traj` only by the tool being available. Whether and how often the agent calls it is recorded as a secondary outcome.
+3. **Round 2: a repair protocol, after the two arms above.**
+   - Every arm gets the same protocol in place of round 1's one-line note: diagnose why the previous attempt failed and write the diagnosis down before editing; then a fixed gather, fix, verify loop; do not end the turn without running a check. (Self-Debugging, RepairAgent, FailForge's diagnosis pass.)
+   - Round 1 stays as the naive-note baseline; round 2 is a new corpus, `tb40-repair-v3-<trial>-<arm>`, on the same failures.
+   - The written diagnosis is recorded as a second outcome, so arms can be told apart even where repairs stay at zero. Capture records it; how it is scored is analysis and is decided before round 2 starts, not here.
+
+### Before building
+
+- Read three short trials from the all-zero tasks and write down why each stopped (input to decision 3).
+- Read `recovery_mixin.py` in letta-ai/recovery-bench to confirm the transcript goes in the prompt and how they truncate (input to decision 1).
+- Design the checkpoint tool's interface. Checkpoint images live in the host's Docker; the trial container cannot reach them, so the tool needs a channel (a host-side server, or data exported into the container). Its interface and what it exposes need their own section here before `traj-ckpt` runs.
+
+### Consequences
+
+- `RepairArm` in `contracts/repair.py` gains `traj-text`, `traj-ckpt`, and, if run, `state-traj-ckpt`; the arm sets that decide inputs (`CHECKPOINT_ARMS`, `SESSION_ARMS`) gain a transcript set and a tool set. New arm names give new corpus ids under the existing `tb40-repair-v2-<trial>-<arm>` pattern.
+- **Prompt size limit.** Harbor passes the instruction as one `docker exec -e` argument (`harbor/environments/docker/docker.py`, `exec`), which Linux caps at 128 KiB per argument (`MAX_ARG_STRLEN`). A rough render of the 21 chosen round 1 failures with the 2,000-character rule (2026-10-03, not the final format) gives 8 to 148 KB: 2 over the cap (vba-userform-port, pretrain-shard-corruption) and 2 more within a few KB of it (sound-change-cascade, layout-config-recreation2), before the note and instruction are added. The longest failures are the ones the arm most needs, so dropping them or tightening the rule for them only is not allowed. The prompt is delivered by our `RepairClaudeCode` subclass instead of through Harbor's argument, and the limit is recorded in `docs/upstream-notes.md`.
+- **`traj` versus `traj-text` is a bundle, stated in the paper as such:** reasoning (cannot be removed), truncation (the per-failure count of cut outputs allows a check on failures with none cut), and conversation form (decision 1). The resumed arms also keep ADR-0012's confounds (Harbor's re-sent instruction, Claude Code's notices).
+- If the source session was compacted, `traj` resumes the compacted context while `traj-text` renders the full trajectory; such failures are flagged in the record.
+- Budget: `traj-text` about 66 trials of short duration; `traj-ckpt` about 66 trials at round 1 durations; round 2 repeats every arm it includes on the same failures, so its arm list is fixed when it is launched, against the remaining budget.
+- Oct 9 exhibit: repair rate by arm, round 1's four arms plus `traj-text` and `traj-ckpt` as they land; caveats on the slide: n of about 33 per arm, and the Recovery-Bench contrast is confounded by hidden reasoning even after `traj-text`.
