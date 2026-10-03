@@ -12,6 +12,7 @@ from harbor.models.trial.result import TrialResult
 from tests.conftest import FIXTURE_TRIAL_NAME, assemble_job_dir, make_checkpoint, write_capture
 from trajlab.capture import repair_launcher
 from trajlab.capture.pins import CLAUDE_CODE_VERSION
+from trajlab.capture.repair import REPAIR_PROTOCOL
 from trajlab.capture.repair_launcher import (
     INPUTS_DIRNAME,
     Launcher,
@@ -421,6 +422,43 @@ def test_per_task_draws_one_failure_reproducibly(failed_job: Path) -> None:
     again = launcher(failed_job, per_task=1)
     again.discover()
     assert [job.name for job in again.pending] == [job.name for job in runner.pending]
+
+
+def test_later_round_repairs_the_same_failures_with_its_note(failed_job: Path) -> None:
+    three_attempts(failed_job, (0.0, 1.0))
+    first = launcher(failed_job, per_task=1)
+    first.inputs_root.mkdir(parents=True)
+    first.discover()
+    (drawn,) = first.selection.values()
+    # A different prefix would draw with a different seed; reusing the draw pins the failures.
+    second = launcher(
+        failed_job,
+        prefix="rep-v2",
+        per_task=1,
+        same_failures_as="rep-v1",
+        repair_note=REPAIR_PROTOCOL,
+    )
+    second.discover()
+    (reused,) = second.selection.values()
+    assert reused == drawn | {"reused_from": "rep-v1"}
+    assert (second.inputs_root / "rep-v2.selection.json").is_file()
+    assert {job.source.source_trial for job in second.pending} == set(drawn["chosen"])
+    assert all(job.name.startswith("rep-v2-") for job in second.pending)
+    for job in second.pending:
+        config = json.loads(job.config_path.read_text())
+        assert config["agents"][0]["kwargs"]["repair_note"] == REPAIR_PROTOCOL
+    for job in first.pending:
+        config = json.loads(job.config_path.read_text())
+        assert "repair_note" not in config["agents"][0]["kwargs"]
+
+
+def test_later_round_draws_no_new_task(failed_job: Path) -> None:
+    three_attempts(failed_job, (0.0, 1.0))
+    runner = launcher(failed_job, prefix="rep-v2", per_task=1, same_failures_as="rep-v1")
+    runner.inputs_root.mkdir(parents=True)
+    (runner.inputs_root / "rep-v1.selection.json").write_text("{}")
+    runner.discover()
+    assert runner.selection == {} and runner.pending == []
 
 
 def test_finished_repair_job_keeps_only_final_images(failed_job: Path) -> None:

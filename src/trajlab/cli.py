@@ -22,6 +22,7 @@ from trajlab.capture.corpus import (
 )
 from trajlab.capture.discover import compose_project_name, iter_trial_dirs, load_trial_config
 from trajlab.capture.harbor_runner import RunRefusedError, execute, plan_run, repo_relative
+from trajlab.capture.repair import REPAIR_NOTES
 from trajlab.capture.repair_launcher import Launcher, check_sources
 from trajlab.checkpoint.backends.docker_commit import DockerCommitBackend
 from trajlab.checkpoint.watcher import (
@@ -86,6 +87,11 @@ def run(
     raise typer.Exit(code=execute(plan, storage=storage))
 
 
+class Note(StrEnum):
+    naive = "naive"
+    protocol = "protocol"
+
+
 @app.command()
 def repair(
     source_jobs: Annotated[
@@ -129,10 +135,24 @@ def repair(
             "records stay."
         ),
     ] = True,
+    note: Annotated[
+        Note,
+        typer.Option(
+            help="The note before the instruction: round 1's one line, or round 2's protocol."
+        ),
+    ] = Note.naive,
+    same_failures_as: Annotated[
+        str | None,
+        typer.Option(
+            help="Repair the failures an earlier round drew (its prefix); needs --per-task."
+        ),
+    ] = None,
     storage: StorageOption = None,
     manifests_dir: ManifestsDirOption = MANIFESTS_DIR,
 ) -> None:
     """Repair every failed trial of the source jobs under four arms (ADR-0012). Restartable."""
+    if same_failures_as is not None and per_task is None:
+        raise typer.BadParameter("--same-failures-as reuses a per-task draw; pass --per-task")
     if env_file is None and DEFAULT_ENV_FILE.is_file():
         env_file = DEFAULT_ENV_FILE
     # The source job may have been started a moment ago; Harbor writes its config.json first.
@@ -153,6 +173,9 @@ def repair(
         storage=storage,
         per_task=per_task,
         prune=prune,
+        # Round 1's configs carry no note; keep the naive note implicit so they stay comparable.
+        repair_note=None if note is Note.naive else REPAIR_NOTES[note],
+        same_failures_as=same_failures_as,
         watcher_running=watcher_running,
     ).run(poll_s=poll)
 

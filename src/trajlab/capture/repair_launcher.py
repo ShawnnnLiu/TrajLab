@@ -20,6 +20,9 @@ same note that an earlier attempt failed):
 
 A failure is repaired only if every arm can start: it has a final checkpoint whose image still
 exists and exactly one native session. Otherwise no arm runs, so the arms stay paired.
+
+A later round repairs the same failures with a different note (`repair_note`, passed to every
+arm) by reusing an earlier round's draw (`same_failures_as`, its prefix).
 """
 
 import json
@@ -195,8 +198,12 @@ def repair_job_config(
     attempts: int,
     checkpoint_image: str | None,
     session_file: Path | None,
+    repair_note: str | None = None,
 ) -> dict[str, Any]:
-    """The Harbor job config of one repair job: the source job's agent, model, and dataset."""
+    """The Harbor job config of one repair job: the source job's agent, model, and dataset.
+
+    `repair_note` replaces `RepairClaudeCode`'s default note; None leaves it out of the config.
+    """
     source_agent = source_job_config["agents"][0]
     agent: dict[str, Any] = {
         "import_path": REPAIR_AGENT,
@@ -207,6 +214,8 @@ def repair_job_config(
             "config": HOOKS,
         },
     }
+    if repair_note is not None:
+        agent["kwargs"]["repair_note"] = repair_note
     if arm in SESSION_ARMS:
         if session_file is None:
             raise ValueError(f"arm {arm} needs a session file")
@@ -342,6 +351,8 @@ class Launcher:
     storage: str | None = None
     per_task: int | None = None
     prune: bool = True
+    repair_note: str | None = None
+    same_failures_as: str | None = None
     watcher_running: Callable[[Path], bool] = lambda _: True
     tag_lookup: Callable[[str], str | None] = checkpoint_tag
     remove_image: Callable[[str], bool] = lambda tag: remove_checkpoint_image(tag)
@@ -424,6 +435,7 @@ class Launcher:
                 attempts=self.attempts,
                 checkpoint_image=source.checkpoint_image,
                 session_file=session_file,
+                repair_note=self.repair_note,
             )
             if not (self.jobs_dir / name).exists():
                 inputs.mkdir(parents=True, exist_ok=True)
@@ -463,10 +475,21 @@ class Launcher:
         Waiting for every attempt keeps the draw from favoring early failures. A task with a
         harness-failed attempt waits for its rerun, unless the source job has finished. The draw
         is seeded by prefix and task and written to `<prefix>.selection.json`; a recorded draw is
-        reused on restart.
+        reused on restart. With `same_failures_as`, that round's draw is copied in first, with
+        each entry marked `reused_from`, and no task is drawn anew.
         """
         if not self.selection and self.selection_path.is_file():
             self.selection = json.loads(self.selection_path.read_text())
+        if not self.selection and self.same_failures_as is not None:
+            earlier = self.inputs_root / f"{self.same_failures_as}.selection.json"
+            self.selection = {
+                key: entry | {"reused_from": self.same_failures_as}
+                for key, entry in json.loads(earlier.read_text()).items()
+            }
+            self.selection_path.write_text(json.dumps(self.selection, indent=2) + "\n")
+            logger.info(
+                "reusing the draw of %s: %d tasks", self.same_failures_as, len(self.selection)
+            )
         for source_job in self.source_jobs:
             attempts = int(
                 json.loads((source_job / "config.json").read_text()).get("n_attempts", 1)
@@ -480,6 +503,8 @@ class Launcher:
                 )
             for task, trials in sorted(by_task.items()):
                 key = f"{source_job.name}:{task}"
+                if key not in self.selection and self.same_failures_as is not None:
+                    continue
                 if key not in self.selection:
                     unsettled = any(
                         classify_failure(r) in ("infra_error", "unclassified") for _, r in trials
