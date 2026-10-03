@@ -48,6 +48,7 @@ from trajlab.capture.corpus import (
     write_manifest,
 )
 from trajlab.capture.discover import iter_trial_dirs, load_trial_config
+from trajlab.capture.harbor_runner import repo_relative
 from trajlab.capture.pins import CLAUDE_CODE_VERSION
 from trajlab.contracts import (
     CHECKPOINT_ARMS,
@@ -698,12 +699,12 @@ class Launcher:
         """Rewrite a resumed job's manifest: its trials changed since `trajlab run` wrote it."""
         try:
             root = repo_root(Path.cwd())
-            config = (self.inputs_root / name / "config.json").resolve().relative_to(root)
+            config = repo_relative(self.inputs_root / name / "config.json", root)
             manifest = build_manifest(
                 [self.jobs_dir / name],
                 corpus_id=name,
                 repo=repo_state(root),
-                config_path=config.as_posix(),
+                config_path=config,
                 storage=self.storage,
             )
             write_manifest(manifest, self.manifests_dir, overwrite=True)

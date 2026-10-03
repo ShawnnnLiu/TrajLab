@@ -21,7 +21,7 @@ from trajlab.capture.corpus import (
     write_manifest,
 )
 from trajlab.capture.discover import compose_project_name, iter_trial_dirs, load_trial_config
-from trajlab.capture.harbor_runner import RunRefusedError, execute, plan_run
+from trajlab.capture.harbor_runner import RunRefusedError, execute, plan_run, repo_relative
 from trajlab.capture.repair_launcher import Launcher, check_sources
 from trajlab.checkpoint.backends.docker_commit import DockerCommitBackend
 from trajlab.checkpoint.watcher import (
@@ -291,9 +291,9 @@ def manifest(
         root = repo_root(Path.cwd())
         config_repo_path = None
         if config is not None:
-            if not config.resolve().is_relative_to(root):
+            config_repo_path = repo_relative(config, root)
+            if config_repo_path is None:
                 raise ManifestError(f"{config} is not inside the repo at {root}")
-            config_repo_path = config.resolve().relative_to(root).as_posix()
         built = build_manifest(
             job_dirs,
             corpus_id=corpus_id,
