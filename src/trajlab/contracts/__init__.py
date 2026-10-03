@@ -17,6 +17,16 @@ from trajlab.contracts.checkpoint import (
 )
 from trajlab.contracts.corpus import CorpusJob, CorpusManifest, CorpusTask
 from trajlab.contracts.preinstall import PREINSTALL_RECORD_FILENAME, PreinstallRecord
+from trajlab.contracts.repair import (
+    CHECKPOINT_ARMS,
+    REPAIR_ARMS,
+    REPAIR_SOURCE_FILENAME,
+    REPAIRABLE_KINDS,
+    SESSION_ARMS,
+    FailureKind,
+    RepairArm,
+    RepairSource,
+)
 from trajlab.contracts.resume import RESUME_RECORD_FILENAME, ResumeRecord
 from trajlab.contracts.steps import (
     CHECKPOINT_STEP_MESSAGE,
@@ -61,6 +71,14 @@ __all__ = [
     "CorpusTask",
     "OriginalStepExtra",
     "PreinstallRecord",
+    "CHECKPOINT_ARMS",
+    "REPAIR_ARMS",
+    "REPAIR_SOURCE_FILENAME",
+    "SESSION_ARMS",
+    "REPAIRABLE_KINDS",
+    "FailureKind",
+    "RepairArm",
+    "RepairSource",
     "RESUME_RECORD_FILENAME",
     "ResumeRecord",
     "TrajlabStepExtra",

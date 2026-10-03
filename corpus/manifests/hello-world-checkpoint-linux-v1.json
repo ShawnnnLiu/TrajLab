@@ -1,0 +1,65 @@
+{
+  "corpus_id": "hello-world-checkpoint-linux-v1",
+  "created_at": "2026-10-02T19:26:38.839287Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "bfc990197d26f0e560e931235cd226f04b09408a",
+  "repo_dirty": false,
+  "config_path": "configs/harbor/hello-world-checkpoint-linux-v1.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "docker",
+  "n_attempts": 1,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 2.0,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "tasks": [
+    {
+      "name": "hello-world/hello-world",
+      "digest": "sha256:38d7a077f07fbee8efc78db5dec9a72f82e727510ad1dcfeac0b55fa845256b7"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "hello-world-checkpoint-linux-v1",
+      "job_id": "bc552bbc-ca1a-43b8-9c11-c7e09604df1a",
+      "job_config": {
+        "job_name": "hello-world-checkpoint-linux-v1",
+        "jobs_dir": "corpus/jobs",
+        "agent_timeout_multiplier": 2.0,
+        "n_concurrent_trials": 1,
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "tasks": [
+          {
+            "name": "hello-world/hello-world",
+            "ref": "latest"
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "5e720495-e0ca-454b-8573-80ef406d5d03",
+          "trial_name": "hello-world__TDSVJ4E",
+          "task_name": "hello-world/hello-world",
+          "job_id": "bc552bbc-ca1a-43b8-9c11-c7e09604df1a",
+          "job_dir": "hello-world-checkpoint-linux-v1",
+          "claude_session_id": "582fdbda-ca9e-45ae-a583-b3182275ec5d"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}

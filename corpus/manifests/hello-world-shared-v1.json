@@ -1,0 +1,68 @@
+{
+  "corpus_id": "hello-world-shared-v1",
+  "created_at": "2026-10-02T19:39:40.071276Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "3d4baa1dc1e3b4087a5f7d7e81a8bf15eee630fe",
+  "repo_dirty": false,
+  "config_path": "configs/harbor/hello-world-shared-v1.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 1,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 2.0,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "tasks": [
+    {
+      "name": "hello-world/hello-world",
+      "digest": "sha256:38d7a077f07fbee8efc78db5dec9a72f82e727510ad1dcfeac0b55fa845256b7"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "hello-world-shared-v1",
+      "job_id": "9ad12c11-6e31-443d-b755-4ff98417fd9b",
+      "job_config": {
+        "job_name": "hello-world-shared-v1",
+        "jobs_dir": "corpus/jobs",
+        "agent_timeout_multiplier": 2.0,
+        "n_concurrent_trials": 1,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "tasks": [
+          {
+            "name": "hello-world/hello-world",
+            "ref": "latest"
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "15da05eb-df58-4b6e-bbec-88befba7defa",
+          "trial_name": "hello-world__8x7Tc3k",
+          "task_name": "hello-world/hello-world",
+          "job_id": "9ad12c11-6e31-443d-b755-4ff98417fd9b",
+          "job_dir": "hello-world-shared-v1",
+          "claude_session_id": "1c660794-4788-48cc-a92f-daa4e442b5bc"
+        }
+      ]
+    }
+  ],
+  "storage": "/srv/trajlab/jobs"
+}

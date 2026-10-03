@@ -6,6 +6,7 @@ reads, copies, or logs them.
 
 import json
 import logging
+import os
 import subprocess
 import sys
 from collections.abc import Callable
@@ -103,6 +104,18 @@ def enables_hooks(config: JobConfig) -> bool:
     return any(settings.get("hooks") for settings in claude_settings(config))
 
 
+def repo_relative(path: Path, root: Path) -> str | None:
+    """`path` relative to the repo root, as written, or None if it is outside the repo.
+
+    Symlinks are not followed: `corpus/jobs` may link to shared storage outside the repo
+    (corpus/README.md), and a config under it is still the repo path `corpus/jobs/...`.
+    """
+    lexical = Path(os.path.abspath(path))
+    if lexical.is_relative_to(root):
+        return lexical.relative_to(root).as_posix()
+    return None
+
+
 def harbor_executable() -> Path:
     """The `harbor` script installed next to this interpreter: the pinned version."""
     return Path(sys.executable).parent / "harbor"
@@ -148,7 +161,8 @@ def plan_run(
         repo = repo_state(root)
     except ManifestError as error:
         raise RunRefusedError(str(error)) from error
-    if not config_path.resolve().is_relative_to(root):
+    config_repo_path = repo_relative(config_path, root)
+    if config_repo_path is None:
         raise RunRefusedError(f"{config_path} is not inside the repo at {root}")
     if repo.dirty and not allow_dirty:
         raise RunRefusedError(
@@ -165,7 +179,7 @@ def plan_run(
         command += ["--env-file", str(env_file)]
     return RunPlan(
         config_path=config_path,
-        config_repo_path=config_path.resolve().relative_to(root).as_posix(),
+        config_repo_path=config_repo_path,
         job_dir=job_dir,
         corpus_id=corpus_id,
         manifest_path=manifest,

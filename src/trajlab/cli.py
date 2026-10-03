@@ -3,6 +3,7 @@
 import logging
 import signal
 import threading
+import time
 from enum import StrEnum
 from pathlib import Path
 from typing import Annotated
@@ -20,7 +21,8 @@ from trajlab.capture.corpus import (
     write_manifest,
 )
 from trajlab.capture.discover import compose_project_name, iter_trial_dirs, load_trial_config
-from trajlab.capture.harbor_runner import RunRefusedError, execute, plan_run
+from trajlab.capture.harbor_runner import RunRefusedError, execute, plan_run, repo_relative
+from trajlab.capture.repair_launcher import Launcher, check_sources
 from trajlab.checkpoint.backends.docker_commit import DockerCommitBackend
 from trajlab.checkpoint.watcher import (
     DEFAULT_SWEEP_INTERVAL_S,
@@ -82,6 +84,77 @@ def run(
         typer.echo(f"trajlab run: {error}", err=True)
         raise typer.Exit(code=1) from error
     raise typer.Exit(code=execute(plan, storage=storage))
+
+
+@app.command()
+def repair(
+    source_jobs: Annotated[
+        list[Path], typer.Argument(help="Source job dirs whose failed trials are repaired.")
+    ],
+    prefix: Annotated[str, typer.Option(help="Repair job names: <prefix>-<trial>-<arm>.")],
+    attempts: Annotated[int, typer.Option(min=1, help="Repair trials per failure per arm.")] = 3,
+    max_running: Annotated[
+        int,
+        typer.Option(min=1, help="Trials at once, source jobs' remaining concurrency included."),
+    ] = 6,
+    jobs_dir: Annotated[Path, typer.Option(help="Where repair jobs are written.")] = Path(
+        "corpus/jobs"
+    ),
+    env_file: Annotated[
+        Path | None,
+        typer.Option(help="Credentials file passed to Harbor. Default: .env if it exists."),
+    ] = None,
+    hold_below_gb: Annotated[
+        float, typer.Option(help="Start nothing while the jobs dir's disk has less free.")
+    ] = 50.0,
+    usage_backoff: Annotated[
+        float, typer.Option(help="Seconds to pause launches after a usage-limit error.")
+    ] = 1800.0,
+    max_resumes: Annotated[
+        int, typer.Option(min=0, help="Resumes per repair job for unfinished or infra trials.")
+    ] = 3,
+    poll: Annotated[float, typer.Option(help="Seconds between passes.")] = 30.0,
+    per_task: Annotated[
+        int | None,
+        typer.Option(
+            min=1,
+            help="Repair this many failures per task, drawn at random once all its attempts "
+            "end (ADR-0012 amendment). Default: every failure.",
+        ),
+    ] = None,
+    prune: Annotated[
+        bool,
+        typer.Option(
+            help="Remove a finished repair trial's checkpoint images except its final one; "
+            "records stay."
+        ),
+    ] = True,
+    storage: StorageOption = None,
+    manifests_dir: ManifestsDirOption = MANIFESTS_DIR,
+) -> None:
+    """Repair every failed trial of the source jobs under four arms (ADR-0012). Restartable."""
+    if env_file is None and DEFAULT_ENV_FILE.is_file():
+        env_file = DEFAULT_ENV_FILE
+    # The source job may have been started a moment ago; Harbor writes its config.json first.
+    while problems := check_sources(source_jobs):
+        logging.getLogger(__name__).warning("waiting: %s", "; ".join(problems))
+        time.sleep(poll)
+    Launcher(
+        source_jobs=source_jobs,
+        prefix=prefix,
+        attempts=attempts,
+        max_running=max_running,
+        jobs_dir=jobs_dir,
+        manifests_dir=manifests_dir,
+        env_file=env_file,
+        hold_below_gb=hold_below_gb,
+        usage_backoff_s=usage_backoff,
+        max_resumes=max_resumes,
+        storage=storage,
+        per_task=per_task,
+        prune=prune,
+        watcher_running=watcher_running,
+    ).run(poll_s=poll)
 
 
 BACKENDS = {"docker_commit": DockerCommitBackend}
@@ -218,9 +291,9 @@ def manifest(
         root = repo_root(Path.cwd())
         config_repo_path = None
         if config is not None:
-            if not config.resolve().is_relative_to(root):
+            config_repo_path = repo_relative(config, root)
+            if config_repo_path is None:
                 raise ManifestError(f"{config} is not inside the repo at {root}")
-            config_repo_path = config.resolve().relative_to(root).as_posix()
         built = build_manifest(
             job_dirs,
             corpus_id=corpus_id,

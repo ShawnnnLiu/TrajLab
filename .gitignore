@@ -1,5 +1,6 @@
 # data and secrets
-corpus/jobs/
+# a directory, or a symlink to shared storage (/srv/trajlab/jobs on the Linux server)
+corpus/jobs
 .env
 *.jsonl
 !tests/fixtures/**/*.jsonl

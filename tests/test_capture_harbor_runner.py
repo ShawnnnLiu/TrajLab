@@ -261,3 +261,27 @@ def test_committed_job_configs_use_the_pin() -> None:
     assert configs
     for path in configs:
         check_version_pins(JobConfig.model_validate_json(path.read_text()))
+
+
+def test_config_behind_a_symlink_counts_as_inside_the_repo(repo: Path, tmp_path: Path) -> None:
+    # corpus/jobs links to shared storage outside the repo; repair configs live under it.
+    shared = tmp_path / "shared"
+    shared.mkdir()
+    (repo / "corpus").mkdir()
+    (repo / "corpus" / "jobs").symlink_to(shared)
+    (repo / ".gitignore").write_text(".env\ncorpus/jobs\n")
+    _git(repo, "add", ".gitignore")
+    _git(repo, "commit", "-q", "-m", "ignore jobs")
+    config = repo / "corpus" / "jobs" / "_repair-inputs" / "x" / "config.json"
+    config.parent.mkdir(parents=True)
+    config.write_text((repo / "configs" / "harbor" / "hello.json").read_text())
+    plan = plan_run(
+        config,
+        repo_dir=repo,
+        corpus_id="x",
+        manifests_dir=tmp_path / "manifests",
+        env_file=None,
+        allow_dirty=False,
+        watcher_running=lambda _: True,
+    )
+    assert plan.config_repo_path == "corpus/jobs/_repair-inputs/x/config.json"
