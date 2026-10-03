@@ -151,8 +151,38 @@ Round 1 finished on 2026-10-03 at 12:52 UTC (`docs/research/2026-10-03_tb40-repa
 
 ## Amendment (2026-10-03, night): setup differences from Anthropic's reported TB 4.0 setup
 
-Recorded, not changed. Every corpus of this experiment, round 1 and the running round 2 (`tb40-repair-v3`), runs Claude Code in normal mode at medium effort with public network, where the Claude Sonnet 5.5 system card (§8.5) reports `--bare` mode, max effort, and no internet egress with resources pre-cached into the images. The full list, with sources, is in `docs/research/2026-10-03_tb40-setup-vs-anthropic.md`.
+Revised the same night after the differences were checked against round 1; the first version deferred `--bare` together with the allowlist and pre-caching.
+
+Recorded, not changed. Every corpus of this experiment, round 1 and the running round 2 (`tb40-repair-v3`), runs Claude Code in normal mode at medium effort with public network, where the Claude Sonnet 5.5 system card (§8.5) reports `--bare` mode, max effort, and no internet egress with resources pre-cached into the images. The full list, the round 1 check, and the `--bare` tests are in `docs/research/2026-10-03_tb40-setup-vs-anthropic.md`.
 
 1. No run of this experiment changes; round 2 continues as launched.
-2. A custom agent-phase allowlist, `--bare`, and pre-caching are deferred to a later, larger experiment, which needs its own ADR and new corpus ids.
-3. Absolute pass rates from this experiment are not comparable with Anthropic's 70.6%; comparisons between arms are on a shared setup.
+2. **Kept, for a later, larger experiment** with its own ADR and new corpus ids:
+   - a custom agent-phase allowlist with the Anthropic API host only; the verifier phase keeps its network;
+   - pre-caching of dependencies into the task images. Each package in our run logs is reviewed first: a pristine copy of code that a task ships modified is not cached (in round 1, `megatron-core`, `nemo-toolkit`, `vllm`, `litdata`).
+   - First attempts are rerun under both, on the pre-cached image. This experiment's 21 failures are not reused there: 8 of them ran package commands, so their checkpoints and sessions carry content fetched from the internet.
+3. **`--bare` is dropped.** Under `--bare`, Claude Code 2.1.278 and 2.1.288 run neither settings hooks nor plugin hooks, so no checkpoint would be taken and the `state` arms could not exist; and `--bare` does not read the subscription token our runs authenticate with (tested on 2.1.288; the 2.1.278 help text says the same). It stays a recorded difference.
+4. Absolute pass rates from this experiment are not comparable with Anthropic's 70.6%; comparisons between arms are on a shared setup, with the two exceptions below.
+
+### Found by the check, not decided
+
+- **Safety refusals fall on two arms.** `AgentSafetyRefusalError` is an `agent_error` under decision 4: a failed attempt, not rerun. All six of round 1 are on interleaved-vigenere, every `fresh` and every `state` repair of it, after one or two tool calls; `traj` passed 3 of 3 and `state-traj` 2 of 3 on the same failure. How a refused trial counts in the arm comparison is open.
+- **Infra reruns do not happen as decision 4 states.** The launcher passes `--env-file` to `harbor jobs resume`, which has no such option; each resume exits at once, and after three (`max_resumes`) the job is left. Round 1's two `EnvironmentStartTimeoutError` trials were not rerun for this reason. The round 2 launcher runs the same code with `.env` as its env file, so an infra error or a usage-limit pause in round 2 would not be rerun either, and the consequence "a limit costs time, not data" does not hold until the launcher is fixed.
+
+## Amendment (2026-10-03, late night): what this experiment's measures stand in for
+
+The main experiment is the course brief's (`docs/project-brief.md`): answer analysis questions about agent runs with less analyst effort than ad hoc workflows, keeping accuracy and provenance. This experiment does not measure those quantities directly. Two of its measures are used as proxies for them; nothing about what a trial records changes.
+
+| Quantity in the main experiment | Proxy in this experiment | Computed as |
+|---|---|---|
+| Analyst effort, as the cost of an ad hoc workflow | Tokens a repair spends | The repair's own tokens by kind (input, cache write, cache read, output) and their cost at list prices, by decision 8's rule: messages whose `uuid` is not in the source session, deduplicated by API message id. Reported per repair and per resolved failure. |
+| An error localized correctly | Increase in repair resolution rate | Per failure, an arm's repair resolution rate minus `fresh`'s on the same failure (decision 8's primary comparison); between rounds, the same arm's rate under the protocol minus its rate under round 1's note. |
+
+Limits, stated with any claim that uses the proxies:
+
+- **The reward grades the repair, not the localization.** A repair can pass without the cause being identified (`fresh`, which sees nothing of the earlier attempt, passed 7 of 63 in round 1), and can fail after a correct localization if the fix is not finished. The increase over `fresh` is a rough estimate of correct localization, not a count of it.
+- **The tokens cover the whole repair:** diagnosing, fixing, and checking. They are an upper estimate of the analysis alone, and the effort of an LLM analyst, not of a person.
+- **Round 2 has a direct measure next to the proxy:** the diagnosis outcome (evening amendment, item 5), scored by a person against the source trial's failed checks. Both are reported, including where they disagree.
+- **Provenance has no proxy here.**
+- **The night amendment's confounds apply to the proxies as to the rates:** the refusals on interleaved-vigenere fall on `fresh` and `state`, and package fetching differs by arm.
+
+The main experiment's analyst arms are to count tokens by the same rule, so effort means the same thing in both; that is fixed in the ADR that opens the analysis phase.
