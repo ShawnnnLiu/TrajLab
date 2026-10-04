@@ -186,3 +186,12 @@ Limits, stated with any claim that uses the proxies:
 - **The night amendment's confounds apply to the proxies as to the rates:** the refusals on interleaved-vigenere fall on `fresh` and `state`, and package fetching differs by arm.
 
 The main experiment's analyst arms are to count tokens by the same rule, so effort means the same thing in both; that is fixed in the ADR that opens the analysis phase.
+
+## Amendment (2026-10-04, 01:05 UTC): round 2 prunes running repairs early
+
+Two running layout-config-recreation `state` repairs of `tb40-repair-v3` committed 863 MB and 396 MB of container diff per checkpoint (37 GB and 24 GB after 63 and 67 checkpoints), together about 1.3 GB a minute against 111 GB free; the disk would have filled before their 4 h cap. The launcher's disk hold stops only new jobs.
+
+1. `scripts/2026-10-04_prune_running_repairs.py` runs beside the launcher until it has no running or pending job. Every 10 minutes it removes, in each running repair trial, every checkpoint image older than that trial's newest record. The newest always stays, so the final checkpoint survives, and the end state equals the end-of-job prune of the 2026-10-02 amendment.
+2. Checkpoint records are untouched. Images removed early are listed in `_repair-inputs/<job>/pruned-early.json` (outside the trial dir, which the agent sees at `/logs/agent`); the job's `pruned.json` lists only what remained at job end.
+3. Capture is unaffected: change gating compares file listings the watcher holds in memory, not earlier images (ADR-0010).
+4. First-attempt checkpoints, including the source checkpoints the `state` arms start from, are never touched; only images named in repair trials' own records are removed.
