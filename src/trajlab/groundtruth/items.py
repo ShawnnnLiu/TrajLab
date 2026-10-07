@@ -30,6 +30,7 @@ from trajlab.contracts.checkpoint import CALLS_FILENAME, CHECKPOINTS_DIRNAME, Ca
 from trajlab.contracts.groundtruth import (
     ITEMS_FILENAME,
     LABELS_FILENAME,
+    REFUTATIONS_FILENAME,
     AlternativeFix,
     BlamedHunk,
     FixRecord,
@@ -38,6 +39,7 @@ from trajlab.contracts.groundtruth import (
     ItemKind,
     LabelCause,
     MinimizationRecord,
+    RefutationRecord,
     ReplayRecord,
     TimelinePoint,
     TrialLabels,
@@ -648,6 +650,22 @@ def _components(needs: dict[str, set[int]]) -> list[tuple[tuple[str, ...], set[i
     return [(tuple(sorted(c)), h) for c, h in sorted(groups, key=lambda g: sorted(g[0]))]
 
 
+def read_refutations(trial_dir: Path) -> dict[str, RefutationRecord]:
+    """The latest refutation of each item."""
+    path = groundtruth_dir(trial_dir) / REFUTATIONS_FILENAME
+    if not path.is_file():
+        return {}
+    found = [RefutationRecord.model_validate_json(x) for x in path.read_text().splitlines()]
+    return {r.item_id: r for r in found}
+
+
+def _with_refutation(item: GroundTruthItem, refutation: RefutationRecord | None) -> GroundTruthItem:
+    if refutation is None:
+        return item
+    flag = {"upheld": "upheld_by_refuter", "refuted": "refuted", "uncertain": "refuter_uncertain"}
+    return item.model_copy(update={"flags": (*item.flags, flag[refutation.verdict])})
+
+
 def build_items(inputs: TrialInputs) -> list[GroundTruthItem]:
     """Rewrite the trial's items.jsonl from its replays, fixes, and labels; return the items."""
     trial_dir = inputs.trial_dir
@@ -676,5 +694,7 @@ def build_items(inputs: TrialInputs) -> list[GroundTruthItem]:
                 excluded,
                 records,
             )
+    refutations = read_refutations(trial_dir)
+    items = [_with_refutation(item, refutations.get(item.item_id)) for item in items]
     items_path(trial_dir).write_text("".join(item.model_dump_json() + "\n" for item in items))
     return items

@@ -434,3 +434,20 @@ class GroundTruthManifest(_Model):
     fixes: int = Field(ge=0)
     items_by_kind: dict[str, int]
     items_by_method: dict[str, int]
+
+
+REFUTATIONS_FILENAME = "refutations.jsonl"  # one RefutationRecord per refutation attempt
+
+
+class RefutationRecord(_Model):
+    """An adversarial reviewer's verdict on one item (ADR-0013, decision 5)."""
+
+    trial_name: str = Field(min_length=1)
+    item_id: str = Field(min_length=1)
+    verdict: Literal["upheld", "refuted", "uncertain"]
+    reasons: str = Field(min_length=1)
+    alternative_fix_ids: tuple[str, ...] = Field(
+        default=(), description="Fixes the reviewer tried at another location for these checks."
+    )
+    reviewer: str = Field(min_length=1, description="e.g. a model id.")
+    created_at: AwareDatetime

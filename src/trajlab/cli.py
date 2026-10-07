@@ -9,6 +9,7 @@ import threading
 import time
 from collections import Counter
 from collections.abc import Coroutine
+from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
 from typing import Annotated, Any
@@ -37,12 +38,24 @@ from trajlab.checkpoint.watcher import (
     hold_watcher_lock,
     watcher_running,
 )
-from trajlab.contracts.groundtruth import GROUNDTRUTH_DIRNAME, POINTS_FILENAME, TrialLabels
+from trajlab.contracts.groundtruth import (
+    GROUNDTRUTH_DIRNAME,
+    POINTS_FILENAME,
+    REFUTATIONS_FILENAME,
+    RefutationRecord,
+    TrialLabels,
+)
 from trajlab.groundtruth.blame import blame
 from trajlab.groundtruth.counterfactual import file_history, read_fixes, try_fix
 from trajlab.groundtruth.extract import TrialInputs
 from trajlab.groundtruth.gates import job_report
-from trajlab.groundtruth.items import build_items, labels_path, regressions, trial_timeline
+from trajlab.groundtruth.items import (
+    build_items,
+    labels_path,
+    read_items,
+    regressions,
+    trial_timeline,
+)
 from trajlab.groundtruth.manifest import build_manifest as build_gt_manifest
 from trajlab.groundtruth.minimize import (
     minimize_fix,
@@ -693,3 +706,40 @@ def gt_review_sheet(
     path = out or job_dir / "groundtruth-review.csv"
     count = write_review_sheet(path, trial_inputs(finished_trial_dirs(job_dir)))
     typer.echo(f"wrote {path}: {count} items")
+
+
+@gt_app.command("refute")
+def gt_refute(
+    trial_dir: TrialDirArgument,
+    item_id: Annotated[str, typer.Option("--item", help="The item id, as items.jsonl has it.")],
+    verdict: Annotated[str, typer.Option(help="upheld, refuted, or uncertain.")],
+    reasons: Annotated[str, typer.Option(help="Why, with the evidence.")],
+    reviewer: Annotated[str, typer.Option(help="Who reviewed, e.g. a model id.")],
+    alternative: Annotated[
+        list[str] | None,
+        typer.Option("--alternative", help="A fix the reviewer tried elsewhere (repeatable)."),
+    ] = None,
+) -> None:
+    """Record an adversarial review of one item; `gt items` turns it into a flag."""
+    trial_dir = trial_dir.resolve()
+    if item_id not in {i.item_id for i in read_items(trial_dir)}:
+        typer.echo(f"trajlab gt refute: no item {item_id} in {trial_dir.name}", err=True)
+        raise typer.Exit(code=1)
+    fixes = {f.fix_id for f in read_fixes(trial_dir)}
+    unknown = [a for a in alternative or [] if a not in fixes]
+    if unknown:
+        typer.echo(f"trajlab gt refute: no such fixes: {unknown}", err=True)
+        raise typer.Exit(code=1)
+    record = RefutationRecord(
+        trial_name=trial_dir.name,
+        item_id=item_id,
+        verdict=verdict,  # type: ignore[arg-type]
+        reasons=reasons,
+        alternative_fix_ids=tuple(alternative or ()),
+        reviewer=reviewer,
+        created_at=datetime.now(UTC),
+    )
+    path = trial_dir / GROUNDTRUTH_DIRNAME / REFUTATIONS_FILENAME
+    with path.open("a") as handle:
+        handle.write(record.model_dump_json() + "\n")
+    typer.echo(f"recorded {verdict} for {item_id}")
