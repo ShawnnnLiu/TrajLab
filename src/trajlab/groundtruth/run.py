@@ -279,6 +279,7 @@ def plan_fix_confirmations(trial_dir: Path) -> list[tuple[str, str, str]]:
     """
     from trajlab.contracts.groundtruth import TrialLabels
     from trajlab.groundtruth.counterfactual import read_fixes
+    from trajlab.groundtruth.gates import excluded_checks
     from trajlab.groundtruth.items import labels_path
     from trajlab.groundtruth.minimize import read_minimized, read_reverts
     from trajlab.groundtruth.traits import traits
@@ -290,13 +291,13 @@ def plan_fix_confirmations(trial_dir: Path) -> list[tuple[str, str, str]]:
     test_tries = {lo.fix_id for m in read_minimized(trial_dir).values() for lo in m.leave_outs}
     test_tries |= {r.fix_id for r in read_reverts(trial_dir).values()}
     labeled = {c.fix_id for c in labels.causes if c.fix_id}
+    excluded = excluded_checks(trial_dir)
+    claims = [set(c.checks) - excluded for c in labels.causes]
     candidates = []
     for fix in fixes:
         if fix.state_id is None or fix.error or fix.broken or fix.fix_id in test_tries:
             continue
-        if fix.fix_id in labeled or any(
-            set(cause.checks) <= set(fix.fixed) for cause in labels.causes
-        ):
+        if fix.fix_id in labeled or any(c and c <= set(fix.fixed) for c in claims):
             candidates.append(fix)
     task_name = trial_config(trial_dir).task.name or ""
     wanted = QUIET_FIX_SAMPLES if traits(task_name).quiet else FIX_SAMPLES

@@ -48,7 +48,7 @@ from trajlab.contracts.groundtruth import (
 from trajlab.groundtruth.blame import blame
 from trajlab.groundtruth.counterfactual import file_history, read_fixes, run_oracle, try_fix
 from trajlab.groundtruth.extract import TrialInputs, remove_stale_containers
-from trajlab.groundtruth.gates import job_report
+from trajlab.groundtruth.gates import excluded_checks, job_report
 from trajlab.groundtruth.items import (
     build_items,
     build_progress,
@@ -643,10 +643,12 @@ def gt_minimize(job_dir: JobDirArgument, trial: TrialsOption = None) -> None:
         timeline = trial_timeline(trial_dir)
         base = {t.key: t.final for t in timeline.timelines if t.final and t.final != "flaky"}
         required = QUIET_FIX_SAMPLES if traits(inputs.task_name).quiet else FIX_SAMPLES
+        excluded = excluded_checks(trial_dir)
         for cause in labels.causes:
             fix = fixes.get(cause.fix_id or "")
-            checks = tuple(sorted(cause.checks))
-            if fix is None or (fix.fix_id, checks) in done:
+            # The checks the cause's items are built from (gate 2's exclusions left out).
+            checks = tuple(sorted(c for c in cause.checks if c not in excluded))
+            if fix is None or not checks or (fix.fix_id, checks) in done:
                 continue
             final = timeline.points[-1].state_id
             if fix_confirms(fix, checks, final, timeline.records, base, required) is not None:
