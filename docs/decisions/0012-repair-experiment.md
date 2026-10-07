@@ -195,3 +195,204 @@ Two running layout-config-recreation `state` repairs of `tb40-repair-v3` committ
 2. Checkpoint records are untouched. Images removed early are listed in `_repair-inputs/<job>/pruned-early.json` (outside the trial dir, which the agent sees at `/logs/agent`); the job's `pruned.json` lists only what remained at job end.
 3. Capture is unaffected: change gating compares file listings the watcher holds in memory, not earlier images (ADR-0010).
 4. First-attempt checkpoints, including the source checkpoints the `state` arms start from, are never touched; only images named in repair trials' own records are removed.
+
+## Amendment (2026-10-07): `traj-text` as built (round 1 note)
+
+This builds decision 1 of the 2026-10-03 amendment for round 1 only. As the evening amendment ordered, round 2 (`tb40-repair-v3`) ran first. `traj-text` now runs as a fifth arm of round 1 (`tb40-repair-v2`), with round 1's note. Round 2's protocol is not run for this arm, and `traj-ckpt` is not built.
+
+### What runs
+
+**Trials.** The 21 failures of round 1, 3 repairs each: 63 repair trials in 21 jobs named `tb40-repair-v2-<trial>-traj-text`, which are also their corpus ids. The failures are the recorded draw in `_repair-inputs/tb40-repair-v2.selection.json`, read and never rewritten. A launcher given arms other than the default four draws no task (`Launcher.reuses_draw`). The CLI also refuses to start one in two cases:
+- without `--per-task` on a round drawn per task;
+- with `--per-task` on a prefix that has no recorded draw, unless `--same-failures-as` names one.
+
+**Everything but the prompt is as round 1's `fresh`.**
+- The task image (`PreinstalledDockerEnvironment`) and a new conversation (no `load_trajectory`).
+- `RepairClaudeCode` with round 1's note (no `repair_note` kwarg, as in round 1's configs).
+- Claude Sonnet 5.5 at medium effort, Claude Code 2.1.278, a 4 h agent cap (`agent_timeout_multiplier: 0.5`), and hooks from `configs/claude-code/settings.hooks.json`.
+- The watcher process that served round 1 (`--every 1 --gate change`, running since 2026-10-02 19:42).
+- Pruning at job end, storage in `/srv/trajlab/jobs`, at most 6 trials at once, and the env file round 1 used (see Launch).
+
+The hooks, checkpoint code, pre-install, runner, and Claude Code pin have not changed since round 1's commit `52432f5`; `pins.py` only gained ADR-0005's cap as a constant, for the launch check below. No TB 4.0 setup-alignment change is applied (night amendment). For all 21 tasks the agent user is root: no task sets `[agent] user`, and each derived image's default user is empty or `root`.
+
+**What is recorded.** The job config adds one agent kwarg, `repair_transcript`: the absolute path of `_repair-inputs/<job>/transcript.txt`, rendered when the job is planned.
+- `RepairSource` records `transcript_file`, `transcript_chars`, `transcript_bytes` (UTF-8), `transcript_outputs_total`, `transcript_outputs_cut`, `transcript_rule`, and `source_compacted`. These are set exactly when the arm is `traj-text`.
+- The corpus manifest records the transcript's path through the agent kwargs. The sizes and the rule are in `repair-source.json`, next to the `config.json` the manifest names; the manifest schema is unchanged. The 2026-10-03 amendment also asked for them in the manifest.
+
+The `traj-text` blocker needs only the failed trial's `agent/trajectory.json`, not a checkpoint image or a session. All 21 failures had passed round 1's blocker.
+
+### The prompt, verbatim
+
+The prompt is the note, a blank line, the transcript block, a blank line, and the task instruction, unchanged:
+
+```
+A previous attempt at this task did not pass the task's tests.
+
+=== TRANSCRIPT OF THE PREVIOUS ATTEMPT ===
+It gives the attempt's instruction, then each step: the agent's message,
+its tool calls, and their outputs. Tool outputs longer than 4,000
+characters are shortened to their first and last 2,000 characters.
+
+[user] <step message>
+[agent] <step message>
+[tool call <function_name>] <arguments as JSON>
+[tool output] <content, truncated by the rule>
+...
+=== END OF TRANSCRIPT ===
+
+<task instruction>
+```
+
+`trajlab.capture.transcript.render` builds the transcript from Harbor's `Trajectory` in the failed trial's `agent/trajectory.json`.
+
+**Blocks.** Each ATIF step gives one block, in order, and one blank line separates blocks. A block has:
+- the step's message as `[<source>] <message>` (`user`, `agent`, or `system`);
+- then each tool call as `[tool call <function_name>] <arguments>`, with the arguments as one line of JSON (`json.dumps`, non-ASCII kept);
+- then each tool output as `[tool output] <output>`.
+
+A step with an empty message gets no message line; 363 of the 416 agent steps in the 21 sources carry only tool calls. Otherwise message text is verbatim, trailing newlines included. In all 21 sources the first step is the task instruction, equal to what the repair receives (the task's `instruction.md` without its canary line).
+
+**Tool output: the text the failed agent saw.** This was chosen by the owner on 2026-10-07, after review.
+- Each output is Claude Code's tool_result content. Harbor keeps it in the observation's `extra.tool_result_metadata.raw_tool_result` and prefers it itself when it rebuilds a conversation from ATIF (`ClaudeCode._session_tool_result_content`). It is present for all 422 outputs of the 21 sources; the observation's `content` is the fallback.
+- Non-text blocks become `[<type>]`. These are 26 image reads in 5 failures, each shown as `[image]`: cad-model 1, freecad-platform-drawing 1, layout-config-recreation 9, layout-config-recreation2 12, vba-userform-port 3.
+- Harbor's observation `content` is not used. `ClaudeCode._format_tool_result` appends to the text the agent saw:
+  - a `[stdout]` copy of the output (346 of the 422 outputs);
+  - `[metadata]` JSON (390);
+  - `[stderr]`, `[exit_code]`, and `[error]` lines;
+  - image blocks as base64 text, about 4,000 characters each after the cut;
+  - in 2 outputs, the first 30,000 characters of the stdout behind the 2 KB preview the agent was shown (production-planning step 5, vba-userform-port step 3).
+
+  Rendered from `content`, the 21 transcripts were 8.7 to 146.1 KiB, with 110 outputs cut and 2 prompts over 128 KiB.
+- Carriage returns are kept: the transcript is written and read as bytes. Universal-newline reading would turn them into line feeds. The transcripts of 6 failures hold them, counted after the cut: freecad-impeller 74, freecad-platform-drawing 59, freecad-spring-clip 50, roy-polymorph-cn 113, vba-userform-port 98 (956 in the full outputs), vllm-deepseek-streaming 25 (170).
+
+**Thinking.** `reasoning_content` is never rendered. It is non-empty in 2 of the 441 source steps (vf2-speedup-networkx, steps 13 and 17); those 2 are left out like all thinking.
+
+**Truncation rule.** It is recorded as `transcript_rule`: "tool outputs > 4000 chars: first 2000 + last 2000".
+- A tool output longer than 4,000 characters keeps its first 2,000 and last 2,000 characters, with a line `[... N characters cut ...]` between them. N has thousands separators, e.g. `[... 12,345 characters cut ...]`.
+- Characters are Unicode code points (Python `str`).
+- Nothing else is shortened: messages and tool-call arguments stay whole, and no failure gets a different rule.
+
+No sentence says the environment is fresh, since `traj` gets none either.
+
+### Delivery, and why
+
+**The cap.** Harbor 0.23.0 (`ClaudeCode.run`) puts the prompt in one environment variable, `HARBOR_CLAUDE_CODE_INSTRUCTION_<hex>`. It is passed as one `docker compose exec -e` argument, and the command then copies it into a shell variable and pipes it to `claude`. Linux caps every argument and environment string at 128 KiB (`MAX_ARG_STRLEN`, 131,072 bytes including the terminating NUL).
+- As built, no prompt is over the cap. The largest is vba-userform-port, whose environment string is 123,670 bytes, 7,402 under.
+- Rendered from Harbor's `content`, 2 were over: pretrain-shard-corruption at 151,500 bytes and vba-userform-port at 148,603.
+- The longest failures are not dropped, and the rule is not tightened for them.
+
+**The workaround.** `RepairClaudeCode.exec_as_agent` delivers every `traj-text` prompt through a file, whatever its size, so the arm has one delivery path. Harbor is not patched.
+1. When an exec's environment holds the instruction variable, the prompt goes to a host temp file as bytes. `environment.upload_file` then uploads it to `/tmp/trajlab-prompt-<hex>.txt`.
+2. The uploaded file is in general not the agent user's: Harbor's `upload_file` (`docker compose cp`) keeps the host user's uid and gid (1000:1000 here), and its tar fallback makes the file root's. `/tmp` is sticky, so a non-root agent user could not remove it. The agent reads the uid and gid of the agent user from the container (`id`, run as that user). As root, it chowns the file to them and sets mode 600.
+3. The variable is dropped from the exec's environment. The command's `<var>="$<VAR>"; unset <VAR>; ` becomes `<var>="$(cat <file>; printf x)"; <var>="${<var>%x}"; rm -f <file>; `.
+   - The sentinel `x` keeps trailing newlines, which `$(...)` would drop, so the shell variable holds the prompt byte for byte. Every task instruction here ends with a newline.
+   - The file is removed before `claude` starts. The agent receives the prompt only on stdin, as its first user message.
+4. If Harbor's command no longer contains that exact read, the agent raises instead of sending the variable. A unit test runs Harbor's own `ClaudeCode.run` against a fake environment, so a Harbor upgrade that changes the command fails the test.
+
+Arms other than `traj-text` are unchanged: their prompt still travels in the variable. The limit and the workaround are in `docs/upstream-notes.md`.
+
+**Checked on 2026-10-07** with `scripts/2026-10-07_traj_text_delivery_check.py`, on hello-world with a synthetic transcript of 207,573 bytes (3,234 carriage returns, 1,078 of them in CRLF).
+
+- **Trial** `hello-world-traj-text-delivery-v2` (`hello-world__t7xQPQe`).
+  - The prompt was 202,317 characters and 207,707 bytes. As an environment string it would have been 207,772 bytes, over the 131,072-byte cap.
+  - The native session's first user message equals the prompt byte for byte: 202,317 characters, 207,707 bytes, 3,234 carriage returns.
+  - The trial's one checkpoint image holds no `/tmp/trajlab-prompt-*` file.
+  - `checkpoints.jsonl` has 1 record; there are 2 `.req` files, 2 `.ack` files, and no `.timeout`.
+  - The agent phase took 12 s and wrote `/app/hello.txt`. The verifier's 2 tests passed in its output, but the verifier hit its 120 s limit (`VerifierTimeoutError`). hello-world's `test.sh` runs `apt-get update` and `apt-get install curl`, and Ubuntu's mirrors served about 4 to 10 KB/s to this host that day.
+- **Ownership.** This ran in a container of that trial's checkpoint image, running as root, with the agent user 65534 (`docker exec -u`). The agent user's shell received the prompt with the same SHA-256, and the file was gone. A control file uploaded the same way (`docker cp -a`, which gave owner 1000:1000 and mode 664, as Harbor's `docker compose cp` leaves its uploads) could not be removed by uid 65534 (`Operation not permitted`).
+- **First attempt.** `hello-world-traj-text-delivery-v1` ended with `EnvironmentStartTimeoutError` before the agent ran. hello-world builds its task image from a Dockerfile, and the rebuilt `WORKDIR` layer changed its derived image's key. Harbor's install of `nodejs` and `npm` through apt did not finish within the 600 s environment start at that mirror speed. The derived image was then built outside a trial with the same code, in 1,159 s.
+
+### Per-failure sizes and cuts
+
+The dry run (`--dry-run`, 2026-10-07) printed 21 jobs and 63 trials with these transcript sizes and cut counts. The images column counts tool outputs shown as `[image]`. The last column is the prompt with the note and the instruction, measured as the environment string `HARBOR_CLAUDE_CODE_INSTRUCTION_<hex>=<prompt>` plus its NUL, which is what the 131,072-byte cap applies to.
+
+| Failure (source trial) | Transcript KiB | Tool outputs | Cut | Images as `[image]` | Prompt as an environment string, bytes |
+|---|---:|---:|---:|---:|---:|
+| bun-sourcemap-leak (`bun-sourcemap-leak__bWBkDEi`) | 13.3 | 3 | 0 | 0 | 16,317 |
+| cad-model (`cad-model__owX55WW`) | 4.1 | 5 | 0 | 1 | 4,608 |
+| cargo-flight-dispatch (`cargo-flight-dispatch__dCQcazx`) | 18.3 | 4 | 1 | 0 | 21,187 |
+| foodstuff-beta-activity (`foodstuff-beta-activity__9sEaCB7`) | 9.7 | 5 | 1 | 0 | 11,402 |
+| freecad-impeller (`freecad-impeller__5uRf9iP`) | 17.8 | 8 | 0 | 0 | 19,654 |
+| freecad-platform-drawing (`freecad-platform-drawing__MoExzvS`) | 5.0 | 4 | 0 | 1 | 5,946 |
+| freecad-spring-clip (`freecad-spring-clip__iekZ2gG`) | 10.7 | 3 | 0 | 0 | 13,700 |
+| gsea-proteomics (`gsea-proteomics__pGdXBZN`) | 23.2 | 16 | 1 | 0 | 26,611 |
+| interleaved-vigenere (`interleaved-vigenere__ZADTzxt`) | 56.5 | 38 | 1 | 0 | 60,143 |
+| layout-config-recreation (`layout-config-recreation__U6tosEx`) | 42.0 | 42 | 0 | 9 | 45,199 |
+| layout-config-recreation2 (`layout-config-recreation2__7aXyTZX`) | 54.0 | 59 | 1 | 12 | 57,650 |
+| mvcc-lsm-compaction (`mvcc-lsm-compaction__EkrWD8Q`) | 12.1 | 3 | 1 | 0 | 13,327 |
+| pretrain-shard-corruption (`pretrain-shard-corruption__QaSkaGD`) | 102.4 | 52 | 2 | 0 | 106,719 |
+| production-planning (`production-planning__TDgRk2e`) | 63.7 | 26 | 4 | 0 | 68,249 |
+| protein-autointerp-disulfide (`protein-autointerp-disulfide__FTyekmW`) | 7.9 | 4 | 0 | 0 | 9,237 |
+| roy-polymorph-cn (`roy-polymorph-cn__XazWJRu`) | 11.7 | 6 | 0 | 0 | 13,658 |
+| sglang-qwen-burst (`sglang-qwen-burst__Gzz6bVA`) | 21.4 | 8 | 2 | 0 | 22,852 |
+| sound-change-cascade (`sound-change-cascade__f6vnRbi`) | 79.0 | 50 | 1 | 0 | 82,733 |
+| vba-userform-port (`vba-userform-port__zyezmFw`) | 119.7 | 31 | 6 | 3 | 123,670 |
+| vf2-speedup-networkx (`vf2-speedup-networkx__MC8ceMN`) | 67.9 | 22 | 0 | 0 | 71,794 |
+| vllm-deepseek-streaming (`vllm-deepseek-streaming__tHKh5W5`) | 99.4 | 33 | 15 | 0 | 102,332 |
+| **21 failures** | 4.1 to 119.7 | 422 | 36 | 26 | largest 123,670 |
+
+- 9 failures have no output cut, and 7 have exactly one: cargo-flight-dispatch, foodstuff-beta-activity, gsea-proteomics, interleaved-vigenere, layout-config-recreation2, mvcc-lsm-compaction, sound-change-cascade.
+- None of the 21 source sessions was compacted: `source_compacted` is false in every record.
+- KiB is bytes / 1024. sound-change-cascade has 77,227 characters in 80,878 bytes.
+
+### Launch
+
+Run from the worktree on `sl/traj-text`. There, `corpus/jobs` links to `/srv/trajlab/jobs`, and `.env` links to `/home/ubuntu/TrajLab/.env`, the env file rounds 1 and 2 used; it holds the subscription credentials and ADR-0005's `CLAUDE_CODE_MAX_OUTPUT_TOKENS`. The launch is detached, with its log at `/srv/trajlab/jobs/tb40-repair-v2.traj-text.launcher.log`:
+
+```
+uv run trajlab repair corpus/jobs/tb40-sonnet-v2 --prefix tb40-repair-v2 --per-task 1 \
+    --arms traj-text --storage /srv/trajlab/jobs
+```
+
+- The launcher writes `_repair-inputs/tb40-repair-v2.traj-text.status.json`. Round 1's `tb40-repair-v2.status.json`, its selection file, and its 84 job dirs are not touched or adopted.
+- A non-dry-run `trajlab repair` now refuses to start unless the trials' environment (the env file over the launcher's own) has credentials, has `CLAUDE_CODE_OAUTH_TOKEN` when `CLAUDE_FORCE_OAUTH` is set, and has ADR-0005's `CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000`. An `--env-file` that does not exist is refused. The dry run prints the env file and the result of this check.
+- Conditions on 2026-10-07:
+  - The 21 tasks pull digest-pinned images, and all their derived images are cached, so no image is built.
+  - Only Ubuntu's apt mirrors were slow; PyPI, npm, and `downloads.claude.ai` served at normal speed.
+  - No round 1 repair trial ran `apt-get` in a Bash call (0 of the 249 with a trajectory).
+  - Two of the 21 verifiers install packages at verify time. cargo-flight-dispatch runs `apt-get` on a package list in `/app` when one is present; its round 1 verifiers took 22 s. vba-userform-port runs pip and npm installs, taking 65 to 143 s in round 1 against a 900 s limit.
+- No ground-truth work (`trajlab gt` replay, try-fix, confirm, minimize, or oracle) runs alongside, as in rounds 1 and 2. The repair launcher's 6-trial cap does not see ground truth's admission ledger. Before launch, the ledger (`~/.cache/trajlab/gt-admission/ledger.json`) is empty and no `trajlab gt` process runs.
+
+**Infra reruns.** Unlike round 1's runs, an infra-failed trial is rerun.
+- The night amendment found that `harbor jobs resume` has no `--env-file` option. The launcher now loads the env file into the resume subprocess's environment the way `harbor run --env-file` loads it (python-dotenv; values from the file override the environment).
+- Round 1's two `EnvironmentStartTimeoutError` trials were not rerun.
+- A resume holds the slots of the trials it reruns until it exits. Without that, one pass could start a resume and another job and run 7 trials.
+- Harbor's resume deletes the dir of each trial it reruns before it rewrites the job's result.json. A job therefore counts as done only when it has a result for every trial, so a resume that dies in between is resumed again.
+- That deleted trial's checkpoint images stay tagged `trajlab-checkpoint:<trial>.<seq>`. Harbor names in `<job>.log` each trial it deletes for a listed exception; it deletes a trial dir with no result.json without a log line.
+
+### Recovery-Bench, for comparison
+
+These facts are from letta-ai/recovery-bench at main `c5f83f2` (2026-04-20).
+
+- **Where the transcript goes.** It is in the prompt. `build_recovery_instruction` (`recovery_bench/prompts.py`) joins three parts with blank lines:
+  - a preamble: "RECOVERY MODE: The previous attempt to complete this task failed. The environment has been restored to the state after the failed attempt. Please analyze what went wrong and try a DIFFERENT approach.";
+  - a block headed `--- PREVIOUS ATTEMPT CONTEXT ---` with the transcript;
+  - a block headed `--- ORIGINAL TASK ---` with the instruction.
+- **What the transcript holds.** One `[<role>]: <content>` per message, with only each step's message text (`replay.py`, `prompts.py` `format_messages_as_text`). Tool calls (the commands that ran), observations (the terminal output), and `reasoning_content` are not included.
+  - In the 89 bundled Terminus-2 traces, 4,201 of the 4,259 agent messages are "Analysis: … Plan: …" text. The other 58 are replies that failed to parse, included as raw text; 31 of them hold commands that were proposed and not run.
+- **Size.** There has been no truncation since commit `85db7b6` (2026-03-27), which removed a 2,000-character cut. A task whose instruction would exceed 64,000 bytes is left out instead (`MAX_INSTRUCTION_BYTES`, `pipeline.py`).
+- **Replay.** The failed attempt's commands are replayed to restore the environment (`replay.py`). These are the `keystrokes` arguments of its tool calls, sent through tmux for Terminus, or through `environment.exec` with 15 s per command for installed agents. No snapshot is taken or compared.
+- **Modes.** `full` (the default), `summary` (an LLM summary in place of the transcript), and `none`.
+- **History and data.** The context block was added on 2026-03-20. The bundled failures are Terminus-2 runs of Claude Haiku 4.5. Which code version produced Recovery-Bench's published results is not checked here.
+
+As built, `traj-text` differs from this in these ways:
+- tool calls and the tool outputs the agent saw are included, with outputs over 4,000 characters cut to 4,000;
+- no failure is left out;
+- the environment is the task image, not a replay;
+- the note is round 1's one line, with no "different approach";
+- the agent is Claude Code with Claude Sonnet 5.5.
+
+### `traj` and `traj-text`, restated
+
+The two arms carry the same failed attempt and differ in how it is delivered. Results are reported as this bundle, not as format alone:
+- (a) **Hidden reasoning.** The resumed conversation of `traj` sends the model's earlier thinking blocks back to the API, which a transcript cannot contain.
+- (b) **Truncation.** `traj` has every tool output in full. `traj-text` cuts 36 of the 422 outputs, and 9 of the 21 failures have no output cut.
+- (c) **Conversation form.** `traj` gets the history as its own multi-turn conversation. `traj-text` gets it as one user message describing an attempt.
+- (d) **Images.** `traj` resends the 26 images the failed agent viewed (5 failures). `traj-text` shows `[image]`.
+- (e) **Claude Code's reminders.** Claude Code adds system reminders to the conversation between turns, as `attachment` events. Harbor's ATIF does not record them, so the transcript lacks them, and `traj`'s resumed session holds them. In the 21 sources these are:
+  - 395 token-budget reminders;
+  - 42 working-directory updates in 10 failures;
+  - 3 background-task completion notices (pretrain-shard-corruption 2, layout-config-recreation2 1);
+  - one changed-file note carrying 8,577 characters of `main.py` (vba-userform-port).
+
+No source session was compacted, so `traj` resumed the full context on every failure.
