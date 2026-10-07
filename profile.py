@@ -28,6 +28,15 @@ IMAGES = [
     ("urn:publicid:IDN+emulab.net+image+emulab-ops//UBUNTU22-64-STD", "Ubuntu 22.04"),
 ]
 
+# Cluster, cores, RAM, and the disk /srv lands on (the blockstore avoids the system disk).
+HARDWARE = [
+    ("r650", "r650 (Clemson): 72 cores, 256 GB, 1.6 TB NVMe"),
+    ("r6525", "r6525 (Clemson): 64 cores, 256 GB, 1.6 TB NVMe"),
+    ("r6615", "r6615 (Clemson): 32 cores, 192 GB, 800 GB NVMe"),
+    ("c6525-100g", "c6525-100g (Utah): 24 cores, 128 GB, 1.6 TB NVMe"),
+    ("c6420", "c6420 (Clemson): 32 cores, 384 GB, 1 TB HDD"),
+]
+
 # Runs as root on every boot; the marker file makes it a no-op after the first.
 SETUP = r"""
 [ -e /srv/.trajlab-setup-done ] && exit 0
@@ -63,9 +72,9 @@ pc.defineParameter(
     "hardware_type",
     "Hardware type",
     portal.ParameterType.NODETYPE,
-    "c220g5",
-    longDescription="Node type, e.g. c220g5 (Wisconsin: 40 cores, 192 GB RAM) or c6525-25g "
-    "(Utah: 16 cores, 128 GB RAM). Leave empty for any type with enough local disk.",
+    HARDWARE[0][0],
+    HARDWARE,
+    longDescription="If the cluster has no free node of this type, pick another from the list.",
 )
 pc.defineParameter(
     "image",
@@ -78,23 +87,25 @@ pc.defineParameter(
     "disk_gb",
     "Local disk for /srv (GB)",
     portal.ParameterType.INTEGER,
-    400,
+    600,
     longDescription="Ephemeral blockstore holding /srv/trajlab/jobs and Docker's data root. "
     "Its contents are lost when the experiment ends; copy results off before it expires.",
 )
 params = pc.bindParameters()
-if params.disk_gb < 100:
-    pc.reportError(portal.ParameterError("Use at least 100 GB for /srv.", ["disk_gb"]))
+if not 100 <= params.disk_gb <= 700:
+    pc.reportError(
+        portal.ParameterError("Use 100 to 700 GB for /srv (r6615's NVMe is 800 GB).", ["disk_gb"])
+    )
 pc.verifyParameters()
 
 request = pc.makeRequestRSpec()
 node = request.RawPC("trajlab")
 node.disk_image = params.image
-if params.hardware_type:
-    node.hardware_type = params.hardware_type
+node.hardware_type = params.hardware_type
 
 srv = node.Blockstore("srv", "/srv")
 srv.size = f"{params.disk_gb}GB"
+srv.placement = "nonsysvol"
 
 node.addService(
     pg.Execute(
