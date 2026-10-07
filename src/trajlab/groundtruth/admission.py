@@ -173,6 +173,9 @@ async def admitted(claim: Claim, ledger: Ledger | None = None) -> AsyncIterator[
         await asyncio.sleep(POLL_S)
     try:
         yield beside
+    except BaseException:
+        tear_down(claim)  # a cancelled replay may not have finished Harbor's own teardown
+        raise
     finally:
         ledger.release(claim.claim_id)
 

@@ -73,6 +73,9 @@ INFRA_MARKERS = (
     "Cannot connect to the Docker daemon",
 )
 FINAL_SAMPLES = 2  # replays of the final state; with the original run, three samples
+MAX_FINAL_ATTEMPTS = 4  # final replays with or without a verdict; gate 2 fails after these
+FIX_SAMPLES = 2  # replays of a labeled fix's state before it confirms anything
+QUIET_FIX_SAMPLES = 3  # the same for tasks whose checks race wall-clock limits
 DEFAULT_VERIFIER_CPUS = 1.0
 DEFAULT_VERIFIER_MEMORY_MB = 2048
 

@@ -599,6 +599,20 @@ def gt_label(
     if unknown:
         typer.echo(f"trajlab gt label: no such fixes in fixes.jsonl: {unknown}", err=True)
         raise typer.Exit(code=1)
+    failing = set(trial_timeline(trial_dir).final_failing)
+    claimed = [check for cause in parsed.causes for check in cause.checks]
+    not_failing = sorted(set(claimed) - failing)
+    if not_failing:
+        typer.echo(
+            f"trajlab gt label: these checks do not fail at the end: {not_failing}; "
+            f"failing checks are {sorted(failing)}",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+    twice = sorted(c for c in set(claimed) if claimed.count(c) > 1)
+    if twice:
+        typer.echo(f"trajlab gt label: checks in more than one cause: {twice}", err=True)
+        raise typer.Exit(code=1)
     path = labels_path(trial_dir)
     path.write_text(parsed.model_dump_json(indent=2) + "\n")
     typer.echo(f"wrote {path}")
@@ -625,11 +639,12 @@ def gt_minimize(job_dir: JobDirArgument, trial: TrialsOption = None) -> None:
         done = read_minimized(trial_dir)
         for cause in labels.causes:
             fix = fixes.get(cause.fix_id or "")
-            if fix is None or fix.fix_id in done or fix.replay_id is None:
+            checks = tuple(sorted(cause.checks))
+            if fix is None or (fix.fix_id, checks) in done or fix.replay_id is None:
                 continue
-            if set(cause.checks) - set(fix.fixed) or fix.broken:
+            if fix.error or set(checks) - set(fix.fixed) or fix.broken:
                 continue  # not confirmed; nothing to minimize
-            record = minimize_fix(inputs, fix, tuple(sorted(cause.checks)))
+            record = minimize_fix(inputs, fix, checks)
             typer.echo(f"{trial_dir.name} {fix.fix_id}: {record.raw_hunks} hunks minimized")
 
 
@@ -644,7 +659,7 @@ def gt_revert(job_dir: JobDirArgument, trial: TrialsOption = None) -> None:
         timeline = trial_timeline(trial_dir)
         done = read_reverts(trial_dir)
         for index, checks in regressions(trial_dir, timeline).items():
-            if index in done:
+            if (index, checks) in done:
                 continue
             record = revert_regression(inputs, timeline.points, index, checks)
             typer.echo(f"{trial_dir.name} P{index}: {record.verdict} {record.reason or ''}")
@@ -702,10 +717,16 @@ def gt_review_sheet(
     out: Annotated[
         Path | None, typer.Option(help="CSV path; default <job>/groundtruth-review.csv.")
     ] = None,
+    force: Annotated[bool, typer.Option("--force", help="Overwrite an existing sheet.")] = False,
 ) -> None:
     """Write the human review sheet: items that must be checked plus a stratified sample."""
     _quiet_harbor()
     path = out or job_dir / "groundtruth-review.csv"
+    if path.exists() and not force:
+        typer.echo(
+            f"trajlab gt review-sheet: {path} exists (it may hold reviews); --force", err=True
+        )
+        raise typer.Exit(code=1)
     count = write_review_sheet(path, trial_inputs(finished_trial_dirs(job_dir)))
     typer.echo(f"wrote {path}: {count} items")
 

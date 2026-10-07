@@ -386,16 +386,19 @@ def test_build_items_blames_the_checkpoint_that_wrote_the_fixed_line(tmp_path: P
     sha = hashlib.sha256(diff.encode()).hexdigest()
     (gt / "patches").mkdir()
     (gt / "patches" / f"{sha}.diff").write_text(diff)
-    append_record(
-        trial,
-        _record(
-            fixed,
-            "counterfactual",
-            {"t1": "passed", "t2": "passed"},
-            base_state_id=c,
-            patch_sha256=sha,
-        ),
-    )
+    for n in range(2):  # a fix confirms only with FIX_SAMPLES agreeing replays
+        append_record(
+            trial,
+            _record(
+                fixed,
+                "counterfactual",
+                {"t1": "passed", "t2": "passed"},
+                base_state_id=c,
+                patch_sha256=sha,
+                load_1m=float(n),
+            ),
+        )
+
     fix = FixRecord(
         fix_id="fix-1",
         trial_name="x__abc",
@@ -510,6 +513,7 @@ def _contract_instances() -> list[Any]:
         MinimizationRecord(
             trial_name="t__a",
             fix_id="fix-1",
+            checks=("pytest:t1",),
             raw_hunks=2,
             leave_outs=(LeaveOut(raw_hunk=0, fix_id="fix-3", needed_for=("pytest:t1",)),),
             created_at=now,

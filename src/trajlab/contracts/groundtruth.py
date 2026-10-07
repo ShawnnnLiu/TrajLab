@@ -202,7 +202,10 @@ class FixRecord(_Model):
         default=None, pattern=SHA256, description="The state the fix produced, if it applied."
     )
     replay_id: str | None = Field(default=None, description="The counterfactual replay.")
-    error: str | None = Field(default=None, description="Why the fix produced no replay.")
+    error: str | None = Field(
+        default=None,
+        description="Why the fix is no evidence: it did not apply, or its replay had no verdict.",
+    )
     fixed: tuple[str, ...] = Field(default=(), description="Checks failing at base, now passing.")
     broken: tuple[str, ...] = Field(default=(), description="Checks passing at base, now not.")
     still_failing: tuple[str, ...] = ()
@@ -210,10 +213,14 @@ class FixRecord(_Model):
 
     @model_validator(mode="after")
     def _outcome(self) -> Self:
-        if (self.replay_id is None) == (self.error is None):
-            raise ValueError("a fix has either a replay or an error")
-        if (self.mode == "environment") != (self.base_image is not None):
-            raise ValueError("environment fixes, and only they, name a base image")
+        if self.replay_id is None and self.error is None:
+            raise ValueError("a fix without a replay says why (error)")
+        if self.error is not None and (self.fixed or self.broken):
+            raise ValueError("a fix with an error is no evidence: fixed and broken stay empty")
+        if self.mode == "artifacts" and self.base_image is not None:
+            raise ValueError("an artifacts-mode fix has no base image")
+        if self.mode == "environment" and self.replay_id is not None and self.base_image is None:
+            raise ValueError("a replayed environment fix names its base image")
         return self
 
 
@@ -387,6 +394,7 @@ class MinimizationRecord(_Model):
 
     trial_name: str = Field(min_length=1)
     fix_id: str = Field(min_length=1)
+    checks: tuple[str, ...] = Field(min_length=1, description="The checks it was minimized for.")
     raw_hunks: int = Field(ge=1)
     leave_outs: tuple[LeaveOut, ...]
     created_at: AwareDatetime

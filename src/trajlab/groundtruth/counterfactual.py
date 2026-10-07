@@ -43,7 +43,7 @@ from trajlab.contracts.groundtruth import (
     TimelinePoint,
 )
 from trajlab.groundtruth.admission import Claim, held
-from trajlab.groundtruth.blame import fix_hunks
+from trajlab.groundtruth.blame import fix_hunks, split_lines
 from trajlab.groundtruth.checks import PASSED, read_checks, statuses
 from trajlab.groundtruth.extract import (
     MANIFEST_FILENAME,
@@ -94,9 +94,10 @@ def _append_fix(trial_dir: Path, record: FixRecord) -> None:
 
 
 def read_lines(path: Path) -> list[str] | None:
+    """A file's lines as blame and diffs see them (one decoding everywhere)."""
     if not path.is_file():
         return None
-    return path.read_bytes().decode("utf-8", errors="replace").splitlines()
+    return split_lines(path.read_bytes().decode("utf-8", errors="surrogateescape"))
 
 
 def patch_paths(patch: Path) -> list[str]:
@@ -324,6 +325,20 @@ def try_fix(
     )
     now = statuses(record.checks)
     failing = sorted(k for k, s in base.items() if s != PASSED)
+    if record.outcome != "verdict":
+        result = FixRecord(
+            **common,
+            command_exit_code=exit_code,
+            command_output=output,
+            files=_file_changes(before, after),
+            state_id=state.state_id,
+            replay_id=record.replay_id,
+            error=f"the fix's replay ended without a verdict ({record.outcome})",
+            still_failing=tuple(failing),
+            created_at=datetime.now(UTC),
+        )
+        _append_fix(trial_dir, result)
+        return result
     fixed = tuple(k for k in failing if now.get(k) == PASSED)
     result = FixRecord(
         **common,

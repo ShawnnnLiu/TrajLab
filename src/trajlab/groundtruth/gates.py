@@ -21,11 +21,12 @@ from harbor.models.trial.paths import TrialPaths
 
 from trajlab.groundtruth.checks import read_checks, statuses
 from trajlab.groundtruth.extract import points_path, read_points
-from trajlab.groundtruth.replay import FINAL_SAMPLES, read_records
+from trajlab.groundtruth.replay import FINAL_SAMPLES, MAX_FINAL_ATTEMPTS, read_records
 from trajlab.groundtruth.traits import traits
 
 Gate = Literal["pass", "fail", "pending", "n/a"]
-_INSTALLED = re.compile(r"^(Successfully installed .*|added \d+ packages.*)$", re.MULTILINE)
+# What a grading-time install resolved: pip's list, and npm's package count without its timing.
+_INSTALLED = re.compile(r"^(Successfully installed .*|added \d+ packages)", re.MULTILINE)
 
 
 @dataclass
@@ -93,6 +94,13 @@ def trial_gates(trial_dir: Path) -> TrialGates:
     ]
     gates.final_samples = len(finals)
     if len(finals) < FINAL_SAMPLES:
+        attempts = sum(
+            1
+            for r in records
+            if r.state_id == final_id and r.purpose == "final" and r.outcome != "infra"
+        )
+        if attempts >= MAX_FINAL_ATTEMPTS:  # the recorded verdict cannot be reproduced
+            gates.gate2 = "fail"
         return gates
     recorded = statuses(read_checks(TrialPaths(trial_dir).verifier_dir))
     samples = [statuses(r.checks) for r in finals]

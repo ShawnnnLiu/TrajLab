@@ -66,7 +66,7 @@ For every non-excluded check that fails at `final`:
   - `missed_fix`: it replaces lines present since `initial`; no call is blamed.
   - `omission`: it only inserts, with only initial lines within 3 lines, or creates an ungraded file.
   - `missing_artifact`: it creates a graded artifact absent at `final`.
-  An item's kind is its strongest hunk kind in that order; `unconfirmed` if no fix confirms it.
+  An item's kind is its strongest hunk kind, in the order wrong_edit, incomplete_edit, missed_fix, missing_artifact, omission; `unconfirmed` if no fix confirms it.
 - **Alternatives:** every other recorded fix that confirms the same checks is stored with its own blame as an acceptable answer; the labeler's fix is the primary one.
 - **Related calls:** calls whose own changes touched ungraded files in the directories of the fixed graded artifacts (e.g. vllm's edits to `vllm/parser/` while only `vllm/reasoning/` is graded); citing them is not a false accusation.
 - **Flags** (kept, never used to drop an item): `covered_ambiguous` (a blamed checkpoint covers several calls, after hook timeouts), `baseline_checkpoint`, `restore_like` (the blamed call copies or restores files), `text_seen_earlier`, `also_initial_lines`, `large_fix` (more than 40 changed lines), `test_literal` (the fix adds literals found in the tests but not the instruction) and `answer_substitution` (the same on an output task), `aggregate_check`, `timing_check`, `self_test_check`, `message_blind`, `no_checkpoints`, `agrees_with_regression` / `disagrees_with_regression`, `primary_from_alternative`, `not_minimized`.

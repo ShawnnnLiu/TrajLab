@@ -117,7 +117,7 @@ def markdown(job_dir: Path, inputs: list[TrialInputs]) -> str:
             for k in kind_names
         ],
     )
-    flags = Counter(flag.split(":")[0] for i in items for flag in i.flags)
+    flags = Counter(name for i in items for name in {flag.split(":")[0] for flag in i.flags})
     out += ["", "Flags (items carrying each):", ""]
     out += _table(["Flag", "Items"], [[k, v] for k, v in sorted(flags.items())])
     out += ["", "## Failed trials", ""]

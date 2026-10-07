@@ -28,7 +28,7 @@ from trajlab.contracts.groundtruth import (
     RevertRecord,
     TimelinePoint,
 )
-from trajlab.groundtruth.blame import apply_hunks, raw_hunks, unified_diff
+from trajlab.groundtruth.blame import apply_hunks, raw_hunks, split_keep, unified_diff
 from trajlab.groundtruth.counterfactual import fix_contents, read_text, try_fix
 from trajlab.groundtruth.extract import TrialInputs, groundtruth_dir, read_state, state_dir
 
@@ -43,20 +43,22 @@ def _append(path: Path, record: BaseModel) -> None:
             fcntl.flock(handle, fcntl.LOCK_UN)
 
 
-def read_minimized(trial_dir: Path) -> dict[str, MinimizationRecord]:
+def read_minimized(trial_dir: Path) -> dict[tuple[str, tuple[str, ...]], MinimizationRecord]:
+    """The latest minimization of each (fix, checks) pair."""
     path = groundtruth_dir(trial_dir) / MINIMIZED_FILENAME
     if not path.is_file():
         return {}
     records = [MinimizationRecord.model_validate_json(x) for x in path.read_text().splitlines()]
-    return {r.fix_id: r for r in records}
+    return {(r.fix_id, r.checks): r for r in records}
 
 
-def read_reverts(trial_dir: Path) -> dict[int, RevertRecord]:
+def read_reverts(trial_dir: Path) -> dict[tuple[int, tuple[str, ...]], RevertRecord]:
+    """The latest revert test of each (point, checks) pair."""
     path = groundtruth_dir(trial_dir) / REVERTS_FILENAME
     if not path.is_file():
         return {}
     records = [RevertRecord.model_validate_json(x) for x in path.read_text().splitlines()]
-    return {r.point: r for r in records}
+    return {(r.point, r.checks): r for r in records}
 
 
 def hunk_index(contents: dict[str, tuple[str | None, str | None]]) -> list[tuple[str, int | None]]:
@@ -67,14 +69,16 @@ def hunk_index(contents: dict[str, tuple[str | None, str | None]]) -> list[tuple
         if before is None or after is None:
             hunks.append((path, None))
             continue
-        found = raw_hunks(before.splitlines(keepends=True), after.splitlines(keepends=True))
+        found = raw_hunks(split_keep(before), split_keep(after))
         hunks += [(path, i) for i in range(len(found))]
     return hunks
 
 
 def _try(inputs: TrialInputs, diff: str, like: FixRecord | None = None) -> FixRecord:
     """Try a diff the way `like` was tried (its mode and command), or on the graded files."""
-    with tempfile.NamedTemporaryFile("w", suffix=".diff", delete=False) as handle:
+    with tempfile.NamedTemporaryFile(
+        "w", suffix=".diff", delete=False, errors="surrogateescape"
+    ) as handle:
         handle.write(diff)
         patch = Path(handle.name)
     try:
@@ -107,8 +111,8 @@ def minimize_fix(
                 if path == dropped_path:
                     if dropped is None:
                         continue
-                    old = before.splitlines(keepends=True)  # type: ignore[union-attr]
-                    new = after.splitlines(keepends=True)  # type: ignore[union-attr]
+                    old = split_keep(before)  # type: ignore[arg-type]
+                    new = split_keep(after)  # type: ignore[arg-type]
                     keep = set(range(len(raw_hunks(old, new)))) - {dropped}
                     after = "".join(apply_hunks(old, new, keep))
                 diff += unified_diff(path, before, after)
@@ -120,7 +124,10 @@ def minimize_fix(
                 LeaveOut(
                     raw_hunk=index,
                     fix_id=reduced.fix_id,
-                    needed_for=tuple(c for c in checks if c not in reduced.fixed),
+                    # A try without a verdict is no evidence; items then keep every hunk.
+                    needed_for=()
+                    if reduced.error
+                    else tuple(c for c in checks if c not in reduced.fixed),
                     broken=reduced.broken,
                     error=reduced.error,
                 )
@@ -128,6 +135,7 @@ def minimize_fix(
     record = MinimizationRecord(
         trial_name=inputs.trial_dir.name,
         fix_id=fix.fix_id,
+        checks=checks,
         raw_hunks=max(1, len(hunks)),
         leave_outs=tuple(leave_outs),
         created_at=datetime.now(UTC),
@@ -154,8 +162,8 @@ def _reverse(before: str, after: str, final: str) -> str | None:
         undone = subprocess.run(
             [
                 "patch",
-                "--batch",
                 "--reverse",
+                "--forward",  # refuse, rather than re-apply, a change already undone
                 "--fuzz=3",
                 "--no-backup-if-mismatch",
                 "--reject-file=-",
@@ -221,7 +229,7 @@ def revert_regression(
     if not diff:
         return record("cannot_revert", reason="no textual change to undo")
     attempt = _try(inputs, diff)
-    if attempt.error:
+    if attempt.error:  # did not apply, or its replay had no verdict: no evidence either way
         return record("cannot_revert", fix_id=attempt.fix_id, reason=attempt.error)
     restored = tuple(c for c in checks if c in attempt.fixed)
     verdict = "confirmed" if set(restored) == set(checks) and not attempt.broken else "cause_moved"

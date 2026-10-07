@@ -19,6 +19,27 @@ from trajlab.groundtruth.items import trial_timeline
 ARGUMENT_CHARS = 240
 
 
+# One mark per timeline point in the brief's per-check rows.
+STATUS_MARK = {
+    "passed": "P",
+    "failed": "F",
+    "skipped": "S",
+    "absent": "a",
+    "flaky": "~",
+    "unknown": "u",
+}
+
+
+def _letter(index: int) -> str:
+    """A, B, ..., Z, AA, AB, ...: a distinct name per state."""
+    name = ""
+    index += 1
+    while index:
+        index, rest = divmod(index - 1, 26)
+        name = chr(ord("A") + rest) + name
+    return name
+
+
 def _point_label(index: int, kind: str, seq: int | None) -> str:
     return f"P{index}" + (f" (checkpoint {seq})" if seq is not None else f" ({kind})")
 
@@ -56,11 +77,13 @@ def brief(inputs: TrialInputs) -> str:
         "Graded artifacts (container paths): "
         + ", ".join(f"/{root}" for root in artifact_roots(inputs)),
         "",
-        "Timeline (state = the graded artifacts' bytes; same letter = same bytes):",
+        "Timeline (state = the graded artifacts' bytes; same letter = same bytes). Per-check "
+        "marks below: P passed, F failed, S skipped, a absent, ~ flaky, u no verdict, ? not "
+        "replayed yet.",
     ]
     letters: dict[str, str] = {}
     for point in points:
-        letter = letters.setdefault(point.state_id, chr(ord("A") + len(letters) % 26))
+        letter = letters.setdefault(point.state_id, _letter(len(letters)))
         calls = ", ".join(point.covered_tool_call_ids)
         out.append(
             f"  {_point_label(point.index, point.kind, point.seq):24} state {letter}"
@@ -86,7 +109,7 @@ def brief(inputs: TrialInputs) -> str:
             detail += f": passed at P{verdict.last_pass}, fails from P{verdict.point}"
             if point.covered_tool_call_ids:
                 detail += f" (calls {', '.join(point.covered_tool_call_ids)})"
-        statuses = " ".join((s or "?")[0].upper() for s in rows[key].statuses)
+        statuses = " ".join(STATUS_MARK.get(s or "", "?") for s in rows[key].statuses)
         out.append(f"  {key}")
         out.append(f"    timeline {statuses}   [{detail}]")
         if messages.get(key):

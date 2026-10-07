@@ -334,7 +334,12 @@ def store_state(trial_dir: Path, staged: Path, task_name: str) -> ArtifactState:
     # Harbor's regrade reads the source trial's result.json (task name, agent info).
     shutil.copy2(TrialPaths(trial_dir).result_path, staged / "result.json")
     final_dir.parent.mkdir(parents=True, exist_ok=True)
-    staged.rename(final_dir)
+    try:
+        staged.rename(final_dir)
+    except OSError:
+        if not final_dir.is_dir():
+            raise
+        shutil.rmtree(staged)  # another process stored the same state meanwhile
     return state
 
 

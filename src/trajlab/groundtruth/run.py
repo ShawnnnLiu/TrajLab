@@ -37,6 +37,9 @@ from trajlab.groundtruth.extract import (
 from trajlab.groundtruth.items import regression_repeats, trial_timeline
 from trajlab.groundtruth.replay import (
     FINAL_SAMPLES,
+    FIX_SAMPLES,
+    MAX_FINAL_ATTEMPTS,
+    QUIET_FIX_SAMPLES,
     PreparedReplay,
     prepare,
     read_records,
@@ -123,21 +126,27 @@ class PlannedReplay:
     wave: int  # 0: first final sample; 1: timeline states; 2: further samples
 
 
-def _counts(records: list[ReplayRecord]) -> tuple[Counter[str], Counter[str], Counter[str]]:
-    """Per state: samples (verdict or no_verdict), final samples, and infra failures."""
-    samples: Counter[str] = Counter()
-    finals: Counter[str] = Counter()
-    infra: Counter[str] = Counter()
+@dataclass
+class StateCounts:
+    samples: Counter[str]  # replays with a verdict or without one (not infra)
+    final_verdicts: Counter[str]
+    final_attempts: Counter[str]  # final replays with or without a verdict
+    infra: Counter[str]
+
+
+def _counts(records: list[ReplayRecord]) -> StateCounts:
+    counts = StateCounts(Counter(), Counter(), Counter(), Counter())
     for record in records:
-        if record.purpose == "counterfactual":
+        if record.purpose in ("counterfactual", "oracle"):
             continue
-        if record.outcome == "infra" or (record.exception_type and not record.checks):
-            infra[record.state_id] += 1
+        if record.outcome == "infra":
+            counts.infra[record.state_id] += 1
             continue
-        samples[record.state_id] += 1
+        counts.samples[record.state_id] += 1
         if record.purpose == "final":
-            finals[record.state_id] += 1
-    return samples, finals, infra
+            counts.final_attempts[record.state_id] += 1
+            counts.final_verdicts[record.state_id] += record.outcome == "verdict"
+    return counts
 
 
 def plan_replays(trial_dir: Path, *, timeline: bool, repeats: bool) -> list[PlannedReplay]:
@@ -145,19 +154,22 @@ def plan_replays(trial_dir: Path, *, timeline: bool, repeats: bool) -> list[Plan
     if not points_path(trial_dir).is_file():
         return []
     points = read_points(trial_dir)
-    samples, finals, infra = _counts(read_records(trial_dir))
+    counts = _counts(read_records(trial_dir))
     final_id = points[-1].state_id
     planned: list[PlannedReplay] = []
 
     def gave_up(state_id: str) -> bool:
-        return not samples[state_id] and infra[state_id] > INFRA_RETRIES
+        return not counts.samples[state_id] and counts.infra[state_id] > INFRA_RETRIES
 
     if not gave_up(final_id):
-        for n in range(finals[final_id], FINAL_SAMPLES):
-            planned.append(PlannedReplay(trial_dir, final_id, "final", 0 if n == 0 else 2))
+        missing = FINAL_SAMPLES - counts.final_verdicts[final_id]
+        room = MAX_FINAL_ATTEMPTS - counts.final_attempts[final_id]
+        for n in range(max(0, min(missing, room))):
+            first = counts.final_attempts[final_id] == 0 and n == 0
+            planned.append(PlannedReplay(trial_dir, final_id, "final", 0 if first else 2))
     if timeline:
         for state_id in dict.fromkeys(p.state_id for p in points):
-            if state_id != final_id and not samples[state_id] and not gave_up(state_id):
+            if state_id != final_id and not counts.samples[state_id] and not gave_up(state_id):
                 planned.append(PlannedReplay(trial_dir, state_id, "timeline", 1))
     if repeats:
         for state_id, missing in regression_repeats(trial_timeline(trial_dir)).items():
@@ -286,10 +298,6 @@ def plan_fix_confirmations(trial_dir: Path) -> list[tuple[str, str, str]]:
             planned.append((fix.state_id, fix.base_state_id, fix.patch_sha256))
         counts[fix.state_id] = max(counts[fix.state_id], wanted)
     return planned
-
-
-FIX_SAMPLES = 2
-QUIET_FIX_SAMPLES = 3
 
 
 async def confirm_fixes(trial_dirs: list[Path]) -> int:

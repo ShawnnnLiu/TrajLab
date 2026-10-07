@@ -17,6 +17,7 @@ or irreproducible) never appear in an item.
 Flags tell a reviewer or a scorer what to know about an item; they are listed in ADR-0013.
 """
 
+import hashlib
 import json
 import re
 from collections import defaultdict
@@ -48,7 +49,15 @@ from trajlab.contracts.groundtruth import (
     TrialLabels,
     TrialProgress,
 )
-from trajlab.groundtruth.blame import blame, first_seen, normalize, raw_hunks, view_of
+from trajlab.groundtruth.blame import (
+    blame,
+    first_seen,
+    normalize,
+    raw_hunks,
+    split_keep,
+    split_lines,
+    view_of,
+)
 from trajlab.groundtruth.checks import PASSED, read_checks, statuses
 from trajlab.groundtruth.counterfactual import (
     artifact_roots,
@@ -60,7 +69,7 @@ from trajlab.groundtruth.counterfactual import (
 from trajlab.groundtruth.extract import TrialInputs, groundtruth_dir, read_points, read_state
 from trajlab.groundtruth.gates import excluded_checks
 from trajlab.groundtruth.minimize import hunk_index, read_minimized, read_reverts
-from trajlab.groundtruth.replay import read_records
+from trajlab.groundtruth.replay import FIX_SAMPLES, QUIET_FIX_SAMPLES, read_records
 from trajlab.groundtruth.timeline import (
     CheckTimeline,
     Classification,
@@ -253,7 +262,7 @@ def regression_items(
         before = read_state(trial_dir, timeline.points[index - 1].state_id)
         if any(entry.status == "failed" for entry in before.entries):
             flags.append("prior_pass_vacuous")  # the passing state lacked a graded artifact
-        revert = reverts.get(index)
+        revert = reverts.get((index, checks))
         flags.append(f"revert_{revert.verdict}" if revert else "revert_untested")
         flags += _check_flags(inputs, checks, bool(blamed))
         items.append(
@@ -281,19 +290,27 @@ def fix_confirms(
     final_state: str,
     records: list[ReplayRecord],
     base: dict[str, str],
+    required: int = 1,
 ) -> str | None:
-    """Why a fix does not confirm these checks, or None if it does in every replay of it."""
+    """Why a fix does not confirm these checks, or None if it does in every replay of it.
+
+    Every claimed check must fail at the end of the trial; the fix's state needs `required`
+    replays with a verdict and none without one (a fix whose state sometimes times out does not
+    confirm anything), and every verdict replay must pass the claimed checks and break none.
+    """
     if fix.replay_id is None or fix.state_id is None:
         return f"the fix produced no replay: {fix.error}"
     if fix.base_state_id != final_state:
         return "the fix does not start from the final state"
-    samples = [
-        r
-        for r in records
-        if r.state_id == fix.state_id and r.purpose == "counterfactual" and r.outcome == "verdict"
-    ]
-    if not samples:
-        return "the fix's replay has no verdict"
+    not_failing = sorted(c for c in checks if base.get(c) in (None, PASSED))
+    if not_failing:
+        return f"claims checks that do not fail at the end: {not_failing}"
+    replays = [r for r in records if r.state_id == fix.state_id and r.purpose == "counterfactual"]
+    if any(r.outcome == "no_verdict" for r in replays):
+        return "a replay of the fix's state ended without a verdict"
+    samples = [r for r in replays if r.outcome == "verdict"]
+    if len(samples) < required:
+        return f"{len(samples)} of {required} confirming replays so far"
     for sample in samples:
         now = statuses(sample.checks)
         unfixed = sorted(c for c in checks if now.get(c) != PASSED)
@@ -367,13 +384,13 @@ def blame_fix(
         if local is None:  # the fix creates or deletes the whole file
             if before is None:
                 kind: HunkKind = "missing_artifact" if in_artifacts(path, inputs) else "omission"
-                added = len((after or "").splitlines())
+                added = len(split_lines(after or ""))
                 hunks.append(BlamedHunk(path=container_path, kind=kind, raw_hunk=raw, added=added))
                 size += added
                 continue
             after = ""  # a deletion: every line is removed
-        old = before.splitlines()  # type: ignore[union-attr]
-        new = (after or "").splitlines()
+        old = split_lines(before)  # type: ignore[arg-type]
+        new = split_lines(after or "")
         versions = [(p.index, lines) for p, lines in history(container_path)]
         if not versions or versions[-1][1] is None:
             flags.append(f"no_history:{container_path}")
@@ -391,8 +408,8 @@ def blame_fix(
         else:
             view = "lines"
             local_hunks = raw_hunks(
-                before.splitlines(keepends=True),  # type: ignore[union-attr]
-                (after or "").splitlines(keepends=True),
+                split_keep(before),  # type: ignore[arg-type]
+                split_keep(after or ""),
             )
             if local is not None:
                 local_hunks = [local_hunks[local]]
@@ -507,7 +524,7 @@ def literal_flags(
     instruction = (inputs.task_dir / "instruction.md").read_text(errors="replace")
     copied = []
     for before, after in contents.values():
-        added = set((after or "").splitlines()) - set((before or "").splitlines())
+        added = set(split_lines(after or "")) - set(split_lines(before or ""))
         for line in added:
             for literal in _LITERAL.findall(line):
                 if (
@@ -544,8 +561,11 @@ def cause_items(
         return []
     base = _base_statuses(timeline)
     final_state = points[-1].state_id
+    required = QUIET_FIX_SAMPLES if traits(inputs.task_name).quiet else FIX_SAMPLES
     confirming = [
-        f for f in fixes if fix_confirms(f, checks, final_state, timeline.records, base) is None
+        f
+        for f in fixes
+        if fix_confirms(f, checks, final_state, timeline.records, base, required) is None
     ]
     common = {
         "trial_name": trial_dir.name,
@@ -566,13 +586,13 @@ def cause_items(
             if cause.fix_id is None
             else f"no fix {cause.fix_id} in fixes.jsonl"
             if labeled is None
-            else fix_confirms(labeled, checks, final_state, timeline.records, base)
+            else fix_confirms(labeled, checks, final_state, timeline.records, base, required)
         )
         suspects = cause.suspected_tool_call_ids
         return [
             GroundTruthItem(
                 **common,
-                item_id=f"{trial_dir.name}/cause-{number}",
+                item_id=f"{trial_dir.name}/cause-{cause_key(checks)}",
                 checks=checks,
                 kind="unconfirmed",
                 method="labeler",
@@ -584,8 +604,10 @@ def cause_items(
         ]
     # Which raw hunks each check needs, from the minimization record if there is one.
     groups: list[tuple[tuple[str, ...], set[int] | None]] = [(checks, None)]
-    record = minimized.get(primary.fix_id)
-    if record is not None and record.leave_outs:
+    record = minimized.get((primary.fix_id, checks))
+    if record is not None and any(lo.error for lo in record.leave_outs):
+        flags.append("minimization_incomplete")  # some reduced try had no verdict: keep all
+    elif record is not None and record.leave_outs:
         needs = {
             check: {lo.raw_hunk for lo in record.leave_outs if check in lo.needed_for}
             for check in checks
@@ -633,7 +655,7 @@ def cause_items(
         items.append(
             GroundTruthItem(
                 **common,
-                item_id=f"{trial_dir.name}/cause-{number}{suffix}",
+                item_id=f"{trial_dir.name}/cause-{cause_key(checks)}{suffix}",
                 checks=group_checks,
                 kind=found.kind,
                 method="counterfactual",
@@ -651,6 +673,11 @@ def cause_items(
             )
         )
     return items
+
+
+def cause_key(checks: tuple[str, ...]) -> str:
+    """A cause's id within its trial, from its checks, so it survives relabeling in any order."""
+    return hashlib.sha256("\n".join(sorted(checks)).encode()).hexdigest()[:10]
 
 
 def _components(needs: dict[str, set[int]]) -> list[tuple[tuple[str, ...], set[int]]]:

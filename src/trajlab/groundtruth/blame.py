@@ -25,9 +25,20 @@ _NUMBER = re.compile(r"(?<![\w.])-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?(?![\w.])")
 
 def _canonical_number(found: re.Match[str]) -> str:
     try:
-        return format(float(found.group(0)), ".12g")
+        return repr(float(found.group(0)))  # the exact value: 8, 8.0 and 8.00 are equal
     except ValueError:
         return found.group(0)
+
+
+def split_lines(text: str) -> list[str]:
+    """Lines as git and diff see them: split on newlines only, no line endings kept."""
+    lines = text.split("\n")
+    return lines[:-1] if lines and lines[-1] == "" else lines
+
+
+def split_keep(text: str) -> list[str]:
+    """Lines split on newlines only, each keeping its newline (the last may lack one)."""
+    return [line for line in re.split(r"(?<=\n)", text) if line]
 
 
 def normalize(line: str) -> str:
@@ -43,7 +54,9 @@ def view_of(path: str, lines: list[str] | None) -> tuple[View, list[str] | None]
         parsed = json.loads("\n".join(lines))
     except ValueError:
         return "lines", lines
-    return "json", json.dumps(parsed, indent=1, sort_keys=True).splitlines()
+    # Without trailing commas, so adding a key after a value does not change the value's line.
+    pretty = json.dumps(parsed, indent=1, sort_keys=True).split("\n")
+    return "json", [line.removesuffix(",") for line in pretty]
 
 
 def _matcher(a: list[str], b: list[str], *, exact: bool = False) -> difflib.SequenceMatcher[str]:
@@ -150,8 +163,8 @@ def apply_hunks(final: list[str], fixed: list[str], keep: set[int]) -> list[str]
 
 def unified_diff(path: str, before: str | None, after: str | None) -> str:
     """A git-style diff of one file (`path` relative to the container root)."""
-    old = (before or "").splitlines(keepends=True)
-    new = (after or "").splitlines(keepends=True)
+    old = split_keep(before or "")
+    new = split_keep(after or "")
     out = []
     for line in difflib.unified_diff(
         old,
@@ -160,9 +173,13 @@ def unified_diff(path: str, before: str | None, after: str | None) -> str:
         tofile=f"b/{path}" if after is not None else "/dev/null",
     ):
         out.append(line if line.endswith("\n") else line + "\n\\ No newline at end of file\n")
-    if not out:
-        return ""
     header = f"diff --git a/{path} b/{path}\n"
+    if not out:
+        if before is None and after == "":
+            return header + "new file mode 100644\n"  # git applies a header-only diff
+        if after is None and before == "":
+            return header + "deleted file mode 100644\n"
+        return ""
     if before is None:
         header += "new file mode 100644\n"
     elif after is None:
