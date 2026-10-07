@@ -43,6 +43,7 @@ from trajlab.groundtruth.counterfactual import file_history, read_fixes, try_fix
 from trajlab.groundtruth.extract import TrialInputs
 from trajlab.groundtruth.gates import job_report
 from trajlab.groundtruth.items import build_items, labels_path, regressions, trial_timeline
+from trajlab.groundtruth.manifest import build_manifest as build_gt_manifest
 from trajlab.groundtruth.minimize import (
     minimize_fix,
     read_minimized,
@@ -630,3 +631,32 @@ def gt_revert(job_dir: JobDirArgument, trial: TrialsOption = None) -> None:
                 continue
             record = revert_regression(inputs, timeline.points, index, checks)
             typer.echo(f"{trial_dir.name} P{index}: {record.verdict} {record.reason or ''}")
+
+
+@gt_app.command("manifest")
+def gt_manifest(
+    job_dir: JobDirArgument,
+    dataset_id: Annotated[str, typer.Option(help="Manifest name, e.g. tb40-sonnet-v2-gt-v1.")],
+    source_corpus_id: Annotated[str, typer.Option(help="The corpus the job belongs to.")],
+    labeler: Annotated[
+        list[str] | None, typer.Option("--labeler", help="Who proposed causes (repeatable).")
+    ] = None,
+    storage: StorageOption = None,
+    manifests_dir: ManifestsDirOption = MANIFESTS_DIR,
+) -> None:
+    """Write the ground-truth dataset manifest to corpus/manifests/<dataset-id>.json."""
+    _quiet_harbor()
+    state = repo_state(repo_root(Path.cwd()))
+    built = build_gt_manifest(
+        dataset_id,
+        source_corpus_id,
+        job_dir,
+        trial_inputs(finished_trial_dirs(job_dir)),
+        repo_sha=state.sha,
+        repo_dirty=state.dirty,
+        labelers=tuple(labeler or ()),
+        storage=storage,
+    )
+    path = manifests_dir / f"{dataset_id}.json"
+    path.write_text(built.model_dump_json(indent=2) + "\n")
+    typer.echo(f"wrote {path}")

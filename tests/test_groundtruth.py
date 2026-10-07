@@ -425,3 +425,142 @@ def test_build_items_blames_the_checkpoint_that_wrote_the_fixed_line(tmp_path: P
     assert item.points == (1,) and item.tool_call_ids == ("toolu_1",) and item.step_ids == (2,)
     [hunk] = item.hunks
     assert (hunk.removed, hunk.origins, hunk.earliest) == ((2,), (1,), (1,))
+
+
+# --- contracts ------------------------------------------------------------------------------
+
+
+def _contract_instances() -> list[Any]:
+    from trajlab.contracts.groundtruth import (
+        AlternativeFix,
+        ArtifactState,
+        BlamedHunk,
+        FixFile,
+        FixRecord,
+        GroundTruthItem,
+        GroundTruthManifest,
+        LeaveOut,
+        MinimizationRecord,
+        RevertRecord,
+        StateEntry,
+        StateFile,
+        TimelinePoint,
+        TrialLabels,
+    )
+
+    now = datetime(2026, 10, 7, tzinfo=UTC)
+    sha = "0" * 64
+    hunk = BlamedHunk(
+        path="/app/x.py", kind="wrong_edit", raw_hunk=0, removed=(2,), origins=(1,), earliest=(1,)
+    )
+    return [
+        ArtifactState(
+            state_id=sha,
+            task_name="t",
+            entries=(StateEntry(source="/app/x.py", type="file", status="ok"),),
+            files=(StateFile(path="app/x.py", kind="file", size=1, sha256=sha),),
+        ),
+        TimelinePoint(trial_name="t__a", index=0, kind="initial", image="sha256:1", state_id=sha),
+        _record(sha, "final", {"t1": "failed"}, outcome="verdict", load_1m=1.5, beside=("c",)),
+        FixRecord(
+            fix_id="fix-1",
+            trial_name="t__a",
+            mode="environment",
+            base_state_id=sha,
+            base_image="sha256:1",
+            patch_sha256=sha,
+            command="make",
+            files=(FixFile(path="/app/x.py", existed=True, removed=(2,), added=1),),
+            state_id=sha,
+            replay_id="r",
+            fixed=("pytest:t1",),
+            created_at=now,
+        ),
+        GroundTruthItem(
+            item_id="t__a/cause-1",
+            trial_name="t__a",
+            task_name="t",
+            artifact_class="source",
+            checks=("pytest:t1",),
+            kind="wrong_edit",
+            method="counterfactual",
+            points=(1,),
+            tool_call_ids=("toolu_1",),
+            step_ids=(2,),
+            hunks=(hunk,),
+            fix_id="fix-1",
+            fix_size=2,
+            alternatives=(AlternativeFix(fix_id="fix-2", kind="omission", fix_size=1),),
+            flags=("large_fix",),
+        ),
+        TrialLabels.model_validate(
+            {
+                "trial_name": "t__a",
+                "labeler": "m",
+                "causes": [{"checks": ["a"], "explanation": "e"}],
+            }
+        ),
+        MinimizationRecord(
+            trial_name="t__a",
+            fix_id="fix-1",
+            raw_hunks=2,
+            leave_outs=(LeaveOut(raw_hunk=0, fix_id="fix-3", needed_for=("pytest:t1",)),),
+            created_at=now,
+        ),
+        RevertRecord(
+            trial_name="t__a", point=2, checks=("pytest:t1",), verdict="confirmed", created_at=now
+        ),
+        GroundTruthManifest(
+            dataset_id="tb40-sonnet-v2-gt-v1",
+            created_at=now,
+            source_corpus_id="tb40-sonnet-v2",
+            source_job="tb40-sonnet-v2",
+            harbor_version="0.23.0",
+            repo_sha="a" * 40,
+            repo_dirty=False,
+            labelers=("claude-opus-5-5",),
+            verifier_images={"t": "image@sha256:1"},
+            admission={"cpu_capacity": 7.0},
+            trials=1,
+            failed_trials=1,
+            points=4,
+            states=2,
+            replays_by_outcome={"verdict": 3},
+            replays_by_purpose={"final": 2},
+            gate1={"pass": 1},
+            gate2={"pass": 1},
+            excluded_checks=0,
+            fixes=1,
+            items_by_kind={"wrong_edit": 1},
+            items_by_method={"counterfactual": 1},
+        ),
+    ]
+
+
+def test_groundtruth_contracts_round_trip() -> None:
+    for instance in _contract_instances():
+        dumped = instance.model_dump_json()
+        assert type(instance).model_validate_json(dumped) == instance
+        assert type(instance).model_validate_json(dumped, strict=True) == instance
+
+
+def test_groundtruth_contracts_reject_inconsistent_records() -> None:
+    from pydantic import ValidationError
+
+    from trajlab.contracts.groundtruth import BlamedHunk, GroundTruthItem
+
+    with pytest.raises(ValidationError):  # one origin per removed line
+        BlamedHunk(
+            path="/a", kind="wrong_edit", raw_hunk=0, removed=(1, 2), origins=(1,), earliest=(1,)
+        )
+    with pytest.raises(ValidationError):  # a regression comes from the timeline
+        GroundTruthItem(
+            item_id="i",
+            trial_name="t",
+            task_name="t",
+            artifact_class="source",
+            checks=("c",),
+            kind="regression",
+            method="counterfactual",
+            fix_id="f",
+        )

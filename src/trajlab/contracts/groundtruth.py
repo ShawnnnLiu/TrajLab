@@ -403,3 +403,34 @@ class RevertRecord(_Model):
     broken: tuple[str, ...] = ()
     reason: str | None = None
     created_at: AwareDatetime
+
+
+class GroundTruthManifest(_Model):
+    """How a ground-truth dataset was produced and what it holds (ADR-0013).
+
+    Written by `trajlab gt manifest` to `corpus/manifests/<dataset_id>.json`.
+    """
+
+    dataset_id: str = Field(min_length=1, pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+    created_at: AwareDatetime
+    source_corpus_id: str = Field(min_length=1)
+    source_job: str = Field(min_length=1, description="The job dir name under corpus/jobs/.")
+    storage: str | None = None
+    harbor_version: str = Field(min_length=1)
+    repo_sha: str = Field(min_length=40, max_length=40)
+    repo_dirty: bool
+    labelers: tuple[str, ...] = Field(description="Who proposed causes, e.g. model and run id.")
+    verifier_images: dict[str, str] = Field(description="Task name -> verifier image@digest.")
+    admission: dict[str, float] = Field(description="CPU and memory caps replays ran under.")
+    trials: int = Field(ge=0)
+    failed_trials: int = Field(ge=0)
+    points: int = Field(ge=0)
+    states: int = Field(ge=0)
+    replays_by_outcome: dict[str, int]
+    replays_by_purpose: dict[str, int]
+    gate1: dict[str, int]
+    gate2: dict[str, int]
+    excluded_checks: int = Field(ge=0)
+    fixes: int = Field(ge=0)
+    items_by_kind: dict[str, int]
+    items_by_method: dict[str, int]
