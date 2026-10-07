@@ -101,3 +101,4 @@ For every non-excluded check that fails at `final`:
 - Brief question classes covered: 2 as within-trial failure localization (only 4 tasks have both passing and failing trials, too few for divergence between runs), 4 (calls that changed graded files, set precision and recall) and 5 (first-pass points, scored by distance in calls or seconds). Classes 1 and 3 need another source.
 - Compute: about 2.5 hours of replays under admission, plus labeling (two workflow waves) and confirmation, minimization, and revert replays. Disk: states and replay dirs well under 1 GB.
 - Nothing in capture changes; no new capture `corpus_id`. The ground-truth dataset is `tb40-sonnet-v2-gt-v1`.
+- Results of the first run (counts, events, data locations): `docs/research/2026-10-07_tb40-groundtruth-v1.md`.
