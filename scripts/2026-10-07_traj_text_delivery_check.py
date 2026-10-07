@@ -14,12 +14,14 @@ both the text an agent saw and Harbor's longer ATIF content, so the renderer's c
    read as line feeds); no /tmp/trajlab-prompt-* file is in any of the trial's checkpoint
    images (each taken after `claude` started); checkpoints.jsonl has records and every .req has
    an .ack.
-2. Ownership, no API: in a container of the trial's final checkpoint image run as a non-root
-   user (65534), sends the same prompt through `RepairClaudeCode.exec_as_agent` with a minimal
-   Docker-backed environment. Its upload is `docker cp -a`, which, like Harbor's `docker compose
-   cp`, keeps the host user's uid and gid (not the agent user's) on a file in sticky /tmp.
-   Checks the agent user's shell gets every byte and the file is gone; as a control, a file
-   uploaded the same way, without the agent's chown, is one that user cannot remove.
+2. Ownership, no API: in a container of the trial's final checkpoint image, running as the
+   image's default user as a trial's container does, sends the same prompt through
+   `RepairClaudeCode.exec_as_agent` with a minimal Docker-backed environment whose agent user is
+   65534 (Harbor's `default_user`, i.e. `docker exec -u`). Its upload is `docker cp -a`, which,
+   like Harbor's `docker compose cp`, keeps the host user's uid and gid, not the agent user's,
+   on a file in sticky /tmp. Checks the agent user's shell gets every byte and the file is gone;
+   as a control, a file uploaded the same way, without the agent's chown, is one that user
+   cannot remove.
 
     uv run python scripts/2026-10-07_traj_text_delivery_check.py [--job NAME] [--env-file PATH]
     uv run python scripts/2026-10-07_traj_text_delivery_check.py --skip-trial --image IMAGE
@@ -293,10 +295,9 @@ class ContainerEnvironment:
     upload in one running container. Upload is `docker cp -a`, which keeps the host file's uid,
     gid, and mode, as Harbor's `docker compose cp` (no --archive) was seen to do."""
 
-    default_user: str | int | None = None
-
-    def __init__(self, container: str) -> None:
+    def __init__(self, container: str, default_user: str | int | None) -> None:
         self.container = container
+        self.default_user = default_user
 
     async def exec(
         self,
@@ -306,6 +307,7 @@ class ContainerEnvironment:
         timeout_sec: int | None = None,
         user: str | int | None = None,
     ) -> ExecResult:
+        user = user if user is not None else self.default_user  # Harbor's _resolve_user
         args = ["exec"] + (["-u", str(user)] if user is not None else [])
         for key, value in (env or {}).items():
             args += ["-e", f"{key}={value}"]
@@ -319,10 +321,10 @@ class ContainerEnvironment:
 def check_ownership(image: str, prompt: str, transcript_file: Path) -> dict[str, Any]:
     """Part 2: the prompt reaches a non-root agent user whole, and its file is removed."""
     container = docker(
-        "run", "-d", "--rm", "--user", NOBODY, "--entrypoint", "sleep", image, "infinity"
+        "run", "-d", "--rm", "--entrypoint", "sleep", image, "infinity"
     ).stdout.strip()
     try:
-        environment = ContainerEnvironment(container)
+        environment = ContainerEnvironment(container, default_user=NOBODY)
         agent = RepairClaudeCode(
             logs_dir=transcript_file.parent,
             model_name=MODEL,
@@ -345,12 +347,14 @@ def check_ownership(image: str, prompt: str, transcript_file: Path) -> dict[str,
         control = f"/tmp/trajlab-prompt-control-{uuid.uuid4().hex}.txt"
         docker("cp", "-a", str(transcript_file), f"{container}:{control}")
         owner = docker("exec", container, "stat", "-c", "%u:%g %a", control).stdout.strip()
-        removed = docker("exec", container, "rm", "-f", control, check=False)
+        removed = docker("exec", "-u", NOBODY, container, "rm", "-f", control, check=False)
         still_there = docker("exec", container, "test", "-e", control, check=False).returncode == 0
+        container_user = docker("exec", container, "id", "-u").stdout.strip()
     finally:
         docker("rm", "-f", container, check=False)
     numbers = {
         "image": image,
+        "container_default_uid": container_user,
         "agent_uid": lines[1].strip(),
         "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
         "received_sha256": received_sha,
