@@ -603,3 +603,21 @@ def test_anchor_window_spans_three_lines_each_side() -> None:
     assert anchors_of(5, 20) == (3, 4, 5, 6, 7, 8)
     assert anchors_of(0, 20) == (1, 2, 3)
     assert anchors_of(20, 20) == (18, 19, 20)
+
+
+def test_summary_node_ids_keep_spaces_and_drop_messages() -> None:
+    from trajlab.groundtruth.checks import _node_id
+
+    assert (
+        _node_id("tests/t.py::f[Detection limit (Bq/kg)]")
+        == "tests/t.py::f[Detection limit (Bq/kg)]"
+    )
+    assert _node_id("tests/t.py::f[a b] - AssertionError: [x] - y") == "tests/t.py::f[a b]"
+    assert _node_id("tests/t.py::f - assert 1 == 2") == "tests/t.py::f"
+    assert _node_id("tests/t.py::f[a - b] - boom") == "tests/t.py::f[a - b]"
+
+
+def test_cad_details_without_combined_raw_still_parse(tmp_path: Path) -> None:
+    (tmp_path / "reward_details.json").write_text(json.dumps({"score": 0.0}))
+    [score] = read_checks(tmp_path)
+    assert (score.check, score.status, score.value) == ("score", "failed", 0.0)

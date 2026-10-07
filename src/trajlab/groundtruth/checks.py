@@ -28,10 +28,9 @@ SUMMARY_OUTCOMES = {
     "XPASS": "passed",
     "FAILED": "failed",
     "ERROR": "failed",
-    "SKIPPED": "skipped",
     "XFAIL": "skipped",
 }
-_SUMMARY_LINE = re.compile(r"^(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS) (\S+)")
+_SUMMARY_LINE = re.compile(r"^(PASSED|FAILED|ERROR|XFAIL|XPASS) (.+)$")
 
 
 def _check(
@@ -59,8 +58,22 @@ def _summary_nodes(stdout: Path) -> dict[str, list[str]]:
     for line in stdout.read_text(errors="replace").splitlines():
         found = _SUMMARY_LINE.match(line)
         if found:
-            nodes[SUMMARY_OUTCOMES[found.group(1)]].append(found.group(2))
+            # A node id may hold spaces inside its parameter brackets; a failure message
+            # follows " - " after the closing bracket.
+            nodes[SUMMARY_OUTCOMES[found.group(1)]].append(_node_id(found.group(2)))
     return nodes
+
+
+def _node_id(rest: str) -> str:
+    """The node id at the start of a summary line's remainder: the shortest prefix before a
+    " - " (which starts the failure message) whose brackets balance."""
+    start = 0
+    while (cut := rest.find(" - ", start)) != -1:
+        head = rest[:cut]
+        if head.count("[") == head.count("]"):
+            return head.rstrip()
+        start = cut + 1
+    return rest.rstrip()
 
 
 def _same_test(node: str, name: str) -> bool:
@@ -119,8 +132,10 @@ def read_checks(verifier_dir: Path) -> list[CheckResult]:
     details_path = verifier_dir / "reward_details.json"
     if details_path.is_file():
         details = json.loads(details_path.read_text())
-        status = PASSED if details["score"] == 1.0 else FAILED
-        found.append(_check("cad", "score", status, value=details["combined_raw"]))
+        score = details.get("score")
+        status = PASSED if score == 1.0 else FAILED
+        raw = details.get("combined_raw")
+        found.append(_check("cad", "score", status, value=raw if raw is not None else score))
         for part in ("base", "target"):
             for metric, value in (details.get(part) or {}).items():
                 if isinstance(value, int | float):
