@@ -127,13 +127,29 @@ def append_record(trial_dir: Path, record: ReplayRecord) -> None:
             fcntl.flock(handle, fcntl.LOCK_UN)
 
 
-def classify_outcome(verifier_dir: Path, checks: list[CheckResult]) -> ReplayOutcome:
+TIMEOUT_SHARE = 0.9  # a replay that ran this share of the verifier's timeout timed out itself
+
+
+def classify_outcome(
+    verifier_dir: Path,
+    checks: list[CheckResult],
+    *,
+    elapsed_s: float | None = None,
+    timeout_s: float | None = None,
+) -> ReplayOutcome:
+    """verdict if checks were reported; no_verdict if the test script ran (it printed output
+    without infrastructure errors, or it used up the verifier's timeout) but reported none;
+    infra otherwise."""
     if any(check.status is not None for check in checks):
         return "verdict"
     stdout = verifier_dir / "test-stdout.txt"
     text = stdout.read_text(errors="replace") if stdout.is_file() else ""
-    if text.strip() and not any(marker in text for marker in INFRA_MARKERS):
+    if any(marker in text for marker in INFRA_MARKERS):
+        return "infra"
+    if text.strip():
         return "no_verdict"
+    if elapsed_s is not None and timeout_s and elapsed_s >= TIMEOUT_SHARE * timeout_s:
+        return "no_verdict"  # a silent verifier that ran out its time
     return "infra"
 
 
@@ -238,7 +254,12 @@ async def run_prepared(prepared: PreparedReplay, beside: list[str]) -> ReplayRec
     result = await trial.run()
     finished_at = datetime.now(UTC)
     verifier_dir = TrialPaths(config.trials_dir / config.trial_name).verifier_dir
-    checks = read_checks(verifier_dir)
+    parse_error = None
+    try:
+        checks = read_checks(verifier_dir)
+    except Exception as error:  # a parser bug must not lose the replay; it shows as infra
+        log.exception("%s: cannot read the verifier output", config.trial_name)
+        checks, parse_error = [], f"{type(error).__name__}: {error}"
     rewards = result.verifier_result.rewards if result.verifier_result else None
     reward = rewards.get("reward") if rewards else None
     exception = result.exception_info
@@ -251,15 +272,24 @@ async def run_prepared(prepared: PreparedReplay, beside: list[str]) -> ReplayRec
         patch_sha256=prepared.patch_sha256,
         reward=float(reward) if reward is not None else None,
         checks=tuple(checks),
-        exception_type=exception.exception_type if exception else None,
+        exception_type=exception.exception_type
+        if exception
+        else ("ParseError" if parse_error else None),
         exception_message=(
-            exception.exception_message[:EXCEPTION_MESSAGE_CHARS] if exception else None
+            exception.exception_message[:EXCEPTION_MESSAGE_CHARS] if exception else parse_error
         ),
         harbor_version=importlib.metadata.version("harbor"),
         task_ref=config.task.ref or config.task.name or "",
         started_at=started_at,
         finished_at=finished_at,
-        outcome=classify_outcome(verifier_dir, checks),
+        outcome="infra"
+        if parse_error
+        else classify_outcome(
+            verifier_dir,
+            checks,
+            elapsed_s=(finished_at - started_at).total_seconds(),
+            timeout_s=prepared.task.config.verifier.timeout_sec,
+        ),
         load_1m=round(load_1m, 2),
         beside=tuple(beside),
     )
@@ -310,12 +340,11 @@ def reparse_records(trial_dir: Path) -> int:
                 verifier_dir = TrialPaths(replays_dir / record.replay_id).verifier_dir
                 if verifier_dir.is_dir():
                     checks = read_checks(verifier_dir)
-                    record = record.model_copy(
-                        update={
-                            "checks": tuple(checks),
-                            "outcome": classify_outcome(verifier_dir, checks),
-                        }
-                    )
+                    elapsed = (record.finished_at - record.started_at).total_seconds()
+                    outcome = classify_outcome(verifier_dir, checks, elapsed_s=elapsed)
+                    if outcome == "infra" and record.outcome == "no_verdict":
+                        outcome = "no_verdict"  # the timeout is not known here; keep the record's
+                    record = record.model_copy(update={"checks": tuple(checks), "outcome": outcome})
                 updated.append(record)
             changed = sum(a != b for a, b in zip(records, updated, strict=True))
             if changed:

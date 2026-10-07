@@ -24,6 +24,7 @@ import tarfile
 import tempfile
 import uuid
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
 
 from harbor.models.task.artifacts import is_convention_entry, with_convention_entry
@@ -89,6 +90,30 @@ def _docker(*args: str, timeout: float = DOCKER_TIMEOUT_S) -> subprocess.Complet
     return subprocess.run(
         ["docker", *args], capture_output=True, text=True, timeout=timeout, check=False
     )
+
+
+STALE_EXTRACT_S = 3600  # an extraction container this old was left by a killed process
+
+
+def remove_stale_containers() -> int:
+    """Remove extraction containers older than `STALE_EXTRACT_S` (left by a killed extract)."""
+    listed = _docker(
+        "ps",
+        "--all",
+        "--filter",
+        f"label={CONTAINER_LABEL}=extract",
+        "--format",
+        "{{.ID}} {{.CreatedAt}}",
+    )
+    removed = 0
+    now = datetime.now(UTC)
+    for line in listed.stdout.splitlines():
+        container, created = line.split(" ", 1)
+        stamp = datetime.strptime(" ".join(created.split()[:2]), "%Y-%m-%d %H:%M:%S")
+        if (now - stamp.replace(tzinfo=UTC)).total_seconds() > STALE_EXTRACT_S:
+            _docker("rm", "--force", container, timeout=120)
+            removed += 1
+    return removed
 
 
 class ImageReader:
@@ -175,7 +200,9 @@ class ImageReader:
         except subprocess.TimeoutExpired as expired:
             # Every process but PID 1 (the keep-alive loop); the container is discarded anyway.
             self.exec_root("kill -KILL -1 2>/dev/null; true")
-            output = expired.stdout if isinstance(expired.stdout, str) else ""
+            output = expired.stdout or b""  # bytes even with text=True
+            if isinstance(output, bytes):
+                output = output.decode(errors="replace")
             return subprocess.CompletedProcess(args, 124, output, "timed out")
 
     def copy_dir_with_exclusions(self, source: str, target: Path, exclude: list[str]) -> None:

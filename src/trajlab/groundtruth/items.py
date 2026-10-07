@@ -420,7 +420,10 @@ def blame_fix(
             if i2 > i1:
                 removed = tuple(range(i1 + 1, min(i2, len(origins)) + 1))
                 removed_origins = tuple(origins[line - 1] for line in removed)
-                earliest = tuple(seen[normalize(old[line - 1])] for line in removed)
+                earliest = tuple(
+                    seen.get(normalize(old[line - 1]), origin)
+                    for line, origin in zip(removed, removed_origins, strict=True)
+                )
                 hunks.append(
                     BlamedHunk(
                         path=container_path,

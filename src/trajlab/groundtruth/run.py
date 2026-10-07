@@ -268,35 +268,54 @@ def planned_counts(trial_dirs: list[Path], *, timeline: bool, repeats: bool) -> 
 
 
 def plan_fix_confirmations(trial_dir: Path) -> list[tuple[str, str, str]]:
-    """Missing replays of labeled fixes' states: (state_id, base_state_id, patch_sha256) each.
+    """Missing replays of candidate fixes' states: (state_id, base_state_id, patch_sha256) each.
 
     A fix confirms a cause only if every replay of its state agrees (ADR-0013, decision 5), so
-    each labeled fix's state gets `FIX_SAMPLES` (`QUIET_FIX_SAMPLES` for quiet tasks) replays.
+    each candidate gets `FIX_SAMPLES` (`QUIET_FIX_SAMPLES` for quiet tasks) replays with a
+    verdict. Candidates: the labeled fixes, and any other try whose first replay turned all of
+    some cause's checks from failing to passing and broke none (an alternative answer), except
+    the tries of minimization and revert tests. A state that ended without a verdict once gets no
+    more replays: it cannot confirm anything.
     """
     from trajlab.contracts.groundtruth import TrialLabels
     from trajlab.groundtruth.counterfactual import read_fixes
     from trajlab.groundtruth.items import labels_path
+    from trajlab.groundtruth.minimize import read_minimized, read_reverts
     from trajlab.groundtruth.traits import traits
 
     if not labels_path(trial_dir).is_file():
         return []
     labels = TrialLabels.model_validate_json(labels_path(trial_dir).read_text())
-    fixes = {f.fix_id: f for f in read_fixes(trial_dir)}
+    fixes = read_fixes(trial_dir)
+    test_tries = {lo.fix_id for m in read_minimized(trial_dir).values() for lo in m.leave_outs}
+    test_tries |= {r.fix_id for r in read_reverts(trial_dir).values()}
+    labeled = {c.fix_id for c in labels.causes if c.fix_id}
+    candidates = []
+    for fix in fixes:
+        if fix.state_id is None or fix.error or fix.broken or fix.fix_id in test_tries:
+            continue
+        if fix.fix_id in labeled or any(
+            set(cause.checks) <= set(fix.fixed) for cause in labels.causes
+        ):
+            candidates.append(fix)
     task_name = trial_config(trial_dir).task.name or ""
     wanted = QUIET_FIX_SAMPLES if traits(task_name).quiet else FIX_SAMPLES
-    counts = Counter(
-        r.state_id
-        for r in read_records(trial_dir)
-        if r.purpose == "counterfactual" and r.outcome == "verdict"
-    )
+    verdicts: Counter[str] = Counter()
+    silent: set[str] = set()
+    for record in read_records(trial_dir):
+        if record.purpose == "counterfactual":
+            if record.outcome == "verdict":
+                verdicts[record.state_id] += 1
+            elif record.outcome == "no_verdict":
+                silent.add(record.state_id)
     planned = []
-    for cause in labels.causes:
-        fix = fixes.get(cause.fix_id or "")
-        if fix is None or fix.state_id is None:
+    for fix in candidates:
+        assert fix.state_id is not None
+        if fix.state_id in silent:
             continue
-        for _ in range(wanted - counts[fix.state_id]):
+        for _ in range(wanted - verdicts[fix.state_id]):
             planned.append((fix.state_id, fix.base_state_id, fix.patch_sha256))
-        counts[fix.state_id] = max(counts[fix.state_id], wanted)
+        verdicts[fix.state_id] = max(verdicts[fix.state_id], wanted)
     return planned
 
 

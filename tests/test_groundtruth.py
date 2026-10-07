@@ -625,3 +625,68 @@ def test_cad_details_without_combined_raw_still_parse(tmp_path: Path) -> None:
     (tmp_path / "reward_details.json").write_text(json.dumps({"score": 0.0}))
     [score] = read_checks(tmp_path)
     assert (score.check, score.status, score.value) == ("score", "failed", 0.0)
+
+
+def _fix_record(state: str, base: str) -> Any:
+    from trajlab.contracts.groundtruth import FixRecord
+
+    return FixRecord(
+        fix_id="fix-x",
+        trial_name="x__abc",
+        mode="artifacts",
+        base_state_id=base,
+        patch_sha256="1" * 64,
+        state_id=state,
+        replay_id="r",
+        fixed=("pytest:t1",),
+        created_at=datetime(2026, 10, 7, tzinfo=UTC),
+    )
+
+
+@pytest.mark.parametrize(
+    ("outcomes", "required", "confirmed"),
+    [
+        (["verdict"], 2, False),  # one replay is not enough
+        (["verdict", "verdict"], 2, True),
+        (["verdict", "infra"], 2, False),  # infra is no sample
+        (["verdict", "verdict", "no_verdict"], 2, False),  # a state that times out
+        (["verdict", "verdict"], 3, False),  # quiet tasks need three
+    ],
+)
+def test_fix_confirms_needs_every_replay_and_enough_of_them(
+    outcomes: list[str], required: int, confirmed: bool
+) -> None:
+    from trajlab.groundtruth.items import fix_confirms
+
+    base, state = "a" * 64, "b" * 64
+    records = [
+        _record(
+            state,
+            "counterfactual",
+            {"t1": "passed", "t2": "passed"} if outcome == "verdict" else {},
+            base_state_id=base,
+            patch_sha256="1" * 64,
+            outcome=outcome,
+        )
+        for outcome in outcomes
+    ]
+    statuses_ = {"pytest:t1": "failed", "pytest:t2": "passed"}
+    reason = fix_confirms(
+        _fix_record(state, base), ("pytest:t1",), base, records, statuses_, required
+    )
+    assert (reason is None) is confirmed
+
+
+def test_fix_confirms_refuses_checks_that_do_not_fail() -> None:
+    from trajlab.groundtruth.items import fix_confirms
+
+    base, state = "a" * 64, "b" * 64
+    records = [
+        _record(
+            state, "counterfactual", {"t1": "passed"}, base_state_id=base, patch_sha256="1" * 64
+        )
+    ] * 2
+    reason = fix_confirms(
+        _fix_record(state, base), ("pytest:t1",), base, records, {"pytest:t1": "passed"}, 2
+    )
+    assert reason is not None and "do not fail" in reason

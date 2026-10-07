@@ -47,11 +47,12 @@ from trajlab.contracts.groundtruth import (
 )
 from trajlab.groundtruth.blame import blame
 from trajlab.groundtruth.counterfactual import file_history, read_fixes, run_oracle, try_fix
-from trajlab.groundtruth.extract import TrialInputs
+from trajlab.groundtruth.extract import TrialInputs, remove_stale_containers
 from trajlab.groundtruth.gates import job_report
 from trajlab.groundtruth.items import (
     build_items,
     build_progress,
+    fix_confirms,
     labels_path,
     read_items,
     regressions,
@@ -64,7 +65,7 @@ from trajlab.groundtruth.minimize import (
     read_reverts,
     revert_regression,
 )
-from trajlab.groundtruth.replay import reparse_records
+from trajlab.groundtruth.replay import FIX_SAMPLES, QUIET_FIX_SAMPLES, reparse_records
 from trajlab.groundtruth.run import (
     confirm_fixes,
     extract_job,
@@ -76,6 +77,7 @@ from trajlab.groundtruth.run import (
 from trajlab.groundtruth.show import brief, calls
 from trajlab.groundtruth.summary import markdown as summary_markdown
 from trajlab.groundtruth.summary import write_review_sheet
+from trajlab.groundtruth.traits import traits
 
 app = typer.Typer(help="Capture Claude Code trajectories on Harbor with environment checkpoints.")
 
@@ -398,6 +400,7 @@ def gt_extract(
 ) -> None:
     """Extract every timeline point's artifact state of a job's finished trials."""
     _quiet_harbor()
+    remove_stale_containers()
     failed = extract_job(finished_trial_dirs(job_dir, trial), workers=workers, force=force)
     if failed:
         typer.echo(f"trajlab gt extract: failed: {', '.join(failed)}", err=True)
@@ -637,13 +640,17 @@ def gt_minimize(job_dir: JobDirArgument, trial: TrialsOption = None) -> None:
         labels = TrialLabels.model_validate_json(labels_path(trial_dir).read_text())
         fixes = {f.fix_id: f for f in read_fixes(trial_dir)}
         done = read_minimized(trial_dir)
+        timeline = trial_timeline(trial_dir)
+        base = {t.key: t.final for t in timeline.timelines if t.final and t.final != "flaky"}
+        required = QUIET_FIX_SAMPLES if traits(inputs.task_name).quiet else FIX_SAMPLES
         for cause in labels.causes:
             fix = fixes.get(cause.fix_id or "")
             checks = tuple(sorted(cause.checks))
-            if fix is None or (fix.fix_id, checks) in done or fix.replay_id is None:
+            if fix is None or (fix.fix_id, checks) in done:
                 continue
-            if fix.error or set(checks) - set(fix.fixed) or fix.broken:
-                continue  # not confirmed; nothing to minimize
+            final = timeline.points[-1].state_id
+            if fix_confirms(fix, checks, final, timeline.records, base, required) is not None:
+                continue  # not confirmed (yet): nothing to minimize
             record = minimize_fix(inputs, fix, checks)
             typer.echo(f"{trial_dir.name} {fix.fix_id}: {record.raw_hunks} hunks minimized")
 
