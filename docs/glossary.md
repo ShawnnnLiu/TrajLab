@@ -99,6 +99,21 @@ One trial is one task executed by one attempt.
   Steps of read-only tools join to the most recent earlier checkpoint (ADR-0001), which in the enriched file is the last checkpoint step before them; each hooked call's `CallRecord` sits on its step as `extra.trajlab.calls` (ADR-0003, 2026-10-01 amendment).
 - **compaction record** - the `CompactionRecord` postprocess builds from one native `compact_boundary` event; it is the `observation.results[0].extra` of a compaction step.
 
+## Ground truth (ADR-0013)
+
+- **timeline / point** - a trial's ordered points: `initial` (the derived image it started from), one per checkpoint, and `final` (Harbor's recorded `artifacts/`); `P<i>` names point `i`.
+- **artifact state / `state_id`** - the declared (graded) artifacts' bytes at a point, collected as Harbor collects them; `state_id` hashes the canonical listing. Points with the same bytes share a state.
+- **replay** - one run of a task's verifier on one artifact state through `ReplayTrial` (Harbor's regrade); its `outcome` is `verdict`, `no_verdict`, or `infra`.
+- **gate 1 / gate 2** - fidelity checks: the last checkpoint's state equals the final state; replaying the final state reproduces the recorded reward and each check (`flaky` and `irreproducible` checks are excluded).
+- **regression** - a check that passes at a point and fails from the next point to the end; a mechanical ground-truth item, tested by revert.
+- **fix / try** - a unified diff tried on a trial's final state by `trajlab gt try-fix`, in `artifacts` or `environment` mode; recorded as a `FixRecord`, regraded as a `counterfactual` replay.
+- **confirmed fix** - a fix every replay of which turns its claimed checks from failing to passing and breaks none.
+- **labeler** - the Claude Code agent that proposes causes and fixes for one trial; never the judge.
+- **item** - one ground-truth fault of a failed trial (`GroundTruthItem`): its checks, kind, blamed points and calls, hunks, flags.
+- **blame / origin / earliest** - the point that last wrote a line (last-writer blame), and the earliest point at which the file held the same text.
+- **admission / claim / quiet** - the host-wide ledger that starts verifier environments and fix containers by declared CPUs and memory; a claim is one entry; a quiet claim runs beside at most 2 other CPUs.
+  Not: "slot", which the first draft used.
+
 ## Everything else
 
 - **ADR** - Architecture Decision Record, in `docs/decisions/`.
