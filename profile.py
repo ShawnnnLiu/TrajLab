@@ -18,7 +18,12 @@ when `/srv/.trajlab-setup-done` exists. Every project member on the node is in t
 Pass `--storage /srv/trajlab/jobs` to `trajlab run` and `trajlab repair` (`corpus/README.md`).
 """
 
-import shlex
+# CloudLab runs profiles on an old Python (no f-strings; possibly Python 2): keep this file
+# compatible with both, so no f-strings and no Python 3-only imports.
+try:
+    from shlex import quote
+except ImportError:
+    from pipes import quote  # noqa: UP035 (Python 2)
 
 import geni.portal as portal
 import geni.rspec.pg as pg
@@ -104,13 +109,13 @@ node.disk_image = params.image
 node.hardware_type = params.hardware_type
 
 srv = node.Blockstore("srv", "/srv")
-srv.size = f"{params.disk_gb}GB"
+srv.size = str(params.disk_gb) + "GB"
 srv.placement = "nonsysvol"
 
 node.addService(
     pg.Execute(
         shell="bash",
-        command=f"sudo bash -c {shlex.quote(SETUP)}",
+        command="sudo bash -c " + quote(SETUP),
     )
 )
 
