@@ -104,7 +104,7 @@ node.disk_image = params.image
 node.hardware_type = params.hardware_type
 
 srv = node.Blockstore("srv", "/srv")
-srv.size = f"{params.disk_gb}GB"
+srv.size = str(params.disk_gb) + "GB"
 srv.placement = "nonsysvol"
 
 node.addService(
