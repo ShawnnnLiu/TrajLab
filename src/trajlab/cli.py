@@ -1,12 +1,17 @@
 """trajlab command line entry point."""
 
+import asyncio
+import fcntl
+import json
 import logging
 import signal
 import threading
 import time
+from collections import Counter
+from collections.abc import Coroutine
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import typer
 
@@ -32,6 +37,28 @@ from trajlab.checkpoint.watcher import (
     hold_watcher_lock,
     watcher_running,
 )
+from trajlab.contracts.groundtruth import GROUNDTRUTH_DIRNAME, POINTS_FILENAME, TrialLabels
+from trajlab.groundtruth.blame import blame
+from trajlab.groundtruth.counterfactual import file_history, read_fixes, try_fix
+from trajlab.groundtruth.extract import TrialInputs
+from trajlab.groundtruth.gates import job_report
+from trajlab.groundtruth.items import build_items, labels_path, regressions, trial_timeline
+from trajlab.groundtruth.minimize import (
+    minimize_fix,
+    read_minimized,
+    read_reverts,
+    revert_regression,
+)
+from trajlab.groundtruth.replay import reparse_records
+from trajlab.groundtruth.run import (
+    confirm_fixes,
+    extract_job,
+    finished_trial_dirs,
+    planned_counts,
+    replay_job,
+    trial_inputs,
+)
+from trajlab.groundtruth.show import brief, calls
 
 app = typer.Typer(help="Capture Claude Code trajectories on Harbor with environment checkpoints.")
 
@@ -326,3 +353,280 @@ def validate(trial_dir: Path) -> None:
             typer.echo(f"valid: {path}")
     if invalid:
         raise typer.Exit(code=1)
+
+
+gt_app = typer.Typer(help="Ground truth for error localization by verifier replay (ADR-0013).")
+app.add_typer(gt_app, name="gt")
+
+JobDirArgument = Annotated[Path, typer.Argument(help="A finished job dir, e.g. corpus/jobs/x.")]
+TrialsOption = Annotated[
+    list[str] | None, typer.Option("--trial", help="Only this trial (repeatable).")
+]
+REPORT_FILENAME = "groundtruth-report.json"
+BATCH_LOCK_FILENAME = ".groundtruth-batch.lock"
+
+
+def _quiet_harbor() -> None:
+    logging.getLogger("harbor").setLevel(logging.WARNING)
+
+
+@gt_app.command("extract")
+def gt_extract(
+    job_dir: JobDirArgument,
+    trial: TrialsOption = None,
+    workers: Annotated[int, typer.Option(min=1, help="Trials extracted at once.")] = 4,
+    force: Annotated[
+        bool, typer.Option("--force", help="Extract again over points.jsonl.")
+    ] = False,
+) -> None:
+    """Extract every timeline point's artifact state of a job's finished trials."""
+    _quiet_harbor()
+    failed = extract_job(finished_trial_dirs(job_dir, trial), workers=workers, force=force)
+    if failed:
+        typer.echo(f"trajlab gt extract: failed: {', '.join(failed)}", err=True)
+        raise typer.Exit(code=1)
+
+
+def _run_cancellable[T](coroutine: Coroutine[Any, Any, T]) -> T:
+    """asyncio.run, with SIGTERM, SIGHUP, and SIGINT cancelling the work so it can clean up."""
+
+    async def main() -> T:
+        task = asyncio.ensure_future(coroutine)
+        loop = asyncio.get_running_loop()
+        for signum in (signal.SIGTERM, signal.SIGHUP, signal.SIGINT):
+            loop.add_signal_handler(signum, task.cancel)
+        return await task
+
+    return asyncio.run(main())
+
+
+@gt_app.command("replay")
+def gt_replay(
+    job_dir: JobDirArgument,
+    timeline: Annotated[
+        bool, typer.Option("--timeline", help="Also replay every non-final state.")
+    ] = False,
+    repeats: Annotated[
+        bool, typer.Option("--repeats", help="Add samples around every regression found so far.")
+    ] = False,
+    trial: TrialsOption = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Only count what is planned.")] = False,
+) -> None:
+    """Replay what is missing: final states, and with --timeline every state; restartable."""
+    _quiet_harbor()
+    trial_dirs = finished_trial_dirs(job_dir, trial)
+    if dry_run:
+        typer.echo(json.dumps(planned_counts(trial_dirs, timeline=timeline, repeats=repeats)))
+        return
+    lock_path = job_dir / BATCH_LOCK_FILENAME
+    with lock_path.open("a") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            typer.echo(f"trajlab gt replay: another batch holds {lock_path}", err=True)
+            raise typer.Exit(code=1) from None
+        try:
+            _, other = _run_cancellable(replay_job(trial_dirs, timeline=timeline, repeats=repeats))
+        except asyncio.CancelledError:
+            typer.echo("trajlab gt replay: cancelled; finished replays are kept", err=True)
+            raise typer.Exit(code=130) from None
+    if other:
+        typer.echo(f"trajlab gt replay: {other} replays without a verdict", err=True)
+
+
+@gt_app.command("report")
+def gt_report(job_dir: JobDirArgument, trial: TrialsOption = None) -> None:
+    """Write `<job>/groundtruth-report.json`: fidelity gates and flaky checks per trial."""
+    report = job_report(finished_trial_dirs(job_dir, trial))
+    path = job_dir / REPORT_FILENAME
+    path.write_text(json.dumps(report, indent=2) + "\n")
+    typer.echo(json.dumps(report["totals"], indent=2))
+    typer.echo(f"wrote {path}")
+
+
+TrialDirArgument = Annotated[Path, typer.Argument(help="A trial dir, e.g. corpus/jobs/x/t__id.")]
+
+
+class FixModeChoice(StrEnum):
+    artifacts = "artifacts"
+    environment = "environment"
+
+
+def _one_trial(trial_dir: Path) -> TrialInputs:
+    trial_dir = trial_dir.resolve()
+    if not (trial_dir / GROUNDTRUTH_DIRNAME / POINTS_FILENAME).is_file():
+        typer.echo(f"trajlab gt: {trial_dir} is not extracted; run trajlab gt extract", err=True)
+        raise typer.Exit(code=1)
+    return trial_inputs([trial_dir])[0]
+
+
+@gt_app.command("show")
+def gt_show(
+    trial_dir: TrialDirArgument,
+    list_calls: Annotated[
+        bool, typer.Option("--calls", help="List the agent's tool calls instead.")
+    ] = False,
+) -> None:
+    """Print a trial's brief for labeling: task files, timeline, failing checks, fixes so far."""
+    _quiet_harbor()
+    inputs = _one_trial(trial_dir)
+    typer.echo(calls(inputs) if list_calls else brief(inputs), nl=False)
+
+
+@gt_app.command("try-fix")
+def gt_try_fix(
+    trial_dir: TrialDirArgument,
+    patch: Annotated[Path, typer.Argument(help="Unified diff, paths from the container root.")],
+    mode: Annotated[
+        FixModeChoice,
+        typer.Option(
+            help="artifacts: patch the final graded files; environment: patch any file in a "
+            "container of the last checkpoint, then --run a command and collect again."
+        ),
+    ] = FixModeChoice.artifacts,
+    run: Annotated[
+        str | None, typer.Option("--run", help="Environment mode: command run after patching.")
+    ] = None,
+    user: Annotated[str, typer.Option(help="Environment mode: user the command runs as.")] = "root",
+    workdir: Annotated[
+        str | None, typer.Option(help="Environment mode: the command's working directory.")
+    ] = None,
+    timeout: Annotated[float, typer.Option(help="Environment mode: seconds.")] = 900.0,
+) -> None:
+    """Apply a fix to a trial's final state, regrade it, and print which checks changed."""
+    _quiet_harbor()
+    inputs = _one_trial(trial_dir)
+    record = try_fix(
+        inputs,
+        patch,
+        mode=mode.value,
+        command=run,
+        user=user,
+        workdir=workdir,
+        timeout=timeout,
+    )
+    shown = record.model_dump(
+        mode="json",
+        include={
+            "fix_id",
+            "error",
+            "fixed",
+            "broken",
+            "still_failing",
+            "command_exit_code",
+            "command_output",
+            "replay_id",
+        },
+    )
+    typer.echo(json.dumps(shown, indent=2))
+
+
+@gt_app.command("blame")
+def gt_blame(
+    trial_dir: TrialDirArgument,
+    path: Annotated[str, typer.Argument(help="Container path of a file, e.g. /app/src/db.cc.")],
+) -> None:
+    """Print a file's last version with, per line, the timeline point that wrote it."""
+    _quiet_harbor()
+    inputs = _one_trial(trial_dir)
+    history = file_history(inputs, path)
+    if not history or history[-1][1] is None:
+        typer.echo(f"trajlab gt blame: {path} is absent at the end of the trial", err=True)
+        raise typer.Exit(code=1)
+    origins = blame([(point.index, lines) for point, lines in history])
+    points = {point.index: point for point, _ in history}
+    for number, (origin, line) in enumerate(zip(origins, history[-1][1], strict=True), start=1):
+        point = points[origin]
+        label = f"P{origin}" + (f"/ckpt{point.seq}" if point.seq is not None else f"/{point.kind}")
+        typer.echo(f"{number:>5} {label:>12} | {line}")
+
+
+@gt_app.command("items")
+def gt_items(job_dir: JobDirArgument, trial: TrialsOption = None) -> None:
+    """Rebuild every trial's groundtruth/items.jsonl from its replays, fixes, and labels."""
+    _quiet_harbor()
+    kinds: Counter[str] = Counter()
+    for inputs in trial_inputs(finished_trial_dirs(job_dir, trial)):
+        if not (inputs.trial_dir / GROUNDTRUTH_DIRNAME / POINTS_FILENAME).is_file():
+            continue
+        for item in build_items(inputs):
+            kinds[item.kind] += 1
+    typer.echo(json.dumps(dict(sorted(kinds.items())), indent=2))
+
+
+@gt_app.command("reparse")
+def gt_reparse(job_dir: JobDirArgument, trial: TrialsOption = None) -> None:
+    """Re-read the checks of every recorded replay from its verifier output."""
+    changed = sum(reparse_records(d) for d in finished_trial_dirs(job_dir, trial))
+    typer.echo(f"{changed} replay records updated")
+
+
+@gt_app.command("label")
+def gt_label(
+    trial_dir: TrialDirArgument,
+    labels: Annotated[Path, typer.Argument(help="A TrialLabels JSON file (contracts).")],
+) -> None:
+    """Validate the labeler's causes for a trial and store them as groundtruth/labels.json."""
+    trial_dir = trial_dir.resolve()
+    try:
+        parsed = TrialLabels.model_validate_json(labels.read_text())
+    except ValueError as error:
+        typer.echo(f"trajlab gt label: {labels} is not a valid TrialLabels: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    if parsed.trial_name != trial_dir.name:
+        typer.echo(f"trajlab gt label: trial_name must be {trial_dir.name}", err=True)
+        raise typer.Exit(code=1)
+    fixes = {f.fix_id for f in read_fixes(trial_dir)}
+    unknown = [c.fix_id for c in parsed.causes if c.fix_id and c.fix_id not in fixes]
+    if unknown:
+        typer.echo(f"trajlab gt label: no such fixes in fixes.jsonl: {unknown}", err=True)
+        raise typer.Exit(code=1)
+    path = labels_path(trial_dir)
+    path.write_text(parsed.model_dump_json(indent=2) + "\n")
+    typer.echo(f"wrote {path}")
+
+
+@gt_app.command("confirm")
+def gt_confirm(job_dir: JobDirArgument, trial: TrialsOption = None) -> None:
+    """Replay every labeled fix's state until it has its confirming samples."""
+    _quiet_harbor()
+    count = _run_cancellable(confirm_fixes(finished_trial_dirs(job_dir, trial)))
+    typer.echo(f"{count} confirmation replays run")
+
+
+@gt_app.command("minimize")
+def gt_minimize(job_dir: JobDirArgument, trial: TrialsOption = None) -> None:
+    """Replay each labeled, confirmed fix without each of its hunks (once per fix)."""
+    _quiet_harbor()
+    for inputs in trial_inputs(finished_trial_dirs(job_dir, trial)):
+        trial_dir = inputs.trial_dir
+        if not labels_path(trial_dir).is_file():
+            continue
+        labels = TrialLabels.model_validate_json(labels_path(trial_dir).read_text())
+        fixes = {f.fix_id: f for f in read_fixes(trial_dir)}
+        done = read_minimized(trial_dir)
+        for cause in labels.causes:
+            fix = fixes.get(cause.fix_id or "")
+            if fix is None or fix.fix_id in done or fix.replay_id is None:
+                continue
+            if set(cause.checks) - set(fix.fixed) or fix.broken:
+                continue  # not confirmed; nothing to minimize
+            record = minimize_fix(inputs, fix, tuple(sorted(cause.checks)))
+            typer.echo(f"{trial_dir.name} {fix.fix_id}: {record.raw_hunks} hunks minimized")
+
+
+@gt_app.command("revert")
+def gt_revert(job_dir: JobDirArgument, trial: TrialsOption = None) -> None:
+    """Test every confirmed regression by undoing its point's change on the final state."""
+    _quiet_harbor()
+    for inputs in trial_inputs(finished_trial_dirs(job_dir, trial)):
+        trial_dir = inputs.trial_dir
+        if not (trial_dir / GROUNDTRUTH_DIRNAME / POINTS_FILENAME).is_file():
+            continue
+        timeline = trial_timeline(trial_dir)
+        done = read_reverts(trial_dir)
+        for index, checks in regressions(trial_dir, timeline).items():
+            if index in done:
+                continue
+            record = revert_regression(inputs, timeline.points, index, checks)
+            typer.echo(f"{trial_dir.name} P{index}: {record.verdict} {record.reason or ''}")

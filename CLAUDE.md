@@ -15,7 +15,7 @@ Owner: Shawn Liu. Team of four. Course milestones: Sep 25 first baseline result 
 3. **`capture/`, `checkpoint/`, `atif/` import each other only through `contracts/`.** Each exposes one entry point in `cli.py`.
 4. **No trial data in git.** `corpus/jobs/`, `.env`, session JSONLs, notebook outputs are ignored. `corpus/manifests/` is committed.
 5. **Anything that changes what a trial records needs an ADR** in `docs/decisions/` and a new `corpus_id` on the next run. Do not silently change the hook, watcher, backend, or postprocess output.
-6. **Do not design analysis modules.** No `store/`, `analysis/`, `bench/` directories yet. If capture needs a shape that analysis will use, put the model in `contracts/` and stop.
+6. **Do not design analysis modules beyond `src/trajlab/groundtruth/`** (ADR-0013: ground truth by verifier replay). No `store/`, `analysis/`, `bench/` directories yet. `groundtruth/` imports only `contracts/` and Harbor. If capture needs a shape that analysis will use, put the model in `contracts/` and stop.
 7. **Reuse Harbor's models.** ATIF is `harbor.models.trajectories`; trial results are `harbor.models.trial.result.TrialResult`; paths are `harbor.models.trial.paths.TrialPaths`. Do not redefine them.
 
 ## Layout
@@ -29,6 +29,7 @@ src/trajlab/contracts/     CheckpointRecord, TrialRecord, ATIF step extras
 src/trajlab/capture/       harbor_runner, corpus manifest, trial/container discovery, preinstall (custom environment, ADR-0008)
 src/trajlab/checkpoint/    hook/ (PostToolUse hook script; delivery per ADR-0003), watcher, changes (ADR-0010), backends/, join
 src/trajlab/atif/          load, compaction recovery, postprocess, validate
+src/trajlab/groundtruth/   ground truth by verifier replay (ADR-0013): extract, replay, admission, counterfactual fixes, items
 scripts/                   dated one-offs (2026-09-25_baseline.py); never imported by src/
 tests/fixtures/hello-world-trial/   one small real trial dir; every test runs against it
 corpus/manifests/          committed; corpus/jobs/ ignored
@@ -56,6 +57,8 @@ docs/decisions/            ADRs
 7. **`atif/postprocess.py` + `atif/compaction.py`**: insert one system step per checkpoint after the agent step that owns the `tool_call_id`; insert `context_management` system steps from native JSONL compaction entries; write `agent/trajectory.enriched.json`; validator passes on the output. Check: tests on the fixture with a synthetic `checkpoints.jsonl`.
 
 Capture ends at step 7. The formerly planned step 8 (`statefork` backend) was dropped by ADR-0004: `docker_commit` is the only backend.
+
+Ground truth (ADR-0013) comes after capture: `trajlab gt extract | replay | try-fix | label | confirm | minimize | revert | items | report` write `groundtruth/` inside trial dirs, next to Harbor's files, and never modify Harbor's own files. Replays and fix containers are admitted host-wide by declared CPUs and memory (`trajlab.groundtruth.admission`); never start verifier environments outside it.
 
 Stop after each step and run `make test`. Do not start step N+1 with step N red.
 
