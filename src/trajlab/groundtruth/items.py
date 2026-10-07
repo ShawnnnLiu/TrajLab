@@ -30,10 +30,13 @@ from trajlab.contracts.checkpoint import CALLS_FILENAME, CHECKPOINTS_DIRNAME, Ca
 from trajlab.contracts.groundtruth import (
     ITEMS_FILENAME,
     LABELS_FILENAME,
+    PROGRESS_FILENAME,
     REFUTATIONS_FILENAME,
     AlternativeFix,
     BlamedHunk,
+    FirstPass,
     FixRecord,
+    GradedChange,
     GroundTruthItem,
     HunkKind,
     ItemKind,
@@ -43,6 +46,7 @@ from trajlab.contracts.groundtruth import (
     ReplayRecord,
     TimelinePoint,
     TrialLabels,
+    TrialProgress,
 )
 from trajlab.groundtruth.blame import blame, first_seen, normalize, raw_hunks, view_of
 from trajlab.groundtruth.checks import PASSED, read_checks, statuses
@@ -698,3 +702,46 @@ def build_items(inputs: TrialInputs) -> list[GroundTruthItem]:
     items = [_with_refutation(item, refutations.get(item.item_id)) for item in items]
     items_path(trial_dir).write_text("".join(item.model_dump_json() + "\n" for item in items))
     return items
+
+
+def build_progress(inputs: TrialInputs) -> TrialProgress:
+    """Rewrite the trial's progress.json: graded changes and first passes (classes 4 and 5)."""
+    trial_dir = inputs.trial_dir
+    timeline = trial_timeline(trial_dir)
+    points = timeline.points
+    changes = [
+        GradedChange(point=p.index, seq=p.seq, tool_call_ids=p.covered_tool_call_ids)
+        for previous, p in zip(points, points[1:], strict=False)
+        if p.state_id != previous.state_id
+    ]
+    excluded = excluded_checks(trial_dir) | traits(inputs.task_name).self_test_checks
+    first: list[FirstPass] = []
+    unresolved: list[str] = []
+    for key, verdict in sorted(timeline.verdicts.items()):
+        if key in excluded:
+            continue
+        if verdict.verdict == "passes" and verdict.point is not None:
+            if verdict.point == 0:
+                continue  # passes from the initial state on: the agent did nothing for it
+            point = points[verdict.point]
+            first.append(
+                FirstPass(
+                    check=key,
+                    point=point.index,
+                    seq=point.seq,
+                    tool_call_ids=point.covered_tool_call_ids,
+                )
+            )
+        elif timeline.timelines and verdict.verdict in ("unstable", "incomplete"):
+            final = next(t.final for t in timeline.timelines if t.key == key)
+            if final == PASSED:
+                unresolved.append(key)
+    progress = TrialProgress(
+        trial_name=trial_dir.name,
+        graded_changes=tuple(changes),
+        first_passes=tuple(first),
+        unresolved=tuple(unresolved),
+    )
+    path = groundtruth_dir(trial_dir) / PROGRESS_FILENAME
+    path.write_text(progress.model_dump_json(indent=2) + "\n")
+    return progress

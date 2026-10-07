@@ -426,6 +426,13 @@ def test_build_items_blames_the_checkpoint_that_wrote_the_fixed_line(tmp_path: P
     [hunk] = item.hunks
     assert (hunk.removed, hunk.origins, hunk.earliest) == ((2,), (1,), (1,))
 
+    from trajlab.groundtruth.items import build_progress
+
+    progress = build_progress(inputs)
+    assert [c.point for c in progress.graded_changes] == [1, 2]
+    assert progress.graded_changes[0].tool_call_ids == ("toolu_1",)
+    assert progress.first_passes == ()  # t2 passes from the initial state on
+
 
 # --- contracts ------------------------------------------------------------------------------
 

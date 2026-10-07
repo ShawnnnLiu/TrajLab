@@ -451,3 +451,37 @@ class RefutationRecord(_Model):
     )
     reviewer: str = Field(min_length=1, description="e.g. a model id.")
     created_at: AwareDatetime
+
+
+PROGRESS_FILENAME = "progress.json"  # a TrialProgress, rewritten by `trajlab gt items`
+
+
+class GradedChange(_Model):
+    """A timeline point whose graded artifacts differ from the previous point's."""
+
+    point: int = Field(ge=1)
+    seq: int | None = None
+    tool_call_ids: tuple[str, ...] = ()
+
+
+class FirstPass(_Model):
+    """The first point from which a check passes through the end of the trial."""
+
+    check: str = Field(min_length=1)
+    point: int = Field(ge=1)
+    seq: int | None = None
+    tool_call_ids: tuple[str, ...] = ()
+
+
+class TrialProgress(_Model):
+    """Ground truth for brief question classes 4 and 5 (ADR-0013, decision 4)."""
+
+    trial_name: str = Field(min_length=1)
+    graded_changes: tuple[GradedChange, ...]
+    first_passes: tuple[FirstPass, ...] = Field(
+        description="Checks passing at the end, except those passing from `initial` on and the "
+        "verifier's self-tests."
+    )
+    unresolved: tuple[str, ...] = Field(
+        default=(), description="Checks passing at the end whose first pass is not known."
+    )

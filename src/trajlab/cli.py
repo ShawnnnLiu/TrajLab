@@ -51,6 +51,7 @@ from trajlab.groundtruth.extract import TrialInputs
 from trajlab.groundtruth.gates import job_report
 from trajlab.groundtruth.items import (
     build_items,
+    build_progress,
     labels_path,
     read_items,
     regressions,
@@ -565,6 +566,7 @@ def gt_items(job_dir: JobDirArgument, trial: TrialsOption = None) -> None:
     for inputs in trial_inputs(finished_trial_dirs(job_dir, trial)):
         if not (inputs.trial_dir / GROUNDTRUTH_DIRNAME / POINTS_FILENAME).is_file():
             continue
+        build_progress(inputs)
         for item in build_items(inputs):
             kinds[item.kind] += 1
     typer.echo(json.dumps(dict(sorted(kinds.items())), indent=2))
