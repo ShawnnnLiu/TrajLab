@@ -5,7 +5,9 @@ replay` batches, `trajlab gt try-fix`) registers a claim in one ledger, by defau
 `~/.cache/trajlab/gt-admission/ledger.json`, under an `flock`. A claim fits while the running
 claims' declared CPUs stay within `CPU_CAPACITY` and their memory within `MEMORY_CAPACITY_MB`.
 A quiet claim (a task whose checks race wall-clock limits) runs alone among quiet claims and with
-at most `QUIET_COMPANY_CPUS` of other CPUs beside it. A claim whose process has died is removed,
+at most `QUIET_COMPANY_CPUS` of other CPUs beside it. Interactive claims (a try-fix, a fix
+confirmation) take precedence: while one waits, no batch claim starts. A claim whose process has
+died is removed,
 and its compose project or container torn down, by whoever takes the lock next, so a killed batch
 neither leaks verifier environments nor frees capacity they still use.
 """
@@ -113,18 +115,46 @@ class Ledger:
             finally:
                 fcntl.flock(lock, fcntl.LOCK_UN)
 
-    def try_admit(self, claim: Claim) -> list[str] | None:
-        """Register the claim if it fits; return the ids running beside it, else None."""
+    def _waiting(self) -> list[Claim]:
+        """Interactive claims waiting for capacity (`waiting.json`), live ones only."""
+        path = self.directory / "waiting.json"
+        if not path.is_file():
+            return []
+        return [w for w in (Claim(**c) for c in json.loads(path.read_text())) if w.alive()]
+
+    def _set_waiting(self, waiting: list[Claim]) -> None:
+        path = self.directory / "waiting.json"
+        staged = path.with_suffix(".tmp")
+        staged.write_text(json.dumps([asdict(c) for c in waiting], indent=1))
+        staged.replace(path)
+
+    def try_admit(self, claim: Claim, *, batch: bool = False) -> list[str] | None:
+        """Register the claim if it fits; return the ids running beside it, else None.
+
+        An interactive claim (a try-fix, a confirmation) that does not fit is put on the waiting
+        list, and no batch claim is admitted while any live claim waits there, so a running
+        batch drains and lets the interactive one in.
+        """
         with self._locked() as claims:
+            waiting = self._waiting()
+            if batch and waiting:
+                return None
             if not fits(claims, claim):
+                if not batch and all(w.claim_id != claim.claim_id for w in waiting):
+                    self._set_waiting([*waiting, claim])
                 return None
             beside = [c.claim_id for c in claims]
             claims.append(claim)
+            if any(w.claim_id == claim.claim_id for w in waiting):
+                self._set_waiting([w for w in waiting if w.claim_id != claim.claim_id])
             return beside
 
     def release(self, claim_id: str) -> None:
         with self._locked() as claims:
             claims[:] = [c for c in claims if c.claim_id != claim_id]
+            waiting = self._waiting()
+            if any(w.claim_id == claim_id for w in waiting):
+                self._set_waiting([w for w in waiting if w.claim_id != claim_id])
 
     def running(self) -> list[Claim]:
         with self._locked() as claims:

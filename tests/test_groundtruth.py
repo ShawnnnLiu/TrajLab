@@ -564,3 +564,14 @@ def test_groundtruth_contracts_reject_inconsistent_records() -> None:
             method="counterfactual",
             fix_id="f",
         )
+
+
+def test_waiting_interactive_claim_holds_back_batch_claims(tmp_path: Path) -> None:
+    ledger = Ledger(tmp_path)
+    assert ledger.try_admit(_claim(6), batch=True) == []
+    waiter = Claim(claim_id="fix", cpus=2, memory_mb=4096)
+    assert ledger.try_admit(waiter) is None  # does not fit; now waiting
+    assert ledger.try_admit(_claim(1), batch=True) is None  # would fit, but a claim waits
+    ledger.release(_claim(6).claim_id)
+    assert ledger.try_admit(waiter) == []
+    assert ledger.try_admit(_claim(1), batch=True) == ["fix"]

@@ -207,7 +207,7 @@ async def replay_job(
                         outcomes["error"] += 1
                         continue
                     queue[index] = (item, prepared)
-                beside = ledger.try_admit(prepared.claim)
+                beside = ledger.try_admit(prepared.claim, batch=True)
                 if beside is None:
                     if index == 0:
                         head_blocked_since = head_blocked_since or time.monotonic()
