@@ -60,6 +60,8 @@ from trajlab.groundtruth.run import (
     trial_inputs,
 )
 from trajlab.groundtruth.show import brief, calls
+from trajlab.groundtruth.summary import markdown as summary_markdown
+from trajlab.groundtruth.summary import write_review_sheet
 
 app = typer.Typer(help="Capture Claude Code trajectories on Harbor with environment checkpoints.")
 
@@ -660,3 +662,34 @@ def gt_manifest(
     path = manifests_dir / f"{dataset_id}.json"
     path.write_text(built.model_dump_json(indent=2) + "\n")
     typer.echo(f"wrote {path}")
+
+
+@gt_app.command("summary")
+def gt_summary(
+    job_dir: JobDirArgument,
+    out: Annotated[
+        Path | None, typer.Option(help="Write the Markdown here; default stdout.")
+    ] = None,
+) -> None:
+    """Facts about the job's ground truth, as Markdown: replays, gates, items, trials."""
+    _quiet_harbor()
+    text = summary_markdown(job_dir, trial_inputs(finished_trial_dirs(job_dir)))
+    if out is None:
+        typer.echo(text, nl=False)
+    else:
+        out.write_text(text)
+        typer.echo(f"wrote {out}")
+
+
+@gt_app.command("review-sheet")
+def gt_review_sheet(
+    job_dir: JobDirArgument,
+    out: Annotated[
+        Path | None, typer.Option(help="CSV path; default <job>/groundtruth-review.csv.")
+    ] = None,
+) -> None:
+    """Write the human review sheet: items that must be checked plus a stratified sample."""
+    _quiet_harbor()
+    path = out or job_dir / "groundtruth-review.csv"
+    count = write_review_sheet(path, trial_inputs(finished_trial_dirs(job_dir)))
+    typer.echo(f"wrote {path}: {count} items")
