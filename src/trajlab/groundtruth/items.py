@@ -454,9 +454,19 @@ def blame_fix(
     return FixBlame(kind, sorted(blamed), sorted(earliest), hunks, flags, size, paths)
 
 
+ANCHOR_WINDOW = 3  # lines on each side of an insertion whose origins classify it
+
+
 def anchors_of(insert_at: int, length: int) -> tuple[int, ...]:
-    """Final-version lines (1-based) on either side of an insertion before index `insert_at`."""
-    return tuple(line for line in (insert_at, insert_at + 1) if 1 <= line <= length)
+    """Final-version lines (1-based) within `ANCHOR_WINDOW` of an insertion before `insert_at`.
+
+    A window, not just the two neighbours, so that moving an insertion by a line or two does
+    not change whether it is an incomplete edit of the agent's code or an omission next to
+    initial code.
+    """
+    first = max(1, insert_at - ANCHOR_WINDOW + 1)
+    last = min(length, insert_at + ANCHOR_WINDOW)
+    return tuple(range(first, last + 1))
 
 
 def related_calls(

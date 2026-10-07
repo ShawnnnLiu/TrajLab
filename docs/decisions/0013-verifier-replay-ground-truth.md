@@ -62,9 +62,9 @@ For every non-excluded check that fails at `final`:
 - **Minimization:** a confirmed fix with more than one hunk is replayed once without each hunk. A hunk is needed for a check if the check fails without it; checks that need disjoint hunks become separate items; hunks no check needs are dropped from the blame (`unneeded_hunks`), and checks no single hunk is needed for keep all hunks (`redundant_hunks`).
 - **Blame** follows each changed file through its versions at every point (graded files from the states, other files from each point's image) by successive line diffs, comparing lines with numbers by value and trailing whitespace ignored, so rewriting `8` as `8.00` does not move the blame; a JSON file of at most 3 lines is blamed in its pretty-printed view. Each removed line gets its last writer (`origins`) and the earliest point at which the file held the same text (`earliest`). Each hunk gets a kind:
   - `wrong_edit`: it replaces lines a checkpoint wrote; blamed on those checkpoints' covered calls.
-  - `incomplete_edit`: it only inserts, next to lines a checkpoint wrote; blamed on those.
+  - `incomplete_edit`: it only inserts, within 3 lines of lines a checkpoint wrote (a window, so moving the insertion by a line does not change the kind); blamed on those.
   - `missed_fix`: it replaces lines present since `initial`; no call is blamed.
-  - `omission`: it only inserts next to initial lines, or creates an ungraded file.
+  - `omission`: it only inserts, with only initial lines within 3 lines, or creates an ungraded file.
   - `missing_artifact`: it creates a graded artifact absent at `final`.
   An item's kind is its strongest hunk kind in that order; `unconfirmed` if no fix confirms it.
 - **Alternatives:** every other recorded fix that confirms the same checks is stored with its own blame as an acceptable answer; the labeler's fix is the primary one.

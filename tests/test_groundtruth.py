@@ -582,3 +582,24 @@ def test_waiting_interactive_claim_holds_back_batch_claims(tmp_path: Path) -> No
     ledger.release(_claim(6).claim_id)
     assert ledger.try_admit(waiter) == []
     assert ledger.try_admit(_claim(1), batch=True) == ["fix"]
+
+
+def test_interactive_claims_are_first_come_first_served(tmp_path: Path) -> None:
+    ledger = Ledger(tmp_path)
+    assert ledger.try_admit(_claim(4)) == []
+    quiet = Claim(claim_id="quiet", cpus=2, memory_mb=4096, quiet=True)
+    small = Claim(claim_id="small", cpus=2, memory_mb=4096)
+    assert ledger.try_admit(quiet) is None  # 4 CPUs beside it: waits first
+    assert ledger.try_admit(small) is None  # would fit, but the quiet claim waits longer
+    ledger.release(_claim(4).claim_id)
+    assert ledger.try_admit(small) is None  # still behind the quiet claim
+    assert ledger.try_admit(quiet) == []
+    assert ledger.try_admit(small) == ["quiet"]
+
+
+def test_anchor_window_spans_three_lines_each_side() -> None:
+    from trajlab.groundtruth.items import anchors_of
+
+    assert anchors_of(5, 20) == (3, 4, 5, 6, 7, 8)
+    assert anchors_of(0, 20) == (1, 2, 3)
+    assert anchors_of(20, 20) == (18, 19, 20)

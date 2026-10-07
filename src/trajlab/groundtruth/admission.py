@@ -139,7 +139,11 @@ class Ledger:
             waiting = self._waiting()
             if batch and waiting:
                 return None
-            if not fits(claims, claim):
+            ahead = next((i for i, w in enumerate(waiting) if w.claim_id == claim.claim_id), None)
+            ahead = len(waiting) if ahead is None else ahead
+            # First come, first served among interactive claims: one that waits longer goes
+            # first, so a quiet claim is not starved by smaller ones that keep fitting.
+            if (not batch and ahead > 0) or not fits(claims, claim):
                 if not batch and all(w.claim_id != claim.claim_id for w in waiting):
                     self._set_waiting([*waiting, claim])
                 return None
