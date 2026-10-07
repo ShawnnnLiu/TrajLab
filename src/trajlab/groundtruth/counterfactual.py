@@ -34,10 +34,12 @@ from harbor.trial.artifact_handler import artifact_host_path
 
 from trajlab.contracts.groundtruth import (
     FIX_RECORDS_FILENAME,
+    ORACLE_FILENAME,
     PATCHES_DIRNAME,
     FixFile,
     FixMode,
     FixRecord,
+    OracleRecord,
     TimelinePoint,
 )
 from trajlab.groundtruth.admission import Claim, held
@@ -445,3 +447,64 @@ def fix_contents(inputs: TrialInputs, fix: FixRecord) -> dict[str, tuple[str | N
         for path in paths:
             contents[path] = (contents[path][0], read_text(root / path))
     return contents
+
+
+ORACLE_TIMEOUT_S = 1800.0
+
+
+def run_oracle(inputs: TrialInputs, *, timeout: float = ORACLE_TIMEOUT_S) -> OracleRecord:
+    """Run the task's reference solution on the trial's initial image and regrade the result.
+
+    A check of the replay harness (ADR-0013): if the reference solution does not pass here, a
+    failing replay of this task says little. The container has network access, since reference
+    solutions may install packages; nothing it makes becomes ground truth.
+    """
+    trial_dir = inputs.trial_dir
+    points = read_points(trial_dir)
+    image = points[0].image or ""
+    common = {"trial_name": trial_dir.name, "image": image}
+
+    def record(**fields: object) -> OracleRecord:
+        result = OracleRecord(**common, **fields, created_at=datetime.now(UTC))
+        path = groundtruth_dir(trial_dir) / ORACLE_FILENAME
+        path.write_text(result.model_dump_json(indent=2) + "\n")
+        return result
+
+    solution = inputs.task_dir / "solution" if inputs.task_dir else None
+    if solution is None or not (solution / "solve.sh").is_file():
+        return record(error="the task has no solution/solve.sh")
+    cpus, memory_mb = agent_resources(inputs)
+    reader = ImageReader(image, purpose="oracle", cpus=cpus, memory_mb=memory_mb, network="bridge")
+    claim = Claim(
+        claim_id=f"oracle-{uuid.uuid4().hex[:10]}",
+        cpus=cpus,
+        memory_mb=memory_mb,
+        container=reader.name,
+    )
+    staged = staging_dir(trial_dir)
+    try:
+        with held(claim), reader as box:
+            box.copy_dir_in(solution, "/solution")
+            ran = box.run("bash /solution/solve.sh", user="root", workdir=None, timeout=timeout)
+            exit_code = ran.returncode
+            output = ((ran.stdout or "") + (ran.stderr or ""))[-OUTPUT_CHARS:]
+            into = staged / "artifacts"
+            into.mkdir()
+            entries = [collect_artifact(box, into, a, inputs.convention) for a in inputs.artifacts]
+            (into / MANIFEST_FILENAME).write_text(
+                json.dumps(ArtifactManifest(entries=entries).to_json_data(), indent=2)
+            )
+        state = store_state(trial_dir, staged, inputs.task_name)
+    except ExtractionError as error:
+        shutil.rmtree(staged, ignore_errors=True)
+        return record(error=str(error))
+    replayed = asyncio.run(replay(trial_dir, state.state_id, "oracle"))
+    failed = tuple(sorted(k for k, s in statuses(replayed.checks).items() if s != PASSED))
+    return record(
+        command_exit_code=exit_code,
+        command_output=output,
+        state_id=state.state_id,
+        replay_id=replayed.replay_id,
+        reward=replayed.reward,
+        failed_checks=failed,
+    )

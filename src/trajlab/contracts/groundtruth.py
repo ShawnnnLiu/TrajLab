@@ -28,8 +28,9 @@ PointKind = Literal["initial", "checkpoint", "final"]
 CheckKind = Literal["pytest", "trace", "cad"]
 # final: the recorded final state (fidelity gate 2); repeat: a further sample of a state already
 # replayed; timeline: a state first seen at an initial or checkpoint point; counterfactual: a
-# state made by applying a fix to another state.
-ReplayPurpose = Literal["final", "repeat", "timeline", "counterfactual"]
+# state made by applying a fix to another state; oracle: the state the task's reference solution
+# makes from the initial state (a check of the replay harness, not ground truth).
+ReplayPurpose = Literal["final", "repeat", "timeline", "counterfactual", "oracle"]
 # verdict: the verifier reported its checks; no_verdict: the test script ran but reported no
 # checks (it timed out or crashed), which is a fact about the state; infra: the environment
 # or the network failed, which says nothing about the state and is retried.
@@ -485,3 +486,21 @@ class TrialProgress(_Model):
     unresolved: tuple[str, ...] = Field(
         default=(), description="Checks passing at the end whose first pass is not known."
     )
+
+
+ORACLE_FILENAME = "oracle.json"  # an OracleRecord, written by `trajlab gt oracle`
+
+
+class OracleRecord(_Model):
+    """The task's reference solution run on the trial's initial image, then regraded."""
+
+    trial_name: str = Field(min_length=1)
+    image: str = Field(min_length=1, description="The initial image the solution ran in.")
+    command_exit_code: int | None = None
+    command_output: str | None = Field(default=None, description="The solution's output, tail.")
+    state_id: str | None = Field(default=None, pattern=SHA256)
+    replay_id: str | None = None
+    reward: float | None = None
+    failed_checks: tuple[str, ...] = ()
+    error: str | None = None
+    created_at: AwareDatetime

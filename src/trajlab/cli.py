@@ -46,7 +46,7 @@ from trajlab.contracts.groundtruth import (
     TrialLabels,
 )
 from trajlab.groundtruth.blame import blame
-from trajlab.groundtruth.counterfactual import file_history, read_fixes, try_fix
+from trajlab.groundtruth.counterfactual import file_history, read_fixes, run_oracle, try_fix
 from trajlab.groundtruth.extract import TrialInputs
 from trajlab.groundtruth.gates import job_report
 from trajlab.groundtruth.items import (
@@ -745,3 +745,17 @@ def gt_refute(
     with path.open("a") as handle:
         handle.write(record.model_dump_json() + "\n")
     typer.echo(f"recorded {verdict} for {item_id}")
+
+
+@gt_app.command("oracle")
+def gt_oracle(
+    job_dir: JobDirArgument,
+    trial: TrialsOption = None,
+    timeout: Annotated[float, typer.Option(help="Seconds for each reference solution.")] = 1800.0,
+) -> None:
+    """Run each task's reference solution on a trial's initial image and regrade it."""
+    _quiet_harbor()
+    for inputs in trial_inputs(finished_trial_dirs(job_dir, trial)):
+        record = run_oracle(inputs, timeout=timeout)
+        outcome = record.error or f"reward {record.reward}, failed {list(record.failed_checks)}"
+        typer.echo(f"{inputs.trial_dir.name}: {outcome}")

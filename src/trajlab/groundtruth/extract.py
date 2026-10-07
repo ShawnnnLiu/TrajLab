@@ -105,9 +105,11 @@ class ImageReader:
         purpose: str = "extract",
         cpus: float | None = None,
         memory_mb: int | None = None,
+        network: str = "none",
     ) -> None:
         self.image = image
         self.purpose = purpose
+        self.network = network
         self.limits = (["--cpus", str(cpus)] if cpus else []) + (
             ["--memory", f"{memory_mb}m"] if memory_mb else []
         )
@@ -120,7 +122,7 @@ class ImageReader:
             "--name",
             self.name,
             "--network",
-            "none",
+            self.network,
             "--label",
             f"{CONTAINER_LABEL}={self.purpose}",
             *self.limits,
@@ -152,6 +154,12 @@ class ImageReader:
         parent = PurePosixPath(target).parent.as_posix()
         self.exec_root(f"mkdir -p {shlex.quote(parent)}")
         copied = _docker("cp", str(source), f"{self.name}:{target}")
+        if copied.returncode != 0:
+            raise ExtractionError(f"docker cp into {target}: {copied.stderr.strip()}")
+
+    def copy_dir_in(self, source: Path, target: str) -> None:
+        self.exec_root(f"mkdir -p {shlex.quote(target)}")
+        copied = _docker("cp", f"{source}/.", f"{self.name}:{target}")
         if copied.returncode != 0:
             raise ExtractionError(f"docker cp into {target}: {copied.stderr.strip()}")
 
