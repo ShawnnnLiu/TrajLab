@@ -6,6 +6,7 @@ tool calls with the timeline point that first holds each call's effects.
 """
 
 import json
+from datetime import datetime
 
 from harbor.models.trial.paths import TrialPaths
 
@@ -27,10 +28,23 @@ def brief(inputs: TrialInputs) -> str:
     reward, exception = recorded_reward(trial_dir)
     timeline = trial_timeline(trial_dir)
     points = timeline.points
+    result = json.loads(TrialPaths(trial_dir).result_path.read_text())
+    phase = result.get("verifier") or {}
+    seconds = (
+        (
+            datetime.fromisoformat(phase["finished_at"])
+            - datetime.fromisoformat(phase["started_at"])
+        ).total_seconds()
+        if phase.get("started_at") and phase.get("finished_at")
+        else None
+    )
     out = [
         f"Trial {trial_dir.name} ({inputs.task_name}): recorded reward {reward}"
         + (f", exception {exception}" if exception else ""),
         f"Trial dir: {trial_dir}",
+        f"Verifier time in the original run: {seconds:.0f} s (a fix's regrade takes about as long)"
+        if seconds is not None
+        else "Verifier time in the original run: unknown",
     ]
     if inputs.task_dir is not None:
         out += [
