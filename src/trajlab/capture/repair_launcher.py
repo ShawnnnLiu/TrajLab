@@ -23,10 +23,17 @@ exists and exactly one native session. Otherwise no arm runs, so the arms stay p
 
 A later round repairs the same failures with a different note (`repair_note`, passed to every
 arm) by reusing an earlier round's draw (`same_failures_as`, its prefix).
+
+Another arm can be added to a round later (`arms`, e.g. only `traj-text`): it runs on that
+round's recorded draw, never draws, and plans only its own jobs, so the round's existing jobs
+are not touched. A failure then needs only what the given arms start from; `traj-text` needs
+the failed trial's `agent/trajectory.json`, which is rendered as text at planning
+(`trajlab.capture.transcript`).
 """
 
 import json
 import logging
+import os
 import random
 import shutil
 import subprocess
@@ -38,10 +45,13 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from dotenv import dotenv_values
 from harbor.models.job.config import JobConfig
 from harbor.models.job.result import JobResult
+from harbor.models.trajectories import Trajectory
 from harbor.models.trial.paths import TrialPaths
 from harbor.models.trial.result import TimingInfo, TrialResult
+from pydantic import ValidationError
 
 from trajlab.capture.corpus import (
     ManifestError,
@@ -53,6 +63,7 @@ from trajlab.capture.corpus import (
 from trajlab.capture.discover import iter_trial_dirs, load_trial_config
 from trajlab.capture.harbor_runner import repo_relative
 from trajlab.capture.pins import CLAUDE_CODE_VERSION
+from trajlab.capture.transcript import render
 from trajlab.contracts import (
     CHECKPOINT_ARMS,
     CHECKPOINT_RECORDS_FILENAME,
@@ -61,6 +72,7 @@ from trajlab.contracts import (
     REPAIR_SOURCE_FILENAME,
     REPAIRABLE_KINDS,
     SESSION_ARMS,
+    TRANSCRIPT_ARMS,
     CheckpointRecord,
     FailureKind,
     RepairArm,
@@ -78,6 +90,8 @@ CHECKPOINT_REPOSITORY = "trajlab-checkpoint"
 PID_FILENAME = "launcher.pid"
 PRUNED_FILENAME = "pruned.json"
 RESUMES_FILENAME = "resumes.json"
+TRANSCRIPT_FILENAME = "transcript.txt"
+COMPACT_BOUNDARY_SUBTYPE = "compact_boundary"
 
 # Exceptions that end a trial because of the agent's own behavior: a failed attempt.
 AGENT_EXCEPTIONS = frozenset(
@@ -184,6 +198,29 @@ def native_sessions(trial_dir: Path) -> list[Path]:
     return sorted((TrialPaths(trial_dir).agent_dir / "sessions/projects").glob("*/*.jsonl"))
 
 
+def session_compacted(trial_dir: Path) -> bool:
+    """True if a native session of the trial records a compaction (a `compact_boundary` event)."""
+    for path in native_sessions(trial_dir):
+        for line in path.read_text().splitlines():
+            if COMPACT_BOUNDARY_SUBTYPE not in line:
+                continue
+            event = json.loads(line)
+            if event.get("type") == "system" and event.get("subtype") == COMPACT_BOUNDARY_SUBTYPE:
+                return True
+    return False
+
+
+def load_trajectory(trial_dir: Path) -> Trajectory | str:
+    """The trial's ATIF trajectory, or why it cannot be read."""
+    path = TrialPaths(trial_dir).agent_dir / "trajectory.json"
+    if not path.is_file():
+        return "no agent/trajectory.json"
+    try:
+        return Trajectory.model_validate_json(path.read_text())
+    except ValidationError as error:
+        return f"agent/trajectory.json does not load: {error.error_count()} errors"
+
+
 def repair_job_name(prefix: str, trial_name: str, arm: RepairArm) -> str:
     return f"{prefix}-{trial_name}-{arm}"
 
@@ -199,6 +236,7 @@ def repair_job_config(
     checkpoint_image: str | None,
     session_file: Path | None,
     repair_note: str | None = None,
+    transcript_file: Path | None = None,
 ) -> dict[str, Any]:
     """The Harbor job config of one repair job: the source job's agent, model, and dataset.
 
@@ -216,6 +254,10 @@ def repair_job_config(
     }
     if repair_note is not None:
         agent["kwargs"]["repair_note"] = repair_note
+    if arm in TRANSCRIPT_ARMS:
+        if transcript_file is None:
+            raise ValueError(f"arm {arm} needs a transcript file")
+        agent["kwargs"]["repair_transcript"] = str(transcript_file.resolve())
     if arm in SESSION_ARMS:
         if session_file is None:
             raise ValueError(f"arm {arm} needs a session file")
@@ -260,6 +302,18 @@ def job_result(job_dir: Path) -> JobResult | None:
 def job_finished(job_dir: Path) -> bool:
     result = job_result(job_dir)
     return result is not None and result.finished_at is not None
+
+
+def job_complete(job_dir: Path) -> bool:
+    """Finished with a result for each of its trials. `harbor jobs resume` deletes the trials it
+    reruns before it rewrites result.json, so a resume that dies in between leaves an old,
+    finished result.json and fewer trials."""
+    result = job_result(job_dir)
+    return (
+        result is not None
+        and result.finished_at is not None
+        and len(finished_trials(job_dir)) >= result.n_total_trials
+    )
 
 
 def finished_trials(job_dir: Path) -> list[tuple[Path, TrialResult]]:
@@ -353,6 +407,8 @@ class Launcher:
     prune: bool = True
     repair_note: str | None = None
     same_failures_as: str | None = None
+    arms: tuple[RepairArm, ...] = REPAIR_ARMS
+    dry_run: bool = False
     watcher_running: Callable[[Path], bool] = lambda _: True
     tag_lookup: Callable[[str], str | None] = checkpoint_tag
     remove_image: Callable[[str], bool] = lambda tag: remove_checkpoint_image(tag)
@@ -362,6 +418,8 @@ class Launcher:
     skipped: dict[str, str] = field(default_factory=dict)
     running: dict[str, subprocess.Popen[bytes] | int] = field(default_factory=dict)
     resume_due: dict[str, float] = field(default_factory=dict)
+    # Trials a running resume reruns: their old dirs count as finished until Harbor removes them.
+    rerunning: dict[str, int] = field(default_factory=dict)
     refusals: dict[str, int] = field(default_factory=dict)
     paused_until: float = 0.0
     selection: dict[str, dict[str, Any]] = field(default_factory=dict)
@@ -380,34 +438,57 @@ class Launcher:
         if kind not in REPAIRABLE_KINDS:
             exception = result.exception_info.exception_type if result.exception_info else None
             return f"{kind} ({exception})"
-        record = final_checkpoint(trial_dir)
-        if record is None:
-            return "no checkpoint"
-        if self.tag_lookup(record.checkpoint_id) is None:
-            return f"checkpoint image {record.checkpoint_id} is gone"
-        sessions = native_sessions(trial_dir)
-        if len(sessions) != 1:
-            return f"expected one native session, found {len(sessions)}"
+        arms = set(self.arms)
+        if arms & CHECKPOINT_ARMS:
+            record = final_checkpoint(trial_dir)
+            if record is None:
+                return "no checkpoint"
+            if self.tag_lookup(record.checkpoint_id) is None:
+                return f"checkpoint image {record.checkpoint_id} is gone"
+        if arms & SESSION_ARMS:
+            sessions = native_sessions(trial_dir)
+            if len(sessions) != 1:
+                return f"expected one native session, found {len(sessions)}"
+        if arms & TRANSCRIPT_ARMS:
+            trajectory = load_trajectory(trial_dir)
+            if isinstance(trajectory, str):
+                return trajectory
         return None
 
     def plan_failure(self, trial_dir: Path, result: TrialResult) -> list[RepairJob] | str:
-        """The four repair jobs for one failed trial, or why it is not repaired."""
+        """One repair job per arm for one failed trial, or why it is not repaired."""
         reason = self.blocker(trial_dir, result)
         if reason is not None:
             return reason
         kind = classify_failure(result)
         assert kind is not None
-        record = final_checkpoint(trial_dir)
-        assert record is not None
-        tag = self.tag_lookup(record.checkpoint_id)
-        sessions = native_sessions(trial_dir)
+        arms = set(self.arms)
+        record = final_checkpoint(trial_dir) if arms & CHECKPOINT_ARMS else None
+        tag = self.tag_lookup(record.checkpoint_id) if record is not None else None
+        sessions = native_sessions(trial_dir) if arms & SESSION_ARMS else []
+        transcript: str | None = None
+        transcript_fields: dict[str, Any] = {}
+        if arms & TRANSCRIPT_ARMS:
+            trajectory = load_trajectory(trial_dir)
+            assert not isinstance(trajectory, str)
+            transcript, stats = render(trajectory)
+            transcript_fields = {
+                "transcript_chars": stats.chars,
+                "transcript_bytes": stats.bytes,
+                "transcript_outputs_total": stats.outputs_total,
+                "transcript_outputs_cut": stats.outputs_cut,
+                "transcript_rule": stats.rule,
+                "source_compacted": session_compacted(trial_dir),
+            }
         source_config = json.loads((trial_dir.parent / "config.json").read_text())
         task_name = load_trial_config(trial_dir).task.name
         jobs = []
-        for arm in REPAIR_ARMS:
+        for arm in self.arms:
             name = repair_job_name(self.prefix, result.trial_name, arm)
             inputs = self.inputs_root / name
             session_file = inputs / sessions[0].name if arm in SESSION_ARMS else None
+            transcript_file = inputs / TRANSCRIPT_FILENAME if arm in TRANSCRIPT_ARMS else None
+            checkpoint = record if arm in CHECKPOINT_ARMS else None
             source = RepairSource(
                 source_job=trial_dir.parent.name,
                 source_trial=result.trial_name,
@@ -420,10 +501,12 @@ class Launcher:
                 source_agent_s=seconds(result.agent_execution),
                 arm=arm,
                 attempts=self.attempts,
-                checkpoint_seq=record.seq if arm in CHECKPOINT_ARMS else None,
-                checkpoint_image=tag if arm in CHECKPOINT_ARMS else None,
-                checkpoint_image_id=record.checkpoint_id if arm in CHECKPOINT_ARMS else None,
+                checkpoint_seq=checkpoint.seq if checkpoint else None,
+                checkpoint_image=tag if checkpoint else None,
+                checkpoint_image_id=checkpoint.checkpoint_id if checkpoint else None,
                 session_file=str(session_file) if session_file else None,
+                transcript_file=str(transcript_file) if transcript_file else None,
+                **(transcript_fields if arm in TRANSCRIPT_ARMS else {}),
                 recorded_at=datetime.now(UTC),
             )
             config = repair_job_config(
@@ -436,11 +519,16 @@ class Launcher:
                 checkpoint_image=source.checkpoint_image,
                 session_file=session_file,
                 repair_note=self.repair_note,
+                transcript_file=transcript_file,
             )
-            if not (self.jobs_dir / name).exists():
+            # A dry run plans and renders but writes nothing.
+            if not self.dry_run and not (self.jobs_dir / name).exists():
                 inputs.mkdir(parents=True, exist_ok=True)
                 if session_file is not None:
                     shutil.copyfile(sessions[0], session_file)
+                if transcript_file is not None:
+                    assert transcript is not None
+                    transcript_file.write_bytes(transcript.encode("utf-8"))
                 (inputs / REPAIR_SOURCE_FILENAME).write_text(source.model_dump_json(indent=2))
                 (inputs / "config.json").write_text(json.dumps(config, indent=4) + "\n")
             jobs.append(RepairJob(name, source, inputs / "config.json"))
@@ -449,6 +537,16 @@ class Launcher:
     @property
     def selection_path(self) -> Path:
         return self.inputs_root / f"{self.prefix}.selection.json"
+
+    @property
+    def reuses_draw(self) -> bool:
+        """True if only failures already drawn are repaired: an earlier round's draw
+        (`same_failures_as`), or this round's own when arms are added to it later."""
+        return self.same_failures_as is not None or self.arms != REPAIR_ARMS
+
+    def save_selection(self) -> None:
+        if not self.dry_run:
+            self.selection_path.write_text(json.dumps(self.selection, indent=2) + "\n")
 
     def discover(self) -> None:
         """Queue repairs for source trials that finished since the last pass."""
@@ -464,7 +562,8 @@ class Launcher:
 
     def check_usage_limit(self, result: TrialResult) -> None:
         if (
-            result.exception_info is not None
+            not self.dry_run
+            and result.exception_info is not None
             and result.exception_info.exception_type == USAGE_LIMIT_EXCEPTION
         ):
             self.pause("source trial hit the usage limit")
@@ -476,7 +575,8 @@ class Launcher:
         harness-failed attempt waits for its rerun, unless the source job has finished. The draw
         is seeded by prefix and task and written to `<prefix>.selection.json`; a recorded draw is
         reused on restart. With `same_failures_as`, that round's draw is copied in first, with
-        each entry marked `reused_from`, and no task is drawn anew.
+        each entry marked `reused_from`, and no task is drawn anew. With arms other than the
+        default, the round's recorded draw is read and never written: no task is drawn anew.
         """
         if not self.selection and self.selection_path.is_file():
             self.selection = json.loads(self.selection_path.read_text())
@@ -486,7 +586,7 @@ class Launcher:
                 key: entry | {"reused_from": self.same_failures_as}
                 for key, entry in json.loads(earlier.read_text()).items()
             }
-            self.selection_path.write_text(json.dumps(self.selection, indent=2) + "\n")
+            self.save_selection()
             logger.info(
                 "reusing the draw of %s: %d tasks", self.same_failures_as, len(self.selection)
             )
@@ -503,7 +603,7 @@ class Launcher:
                 )
             for task, trials in sorted(by_task.items()):
                 key = f"{source_job.name}:{task}"
-                if key not in self.selection and self.same_failures_as is not None:
+                if key not in self.selection and self.reuses_draw:
                     continue
                 if key not in self.selection:
                     unsettled = any(
@@ -524,7 +624,7 @@ class Launcher:
                         "chosen": chosen,
                         "not_candidates": {k: v for k, v in blockers.items() if v is not None},
                     }
-                    self.selection_path.write_text(json.dumps(self.selection, indent=2) + "\n")
+                    self.save_selection()
                     logger.info("%s: repairing %s of %s", task, chosen, candidates)
                 chosen = set(self.selection[key]["chosen"])
                 for trial_dir, result in trials:
@@ -546,7 +646,10 @@ class Launcher:
             return
         self.queued_trials.add(result.trial_name)
         for job in planned:
-            self.adopt_or_queue(job)
+            if self.dry_run:
+                self.pending.append(job)
+            else:
+                self.adopt_or_queue(job)
 
     def adopt_or_queue(self, job: RepairJob) -> None:
         job_dir = self.jobs_dir / job.name
@@ -581,7 +684,7 @@ class Launcher:
         """After a job's process ended: resume it if it is unfinished or hit infra errors."""
         job_dir = self.jobs_dir / name
         failed = infra_failed(job_dir)
-        if job_finished(job_dir) and not failed:
+        if job_complete(job_dir) and not failed:
             if self.prune:
                 self.prune_job(job_dir)
             return
@@ -640,6 +743,7 @@ class Launcher:
                 if code is None:
                     continue
             del self.running[name]
+            self.rerunning.pop(name, None)
             (self.inputs_root / name / PID_FILENAME).unlink(missing_ok=True)
             logger.info("%s exited %s", name, code)
             job_dir = self.jobs_dir / name
@@ -666,7 +770,8 @@ class Launcher:
     def running_trials(self) -> int:
         used = sum(source_reserved_slots(job) for job in self.source_jobs)
         for name in self.running:
-            used += max(0, self.attempts - len(finished_trials(self.jobs_dir / name)))
+            unfinished = max(0, self.attempts - len(finished_trials(self.jobs_dir / name)))
+            used += max(unfinished, self.rerunning.get(name, 0))
         return used
 
     def hold_reason(self) -> str | None:
@@ -682,9 +787,9 @@ class Launcher:
             return f"working tree has changes outside {self.manifests_dir}: {dirty}"
         return None
 
-    def launch(self, name: str, command: list[str]) -> None:
+    def launch(self, name: str, command: list[str], env: dict[str, str] | None = None) -> None:
         log = (self.jobs_dir / f"{name}.log").open("ab")
-        process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, env=env)
         (self.inputs_root / name / PID_FILENAME).write_text(str(process.pid))
         self.running[name] = process
 
@@ -703,11 +808,18 @@ class Launcher:
             (self.inputs_root / name / RESUMES_FILENAME).write_text(json.dumps({"count": count}))
             command = [str(Path(sys.executable).parent / "harbor"), "jobs", "resume"]
             command += ["-p", str(self.jobs_dir / name)]
-            for exception in sorted(infra_failed(self.jobs_dir / name) | {"CancelledError"}):
+            rerun = infra_failed(self.jobs_dir / name) | {"CancelledError"}
+            for exception in sorted(rerun):
                 command += ["-f", exception]
-            if self.env_file is not None:
-                command += ["--env-file", str(self.env_file)]
-            self.launch(name, command)
+            # Harbor reruns every trial but those that finished with another outcome.
+            kept = [
+                result
+                for _, result in finished_trials(self.jobs_dir / name)
+                if result.exception_info is None
+                or result.exception_info.exception_type not in rerun
+            ]
+            self.launch(name, command, env=resume_env(self.env_file))
+            self.rerunning[name] = max(0, self.attempts - len(kept))
             logger.info("resuming %s (resume %d)", name, count)
         while self.pending and self.running_trials() + self.attempts <= self.max_running:
             job = self.pending.pop(0)
@@ -762,7 +874,14 @@ class Launcher:
             "not_repaired": {k: v for k, v in self.skipped.items() if v != "passed"},
             "selected": {v["task"]: v["chosen"] for v in self.selection.values()},
         }
-        (self.inputs_root / f"{self.prefix}.status.json").write_text(json.dumps(status, indent=2))
+        self.status_path.write_text(json.dumps(status, indent=2))
+
+    @property
+    def status_path(self) -> Path:
+        """`<prefix>.status.json`, or `<prefix>.<arms>.status.json` for arms other than the
+        default, so a launcher adding arms to a round leaves the round's own status file alone."""
+        arms = "" if self.arms == REPAIR_ARMS else "." + "+".join(self.arms)
+        return self.inputs_root / f"{self.prefix}{arms}.status.json"
 
     def run(self, poll_s: float = 30.0) -> None:
         self.inputs_root.mkdir(parents=True, exist_ok=True)
@@ -773,6 +892,16 @@ class Launcher:
                 logger.info("all repairs finished; not repaired: %s", self.skipped)
                 return
             time.sleep(poll_s)
+
+
+def resume_env(env_file: Path | None) -> dict[str, str] | None:
+    """The environment for `harbor jobs resume`, which has no `--env-file` option: this
+    process's environment with the env file's values over it, as `harbor run --env-file` loads
+    the file (python-dotenv, override). None, inheriting this process's, without a file."""
+    if env_file is None:
+        return None
+    values = {key: value for key, value in dotenv_values(env_file).items() if value is not None}
+    return {**os.environ, **values}
 
 
 def commit_new_manifests(manifests_dir: Path) -> list[str]:

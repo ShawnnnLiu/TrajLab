@@ -39,3 +39,11 @@ A task's network policy (`public`, `no-network`, `allowlist`) comes only from it
 Claude Code runs inside the trial container, so a restricted run needs an allowlist with the Anthropic API host, applied to the agent phase only: two of the 23 verifiers install packages at verify time.
 Workaround: none yet; deferred to a later experiment (`docs/research/2026-10-03_tb40-setup-vs-anthropic.md`).
 Upstream option: a job-level override of the agent-phase policy, e.g. `agent.network_mode` plus `allowed_hosts` in the trial config.
+
+## 2026-10-07: The prompt travels as one command-line argument, capped at 128 KiB
+
+`ClaudeCode.run` puts the whole prompt in one environment variable, `HARBOR_CLAUDE_CODE_INSTRUCTION_<hex>`, which the Docker environment passes as one `docker compose exec -e KEY=VALUE` argument; the command then copies it into a shell variable and pipes it to `claude`.
+Linux caps every argument and environment string at 128 KiB (`MAX_ARG_STRLEN`, 131,072 bytes including the terminating NUL), on the host's `docker` command line and again when the process starts in the container.
+A longer prompt cannot start. ADR-0012's `traj-text` prompts carry a transcript of a failed trial: rendered from the tool output text the agent saw, as built, the largest is 7,402 bytes under the cap; rendered from Harbor's ATIF observation `content`, 2 of the 21 are over it.
+Workaround: `trajlab.capture.repair.RepairClaudeCode` overrides `exec_as_agent`. For every `traj-text` run it uploads the prompt to `/tmp/trajlab-prompt-<hex>.txt` (chowned to the agent user, mode 600), drops the variable, and rewrites the command's `<var>="$<VAR>"; unset <VAR>; ` to read and remove the file before `claude` starts. It raises if the command no longer has that exact form; a unit test runs Harbor's own `run()` against a fake environment so an upgrade that changes the form fails the test.
+Upstream option: deliver the prompt as an uploaded file or on stdin of the exec, not in an argument.

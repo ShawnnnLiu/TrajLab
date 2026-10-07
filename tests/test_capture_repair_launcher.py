@@ -7,9 +7,16 @@ from typing import Any
 
 import pytest
 from harbor.models.job.config import JobConfig
+from harbor.models.trajectories import Trajectory
 from harbor.models.trial.result import TrialResult
 
-from tests.conftest import FIXTURE_TRIAL_NAME, assemble_job_dir, make_checkpoint, write_capture
+from tests.conftest import (
+    FIXTURE_TRIAL_NAME,
+    assemble_job_dir,
+    edit_trajectory,
+    make_checkpoint,
+    write_capture,
+)
 from trajlab.capture import repair_launcher
 from trajlab.capture.pins import CLAUDE_CODE_VERSION
 from trajlab.capture.repair import REPAIR_PROTOCOL
@@ -22,8 +29,10 @@ from trajlab.capture.repair_launcher import (
     final_checkpoint,
     repair_job_config,
     repair_job_name,
+    resume_env,
     source_reserved_slots,
 )
+from trajlab.capture.transcript import render
 from trajlab.contracts import (
     CHECKPOINT_ARMS,
     REPAIR_ARMS,
@@ -484,3 +493,280 @@ def test_finished_repair_job_keeps_only_final_images(failed_job: Path) -> None:
     # Pruning happens once per trial.
     runner.check_finished(job.name)
     assert removed == ["trajlab-checkpoint:0001"]
+
+
+def test_repair_job_config_for_traj_text(tmp_path: Path) -> None:
+    transcript = tmp_path / "inputs" / "transcript.txt"
+    config = repair_job_config(
+        source_config(),
+        task_name="terminal-bench/b",
+        arm="traj-text",
+        job_name="rep-b-traj-text",
+        jobs_dir=Path("corpus/jobs"),
+        attempts=3,
+        checkpoint_image=None,
+        session_file=None,
+        transcript_file=transcript,
+    )
+    JobConfig.model_validate(config)
+    (agent,) = config["agents"]
+    assert agent["kwargs"] == {
+        "reasoning_effort": "medium",
+        "version": CLAUDE_CODE_VERSION,
+        "config": "configs/claude-code/settings.hooks.json",
+        "repair_transcript": str(transcript.resolve()),
+    }
+    assert "load_trajectory" not in agent
+    assert config["environment"] == {
+        "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+    }
+    with pytest.raises(ValueError, match="transcript file"):
+        repair_job_config(
+            source_config(),
+            task_name="terminal-bench/b",
+            arm="traj-text",
+            job_name="j",
+            jobs_dir=Path("corpus/jobs"),
+            attempts=3,
+            checkpoint_image=None,
+            session_file=None,
+        )
+
+
+def no_docker(image_id: str) -> str | None:
+    raise AssertionError("traj-text needs no checkpoint image")
+
+
+def test_traj_text_plan_needs_only_the_trajectory(failed_job: Path) -> None:
+    trial = failed_job / FIXTURE_TRIAL_NAME
+    write_capture(trial, [])  # no checkpoint
+    shutil.rmtree(trial / "agent/sessions")  # no native session
+    runner = launcher(failed_job, arms=("traj-text",), tag_lookup=no_docker)
+    planned = runner.plan_failure(trial, result_of(trial))
+
+    assert isinstance(planned, list)
+    (job,) = planned
+    assert job.name == f"rep-v1-{FIXTURE_TRIAL_NAME}-traj-text"
+    inputs = failed_job.parent / INPUTS_DIRNAME / job.name
+    text, stats = render(
+        Trajectory.model_validate_json((trial / "agent/trajectory.json").read_text())
+    )
+    assert (inputs / "transcript.txt").read_bytes() == text.encode()
+    saved = RepairSource.model_validate_json((inputs / REPAIR_SOURCE_FILENAME).read_text())
+    assert saved == job.source
+    assert saved.arm == "traj-text"
+    assert saved.transcript_file == str(inputs / "transcript.txt")
+    assert (saved.transcript_chars, saved.transcript_bytes) == (stats.chars, stats.bytes)
+    assert (saved.transcript_outputs_total, saved.transcript_outputs_cut) == (1, 0)
+    assert saved.transcript_rule == "tool outputs > 4000 chars: first 2000 + last 2000"
+    assert saved.source_compacted is False
+    assert saved.checkpoint_image is None and saved.session_file is None
+    config = json.loads(job.config_path.read_text())
+    (agent,) = config["agents"]
+    assert agent["kwargs"]["repair_transcript"] == str((inputs / "transcript.txt").resolve())
+    assert "repair_note" not in agent["kwargs"]
+    assert "load_trajectory" not in agent
+
+
+def test_traj_text_needs_a_trajectory(failed_job: Path) -> None:
+    trial = failed_job / FIXTURE_TRIAL_NAME
+    (trial / "agent/trajectory.json").unlink()
+    runner = launcher(failed_job, arms=("traj-text",))
+    assert runner.plan_failure(trial, result_of(trial)) == "no agent/trajectory.json"
+    # The default arms do not read the trajectory.
+    assert isinstance(launcher(failed_job).plan_failure(trial, result_of(trial)), list)
+
+
+def test_a_compacted_source_session_is_flagged(failed_job: Path) -> None:
+    trial = failed_job / FIXTURE_TRIAL_NAME
+    (session,) = (trial / "agent/sessions/projects").glob("*/*.jsonl")
+    boundary = {"type": "system", "subtype": "compact_boundary", "uuid": "b1"}
+    session.write_text(session.read_text() + json.dumps(boundary) + "\n")
+    planned = launcher(failed_job, arms=("traj-text",)).plan_failure(trial, result_of(trial))
+    assert isinstance(planned, list) and planned[0].source.source_compacted is True
+
+
+def round_one(failed_job: Path) -> tuple[Launcher, Path]:
+    """A finished default-arms round over three attempts: its draw and its four job dirs."""
+    if not (failed_job / "hello-world__Extra0").exists():
+        three_attempts(failed_job, (0.0, 1.0))
+    first = launcher(failed_job, per_task=1)
+    first.inputs_root.mkdir(parents=True)
+    first.discover()
+    for job in first.pending:
+        finished_repair_job(failed_job, job, None)
+    return first, first.selection_path
+
+
+def test_an_added_arm_reuses_the_draw_and_leaves_the_round_alone(failed_job: Path) -> None:
+    first, selection = round_one(failed_job)
+    # One of round 1's jobs is unfinished: adopting it would schedule a resume.
+    unfinished = failed_job.parent / first.pending[0].name / "result.json"
+    unfinished.write_text(json.dumps(json.loads(unfinished.read_text()) | {"finished_at": None}))
+    recorded = selection.read_bytes()
+    stamp = selection.stat().st_mtime_ns
+
+    added = launcher(failed_job, per_task=1, arms=("traj-text",))
+    added.discover()
+
+    (chosen,) = json.loads(recorded)[next(iter(json.loads(recorded)))]["chosen"]
+    assert [job.name for job in added.pending] == [f"rep-v1-{chosen}-traj-text"]
+    assert selection.read_bytes() == recorded and selection.stat().st_mtime_ns == stamp
+    assert added.resume_due == {} and added.running == {}
+    assert added.status_path.name == "rep-v1.traj-text.status.json"
+    assert first.status_path.name == "rep-v1.status.json"
+
+
+def test_an_added_arm_never_draws(failed_job: Path) -> None:
+    _, selection = round_one(failed_job)
+    selection.write_text("{}\n")  # a task missing from the recorded draw
+
+    added = launcher(failed_job, per_task=1, arms=("traj-text",))
+    added.discover()
+
+    assert added.pending == [] and added.selection == {}
+    assert selection.read_text() == "{}\n"
+
+
+def test_dry_run_plans_and_renders_but_writes_nothing(failed_job: Path) -> None:
+    three_attempts(failed_job, (0.0, 1.0))
+    inputs = failed_job.parent / INPUTS_DIRNAME
+    drawn = launcher(failed_job, per_task=1, dry_run=True)
+    drawn.discover()
+    assert len(drawn.pending) == 4 and drawn.selection
+    assert not inputs.exists()
+
+    _, selection = round_one(failed_job)
+    before = sorted(p.relative_to(inputs) for p in inputs.rglob("*"))
+    recorded = selection.read_bytes()
+    added = launcher(failed_job, per_task=1, arms=("traj-text",), dry_run=True)
+    added.discover()
+    (job,) = added.pending
+    assert job.source.transcript_outputs_total == 1
+    assert sorted(p.relative_to(inputs) for p in inputs.rglob("*")) == before
+    assert selection.read_bytes() == recorded
+
+
+def test_resume_gets_the_env_file_in_its_environment(
+    failed_job: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(repair_launcher, "commit_new_manifests", lambda _: [])
+    monkeypatch.setenv("TRAJLAB_TEST_KEPT", "kept")
+    monkeypatch.setenv("CLAUDE_CODE_OAUTH_TOKEN", "from-the-shell")
+    env_file = tmp_path / "test.env"
+    env_file.write_text("CLAUDE_CODE_OAUTH_TOKEN=from-the-file\nCLAUDE_FORCE_OAUTH=1\n")
+    launched: list[tuple[list[str], dict[str, str] | None]] = []
+
+    def popen(command: list[str], env: dict[str, str] | None = None, **_: Any) -> FakeProcess:
+        launched.append((command, env))
+        return FakeProcess()
+
+    monkeypatch.setattr(subprocess, "Popen", popen)
+    runner = launcher(failed_job, env_file=env_file, hold_below_gb=0.0)
+    runner.discover()
+    job = runner.pending.pop(0)
+    runner.pending.clear()
+    finished_repair_job(failed_job, job, "EnvironmentStartTimeoutError")
+    runner.running[job.name] = FakeProcess(code=0)  # type: ignore[assignment]
+    runner.reap()
+    runner.resume_due[job.name] = 0.0
+    runner.launch_ready()
+
+    ((command, env),) = launched
+    assert command[1:3] == ["jobs", "resume"]
+    assert "--env-file" not in command
+    assert command[-4:] == ["-f", "CancelledError", "-f", "EnvironmentStartTimeoutError"]
+    assert env is not None
+    assert env["CLAUDE_CODE_OAUTH_TOKEN"] == "from-the-file"  # the file wins, as with harbor run
+    assert env["CLAUDE_FORCE_OAUTH"] == "1"
+    assert env["TRAJLAB_TEST_KEPT"] == "kept"
+
+
+def test_resume_without_an_env_file_inherits_the_environment() -> None:
+    assert resume_env(None) is None
+
+
+def test_transcript_file_keeps_carriage_returns(failed_job: Path) -> None:
+    trial = failed_job / FIXTURE_TRIAL_NAME
+
+    def mutate(data: dict[str, Any]) -> None:
+        result = data["steps"][1]["observation"]["results"][0]
+        result["extra"]["tool_result_metadata"]["raw_tool_result"]["content"] = "a\r\nb\rc"
+
+    edit_trajectory(trial, mutate)
+    planned = launcher(failed_job, arms=("traj-text",)).plan_failure(trial, result_of(trial))
+    assert isinstance(planned, list)
+    (job,) = planned
+    written = (failed_job.parent / INPUTS_DIRNAME / job.name / "transcript.txt").read_bytes()
+    assert b"[tool output] a\r\nb\rc\n" in written
+    assert len(written) == job.source.transcript_bytes
+
+
+def test_a_resume_holds_the_slots_of_the_trials_it_reruns(
+    failed_job: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(repair_launcher, "commit_new_manifests", lambda _: [])
+    launched: list[list[str]] = []
+
+    def popen(command: list[str], **_: Any) -> FakeProcess:
+        launched.append(command)
+        return FakeProcess()
+
+    monkeypatch.setattr(subprocess, "Popen", popen)
+    runner = launcher(failed_job, hold_below_gb=0.0)
+    runner.discover()
+    resumed, running = runner.pending.pop(0), runner.pending.pop(0)
+    # Two of the resumed job's three trials ended normally; one hit a harness error.
+    job_dir = finished_repair_job(failed_job, resumed, "EnvironmentStartTimeoutError")
+    add_attempt(job_dir, "hello-world__Extra0", 0.0)
+    add_attempt(job_dir, "hello-world__Extra1", 0.0)
+    runner.resume_due[resumed.name] = 0.0
+    runner.running[running.name] = FakeProcess()  # type: ignore[assignment]
+
+    runner.launch_ready()
+
+    # 3 running + 1 rerun: a pending 3-trial job would make 7 of 6.
+    assert [command[1:3] for command in launched] == [["jobs", "resume"]]
+    assert runner.rerunning == {resumed.name: 1}
+    assert runner.running_trials() == 4 and len(runner.pending) == 2
+    monkeypatch.setattr(Launcher, "write_manifest", lambda self, name: None)
+    runner.running[resumed.name] = FakeProcess(code=0)  # type: ignore[assignment]
+    runner.reap()
+    assert runner.rerunning == {}
+
+
+def test_dry_run_leaves_existing_jobs_alone(failed_job: Path) -> None:
+    _, _ = round_one(failed_job)
+    added = launcher(failed_job, per_task=1, arms=("traj-text",))
+    added.discover()
+    (job,) = added.pending
+    # The traj-text job ran and finished; a dry run afterwards must not prune or resume it.
+    repair = finished_repair_job(failed_job, job, None)
+    write_capture(repair / FIXTURE_TRIAL_NAME, [make_checkpoint(1), make_checkpoint(2)])
+
+    def no_docker(tag: str) -> bool:
+        raise AssertionError("a dry run removes no image")
+
+    dry = launcher(
+        failed_job, per_task=1, arms=("traj-text",), dry_run=True, remove_image=no_docker
+    )
+    dry.discover()
+    assert [j.name for j in dry.pending] == [job.name]
+    assert dry.resume_due == {} and dry.running == {}
+    assert not (repair / FIXTURE_TRIAL_NAME / "agent/checkpoints/pruned.json").exists()
+
+
+def test_a_resume_that_died_after_deleting_its_trials_is_resumed_again(failed_job: Path) -> None:
+    runner = launcher(failed_job)
+    runner.discover()
+    job = runner.pending.pop(0)
+    job_dir = finished_repair_job(failed_job, job, None)
+    add_attempt(job_dir, "hello-world__Extra0", 0.0)
+    add_attempt(job_dir, "hello-world__Extra1", 0.0)
+    data = json.loads((job_dir / "result.json").read_text())
+    (job_dir / "result.json").write_text(json.dumps(data | {"n_total_trials": 3}))
+    # Harbor's resume deleted the trial it was to rerun, then exited before rewriting result.json.
+    shutil.rmtree(job_dir / "hello-world__Extra1")
+    runner.running[job.name] = FakeProcess(code=1)  # type: ignore[assignment]
+    runner.reap()
+    assert job.name in runner.resume_due
