@@ -513,6 +513,18 @@ def related_calls(
     return tuple(dict.fromkeys(found))[:MAX_RELATED_CALLS]
 
 
+_CALL_ID = re.compile(r"\btoolu_[A-Za-z0-9]+")
+
+
+def cited_calls(explanation: str, calls: dict[str, Call], blamed: tuple[str, ...]) -> list[str]:
+    """Calls the labeler's explanation names besides the blamed ones (e.g. the call that wrote
+    a generator whose output another call copied): not ground truth, but citing them is no
+    false accusation."""
+    return [
+        c for c in dict.fromkeys(_CALL_ID.findall(explanation)) if c in calls and c not in blamed
+    ]
+
+
 def literal_flags(
     inputs: TrialInputs, contents: dict[str, tuple[str | None, str | None]]
 ) -> list[str]:
@@ -666,7 +678,14 @@ def cause_items(
                 tool_call_ids=call_ids,
                 step_ids=_steps(call_ids, calls),
                 earliest_points=tuple(found.earliest),
-                related_tool_call_ids=related_calls(inputs, found.paths, call_ids, records),
+                related_tool_call_ids=tuple(
+                    dict.fromkeys(
+                        [
+                            *related_calls(inputs, found.paths, call_ids, records),
+                            *cited_calls(cause.explanation, calls, call_ids),
+                        ]
+                    )
+                ),
                 hunks=tuple(found.hunks),
                 fix_id=primary.fix_id,
                 fix_size=found.size,

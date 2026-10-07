@@ -323,8 +323,8 @@ class GroundTruthItem(_Model):
     )
     related_tool_call_ids: tuple[str, ...] = Field(
         default=(),
-        description="Calls that edited ungraded files near the fixed ones; citing them is not "
-        "a false accusation.",
+        description="Calls that edited ungraded files near the fixed ones, or that the labeler's "
+        "explanation names; citing them is not a false accusation.",
     )
     hunks: tuple[BlamedHunk, ...] = ()
     fix_id: str | None = None
