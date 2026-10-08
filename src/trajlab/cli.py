@@ -3,6 +3,7 @@
 import logging
 import os
 import signal
+import subprocess
 import threading
 import time
 from enum import StrEnum
@@ -30,8 +31,14 @@ from trajlab.capture.repair_launcher import (
     Launcher,
     RepairJob,
     check_sources,
+    default_arms,
+    load_result,
     resume_env,
+    save_keep_reason,
+    trial_reward,
+    waypoint_record,
 )
+from trajlab.capture.waypoint import DEFAULT_STATE_DIR, Waypoint
 from trajlab.checkpoint.backends.docker_commit import DockerCommitBackend
 from trajlab.checkpoint.watcher import (
     DEFAULT_SWEEP_INTERVAL_S,
@@ -41,7 +48,7 @@ from trajlab.checkpoint.watcher import (
     hold_watcher_lock,
     watcher_running,
 )
-from trajlab.contracts import REPAIR_ARMS, RepairArm
+from trajlab.contracts import RepairArm
 
 app = typer.Typer(help="Capture Claude Code trajectories on Harbor with environment checkpoints.")
 
@@ -105,6 +112,9 @@ class Arm(StrEnum):
     state_traj = "state-traj"
     traj = "traj"
     traj_text = "traj-text"
+    state_files = "state-files"
+    state_live = "state-live"
+    state_live_traj = "state-live-traj"
 
 
 def trial_env_problem(env_file: Path | None) -> str | None:
@@ -193,9 +203,10 @@ def repair(
     arms: Annotated[
         list[Arm] | None,
         typer.Option(
-            help="Arms to run; repeat for several. Other than the default four, with --per-task, "
-            "the prefix's recorded draw is reused and its other jobs are left alone. Default: "
-            "fresh, state, state-traj, traj."
+            help="Arms to run; repeat for several. Other than the round's default, with "
+            "--per-task, the prefix's recorded draw is reused and its other jobs are left alone. "
+            "Default: fresh, state, state-traj, traj; for Waypoint source jobs, fresh, "
+            "state-files, state-live, state-live-traj, traj (ADR-0013)."
         ),
     ] = None,
     dry_run: Annotated[
@@ -208,10 +219,18 @@ def repair(
     manifests_dir: ManifestsDirOption = MANIFESTS_DIR,
 ) -> None:
     """Repair every failed trial of the source jobs under four arms (ADR-0012). Restartable."""
+    # The source job may have been started a moment ago; Harbor writes its config.json first.
+    while problems := check_sources(source_jobs):
+        logging.getLogger(__name__).warning("waiting: %s", "; ".join(problems))
+        time.sleep(poll)
+    try:
+        round_arms = default_arms(source_jobs)
+    except ValueError as error:
+        raise typer.BadParameter(str(error)) from error
     chosen = {arm.value for arm in arms or []}
-    repair_arms = tuple(a for a in get_args(RepairArm) if a in chosen) or REPAIR_ARMS
+    repair_arms = tuple(a for a in get_args(RepairArm) if a in chosen) or round_arms
     selection = jobs_dir / INPUTS_DIRNAME / f"{prefix}.selection.json"
-    if repair_arms != REPAIR_ARMS:
+    if repair_arms != round_arms:
         if per_task is None and selection.is_file():
             raise typer.BadParameter(
                 f"{prefix} was drawn per task ({selection}); pass --per-task to add arms to it"
@@ -226,10 +245,6 @@ def repair(
     problem = trial_env_problem(env_file)
     if problem and not dry_run:
         raise typer.BadParameter(f"{problem}; trials would not run as round 1's did")
-    # The source job may have been started a moment ago; Harbor writes its config.json first.
-    while problems := check_sources(source_jobs):
-        logging.getLogger(__name__).warning("waiting: %s", "; ".join(problems))
-        time.sleep(poll)
     launcher = Launcher(
         source_jobs=source_jobs,
         prefix=prefix,
@@ -245,6 +260,7 @@ def repair(
         per_task=per_task,
         prune=prune,
         arms=repair_arms,
+        round_arms=round_arms,
         dry_run=dry_run,
         watcher_running=watcher_running,
     )
@@ -405,6 +421,81 @@ def manifest(
         typer.echo(f"trajlab manifest: {error}", err=True)
         raise typer.Exit(code=1) from error
     typer.echo(f"wrote {path}")
+
+
+@app.command("waypoint-report")
+def waypoint_report(
+    job_dir: Annotated[Path, typer.Argument(help="A job dir whose trials ran on Waypoint.")],
+) -> None:
+    """One line per trial: score, and what its Waypoint save holds (ADR-0013)."""
+    typer.echo("trial\treward\texception\tsave\tagent\tprograms\tfiles_mb\tmemory_mb\tsave_s\tkey")
+    for trial_dir in iter_trial_dirs(job_dir):
+        result = load_result(trial_dir)
+        record = waypoint_record(trial_dir)
+        reward = trial_reward(result) if result else None
+        exception = (
+            result.exception_info.exception_type if result and result.exception_info else "-"
+        )
+        save = record.save if record else None
+        if record is not None and record.role == "fork":
+            stopped = record.stopped_processes
+            where = f"copy of {record.opened_from}"
+            programs = f"{len(stopped)} stopped" if stopped is not None else "kept running"
+            typer.echo(f"{trial_dir.name}\t{reward}\t{exception}\t{where}\t-\t{programs}")
+            continue
+        if save is None:
+            typer.echo(f"{trial_dir.name}\t{reward}\t{exception}\tnone")
+            continue
+        names = ", ".join(p.command.split(" ")[0].rsplit("/", 1)[-1] for p in save.processes)
+        files = round((save.files_bytes or 0) / 1e6, 1)
+        memory = round((save.memory_bytes or 0) / 1e6, 1)
+        key = "FOUND" if save.secret_found_in else "no"
+        typer.echo(
+            f"{trial_dir.name}\t{reward}\t{exception}\tfinal\t{save.agent_stopped}\t"
+            f"{len(save.processes)} ({names or '-'})\t{files}\t{memory}\t"
+            f"{save.capture_ms / 1000:.1f}\t{key}"
+        )
+
+
+@app.command("waypoint-cleanup")
+def waypoint_cleanup(
+    source_jobs: Annotated[
+        list[Path], typer.Argument(help="Waypoint source job dirs whose saves may be removed.")
+    ],
+    prefix: Annotated[str, typer.Option(help="The repair round's prefix (`trajlab repair`).")],
+    jobs_dir: Annotated[Path, typer.Option(help="Where repair jobs are written.")] = Path(
+        "corpus/jobs"
+    ),
+    state_dir: Annotated[Path, typer.Option(help="Waypoint's state dir.")] = Path(
+        DEFAULT_STATE_DIR
+    ),
+    waypoint_bin: Annotated[str, typer.Option(help="The waypoint binary.")] = "waypoint",
+    dry_run: Annotated[
+        bool, typer.Option("--dry-run", help="Print what would be removed; remove nothing.")
+    ] = False,
+) -> None:
+    """Remove first attempts' Waypoint sessions once no repair can still open their save
+    (ADR-0013). Saves still needed are kept and the reason printed."""
+    waypoint = Waypoint(state_dir, waypoint_bin)
+    for job in source_jobs:
+        for trial_dir in iter_trial_dirs(job):
+            record = waypoint_record(trial_dir)
+            if record is None or record.role != "source":
+                continue
+            reason = save_keep_reason(trial_dir, jobs_dir, prefix)
+            if reason is not None:
+                typer.echo(f"keep    {trial_dir.name} ({record.session}): {reason}")
+                continue
+            if dry_run:
+                typer.echo(f"remove  {trial_dir.name} ({record.session}) [dry run]")
+                continue
+            done = subprocess.run(
+                waypoint.argv("cleanup", record.session, "--force"),
+                capture_output=True,
+                text=True,
+            )
+            state = "removed" if done.returncode == 0 else f"FAILED: {done.stdout}{done.stderr}"
+            typer.echo(f"{state:7} {trial_dir.name} ({record.session})")
 
 
 @app.command()

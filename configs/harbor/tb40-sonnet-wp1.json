@@ -1,0 +1,54 @@
+{
+    "job_name": "tb40-sonnet-wp1",
+    "jobs_dir": "corpus/jobs",
+    "n_attempts": 3,
+    "n_concurrent_trials": 6,
+    "agent_timeout_multiplier": 0.5,
+    "agents": [
+        {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+                "reasoning_effort": "medium",
+                "version": "2.1.278"
+            }
+        }
+    ],
+    "datasets": [
+        {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "4.0.0",
+            "task_names": [
+                "terminal-bench/bun-sourcemap-leak",
+                "terminal-bench/foodstuff-beta-activity",
+                "terminal-bench/freecad-platform-drawing",
+                "terminal-bench/cad-model",
+                "terminal-bench/freecad-impeller",
+                "terminal-bench/freecad-spring-clip",
+                "terminal-bench/interleaved-vigenere",
+                "terminal-bench/layout-config-recreation",
+                "terminal-bench/layout-config-recreation2",
+                "terminal-bench/pretrain-shard-corruption",
+                "terminal-bench/protein-autointerp-disulfide",
+                "terminal-bench/sglang-qwen-burst",
+                "terminal-bench/vllm-deepseek-streaming",
+                "terminal-bench/vpp-loss-divergence",
+                "terminal-bench/cargo-flight-dispatch",
+                "terminal-bench/roy-polymorph-cn",
+                "terminal-bench/gsea-proteomics",
+                "terminal-bench/mvcc-lsm-compaction",
+                "terminal-bench/production-planning",
+                "terminal-bench/risk-scorer-replay",
+                "terminal-bench/sound-change-cascade",
+                "terminal-bench/vba-userform-port",
+                "terminal-bench/vf2-speedup-networkx"
+            ]
+        }
+    ],
+    "environment": {
+        "import_path": "trajlab.capture.waypoint:WaypointEnvironment",
+        "kwargs": {
+            "state_dir": "/srv/trajlab/waypoint"
+        }
+    }
+}
