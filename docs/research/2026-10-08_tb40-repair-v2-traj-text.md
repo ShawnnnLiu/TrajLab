@@ -47,13 +47,13 @@ The rows for `fresh`, `state`, `state-traj`, and `traj` below are round 1's, fro
 
 First attempts: 13 of 69 passed. The 21 repaired failures are round 1's: 17 tasks at 0/3, 1 at 1/3, 3 at 2/3.
 
-| Arm | Repairs passed | pass@3 (failures) | 0/3 tasks | 1-2/3 tasks | Own cost | Mean / median per repair | Cost per passed repair | Output tok | Cache-write tok | Cache-read tok | API calls | Tool calls | Median agent s | Trial-hours | Longest agent min |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `fresh` | 7/63 (11%) | 4/21 | 4/51 | 3/12 | $44.08 | $0.70 / $0.20 | $6.30 | 1.34 M | 2.78 M | 97.5 M | 1,382 | 1,474 | 292 | 15.4 | 98 |
-| `state` | 5/63 (8%) | 4/21 | 2/51 | 3/12 | $22.54 | $0.36 / $0.18 | $4.51 | 0.63 M | 1.63 M | 48.5 M | 895 | 922 | 167 | 12.8 | 240 |
-| `state-traj` | 15/63 (24%) | 8/21 | 5/51 | 10/12 | $39.53 | $0.63 / $0.24 | $2.64 | 0.80 M | 3.93 M | 78.9 M | 889 | 896 | 138 | 14.0 | 203 |
-| `traj` | 17/63 (27%) | 8/21 | 8/51 | 9/12 | $35.10 | $0.56 / $0.16 | $2.06 | 0.95 M | 1.95 M | 88.7 M | 964 | 996 | 254 | 15.4 | 176 |
-| `traj-text` | 3/63 (5%) | 3/21 | 1/51 | 2/12 | $37.67 | $0.60 / $0.23 | $12.56 | 1.04 M | 3.26 M | 70.8 M | 847 | 838 | 288 | 17.3 | 120 |
+| Arm | Repairs passed | 0/3 tasks | 1-2/3 tasks | Own cost | Mean / median per repair | Cost per passed repair | Output tok | Cache-write tok | Cache-read tok | API calls | Tool calls | Median agent s | Longest agent min |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `fresh` | 7/63 (11%) | 4/51 | 3/12 | $44.08 | $0.70 / $0.20 | $6.30 | 1.34 M | 2.78 M | 97.5 M | 1,382 | 1,474 | 292 | 98 |
+| `state` | 5/63 (8%) | 2/51 | 3/12 | $22.54 | $0.36 / $0.18 | $4.51 | 0.63 M | 1.63 M | 48.5 M | 895 | 922 | 167 | 240 |
+| `state-traj` | 15/63 (24%) | 5/51 | 10/12 | $39.53 | $0.63 / $0.24 | $2.64 | 0.80 M | 3.93 M | 78.9 M | 889 | 896 | 138 | 203 |
+| `traj` | 17/63 (27%) | 8/51 | 9/12 | $35.10 | $0.56 / $0.16 | $2.06 | 0.95 M | 1.95 M | 88.7 M | 964 | 996 | 254 | 176 |
+| `traj-text` | 3/63 (5%) | 1/51 | 2/12 | $37.67 | $0.60 / $0.23 | $12.56 | 1.04 M | 3.26 M | 70.8 M | 847 | 838 | 288 | 120 |
 
 Errored repairs: none in `traj-text`. Round 1's are in its note: `fresh` 2 `EnvironmentStartTimeoutError` and 3 `AgentSafetyRefusalError`, `state` 3 `AgentSafetyRefusalError` and 1 `AgentTimeoutError`. Round 1's 6 refusals were all on interleaved-vigenere; its 3 `traj-text` repairs ran 622 to 942 s and ended without an exception.
 
