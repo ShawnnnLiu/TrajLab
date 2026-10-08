@@ -43,9 +43,11 @@ from trajlab.contracts.repair import (
     REPAIR_ARMS,
     REPAIR_SOURCE_FILENAME,
     REPAIRABLE_KINDS,
+    SAVE_ARMS,
     SESSION_ARMS,
     TRANSCRIPT_ARMS,
     TRANSCRIPT_FIELDS,
+    WAYPOINT_ARMS,
     FailureKind,
     RepairArm,
     RepairSource,
@@ -85,6 +87,13 @@ from trajlab.contracts.store import (
     TrialRow,
 )
 from trajlab.contracts.trial import TrialRecord
+from trajlab.contracts.waypoint import (
+    FINAL_CHECKPOINT,
+    WAYPOINT_RECORD_FILENAME,
+    RunningProcess,
+    WaypointRecord,
+    WaypointSave,
+)
 
 __all__ = [
     "LABEL_PATTERNS",
@@ -150,6 +159,7 @@ __all__ = [
     "CHECKPOINT_ARMS",
     "REPAIR_ARMS",
     "REPAIR_SOURCE_FILENAME",
+    "SAVE_ARMS",
     "SESSION_ARMS",
     "TRANSCRIPT_ARMS",
     "TRANSCRIPT_FIELDS",
@@ -161,4 +171,10 @@ __all__ = [
     "ResumeRecord",
     "TrajlabStepExtra",
     "TrialRecord",
+    "FINAL_CHECKPOINT",
+    "WAYPOINT_ARMS",
+    "WAYPOINT_RECORD_FILENAME",
+    "RunningProcess",
+    "WaypointRecord",
+    "WaypointSave",
 ]
