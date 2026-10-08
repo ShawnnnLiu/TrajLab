@@ -1,0 +1,72 @@
+{
+  "corpus_id": "hello-world-traj-text-delivery-v1",
+  "created_at": "2026-10-07T19:13:47.281269Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "63925aae7a6159fc0d064d47f1b48768a601f1bb",
+  "repo_dirty": false,
+  "config_path": "corpus/jobs/_repair-inputs/hello-world-traj-text-delivery-v1/config.json",
+  "agent_name": "trajlab.capture.repair:RepairClaudeCode",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json",
+    "repair_transcript": "/srv/trajlab/jobs/_repair-inputs/hello-world-traj-text-delivery-v1/transcript.txt"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 1,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 2.0,
+  "checkpoint_every": null,
+  "checkpoint_gate": null,
+  "tasks": [
+    {
+      "name": "hello-world/hello-world",
+      "digest": "sha256:38d7a077f07fbee8efc78db5dec9a72f82e727510ad1dcfeac0b55fa845256b7"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "hello-world-traj-text-delivery-v1",
+      "job_id": "7389c3ec-6c22-4012-9671-bb5b45e88a99",
+      "job_config": {
+        "job_name": "hello-world-traj-text-delivery-v1",
+        "jobs_dir": "corpus/jobs",
+        "agent_timeout_multiplier": 2.0,
+        "n_concurrent_trials": 1,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "import_path": "trajlab.capture.repair:RepairClaudeCode",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json",
+              "repair_transcript": "/srv/trajlab/jobs/_repair-inputs/hello-world-traj-text-delivery-v1/transcript.txt"
+            }
+          }
+        ],
+        "tasks": [
+          {
+            "name": "hello-world/hello-world",
+            "ref": "latest"
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "8812e889-337c-47af-a376-853bb9b064db",
+          "trial_name": "hello-world__mJPdthK",
+          "task_name": "hello-world/hello-world",
+          "job_id": "7389c3ec-6c22-4012-9671-bb5b45e88a99",
+          "job_dir": "hello-world-traj-text-delivery-v1",
+          "claude_session_id": null
+        }
+      ]
+    }
+  ],
+  "storage": "/srv/trajlab/jobs"
+}
