@@ -2265,6 +2265,7 @@ source = { editable = "." }
 dependencies = [
     { name = "harbor" },
     { name = "pydantic" },
+    { name = "python-dotenv" },
     { name = "pyyaml" },
     { name = "typer" },
     { name = "watchdog" },
@@ -2281,6 +2282,7 @@ dev = [
 requires-dist = [
     { name = "harbor", specifier = "==0.23.0" },
     { name = "pydantic", specifier = ">=2.13.5" },
+    { name = "python-dotenv", specifier = ">=1.2.3" },
     { name = "pyyaml", specifier = ">=6" },
     { name = "typer", specifier = ">=0.27.2" },
     { name = "watchdog", specifier = ">=6.0.0" },
