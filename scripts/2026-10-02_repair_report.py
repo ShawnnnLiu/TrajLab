@@ -30,6 +30,9 @@ reported cost is the trial's own). `traj-text` resumes no session, so all its to
         --prefix tb40-repair-v2
     uv run python scripts/2026-10-02_repair_report.py corpus/jobs/tb40-sonnet-v2 \
         --prefix tb40-repair-v2 --arms traj-text
+    uv run python scripts/2026-10-02_repair_report.py corpus/jobs/tb40-sonnet-wp1 \
+        --prefix tb40-repair-wp1 --arms fresh --arms state-files --arms state-live \
+        --arms state-live-traj --arms traj
 """
 
 import argparse
@@ -43,8 +46,10 @@ from typing import Any
 
 JOBS_DIR = Path("corpus/jobs")
 ARMS = ("fresh", "state", "state-traj", "traj")
-ALL_ARMS = (*ARMS, "traj-text")
-RESUMED_ARMS = ("state-traj", "traj")
+# A Waypoint round's arms (ADR-0013); its source job is its own, so its files keep plain names.
+WAYPOINT_ARMS = ("fresh", "state-files", "state-live", "state-live-traj", "traj")
+ALL_ARMS = (*ARMS, "traj-text", "state-files", "state-live", "state-live-traj")
+RESUMED_ARMS = ("state-traj", "traj", "state-live-traj")
 # USD per million tokens, Claude Sonnet 5.5 list prices (claude-api skill, cached 2026-09-25).
 PRICE = {"input": 2.00, "cache_write_5m": 2.50, "cache_write_1h": 4.00, "cache_read": 0.20}
 PRICE_OUTPUT = 10.00
@@ -210,7 +215,7 @@ def main() -> int:
     )
     args = parser.parse_args()
     arms = tuple(a for a in ALL_ARMS if a in (args.arms or ARMS))
-    suffix = "" if arms == ARMS else "." + "+".join(arms)
+    suffix = "" if set(arms) in (set(ARMS), set(WAYPOINT_ARMS)) else "." + "+".join(arms)
 
     rows = []
     check_table = []

@@ -66,6 +66,12 @@ One trial is one task executed by one attempt.
   "Pre-install" names the whole mechanism.
   Not: "base image", which the Dockerfile `FROM` line already means.
 
+- **Waypoint session** - one Waypoint workspace: a first attempt's environment and its save, under `/srv/trajlab/waypoint/sessions/<id>/` (ADR-0013).
+  Always "Waypoint session", never bare "session", which names Claude Code's or Harbor's.
+- **save** - Waypoint's copy of an environment's files and running programs at one moment; trajlab makes one per first attempt, `final`, after the agent stops and before the tests (ADR-0013).
+  A save is a checkpoint with programs; say "save" only for Waypoint's.
+- **fork** - a live copy of a save; each `state-files`, `state-live`, or `state-live-traj` repair runs in its own fork.
+
 - **pin** - `trajlab.capture.pins.CLAUDE_CODE_VERSION`, the one Claude Code version every capture runs (ADR-0009); enforced by `trajlab run`, by the derived-image build, and in every trial container.
 
 ## Trajectory
