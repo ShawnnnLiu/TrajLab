@@ -21,6 +21,16 @@ same note that an earlier attempt failed):
 A failure is repaired only if every arm can start: it has a final checkpoint whose image still
 exists and exactly one native session. Otherwise no arm runs, so the arms stay paired.
 
+Source jobs that ran on Waypoint (ADR-0013) get the Waypoint arms instead, all on Waypoint:
+
+    fresh            task image, new conversation
+    state-files      a copy of the failed trial's save, its programs stopped, new conversation
+    state-live       a copy of the save, programs still running, new conversation
+    state-live-traj  a copy of the save, programs running, the native session loaded
+    traj             task image, the native session loaded
+
+Waypoint trials make no per-call checkpoints, so their jobs carry no hooks and need no watcher.
+
 Another arm can be added to a round later (`arms`, e.g. only `traj-text`): it runs on that
 round's recorded draw, never draws, and plans only its own jobs, so the round's existing jobs
 are not touched. A failure then needs only what the given arms start from; `traj-text` needs
@@ -68,12 +78,16 @@ from trajlab.contracts import (
     REPAIR_ARMS,
     REPAIR_SOURCE_FILENAME,
     REPAIRABLE_KINDS,
+    SAVE_ARMS,
     SESSION_ARMS,
     TRANSCRIPT_ARMS,
+    WAYPOINT_ARMS,
+    WAYPOINT_RECORD_FILENAME,
     CheckpointRecord,
     FailureKind,
     RepairArm,
     RepairSource,
+    WaypointRecord,
 )
 
 logger = logging.getLogger(__name__)
@@ -83,6 +97,8 @@ INPUTS_DIRNAME = "_repair-inputs"
 REPAIR_AGENT = "trajlab.capture.repair:RepairClaudeCode"
 PREINSTALLED_ENV = "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
 RESUME_ENV = "trajlab.capture.resume:CheckpointResumeEnvironment"
+WAYPOINT_ENV = "trajlab.capture.waypoint:WaypointEnvironment"
+WAYPOINT_FORK_ENV = "trajlab.capture.waypoint:WaypointForkEnvironment"
 CHECKPOINT_REPOSITORY = "trajlab-checkpoint"
 PID_FILENAME = "launcher.pid"
 PRUNED_FILENAME = "pruned.json"
@@ -191,6 +207,28 @@ def final_checkpoint(trial_dir: Path) -> CheckpointRecord | None:
     return max(records, key=lambda r: r.seq, default=None)
 
 
+def uses_waypoint(job_config: dict[str, Any]) -> bool:
+    """True if a job ran its trials on Waypoint (ADR-0013)."""
+    environment = job_config.get("environment") or {}
+    return str(environment.get("import_path") or "").startswith("trajlab.capture.waypoint:")
+
+
+def default_arms(source_jobs: Iterable[Path]) -> tuple[RepairArm, ...]:
+    """The round's default arms: the Waypoint arms for Waypoint source jobs, else ADR-0012's."""
+    configs = [json.loads((job / "config.json").read_text()) for job in source_jobs]
+    kinds = {uses_waypoint(config) for config in configs}
+    if len(kinds) > 1:
+        raise ValueError("source jobs mix Waypoint and Docker; repair them separately")
+    return WAYPOINT_ARMS if kinds == {True} else REPAIR_ARMS
+
+
+def waypoint_record(trial_dir: Path) -> WaypointRecord | None:
+    path = trial_dir / WAYPOINT_RECORD_FILENAME
+    if not path.is_file():
+        return None
+    return WaypointRecord.model_validate_json(path.read_text())
+
+
 def native_sessions(trial_dir: Path) -> list[Path]:
     return sorted((TrialPaths(trial_dir).agent_dir / "sessions/projects").glob("*/*.jsonl"))
 
@@ -233,9 +271,15 @@ def repair_job_config(
     checkpoint_image: str | None,
     session_file: Path | None,
     transcript_file: Path | None = None,
+    source_trial: Path | None = None,
 ) -> dict[str, Any]:
-    """The Harbor job config of one repair job: the source job's agent, model, and dataset."""
+    """The Harbor job config of one repair job: the source job's agent, model, and dataset.
+
+    On a Waypoint source job, every arm runs on Waypoint with the source's environment kwargs,
+    and no arm carries hooks (Waypoint trials make no per-call checkpoints).
+    """
     source_agent = source_job_config["agents"][0]
+    waypoint = uses_waypoint(source_job_config)
     agent: dict[str, Any] = {
         "import_path": REPAIR_AGENT,
         "model_name": source_agent["model_name"],
@@ -245,6 +289,8 @@ def repair_job_config(
             "config": HOOKS,
         },
     }
+    if waypoint:
+        agent["kwargs"].pop("config")
     if arm in TRANSCRIPT_ARMS:
         if transcript_file is None:
             raise ValueError(f"arm {arm} needs a transcript file")
@@ -255,9 +301,26 @@ def repair_job_config(
         agent["load_trajectory"] = str(session_file.resolve())
     environment: dict[str, Any] = {"import_path": PREINSTALLED_ENV}
     if arm in CHECKPOINT_ARMS:
+        if waypoint:
+            raise ValueError(
+                f"arm {arm} starts from a Docker checkpoint; the source ran on Waypoint"
+            )
         if checkpoint_image is None:
             raise ValueError(f"arm {arm} needs a checkpoint image")
         environment = {"import_path": RESUME_ENV, "kwargs": {"checkpoint_image": checkpoint_image}}
+    elif arm in SAVE_ARMS and not waypoint:
+        raise ValueError(f"arm {arm} opens a Waypoint save; the source ran on Docker")
+    elif waypoint:
+        kwargs = dict((source_job_config.get("environment") or {}).get("kwargs") or {})
+        kwargs.pop("save_final", None)
+        if arm in SAVE_ARMS:
+            if source_trial is None:
+                raise ValueError(f"arm {arm} needs the source trial")
+            kwargs |= {"source_trial": str(source_trial.resolve())}
+            kwargs |= {"stop_processes": arm == "state-files"}
+            environment = {"import_path": WAYPOINT_FORK_ENV, "kwargs": kwargs}
+        else:
+            environment = {"import_path": WAYPOINT_ENV, "kwargs": kwargs | {"save_final": False}}
     config: dict[str, Any] = {
         "job_name": job_name,
         "jobs_dir": str(jobs_dir),
@@ -397,6 +460,8 @@ class Launcher:
     per_task: int | None = None
     prune: bool = True
     arms: tuple[RepairArm, ...] = REPAIR_ARMS
+    # The round's default arm set (`default_arms`): other arms reuse its draw.
+    round_arms: tuple[RepairArm, ...] = REPAIR_ARMS
     dry_run: bool = False
     watcher_running: Callable[[Path], bool] = lambda _: True
     tag_lookup: Callable[[str], str | None] = checkpoint_tag
@@ -434,6 +499,10 @@ class Launcher:
                 return "no checkpoint"
             if self.tag_lookup(record.checkpoint_id) is None:
                 return f"checkpoint image {record.checkpoint_id} is gone"
+        if arms & SAVE_ARMS:
+            record = waypoint_record(trial_dir)
+            if record is None or record.save is None:
+                return "no Waypoint save"
         if arms & SESSION_ARMS:
             sessions = native_sessions(trial_dir)
             if len(sessions) != 1:
@@ -455,6 +524,8 @@ class Launcher:
         record = final_checkpoint(trial_dir) if arms & CHECKPOINT_ARMS else None
         tag = self.tag_lookup(record.checkpoint_id) if record is not None else None
         sessions = native_sessions(trial_dir) if arms & SESSION_ARMS else []
+        saved = waypoint_record(trial_dir) if arms & SAVE_ARMS else None
+        save = f"{saved.session}/{saved.save.checkpoint_id}" if saved and saved.save else None
         transcript: str | None = None
         transcript_fields: dict[str, Any] = {}
         if arms & TRANSCRIPT_ARMS:
@@ -493,6 +564,7 @@ class Launcher:
                 checkpoint_seq=checkpoint.seq if checkpoint else None,
                 checkpoint_image=tag if checkpoint else None,
                 checkpoint_image_id=checkpoint.checkpoint_id if checkpoint else None,
+                waypoint_save=save if arm in SAVE_ARMS else None,
                 session_file=str(session_file) if session_file else None,
                 transcript_file=str(transcript_file) if transcript_file else None,
                 **(transcript_fields if arm in TRANSCRIPT_ARMS else {}),
@@ -508,6 +580,7 @@ class Launcher:
                 checkpoint_image=source.checkpoint_image,
                 session_file=session_file,
                 transcript_file=transcript_file,
+                source_trial=trial_dir,
             )
             # A dry run plans and renders but writes nothing.
             if not self.dry_run and not (self.jobs_dir / name).exists():
@@ -529,7 +602,7 @@ class Launcher:
     @property
     def reuses_draw(self) -> bool:
         """True if only failures already drawn are repaired: arms added to a round later."""
-        return self.arms != REPAIR_ARMS
+        return self.arms != self.round_arms
 
     def save_selection(self) -> None:
         if not self.dry_run:
@@ -756,7 +829,7 @@ class Launcher:
             return f"{free:.0f} GB free, below {self.hold_below_gb:.0f} GB"
         if self.clock() < self.paused_until:
             return "usage-limit pause"
-        if not self.watcher_running(self.jobs_dir):
+        if self.round_arms != WAYPOINT_ARMS and not self.watcher_running(self.jobs_dir):
             return f"no watcher holds {self.jobs_dir}"
         dirty = commit_new_manifests(self.manifests_dir)
         if dirty:
@@ -856,7 +929,7 @@ class Launcher:
     def status_path(self) -> Path:
         """`<prefix>.status.json`, or `<prefix>.<arms>.status.json` for arms other than the
         default, so a launcher adding arms to a round leaves the round's own status file alone."""
-        arms = "" if self.arms == REPAIR_ARMS else "." + "+".join(self.arms)
+        arms = "" if self.arms == self.round_arms else "." + "+".join(self.arms)
         return self.inputs_root / f"{self.prefix}{arms}.status.json"
 
     def run(self, poll_s: float = 30.0) -> None:
@@ -903,6 +976,39 @@ def commit_new_manifests(manifests_dir: Path) -> list[str]:
     subprocess.run(["git", "commit", "-q", "--no-verify", "-m", message], check=True)
     logger.info("committed %s", paths)
     return []
+
+
+def save_users(inputs_root: Path, trial_name: str) -> list[str]:
+    """Repair jobs that open this trial's Waypoint save."""
+    users = []
+    for path in sorted(inputs_root.glob(f"*/{REPAIR_SOURCE_FILENAME}")):
+        source = RepairSource.model_validate_json(path.read_text())
+        if source.source_trial == trial_name and source.waypoint_save is not None:
+            users.append(path.parent.name)
+    return users
+
+
+def save_keep_reason(trial_dir: Path, jobs_dir: Path, prefix: str) -> str | None:
+    """Why a first attempt's Waypoint save must stay, or None once no repair can still use it.
+
+    A save is needed while the trial is running, while its task's draw is not yet recorded
+    (the launcher may still pick it), and until every repair job that opens it has finished.
+    """
+    if load_result(trial_dir) is None:
+        return "the trial has not finished"
+    inputs_root = jobs_dir / INPUTS_DIRNAME
+    users = save_users(inputs_root, trial_dir.name)
+    unfinished = [name for name in users if not job_finished(jobs_dir / name)]
+    if unfinished:
+        return f"repairs not finished: {', '.join(unfinished)}"
+    if users:
+        return None
+    selection = inputs_root / f"{prefix}.selection.json"
+    task = load_trial_config(trial_dir).task.name
+    drawn = selection.is_file() and any(
+        entry.get("task") == task for entry in json.loads(selection.read_text()).values()
+    )
+    return None if drawn else f"{task} has not been drawn for {prefix} yet"
 
 
 def check_sources(source_jobs: Iterable[Path]) -> list[str]:

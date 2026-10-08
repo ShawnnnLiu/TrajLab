@@ -22,10 +22,31 @@ REPAIRABLE_KINDS: frozenset[FailureKind] = frozenset({"ended_turn", "timeout", "
 # Starting environment x loaded conversation, 2x2 (ADR-0012), plus `traj-text`: the task image,
 # a new conversation, and the failed trial's history as a plain transcript in the prompt
 # (ADR-0012, amendment of 2026-10-03). REPAIR_ARMS, the 2x2, is the default arm set.
-RepairArm = Literal["fresh", "state", "state-traj", "traj", "traj-text"]
+#
+# On Waypoint (ADR-0013) every arm runs on Waypoint, and three arms open a copy of the failed
+# trial's save (`final`): `state-files` with its programs stopped, `state-live` and
+# `state-live-traj` with them still running. WAYPOINT_ARMS is that round's default arm set.
+RepairArm = Literal[
+    "fresh",
+    "state",
+    "state-traj",
+    "traj",
+    "traj-text",
+    "state-files",
+    "state-live",
+    "state-live-traj",
+]
 REPAIR_ARMS: tuple[RepairArm, ...] = ("fresh", "state", "state-traj", "traj")
+WAYPOINT_ARMS: tuple[RepairArm, ...] = (
+    "fresh",
+    "state-files",
+    "state-live",
+    "state-live-traj",
+    "traj",
+)
 CHECKPOINT_ARMS: frozenset[RepairArm] = frozenset({"state", "state-traj"})
-SESSION_ARMS: frozenset[RepairArm] = frozenset({"state-traj", "traj"})
+SAVE_ARMS: frozenset[RepairArm] = frozenset({"state-files", "state-live", "state-live-traj"})
+SESSION_ARMS: frozenset[RepairArm] = frozenset({"state-traj", "traj", "state-live-traj"})
 TRANSCRIPT_ARMS: frozenset[RepairArm] = frozenset({"traj-text"})
 # Set for exactly the arms in TRANSCRIPT_ARMS.
 TRANSCRIPT_FIELDS = (
@@ -58,6 +79,10 @@ class RepairSource(BaseModel):
         default=None, description="Tag of the final checkpoint, for arms that start from it."
     )
     checkpoint_image_id: str | None = None
+    waypoint_save: str | None = Field(
+        default=None,
+        description='The save the arm opens, "<Waypoint session>/<checkpoint>" (ADR-0013).',
+    )
     session_file: str | None = Field(
         default=None, description="The copy of the native session loaded, for arms that do."
     )
@@ -88,6 +113,8 @@ class RepairSource(BaseModel):
             raise ValueError(f"a {self.failure_kind} trial is not repaired")
         if (self.arm in CHECKPOINT_ARMS) != (self.checkpoint_image is not None):
             raise ValueError(f"arm {self.arm} and checkpoint_image disagree")
+        if (self.arm in SAVE_ARMS) != (self.waypoint_save is not None):
+            raise ValueError(f"arm {self.arm} and waypoint_save disagree")
         if (self.arm in SESSION_ARMS) != (self.session_file is not None):
             raise ValueError(f"arm {self.arm} and session_file disagree")
         for name in TRANSCRIPT_FIELDS:
