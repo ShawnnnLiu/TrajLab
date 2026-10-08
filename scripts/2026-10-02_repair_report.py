@@ -5,6 +5,11 @@ as `trajlab repair` names them (ADR-0012), else `<prefix>-<task>-<arm>` as the p
 `scripts/2026-10-02_repair_arms.py` did. Prints a Markdown table, one row per trial, and writes the
 rows as JSON next to the source job (`<source>/repair-report.json`).
 
+`--arms` (repeatable) picks the arms; the default is round 1's four (`ARMS`). With other arms the
+output files are named after them, e.g. `repair-report.traj-text.json` and
+`repair-checks.traj-text.json`, so the default run's files are left alone. Rows of the source
+trials (arm `original`) are written either way.
+
 Also writes one row per (trial, verifier check) to `<source>/repair-checks.json`, from the
 verifier's structured output: pytest results (`ctrf.json`, kind `pytest`), API traces
 (`trace_results.json`, kind `trace`), and CAD scores (`reward_details.json`, kind `cad`: one row
@@ -17,12 +22,14 @@ trial's native session (arms that load the failed trajectory carry its history i
 file), deduplicated by API message id. Cost prices those tokens at Sonnet 5.5 list rates; Claude
 Code's own `total_cost_usd` is shown alongside. `cost_usd_own` is the priced cost, or Claude Code's
 reported cost for a trial whose session files cannot be read and that resumed no session (where the
-reported cost is the trial's own).
+reported cost is the trial's own). `traj-text` resumes no session, so all its tokens are its own.
 
     uv run python scripts/2026-10-02_repair_report.py corpus/jobs/tb40-sonnet-v1 \
         --prefix tb40-repair-v1
     uv run python scripts/2026-10-02_repair_report.py corpus/jobs/tb40-sonnet-v2 \
         --prefix tb40-repair-v2
+    uv run python scripts/2026-10-02_repair_report.py corpus/jobs/tb40-sonnet-v2 \
+        --prefix tb40-repair-v2 --arms traj-text
 """
 
 import argparse
@@ -36,6 +43,7 @@ from typing import Any
 
 JOBS_DIR = Path("corpus/jobs")
 ARMS = ("fresh", "state", "state-traj", "traj")
+ALL_ARMS = (*ARMS, "traj-text")
 RESUMED_ARMS = ("state-traj", "traj")
 # USD per million tokens, Claude Sonnet 5.5 list prices (claude-api skill, cached 2026-09-25).
 PRICE = {"input": 2.00, "cache_write_5m": 2.50, "cache_write_1h": 4.00, "cache_read": 0.20}
@@ -194,7 +202,15 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("source_job", type=Path)
     parser.add_argument("--prefix", required=True)
+    parser.add_argument(
+        "--arms",
+        action="append",
+        choices=ALL_ARMS,
+        help="Arm to report; repeat for several. Default: " + ", ".join(ARMS) + ".",
+    )
     args = parser.parse_args()
+    arms = tuple(a for a in ALL_ARMS if a in (args.arms or ARMS))
+    suffix = "" if arms == ARMS else "." + "+".join(arms)
 
     rows = []
     check_table = []
@@ -204,7 +220,7 @@ def main() -> int:
         source_status = {(c["kind"], c["check"]): c["status"] for c in checks(source)}
         check_table += check_rows(source, "original", source.name, source_status)
         inherited = {e["uuid"] for e in session_events(source) if e.get("uuid")}
-        for arm in ARMS:
+        for arm in arms:
             job = JOBS_DIR / f"{args.prefix}-{source.name}-{arm}"
             if not job.exists():
                 job = JOBS_DIR / f"{args.prefix}-{task}-{arm}"
@@ -212,8 +228,9 @@ def main() -> int:
                 if (trial / "result.json").exists():
                     rows.append(row(trial, arm, source.name, inherited))
                     check_table += check_rows(trial, arm, source.name, source_status)
-    (args.source_job / "repair-report.json").write_text(json.dumps(rows, indent=2) + "\n")
-    (args.source_job / "repair-checks.json").write_text(json.dumps(check_table, indent=2) + "\n")
+    (args.source_job / f"repair-report{suffix}.json").write_text(json.dumps(rows, indent=2) + "\n")
+    checks_path = args.source_job / f"repair-checks{suffix}.json"
+    checks_path.write_text(json.dumps(check_table, indent=2) + "\n")
     columns = [
         "task",
         "arm",

@@ -1,8 +1,11 @@
+import json
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
-from tests.conftest import assemble_job_dir, make_checkpoint, write_capture
+from tests.conftest import FIXTURE_TRIAL_NAME, assemble_job_dir, make_checkpoint, write_capture
+from trajlab.capture.repair_launcher import Launcher
 from trajlab.checkpoint.watcher import hold_watcher_lock
 from trajlab.cli import app, identify_trial
 from trajlab.contracts import CorpusManifest
@@ -137,3 +140,104 @@ def test_postprocess_rejects_empty_dir(tmp_path: Path) -> None:
 
     assert result.exit_code == 1
     assert "no trial dirs" in result.output
+
+
+TRIAL_ENV_VARS = (
+    "CLAUDE_CODE_OAUTH_TOKEN",
+    "ANTHROPIC_API_KEY",
+    "ANTHROPIC_AUTH_TOKEN",
+    "CLAUDE_FORCE_OAUTH",
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS",
+)
+
+
+def flat(output: str) -> str:
+    """CLI output with rich's box drawing and line wrapping removed."""
+    return " ".join(output.replace("│", " ").split())
+
+
+@pytest.fixture
+def bare_env(monkeypatch: pytest.MonkeyPatch, job_dir: Path) -> None:
+    """No credential or cap variable in the environment, and no .env in the cwd."""
+    for name in TRIAL_ENV_VARS:
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.chdir(job_dir.parent)
+
+
+@pytest.mark.usefixtures("bare_env")
+def test_repair_dry_run_plans_only_the_added_arm_on_the_recorded_draw(job_dir: Path) -> None:
+    trial = job_dir / FIXTURE_TRIAL_NAME
+    result_path = trial / "result.json"
+    data = json.loads(result_path.read_text())
+    result_path.write_text(json.dumps(data | {"verifier_result": {"rewards": {"reward": 0.0}}}))
+    jobs = job_dir.parent
+    args = ["repair", str(job_dir), "--prefix", "rep-v1", "--per-task", "1", "--arms"]
+    args += ["traj-text", "--jobs-dir", str(jobs), "--manifests-dir", str(jobs / "m"), "--dry-run"]
+
+    refused = CliRunner().invoke(app, args)
+    assert refused.exit_code == 2
+    assert "rep-v1.selection.json" in flat(refused.output)
+
+    inputs = jobs / "_repair-inputs"
+    inputs.mkdir()
+    task = "hello-world/hello-world"
+    drawn = {"task": task, "seed": f"rep-v1:{task}", "candidates": [FIXTURE_TRIAL_NAME]}
+    drawn |= {"chosen": [FIXTURE_TRIAL_NAME], "not_candidates": {}}
+    (inputs / "rep-v1.selection.json").write_text(json.dumps({f"{job_dir.name}:{task}": drawn}))
+
+    # A dry run reports, and does not refuse, an environment trials could not run in.
+    result = CliRunner().invoke(app, args)
+    assert result.exit_code == 0, result.output
+    lines = result.output.strip().splitlines()
+    assert lines[0].startswith("env file: none (none of CLAUDE_CODE_OAUTH_TOKEN")
+    assert lines[2].split() == [f"rep-v1-{FIXTURE_TRIAL_NAME}-traj-text", "0.6", "1", "0", "no"]
+    assert lines[-1] == "1 jobs, 3 trials"
+    assert [p.name for p in inputs.iterdir()] == ["rep-v1.selection.json"]
+
+    # Adding an arm to a round drawn per task needs --per-task: without it every failure is planned.
+    without = [a for a in args if a not in ("--per-task", "1")]
+    refused = CliRunner().invoke(app, without)
+    assert refused.exit_code == 2 and "--per-task" in flat(refused.output)
+
+
+@pytest.mark.usefixtures("bare_env")
+@pytest.mark.parametrize(
+    ("env_file", "refusal"),
+    [
+        (None, "none of CLAUDE_CODE_OAUTH_TOKEN, ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN"),
+        ("CLAUDE_CODE_OAUTH_TOKEN=t\n", "CLAUDE_CODE_MAX_OUTPUT_TOKENS is not 128000"),
+        (
+            "ANTHROPIC_API_KEY=k\nCLAUDE_FORCE_OAUTH=1\nCLAUDE_CODE_MAX_OUTPUT_TOKENS=128000\n",
+            "CLAUDE_FORCE_OAUTH is set but CLAUDE_CODE_OAUTH_TOKEN is not",
+        ),
+        ("CLAUDE_CODE_OAUTH_TOKEN=t\nCLAUDE_CODE_MAX_OUTPUT_TOKENS=128000\n", None),
+    ],
+    ids=["no-credentials", "no-cap", "force-oauth-without-token", "as-round-1"],
+)
+def test_repair_refuses_to_launch_trials_unlike_round_1(
+    job_dir: Path, monkeypatch: pytest.MonkeyPatch, env_file: str | None, refusal: str | None
+) -> None:
+    started: list[Launcher] = []
+    monkeypatch.setattr(Launcher, "run", lambda self, poll_s: started.append(self))
+    jobs = job_dir.parent
+    args = ["repair", str(job_dir), "--prefix", "rep-v1", "--jobs-dir", str(jobs)]
+    args += ["--manifests-dir", str(jobs / "m")]
+    if env_file is not None:
+        (jobs / "test.env").write_text(env_file)
+        args += ["--env-file", str(jobs / "test.env")]
+
+    result = CliRunner().invoke(app, args)
+
+    if refusal is None:
+        assert result.exit_code == 0, result.output
+        assert [launcher.env_file for launcher in started] == [jobs / "test.env"]
+    else:
+        assert result.exit_code == 2 and refusal in flat(result.output)
+        assert started == []
+
+
+def test_repair_refuses_an_env_file_that_does_not_exist(job_dir: Path) -> None:
+    jobs = job_dir.parent
+    args = ["repair", str(job_dir), "--prefix", "rep-v1", "--jobs-dir", str(jobs)]
+    result = CliRunner().invoke(app, [*args, "--env-file", str(jobs / "missing.env")])
+    assert result.exit_code == 2 and "does not exist" in flat(result.output)

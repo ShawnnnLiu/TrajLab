@@ -27,9 +27,17 @@ from trajlab.contracts import (
     CorpusTask,
     EnrichedTrajectoryExtra,
     OriginalStepExtra,
+    RepairSource,
     ResumeRecord,
     TrajlabStepExtra,
     TrialRecord,
+)
+from trajlab.contracts.repair import (
+    CHECKPOINT_ARMS,
+    REPAIR_ARMS,
+    SESSION_ARMS,
+    TRANSCRIPT_ARMS,
+    TRANSCRIPT_FIELDS,
 )
 
 FIXTURE_TRAJECTORY = Path(__file__).parent / "fixtures/hello-world-trial/agent/trajectory.json"
@@ -158,6 +166,44 @@ INSTANCES: list[BaseModel] = [
         policy=CheckpointPolicy(every=1, gate="change"),
         stop_calls=(_call_record(tool_call_id="stop_1_2", trigger="stop", tool_name="Stop"),),
         timed_out_stop_ids=("stop_3_4",),
+    ),
+]
+
+
+def _repair_source(**overrides: Any) -> RepairSource:
+    fields: dict[str, Any] = {
+        "source_job": "tb40-sonnet-v2",
+        "source_trial": "vba-userform-port__zyezmFw",
+        "task_name": "terminal-bench/vba-userform-port",
+        "failure_kind": "ended_turn",
+        "source_reward": 0.0,
+        "source_agent_s": 1234.5,
+        "arm": "traj-text",
+        "attempts": 3,
+        "transcript_file": "corpus/jobs/_repair-inputs/j/transcript.txt",
+        "transcript_chars": 147_000,
+        "transcript_bytes": 148_123,
+        "transcript_outputs_total": 31,
+        "transcript_outputs_cut": 13,
+        "transcript_rule": "tool outputs > 4000 chars: first 2000 + last 2000",
+        "source_compacted": False,
+        "recorded_at": datetime(2026, 10, 7, 12, 0, tzinfo=UTC),
+    }
+    return RepairSource(**fields | overrides)
+
+
+NO_TRANSCRIPT = dict.fromkeys(TRANSCRIPT_FIELDS)
+INSTANCES += [
+    _repair_source(),
+    _repair_source(source_compacted=True, transcript_outputs_cut=0),
+    _repair_source(arm="fresh", **NO_TRANSCRIPT),
+    _repair_source(
+        arm="state-traj",
+        checkpoint_seq=7,
+        checkpoint_image="trajlab-checkpoint:vba-userform-port__zyezmFw.0007",
+        checkpoint_image_id="sha256:3f1c9e",
+        session_file="corpus/jobs/_repair-inputs/j/c404114e.jsonl",
+        **NO_TRANSCRIPT,
     ),
 ]
 
@@ -371,3 +417,35 @@ def test_contracts_import_only_pydantic_and_stdlib() -> None:
 def test_call_record_rejects(overrides: dict[str, Any]) -> None:
     with pytest.raises(ValidationError):
         _call_record(**overrides)
+
+
+def test_transcript_arms_are_new_and_not_a_default() -> None:
+    assert REPAIR_ARMS == ("fresh", "state", "state-traj", "traj")
+    assert TRANSCRIPT_ARMS == {"traj-text"}
+    assert not TRANSCRIPT_ARMS & (CHECKPOINT_ARMS | SESSION_ARMS | set(REPAIR_ARMS))
+
+
+def test_repair_source_written_before_the_transcript_fields_still_loads() -> None:
+    # A round 1 repair-source.json: no transcript fields at all.
+    data = json.loads(_repair_source(arm="fresh", **NO_TRANSCRIPT).model_dump_json())
+    for name in TRANSCRIPT_FIELDS:
+        del data[name]
+    assert RepairSource.model_validate(data).transcript_file is None
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"transcript_file": None},  # traj-text without its transcript
+        {"source_compacted": None},
+        {"transcript_rule": None},
+        {"transcript_outputs_cut": 32},  # more cut than there are outputs
+        {"transcript_bytes": -1},
+        {"arm": "fresh"},  # a transcript on an arm that gets none
+        {"arm": "traj", "session_file": "s.jsonl"},
+    ],
+    ids=lambda o: "+".join(o),
+)
+def test_repair_source_rejects(overrides: dict[str, Any]) -> None:
+    with pytest.raises(ValidationError):
+        _repair_source(**overrides)

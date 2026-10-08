@@ -1,14 +1,16 @@
 """trajlab command line entry point."""
 
 import logging
+import os
 import signal
 import threading
 import time
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, get_args
 
 import typer
+from harbor.utils.env import parse_bool_env_value
 
 from trajlab.atif.load import trajectory_path
 from trajlab.atif.postprocess import enriched_trajectory_path, postprocess_trial
@@ -22,7 +24,14 @@ from trajlab.capture.corpus import (
 )
 from trajlab.capture.discover import compose_project_name, iter_trial_dirs, load_trial_config
 from trajlab.capture.harbor_runner import RunRefusedError, execute, plan_run, repo_relative
-from trajlab.capture.repair_launcher import Launcher, check_sources
+from trajlab.capture.pins import CLAUDE_CODE_MAX_OUTPUT_TOKENS
+from trajlab.capture.repair_launcher import (
+    INPUTS_DIRNAME,
+    Launcher,
+    RepairJob,
+    check_sources,
+    resume_env,
+)
 from trajlab.checkpoint.backends.docker_commit import DockerCommitBackend
 from trajlab.checkpoint.watcher import (
     DEFAULT_SWEEP_INTERVAL_S,
@@ -32,11 +41,15 @@ from trajlab.checkpoint.watcher import (
     hold_watcher_lock,
     watcher_running,
 )
+from trajlab.contracts import REPAIR_ARMS, RepairArm
 
 app = typer.Typer(help="Capture Claude Code trajectories on Harbor with environment checkpoints.")
 
 MANIFESTS_DIR = Path("corpus/manifests")
 DEFAULT_ENV_FILE = Path(".env")
+# Any one authenticates Claude Code in a trial (Harbor's ClaudeCode._resolve_auth_env and
+# MODEL_CONNECTION.api_key_envs); Bedrock is not used here.
+CREDENTIAL_VARS = ("CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN")
 
 CorpusIdOption = Annotated[
     str | None,
@@ -86,6 +99,50 @@ def run(
     raise typer.Exit(code=execute(plan, storage=storage))
 
 
+class Arm(StrEnum):
+    fresh = "fresh"
+    state = "state"
+    state_traj = "state-traj"
+    traj = "traj"
+    traj_text = "traj-text"
+
+
+def trial_env_problem(env_file: Path | None) -> str | None:
+    """Why trials started with this env file would run unauthenticated, or without ADR-0005's
+    output-token cap; None if neither. Reads the environment Harbor would get: this process's,
+    with the env file's values over it."""
+    env = resume_env(env_file) or dict(os.environ)
+    where = env_file or "the environment"
+    if not any((env.get(name) or "").strip() for name in CREDENTIAL_VARS):
+        return f"none of {', '.join(CREDENTIAL_VARS)} is set in {where}"
+    try:
+        force_oauth = parse_bool_env_value(
+            env.get("CLAUDE_FORCE_OAUTH"), name="CLAUDE_FORCE_OAUTH", default=False
+        )
+    except ValueError as error:
+        return str(error)
+    if force_oauth and not (env.get("CLAUDE_CODE_OAUTH_TOKEN") or "").strip():
+        return f"CLAUDE_FORCE_OAUTH is set but CLAUDE_CODE_OAUTH_TOKEN is not, in {where}"
+    cap = CLAUDE_CODE_MAX_OUTPUT_TOKENS
+    if env.get("CLAUDE_CODE_MAX_OUTPUT_TOKENS") != cap:
+        return f"CLAUDE_CODE_MAX_OUTPUT_TOKENS is not {cap} in {where} (ADR-0005)"
+    return None
+
+
+def print_plan(jobs: list[RepairJob], jobs_dir: Path) -> None:
+    """The dry run's table: one line per planned repair job."""
+    typer.echo(f"{'job':66} {'transcript KiB':>14} {'outputs':>7} {'cut':>4}  exists")
+    for job in jobs:
+        source = job.source
+        size = "-" if source.transcript_bytes is None else f"{source.transcript_bytes / 1024:.1f}"
+        total = "-" if source.transcript_outputs_total is None else source.transcript_outputs_total
+        cut = "-" if source.transcript_outputs_cut is None else source.transcript_outputs_cut
+        exists = "yes" if (jobs_dir / job.name).exists() else "no"
+        typer.echo(f"{job.name:66} {size:>14} {total:>7} {cut:>4}  {exists}")
+    trials = sum(job.source.attempts for job in jobs)
+    typer.echo(f"{len(jobs)} jobs, {trials} trials")
+
+
 @app.command()
 def repair(
     source_jobs: Annotated[
@@ -102,7 +159,11 @@ def repair(
     ),
     env_file: Annotated[
         Path | None,
-        typer.Option(help="Credentials file passed to Harbor. Default: .env if it exists."),
+        typer.Option(
+            exists=True,
+            dir_okay=False,
+            help="Credentials file passed to Harbor. Default: .env if it exists.",
+        ),
     ] = None,
     hold_below_gb: Annotated[
         float, typer.Option(help="Start nothing while the jobs dir's disk has less free.")
@@ -129,17 +190,47 @@ def repair(
             "records stay."
         ),
     ] = True,
+    arms: Annotated[
+        list[Arm] | None,
+        typer.Option(
+            help="Arms to run; repeat for several. Other than the default four, with --per-task, "
+            "the prefix's recorded draw is reused and its other jobs are left alone. Default: "
+            "fresh, state, state-traj, traj."
+        ),
+    ] = None,
+    dry_run: Annotated[
+        bool,
+        typer.Option(
+            "--dry-run", help="Plan and render, print the jobs, and start or write nothing."
+        ),
+    ] = False,
     storage: StorageOption = None,
     manifests_dir: ManifestsDirOption = MANIFESTS_DIR,
 ) -> None:
     """Repair every failed trial of the source jobs under four arms (ADR-0012). Restartable."""
+    chosen = {arm.value for arm in arms or []}
+    repair_arms = tuple(a for a in get_args(RepairArm) if a in chosen) or REPAIR_ARMS
+    selection = jobs_dir / INPUTS_DIRNAME / f"{prefix}.selection.json"
+    if repair_arms != REPAIR_ARMS:
+        if per_task is None and selection.is_file():
+            raise typer.BadParameter(
+                f"{prefix} was drawn per task ({selection}); pass --per-task to add arms to it"
+            )
+        if per_task is not None and not selection.is_file():
+            raise typer.BadParameter(
+                f"--arms other than the default repair the failures already drawn for {prefix}, "
+                f"and {selection} does not exist"
+            )
     if env_file is None and DEFAULT_ENV_FILE.is_file():
         env_file = DEFAULT_ENV_FILE
+    problem = trial_env_problem(env_file)
+    if problem and not dry_run:
+        raise typer.BadParameter(f"{problem}; trials would not run as round 1's did")
     # The source job may have been started a moment ago; Harbor writes its config.json first.
     while problems := check_sources(source_jobs):
         logging.getLogger(__name__).warning("waiting: %s", "; ".join(problems))
         time.sleep(poll)
-    Launcher(
+    launcher = Launcher(
         source_jobs=source_jobs,
         prefix=prefix,
         attempts=attempts,
@@ -153,8 +244,16 @@ def repair(
         storage=storage,
         per_task=per_task,
         prune=prune,
+        arms=repair_arms,
+        dry_run=dry_run,
         watcher_running=watcher_running,
-    ).run(poll_s=poll)
+    )
+    if dry_run:
+        typer.echo(f"env file: {env_file or 'none'} ({problem or 'credentials and cap set'})")
+        launcher.discover()
+        print_plan(launcher.pending, jobs_dir)
+        return
+    launcher.run(poll_s=poll)
 
 
 BACKENDS = {"docker_commit": DockerCommitBackend}

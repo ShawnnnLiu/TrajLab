@@ -19,11 +19,24 @@ REPAIR_SOURCE_FILENAME = "repair-source.json"
 FailureKind = Literal["ended_turn", "timeout", "agent_error", "infra_error", "unclassified"]
 REPAIRABLE_KINDS: frozenset[FailureKind] = frozenset({"ended_turn", "timeout", "agent_error"})
 
-# Starting environment x loaded conversation, 2x2 (ADR-0012).
-RepairArm = Literal["fresh", "state", "state-traj", "traj"]
+# Starting environment x loaded conversation, 2x2 (ADR-0012), plus `traj-text`: the task image,
+# a new conversation, and the failed trial's history as a plain transcript in the prompt
+# (ADR-0012, amendment of 2026-10-03). REPAIR_ARMS, the 2x2, is the default arm set.
+RepairArm = Literal["fresh", "state", "state-traj", "traj", "traj-text"]
 REPAIR_ARMS: tuple[RepairArm, ...] = ("fresh", "state", "state-traj", "traj")
 CHECKPOINT_ARMS: frozenset[RepairArm] = frozenset({"state", "state-traj"})
 SESSION_ARMS: frozenset[RepairArm] = frozenset({"state-traj", "traj"})
+TRANSCRIPT_ARMS: frozenset[RepairArm] = frozenset({"traj-text"})
+# Set for exactly the arms in TRANSCRIPT_ARMS.
+TRANSCRIPT_FIELDS = (
+    "transcript_file",
+    "transcript_chars",
+    "transcript_bytes",
+    "transcript_outputs_total",
+    "transcript_outputs_cut",
+    "transcript_rule",
+    "source_compacted",
+)
 
 
 class RepairSource(BaseModel):
@@ -48,6 +61,25 @@ class RepairSource(BaseModel):
     session_file: str | None = Field(
         default=None, description="The copy of the native session loaded, for arms that do."
     )
+    transcript_file: str | None = Field(
+        default=None, description="The rendered transcript put in the prompt, for arms that do."
+    )
+    transcript_chars: int | None = Field(default=None, ge=0)
+    transcript_bytes: int | None = Field(default=None, ge=0, description="Encoded as UTF-8.")
+    transcript_outputs_total: int | None = Field(
+        default=None, ge=0, description="Tool outputs in the transcript."
+    )
+    transcript_outputs_cut: int | None = Field(
+        default=None, ge=0, description="Tool outputs shortened by `transcript_rule`."
+    )
+    transcript_rule: str | None = Field(
+        default=None, description='e.g. "tool outputs > 4000 chars: first 2000 + last 2000".'
+    )
+    source_compacted: bool | None = Field(
+        default=None,
+        description="Whether the failed trial's native session records a compaction: a resumed "
+        "conversation would hold the compacted context, the transcript holds every step.",
+    )
     recorded_at: AwareDatetime
 
     @model_validator(mode="after")
@@ -58,4 +90,9 @@ class RepairSource(BaseModel):
             raise ValueError(f"arm {self.arm} and checkpoint_image disagree")
         if (self.arm in SESSION_ARMS) != (self.session_file is not None):
             raise ValueError(f"arm {self.arm} and session_file disagree")
+        for name in TRANSCRIPT_FIELDS:
+            if (self.arm in TRANSCRIPT_ARMS) != (getattr(self, name) is not None):
+                raise ValueError(f"arm {self.arm} and {name} disagree")
+        if (self.transcript_outputs_cut or 0) > (self.transcript_outputs_total or 0):
+            raise ValueError("more tool outputs cut than the transcript has")
         return self
