@@ -4,6 +4,10 @@ Reads what `scripts/2026-10-02_repair_report.py` wrote next to the source job (`
 `repair-checks.json`) and each trial's `agent/checkpoints/calls.jsonl` and `agent/trajectory.json`.
 Writes `<source>/early-stop.csv` (one row per trial; list fields joined with `;`).
 
+`--arms` (repeatable) picks the arms, as in the report script: the default is round 1's four. With
+other arms it reads and writes the files named after them, e.g. `repair-report.traj-text.json`,
+`repair-checks.traj-text.json`, and `early-stop.traj-text.csv`; first attempts are in either.
+
 File-changing calls come from the change gate (ADR-0010): a hooked call whose `change` is `changed`.
 The gate never measures a trial's first hooked call (`change: baseline`), so the count is a range,
 `changed_calls_min` to `changed_calls_max`. For the 66 trials whose range touched 0 or 1, the first
@@ -14,6 +18,8 @@ measured changed calls, so no threshold at 0 or 1 depends on its first call.
 
     uv run python scripts/2026-10-07_early_stop_table.py corpus/jobs/tb40-sonnet-v2 \
         --prefix tb40-repair-v2
+    uv run python scripts/2026-10-07_early_stop_table.py corpus/jobs/tb40-sonnet-v2 \
+        --prefix tb40-repair-v2 --arms traj-text
 """
 
 import argparse
@@ -53,10 +59,33 @@ protein-autointerp-disulfide__YGGRdnf protein-autointerp-disulfide__Yo2C2V2
 roy-polymorph-cn__uYfcEB2 sglang-qwen-burst__WDmGw7g sglang-qwen-burst__pmVnG4z
 sglang-qwen-burst__uJ8Yr98
 """
+# traj-text (2026-10-08): the 20 trials whose range touched 0 or 1, each read by two independent
+# readers who agreed. Five first calls meant to write but failed on a missing file before writing
+# (cad-model__jQXbefM, freecad-spring-clip__9U2GWjd, layout-config-recreation2__2uTCWUv,
+# protein-autointerp-disulfide__WNPoYKE, sound-change-cascade__pFcH7Ac); they are classed by
+# effect, as `read`.
+TRAJ_TEXT_WRITE = """
+cad-model__MjzjJib foodstuff-beta-activity__N9sfw3G foodstuff-beta-activity__Son4QC5
+foodstuff-beta-activity__hPjQ8Fj protein-autointerp-disulfide__QbEeLud
+protein-autointerp-disulfide__Zrwjj6u
+"""
+TRAJ_TEXT_SCRATCH = """
+roy-polymorph-cn__A63AgxP roy-polymorph-cn__hyWwbt7 roy-polymorph-cn__yV6TVyN
+"""
+TRAJ_TEXT_READ = """
+bun-sourcemap-leak__4qq8YMG bun-sourcemap-leak__CtSZWt2 bun-sourcemap-leak__EJm44oc
+cad-model__VDUq4Yv cad-model__jQXbefM freecad-spring-clip__9U2GWjd
+layout-config-recreation2__2uTCWUv mvcc-lsm-compaction__6RLSMD4
+protein-autointerp-disulfide__WNPoYKE sglang-qwen-burst__piTFfpk sound-change-cascade__pFcH7Ac
+"""
+
+ARMS = ("fresh", "state", "state-traj", "traj")
+ALL_ARMS = (*ARMS, "traj-text")
+
 BASELINE_CLASS = (
-    {t: "write" for t in WRITE.split()}
-    | {t: "scratch" for t in SCRATCH.split()}
-    | {t: "read" for t in READ.split()}
+    {t: "write" for t in (WRITE + TRAJ_TEXT_WRITE).split()}
+    | {t: "scratch" for t in (SCRATCH + TRAJ_TEXT_SCRATCH).split()}
+    | {t: "read" for t in (READ + TRAJ_TEXT_READ).split()}
 )
 
 COLUMNS = [
@@ -145,12 +174,20 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("source_job", type=Path)
     ap.add_argument("--prefix", required=True)
+    ap.add_argument(
+        "--arms",
+        action="append",
+        choices=ALL_ARMS,
+        help="Arm to tabulate; repeat for several. Default: " + ", ".join(ARMS) + ".",
+    )
     args = ap.parse_args()
+    arms = tuple(a for a in ALL_ARMS if a in (args.arms or ARMS))
+    suffix = "" if arms == ARMS else "." + "+".join(arms)
     source_job: Path = args.source_job
     jobs = source_job.parent
 
-    rows = json.loads((source_job / "repair-report.json").read_text())
-    checks = json.loads((source_job / "repair-checks.json").read_text())
+    rows = json.loads((source_job / f"repair-report{suffix}.json").read_text())
+    checks = json.loads((source_job / f"repair-checks{suffix}.json").read_text())
 
     kind: dict[tuple, str] = {}
     n_checks: collections.Counter = collections.Counter()
@@ -267,7 +304,7 @@ def main() -> None:
             }
         )
 
-    dest = source_job / "early-stop.csv"
+    dest = source_job / f"early-stop{suffix}.csv"
     with dest.open("w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=COLUMNS)
         w.writeheader()
