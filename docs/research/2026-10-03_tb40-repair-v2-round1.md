@@ -83,5 +83,6 @@ For the freecad tasks the only pass/fail check is the overall score.
 - Not recorded per trial: the source's failure kind (`classify_failure`, ADR-0012 decision 4), whether the source was compacted, whether the repair ran the tests itself, whether it ended its turn within 3 minutes (an ADR-0012 secondary metric), and the time to its first edit.
 - The ADR's primary test (Wilcoxon signed-rank against `fresh`, cluster bootstrap) and McNemar on pass@3 are not computed here.
 - One `fresh` session file (`tb40-repair-v2-interleaved-vigenere__ZADTzxt-fresh/interleaved-vigenere__yk3PiVq`) is owned by root with mode 600; that row has `sessions_unreadable: 1`, no token counts, and `cost_usd_own` set to Claude Code's reported cost, which is exact for an arm that resumes no session.
-- The two `fresh` infra-error trials on sound-change-cascade were not rerun, against ADR-0012 decision 4.
+- The two `fresh` infra-error trials on sound-change-cascade were not rerun, against ADR-0012 decision 4. The launcher tried three resumes (`_repair-inputs/tb40-repair-v2-sound-change-cascade__f6vnRbi-fresh/resumes.json`); each exited with `No such option: --env-file` from `harbor jobs resume` (`tb40-repair-v2-sound-change-cascade__f6vnRbi-fresh.log`).
+- All six `AgentSafetyRefusalError` trials are on interleaved-vigenere: its three `fresh` and three `state` repairs (`docs/research/2026-10-03_tb40-setup-vs-anthropic.md`, "Safety refusals").
 - The `state` trial that timed out has no reported cost; its own cost is priced from its tokens.

@@ -114,6 +114,7 @@ Last updated 2026-10-02 (overnight repair pilot); add to it as evidence changes,
 - **Capture overhead grows with trial length.** The hook held the agent 3.7% of a 7-minute Sonnet trial but 16% of Haiku's 24-minute `write-compressor` trial (64 checkpoints, about 2.2 s each; `tb21-haiku-v1`). Report it per trial.
 - **Platform.** All measurements so far are from one Mac running amd64 tasks under emulation. Commit and detection times are expected to differ on the Linux server.
 - **Final state.** Since ADR-0011 the end-of-turn state is recorded, including background writes before the turn ends; anything a background process writes after that, and the verifier's own effects, are not.
+- **Setup differs from Anthropic's TB 4.0 setup.** Our TB 4.0 corpora run Claude Code in normal mode (22 tools, skills, system reminders, our hooks) at medium effort with public network, 23 of 66 tasks, 3 trials per task, and a 4 h agent cap; the Sonnet 5.5 system card reports `--bare`, max effort, no internet egress with pre-cached resources, all 66 tasks, and 5 trials per task. Report absolute pass rates with this caveat; do not compare them with the published 70.6% (`docs/research/2026-10-03_tb40-setup-vs-anthropic.md`).
 
 ## Open work before claims are paper-ready
 
