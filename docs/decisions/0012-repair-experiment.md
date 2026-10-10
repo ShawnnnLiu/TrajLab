@@ -107,3 +107,9 @@ Six tasks are 0/3 in every arm so far, mostly from first attempts that ended the
 - If the source session was compacted, `traj` resumes the compacted context while `traj-text` renders the full trajectory; such failures are flagged in the record.
 - Budget: `traj-text` about 66 trials of short duration; `traj-ckpt` about 66 trials at round 1 durations; round 2 repeats every arm it includes on the same failures, so its arm list is fixed when it is launched, against the remaining budget.
 - Oct 9 exhibit: repair rate by arm, round 1's four arms plus `traj-text` and `traj-ckpt` as they land; caveats on the slide: n of about 33 per arm, and the Recovery-Bench contrast is confounded by hidden reasoning even after `traj-text`.
+
+## Amendment (2026-10-08): repair checkpoint images deleted
+
+On 2026-10-08 every remaining checkpoint image of the repair jobs was deleted from the capture server to free disk: the round 1 finals of `tb40-repair-v2-*` (`fresh`, `state`, `state-traj`, `traj`, `traj-text`) and the withdrawn round 2 (`tb40-repair-v3-*`), 593 images in all.
+Every `CheckpointRecord` stays; each affected trial's `agent/checkpoints/pruned.json` lists its removed images, with `kept_seq: null` and the reason, in the same shape the launcher's prune writes.
+The 917 first-attempt images of `tb40-sonnet-v2` are untouched: they are the corpus, and ground truth (ADR-0013) reads them for `try-fix` in environment mode and for blame.
