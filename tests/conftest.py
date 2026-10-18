@@ -24,6 +24,13 @@ FIXTURE_JOB_NAME = "hello-world-smoke"
 FIXTURE_TOOL_CALL_ID = "toolu_01TKn2WsYzAzVaTXotNFqp2Z"
 
 
+@pytest.fixture(autouse=True)
+def wide_terminal(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Rich wraps CLI errors at 80 columns and splits a long tmp path mid-word, so a test's
+    substring check would depend on how long the platform's tmp dir is."""
+    monkeypatch.setenv("COLUMNS", "1000")
+
+
 @pytest.fixture
 def fixture_trial() -> Path:
     """The committed hello-world trial dir. Read-only: copy it before writing."""
