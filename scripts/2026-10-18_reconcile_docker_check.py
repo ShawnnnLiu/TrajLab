@@ -177,8 +177,10 @@ STEPS: tuple[Step, ...] = (
         "printf 'hello\\nthere\\nworld\\n' > /root/notes.txt"
         " && printf 'line one\\r\\nline 2\\r\\n' > /root/crlf.txt"
         " && printf 'no newline\\nmore' > /root/nonl.txt && echo filled > /root/empty.txt"
-        " && printf 'binary\\0now\\n' > '/root/with space é.txt'",
+        " && printf 'binary\\0now\\n' > '/root/with space é.txt'"
+        " && printf 'now text\\n' > /root/bin.dat",
         {
+            "/root/bin.dat": "modify",  # binary to text: no hunk, so its new text is a blob
             "/root/notes.txt": "modify",
             "/root/notes.hard": "modify",
             "/root/crlf.txt": "modify",
@@ -191,8 +193,10 @@ STEPS: tuple[Step, ...] = (
         "kind-changes",
         "rm /etc/shells && mkdir /etc/shells && echo x > /etc/shells/inner"
         " && rm -rf /etc/periodic && echo file > /etc/periodic"
-        " && rm /root/link && mkdir /root/link && rm -rf /media && ln -s /tmp /media",
+        " && rm /root/link && mkdir /root/link && rm -rf /media && ln -s /tmp /media"
+        " && rm /root/nul.txt && ln -s /etc/os-release /root/nul.txt",
         {
+            "/root/nul.txt": "modify",  # binary to symlink: its target is stored as a blob
             "/etc/shells": "modify",
             "/etc/shells/inner": "add",
             "/etc/periodic": "modify",
@@ -479,7 +483,6 @@ def secondary_problems(
     expected_text: bool | None = (
         all(version_is_text(e, contents) for e in with_content) if with_content else None
     )
-    new_text = version_is_text(new, contents)
     if row.is_text != expected_text:
         problems.append(f"is_text: expected {expected_text}, got {row.is_text}")
         return problems
@@ -488,8 +491,17 @@ def secondary_problems(
         problems += hunk_problems(row, old, new, contents)
     elif row.hunk is not None:
         problems.append(f"hunk: expected none, got {row.hunk[:80]!r}")
-    new_content_changed = old is None or old.kind != "file" or old.sha256 != new_sha256(new)
-    if new is not None and new.kind == "file" and new_text is False and new_content_changed:
+    # Without a hunk, a changed row stores its later version (a file's bytes or a symlink's
+    # target), text or not.
+    changed_content = new is not None and (
+        old is None or old.kind != new.kind or old.sha256 != new.sha256
+    )
+    if (
+        new is not None
+        and new.kind in ("file", "symlink")
+        and expected_text is False
+        and changed_content
+    ):
         assert new.sha256 is not None
         blob = blobs_dir / new.sha256
         if row.blob_ref != f"blobs/{new.sha256}":
@@ -497,7 +509,9 @@ def secondary_problems(
         elif not blob.is_file() or hashlib.sha256(blob.read_bytes()).hexdigest() != new.sha256:
             problems.append(f"blob {blob} is missing or does not hold the later version")
     elif row.blob_ref is not None:
-        problems.append(f"blob_ref: expected none (text, or content unchanged), got {row.blob_ref}")
+        problems.append(
+            f"blob_ref: expected none (a hunk, or content unchanged), got {row.blob_ref}"
+        )
     return problems
 
 
@@ -628,8 +642,8 @@ def oracle_sanity(expected: Mapping[int, Expected]) -> list[str]:
 def check_provider(chain: ImageChain, records: Sequence[CheckpointRecord]) -> list[str]:
     """Every checkpoint has a readable top layer and the base is alpine's one layer."""
     problems = []
-    if len(chain.base_layers) != 1:
-        problems.append(f"expected alpine's 1 base layer, got {len(chain.base_layers)}")
+    if len(chain.start_layers) != 1:
+        problems.append(f"expected alpine's 1 base layer, got {len(chain.start_layers)}")
     if sorted(chain.tops) != [r.seq for r in records]:
         problems.append(f"tops for seqs {sorted(chain.tops)}, expected all {len(records)}")
     for seq, source in sorted(chain.tops.items()):
@@ -683,7 +697,7 @@ def main(keep_work: bool) -> int:
             status = 1
 
         provider_log = logging.getLogger("trajlab.store.docker_images")
-        with DockerImageProvider(work / "saves", base_image=BASE_IMAGE) as provider:
+        with DockerImageProvider(work / "saves", start_image=BASE_IMAGE) as provider:
             provider_log.setLevel(logging.INFO)
             start = time.monotonic()
             chain = provider.chain(records)
@@ -717,7 +731,7 @@ def main(keep_work: bool) -> int:
             "save_s", "reconcile_s",
         )  # fmt: skip
         details: list[tuple[int, list[str]]] = []
-        with DockerImageProvider(work / "saves-one", base_image=BASE_IMAGE) as one:
+        with DockerImageProvider(work / "saves-one", start_image=BASE_IMAGE) as one:
             previous: LayerSource | None = None
             for record, step in zip(records, STEPS, strict=True):
                 seq = record.seq
@@ -725,7 +739,7 @@ def main(keep_work: bool) -> int:
                 single = one.chain([record])
                 seq_save_s = time.monotonic() - start
                 tops = {seq: single.tops[seq]} | ({seq - 1: previous} if previous else {})
-                pair = ImageChain(base_layers=single.base_layers, tops=tops)
+                pair = ImageChain(start_layers=single.start_layers, tops=tops)
                 pair_rows, _, seq_reconcile_s = run_reconcile(
                     pair, records, owner, work, work / "blobs-one"
                 )

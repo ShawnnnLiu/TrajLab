@@ -4,13 +4,18 @@ Pure: functions over binary streams, with no Docker and no subprocess. The layer
 rules for applying layers are in `trajlab.store.reconcile`'s module docstring; this module reads
 one layer, and `Layer.hidden` is the per-layer half of the view rule there.
 
-Layers are read sequentially (`tarfile` stream mode, gzip or plain), because `docker image save`
-writes them as members of one archive and a layer can be larger than memory. A file's content is
+Layers are read sequentially (`tarfile` stream mode), because `docker image save` writes them as
+members of one archive and a layer can be larger than memory. A layer is gzip or plain tar,
+told apart by its first bytes; gzip is read with `gzip.GzipFile`, which reads every member of a
+multi-member stream (eStargz writes one per entry; `tarfile`'s own gzip reader stops after the
+first). zstd is refused, since Python 3.12 cannot read it. A file's content is
 handed to a `FileHook` while the layer streams past; the hook returns the content's sha256 and
 can keep what it needs, so nothing holds a whole layer.
 """
 
+import gzip
 import hashlib
+import io
 import logging
 import tarfile
 import zlib
@@ -27,6 +32,8 @@ logger = logging.getLogger(__name__)
 WHITEOUT_PREFIX = ".wh."
 OPAQUE_MARKER = ".wh..wh..opq"
 _CHUNK = 1 << 20
+_GZIP_MAGIC = b"\x1f\x8b"
+_ZSTD_MAGIC = b"\x28\xb5\x2f\xfd"
 
 
 class LayerError(ValueError):
@@ -176,8 +183,9 @@ def read_layer(
 
     Only paths `keep` accepts become entries (all, without `keep`); markers are always read.
     `on_file` gets the content of every kept regular file. A hard link member names an earlier
-    member and gets that member's entry; when that member was not kept, the link has no entry
-    and its target is in `unresolved_links`. A path with two members takes the last one.
+    member and gets that member's entry; when that member was not kept (or is itself a link
+    left unresolved), the link has no entry and the member that holds the content is in
+    `unresolved_links`. A path with two members takes the last one.
     """
     entries: dict[str, Entry] = {}
     skipped: set[str] = set()
@@ -185,6 +193,7 @@ def read_layer(
     opaque: set[str] = set()
     nondirs: set[str] = set()
     unresolved: set[str] = set()
+    link_of: dict[str, str] = {}  # every hard link member, kept or not -> the path it names
     with _tar(stream) as tar:
         for info in tar:
             path = normalize(info.name)
@@ -202,18 +211,24 @@ def read_layer(
                 nondirs.discard(path)
             else:
                 nondirs.add(path)
+            if info.islnk():
+                link_of[path] = _hard_link_target(path, info)
+            else:
+                link_of.pop(path, None)
             if keep is not None and not keep(path):
                 skipped.add(path)
                 continue
             if not info.islnk():
                 entries[path] = _entry(path, info, tar, on_file)
                 continue
-            target = _hard_link_target(path, info)
-            if target in entries:
-                entries[path] = entries[target]
-            elif target in skipped:
+            root = _link_root(path, link_of, entries)
+            if root in entries:
+                entries[path] = entries[root]
+            elif root in skipped:
+                # The content is in a member not kept, possibly at the end of a chain of links.
                 entries.pop(path, None)
-                unresolved.add(target)
+                skipped.add(path)
+                unresolved.add(root)
             else:
                 raise LayerError(
                     f"hard link {path} names {info.linkname!r}, which is no earlier member"
@@ -262,12 +277,23 @@ def for_each_file(
 
 @contextmanager
 def _tar(stream: BinaryIO) -> Iterator[tarfile.TarFile]:
-    """The layer as a stream-mode tar; read errors, including those raised while a hook reads
-    a member's content, become `LayerError`."""
+    """The layer as a stream-mode tar, gzip or plain; read errors, including those raised while
+    a hook reads a member's content, become `LayerError`."""
+    buffered = stream if isinstance(stream, io.BufferedReader) else io.BufferedReader(stream)
+    magic = buffered.peek(4)[:4]
+    if magic.startswith(_ZSTD_MAGIC):
+        raise LayerError("cannot read layer: zstd-compressed layers are not supported")
     try:
-        with tarfile.open(fileobj=stream, mode="r|*") as tar:
-            yield tar
-    except (tarfile.TarError, EOFError, zlib.error) as error:
+        if magic.startswith(_GZIP_MAGIC):
+            with (
+                gzip.GzipFile(fileobj=buffered) as plain,
+                tarfile.open(fileobj=plain, mode="r|") as tar,
+            ):
+                yield tar
+        else:
+            with tarfile.open(fileobj=buffered, mode="r|") as tar:
+                yield tar
+    except (tarfile.TarError, EOFError, zlib.error, gzip.BadGzipFile) as error:
         raise LayerError(f"cannot read layer: {error}") from error
 
 
@@ -284,6 +310,17 @@ def _marker(path: str) -> tuple[str, str] | None:
         logger.warning("ignoring layer marker %s, which is not a whiteout or opaque marker", path)
         return ("ignored", path)
     return ("whiteout", f"{parent}/{deleted}")
+
+
+def _link_root(path: str, link_of: Mapping[str, str], entries: Mapping[str, Entry]) -> str:
+    """The member holding a hard link's content: follow links until a kept entry or a member
+    that is not a link."""
+    seen = {path}
+    root = link_of[path]
+    while root not in entries and root in link_of and root not in seen:
+        seen.add(root)
+        root = link_of[root]
+    return root
 
 
 def _hard_link_target(path: str, info: tarfile.TarInfo) -> str:

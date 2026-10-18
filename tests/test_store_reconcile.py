@@ -61,7 +61,7 @@ def run(
     records = [make_checkpoint(seq, tool_call_id=call_id(seq)) for seq in range(1, n + 1)]
     owner_step = {call_id(seq): step(seq) for seq in range(1, n + 1)}
     return reconcile(
-        ImageChain(base_layers=tuple(base), tops=dict(tops)),
+        ImageChain(start_layers=tuple(base), tops=dict(tops)),
         records,
         owner_step,
         trial_id=TRIAL,
@@ -722,7 +722,7 @@ def _records(n: int, **overrides: object) -> list:
 
 def _reconcile(tmp_path: Path, records: list, owner: Mapping[str, int], tops=None):
     return reconcile(
-        ImageChain(base_layers=(), tops=tops or {}),
+        ImageChain(start_layers=(), tops=tops or {}),
         records,
         owner,
         trial_id=TRIAL,
@@ -774,7 +774,7 @@ def test_a_stop_checkpoint_is_keyed_by_its_owner_step(tmp_path: Path) -> None:
         2: top(d("root", 0o700), f("root/a", "1\n"), f("root/bg.log", "from a background job\n")),
     }
     result = reconcile(
-        ImageChain(base_layers=(alpine(),), tops=tops),
+        ImageChain(start_layers=(alpine(),), tops=tops),
         list(reversed(records)),  # any order
         {"toolu_a": 3, stop_id: 7},
         trial_id=TRIAL,
@@ -791,7 +791,7 @@ def test_rows_are_ordered_by_step_then_path_even_when_steps_run_backwards(tmp_pa
     records = _records(2)
     tops = {1: top(d("z"), d("a")), 2: top(d("z"), d("a"), d("m"))}
     result = reconcile(
-        ImageChain(base_layers=(), tops=tops),
+        ImageChain(start_layers=(), tops=tops),
         records,
         {call_id(1): 9, call_id(2): 2},
         trial_id=TRIAL,
@@ -915,11 +915,13 @@ def check_hunk_shape(before: str, hunk: str, context: int = 3) -> None:
         previous_end = change_end
 
 
-@pytest.mark.parametrize("matching", ["exact", "edit script", "autojunk"])
+@pytest.mark.parametrize("matching", ["exact", "edit script", "anchored", "anchored, no gaps"])
 def test_hunks_apply_and_keep_their_shape(matching: str, monkeypatch: pytest.MonkeyPatch) -> None:
     if matching != "exact":
-        monkeypatch.setattr(reconcile_module, "_EXACT_MATCH_LIMIT", -1)
-    if matching == "autojunk":
+        monkeypatch.setattr(
+            reconcile_module, "_EXACT_LINE_PRODUCT", -1 if "gaps" in matching else 0
+        )
+    if matching.startswith("anchored"):
         monkeypatch.setattr(reconcile_module, "_EDIT_SCRIPT_BUDGET", -1)
     rng = random.Random(16)
     for _ in range(1500):
@@ -989,7 +991,7 @@ def test_hunks_of_distinct_lines_equal_difflibs() -> None:
 
 
 def test_a_small_edit_to_a_repetitive_file_is_a_small_hunk() -> None:
-    # difflib's autojunk would rewrite every line here, and matching without it is quadratic.
+    # difflib with autojunk would rewrite every line here, and without it is quadratic.
     rng = random.Random(1)
     lines = [rng.choice(["}\n", "\n", "    return x\n", "  else:\n"]) for _ in range(20000)]
     before = "".join(lines)
@@ -1001,8 +1003,8 @@ def test_a_small_edit_to_a_repetitive_file_is_a_small_hunk() -> None:
 
 
 def test_a_large_rewrite_of_ordinary_code_is_matched_exactly() -> None:
-    # Too many edits for the edit script's budget, cheap for difflib without autojunk; with
-    # autojunk the braces and blank lines (each over 1% of lines) would go unmatched.
+    # Too many edits for the edit script's budget: matched on its unique lines, with the gaps
+    # between them matched exactly; plain difflib changes more lines.
     rng = random.Random(5)
 
     def code(n: int) -> list[str]:
@@ -1466,7 +1468,7 @@ def _content(node: Node | None) -> str | None:
 
 def _check_sequence(seed: int, root: Path, limit: int) -> None:
     rng = random.Random(seed)
-    base_layers, base = _base(rng)
+    start_layers, base = _base(rng)
     sim = Sim(rng, dict(base), lower=base)
     states = [dict(base)]
     tops: dict[int, BytesLayer] = {}
@@ -1478,7 +1480,7 @@ def _check_sequence(seed: int, root: Path, limit: int) -> None:
         states.append(dict(sim.state))
     if rng.random() < 0.2:
         del tops[rng.randint(1, n)]
-    result = run(root, base_layers, tops, n=n)
+    result = run(root, start_layers, tops, n=n)
 
     computed = [k for k in range(1, n + 1) if k in tops and (k == 1 or k - 1 in tops)]
     assert result.computed_seqs == tuple(computed), seed
@@ -1505,12 +1507,19 @@ def _check_sequence(seed: int, root: Path, limit: int) -> None:
                 assert apply_patch(_content(b) or "", row.hunk) == (_content(a) or "")
             else:
                 assert row.hunk is None, (seed, k, path)
-            content_changed = b is None or b.kind != "file" or _sha(b) != _sha(a)
-            if a is not None and a.kind == "file" and not _text(a, limit) and content_changed:
+            # Without a hunk, the later version of a changed row is stored, text or not.
+            changed = b is None or a is None or b.kind != a.kind or _sha(b) != _sha(a)
+            if a is not None and a.kind != "dir" and is_text is False and changed:
                 assert row.blob_ref == f"blobs/{_sha(a)}", (seed, k, path)
-                assert (root / "blobs" / str(_sha(a))).read_bytes() == a.data
+                stored = a.data if a.kind == "file" else a.target.encode()
+                assert (root / "blobs" / str(_sha(a))).read_bytes() == stored
             else:
                 assert row.blob_ref is None, (seed, k, path)
+    # Every stored version is one some row names, so the blob dir holds nothing unreferenced.
+    named = {row.blob_ref.removeprefix("blobs/") for row in result.deltas if row.blob_ref}
+    blobs = root / "blobs"
+    stored_blobs = {p.name for p in blobs.iterdir()} if blobs.exists() else set()
+    assert stored_blobs == named, seed
     for written in root.rglob("*"):
         if written.is_file():
             assert _SECRET not in written.read_bytes(), (seed, written)
@@ -1591,3 +1600,169 @@ def test_the_simulator_reaches_every_kind_of_change(tmp_path: Path) -> None:
         ("modify", "dir", "file"),
     ]:
         assert kinds in seen, kinds
+
+
+# -- review findings, 2026-10-18 ----------------------------------------------------------------
+
+
+def test_text_written_over_a_non_text_version_is_stored(tmp_path: Path) -> None:
+    # No hunk (the earlier version is not text), so the later version is the only record of
+    # what the step wrote: UTF-16 converted to UTF-8, and a log over the text limit truncated.
+    utf16 = "id,name\n1,alice\n".encode("utf-16")
+    big = b"log line\n" * (MAX_TEXT_BYTES // 9 + 1)
+    base = BytesLayer.of(d("app"), f("app/data.csv", utf16), f("app/run.log", big))
+    layer = top(d("app"), f("app/data.csv", "id,name\n1,alice\n"), f("app/run.log", "done\n"))
+    rows = rows_of(run(tmp_path, [base], {1: layer}))
+    for path, data in (("/app/data.csv", b"id,name\n1,alice\n"), ("/app/run.log", b"done\n")):
+        row = rows[path]
+        assert (row.op, row.is_text, row.hunk) == ("modify", False, None)
+        assert row.blob_ref == f"blobs/{sha(data)}"
+        assert (tmp_path / "blobs" / sha(data)).read_bytes() == data
+
+
+def test_a_symlink_written_over_a_binary_stores_its_target(tmp_path: Path) -> None:
+    base = BytesLayer.of(d("bin"), f("bin/tool", b"\x7fELF\0\0"))
+    rows = rows_of(run(tmp_path, [base], {1: top(d("bin"), sym("bin/tool", "/opt/tool"))}))
+    row = rows["/bin/tool"]
+    assert (row.kind_before, row.kind_after, row.is_text, row.hunk) == (
+        "file",
+        "symlink",
+        False,
+        None,
+    )
+    assert row.blob_ref == f"blobs/{sha('/opt/tool')}"
+    assert (tmp_path / "blobs" / sha("/opt/tool")).read_bytes() == b"/opt/tool"
+
+
+def test_a_layer_of_several_gzip_members_is_read_whole(tmp_path: Path) -> None:
+    # Valid gzip (eStargz writes one member per entry); tarfile's own reader stops at the first.
+    import gzip
+
+    plain = tar_bytes(
+        d("etc"), f("etc/config", "a=1\n"), f("etc/issue", "Welcome\n"), f("etc/motd", "hi\n")
+    )
+    # Split after the first entry's header, as eStargz splits: tarfile alone stops silently.
+    multi = BytesLayer(gzip.compress(plain[:512]) + gzip.compress(plain[512:]), [])
+    single = BytesLayer(gzip.compress(plain), [])
+    layer = top(d("etc"), f("etc/config", "a=2\n"), wh("etc/.wh.issue"))
+    expected = {"/etc/config": "modify", "/etc/issue": "delete"}
+    assert ops_of(run(tmp_path / "single", [single], {1: layer})) == expected
+    assert ops_of(run(tmp_path / "multi", [multi], {1: layer})) == expected
+
+
+def test_a_zstd_layer_is_refused_by_name(tmp_path: Path) -> None:
+    zstd = BytesLayer(b"\x28\xb5\x2f\xfd" + b"\0" * 64, [])
+    with pytest.raises(ReconcileError, match="zstd"):
+        run(tmp_path, [zstd], {1: top(d("etc"))})
+
+
+def test_a_chain_of_hard_links_in_the_start_image_resolves(tmp_path: Path) -> None:
+    # libx.so.1 links to libx.so and etc/alias to libx.so.1; only /etc/alias is of interest.
+    base = BytesLayer.of(
+        d("usr"),
+        d("usr/lib"),
+        f("usr/lib/libx.so", "x v1\n"),
+        hard("usr/lib/libx.so.1", "usr/lib/libx.so"),
+        d("etc"),
+        hard("etc/alias", "usr/lib/libx.so.1"),
+    )
+    rows = rows_of(run(tmp_path, [base], {1: top(d("etc"), f("etc/alias", "x v2\n"))}))
+    assert rows["/etc/alias"].op == "modify"
+    assert rows["/etc/alias"].sha256_before == sha("x v1\n")
+
+
+def test_a_name_with_wh_inside_it_is_an_ordinary_entry(tmp_path: Path) -> None:
+    layer = top(d("root", 0o700), f("root/a.wh.b", "x\n"), d("root/x.wh.y"), f("root/x.wh.y/z", ""))
+    assert ops_of(run(tmp_path, [alpine()], {1: layer})) == {
+        "/root/a.wh.b": "add",
+        "/root/x.wh.y": "add",
+        "/root/x.wh.y/z": "add",
+    }
+
+
+def test_bytes_that_are_not_utf8_are_escaped_in_paths_and_hunks(tmp_path: Path) -> None:
+    # tarfile decodes undecodable bytes as surrogate escapes, which DuckDB cannot store.
+    name, target = "root/caf\udce9.txt", "caf\udce9"
+    layer = top(d("root", 0o700), f(name, "hello\n"), sym("root/link", target))
+    rows = rows_of(run(tmp_path, [alpine()], {1: layer}))
+    assert rows["/root/caf\\xe9.txt"].hunk.startswith("--- /dev/null\n+++ b/root/caf\\xe9.txt\n")
+    link = rows["/root/link"]
+    assert (link.sha256_after, link.bytes_after) == (sha(b"caf\xe9"), 4)  # the raw bytes
+    assert link.hunk == "--- /dev/null\n+++ b/root/link\n@@ -0,0 +1 @@\n+caf\\xe9\n" + (
+        "\\ No newline at end of file\n"
+    )
+    for row in rows.values():
+        row.path.encode("utf-8")  # storable as UTF-8
+        (row.hunk or "").encode("utf-8")
+
+
+def test_records_of_two_trials_are_refused(tmp_path: Path) -> None:
+    records = [make_checkpoint(1, call_id(1)), make_checkpoint(2, call_id(2), trial_name="other")]
+    with pytest.raises(ReconcileError, match="more than one trial"):
+        reconcile(
+            ImageChain(start_layers=(alpine(),), tops={}),
+            records,
+            {call_id(1): 1, call_id(2): 2},
+            trial_id=TRIAL,
+            blobs_dir=tmp_path / "blobs",
+            work_dir=tmp_path / "work",
+        )
+
+
+def test_the_text_limit_is_one_mebibyte() -> None:
+    # ADR-0014 states 1 MiB; a 1 MB slip would flip which files get hunks.
+    assert MAX_TEXT_BYTES == 1_048_576
+    assert "1048576 bytes" in reconcile_module.TEXT_RULE
+
+
+def _with_type_bits(data: bytes, bits: int) -> bytes:
+    """A plain tar whose every header's mode field also carries file-type bits, as old Go
+    archive/tar wrote (tarfile masks them on write); checksums recomputed."""
+    out = bytearray(data)
+    for offset in range(0, len(out) - 512, 512):
+        header = out[offset : offset + 512]
+        if not any(header) or header[257:262] != b"ustar":
+            continue
+        mode = int(header[100:107].rstrip(b"\0 ") or b"0", 8) | bits
+        header[100:108] = f"{mode:07o}\0".encode()
+        header[148:156] = b"        "
+        header[148:156] = f"{sum(header):06o}\0 ".encode()
+        out[offset : offset + 512] = header
+    return bytes(out)
+
+
+def test_file_type_bits_in_a_mode_field_are_not_permissions(tmp_path: Path) -> None:
+    layer = BytesLayer(
+        _with_type_bits(tar_bytes(d("root", 0o700), f("root/x", "x\n", mode=0o640)), 0o100000), []
+    )
+    row = rows_of(run(tmp_path, [alpine()], {1: layer}))["/root/x"]
+    assert row.mode_after == "0640"
+
+
+def _json_records(n: int, tag: str) -> str:
+    return (
+        "[\n"
+        + "".join(f'  {{\n    "id": {i},\n    "score": "{tag}{i}"\n  }},\n' for i in range(n))
+        + "]\n"
+    )
+
+
+def _yaml_records(n: int, tag: str) -> str:
+    return "".join(f"  - name: item{i}\n    value: {tag}{i}\n" for i in range(n))
+
+
+@pytest.mark.parametrize("shape", ["json", "yaml"])
+def test_a_rewrite_of_every_record_near_the_text_limit_is_quick(shape: str) -> None:
+    # Unchanged lines interleaved with changed ones made difflib quadratic: 167 s for this JSON.
+    import time
+
+    make = _json_records if shape == "json" else _yaml_records
+    n = 19_000 if shape == "json" else 16_000
+    before, after = make(n, "a"), make(n, "b")
+    assert len(before.encode()) < MAX_TEXT_BYTES
+    start = time.monotonic()
+    hunk = _unified_diff("/app/out", before, after)
+    assert time.monotonic() - start < 10
+    assert apply_patch(before, hunk) == after
+    changed = sum(1 for line in hunk.splitlines() if line[:1] in "+-") - 2
+    assert changed == 2 * n  # only the changed lines: each record's one value, out and in

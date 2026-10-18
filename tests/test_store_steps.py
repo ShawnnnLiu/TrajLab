@@ -290,7 +290,7 @@ def test_checkpoint_seq_follows_the_state_after_each_row() -> None:
         ("Read", 1, image(1)),
         ("Bash", 1, image(1)),  # its record names the previous checkpoint
         ("Bash", None, None),  # timed out: no state on record
-        (None, 1, image(1)),  # the timeout left `current` at 1
+        (None, None, None),  # its changes are in no checkpoint until the next one
         ("Edit", 2, image(2)),
         (None, 2, image(2)),
         ("Stop", 2, image(2)),  # an unchanged stop names the last checkpoint
@@ -361,10 +361,10 @@ def test_deferred_calls_have_no_state_on_record() -> None:
 
     assert [(row.tool, row.checkpoint_seq) for row in steps.rows] == [
         ("Bash", None),
-        ("Read", None),
+        ("Read", None),  # d1's changes are in no checkpoint yet
         ("Bash", 1),
         ("Bash", None),
-        (None, 1),
+        (None, None),  # nor are d2's
     ]
     assert steps.answered_calls == ("toolu_d1", "toolu_c1", "toolu_d2")
 
@@ -602,3 +602,86 @@ def test_seen_output_agrees_with_the_transcript_on_the_fixture(fixture_trial: Pa
     assert results
     for result_ in results:
         assert seen_output(result_) == transcript.seen_output(result_) == FIXTURE_OUTPUT
+
+
+# -- review findings, 2026-10-18 ----------------------------------------------------------------
+
+REJECTED = "<tool_use_error>String to replace not found in file.\nString: x</tool_use_error>"
+
+
+def test_a_call_claude_code_rejected_is_not_a_missing_record() -> None:
+    # Edit "String to replace not found" is refused before the tool runs: no hook fires and
+    # nothing changes (tb21-haiku-v1/write-compressor__DBSxwUL had one), so no record is owed.
+    traj = trajectory(
+        agent(1, calls=[call("toolu_w1", "Write", file_path="/a", content="a")]),
+        agent(
+            2,
+            calls=[call("toolu_e1", "Edit", file_path="/a", old_string="x", new_string="y")],
+            results=[result("toolu_e1", REJECTED, is_error=True)],
+        ),
+        agent(3, calls=[call("toolu_r1", "Read", file_path="/a")]),
+    )
+    steps = rows_of(
+        traj, checkpoints=[make_checkpoint(1, "toolu_w1")], calls=[make_call(1, "toolu_w1")]
+    )
+    assert steps.rejected_calls == ("toolu_e1",)
+    assert steps.hooked_calls == ("toolu_w1",) and steps.unanswered_calls == ()
+    # It changed nothing, so the state stays the last checkpoint's.
+    assert [row.checkpoint_seq for row in steps.rows] == [1, 1, 1]
+
+
+def test_an_error_that_is_not_a_rejection_is_still_owed_a_record() -> None:
+    traj = trajectory(
+        agent(
+            1,
+            calls=[call("toolu_b1", "Bash", command="false")],
+            results=[result("toolu_b1", "Exit code 1", is_error=True)],
+        )
+    )
+    steps = rows_of(traj)
+    assert steps.unanswered_calls == ("toolu_b1",) and steps.rejected_calls == ()
+
+
+def test_a_call_stopped_while_running_is_interrupted() -> None:
+    # The time cap killed the agent mid-Bash: the call has no result and no hook fired.
+    traj = trajectory(
+        agent(1, calls=[call("toolu_w1", "Write", file_path="/a", content="a")]),
+        agent(2, "Building."),
+        agent(3, calls=[call("toolu_b9", "Bash", command="make")], results=[]),
+    )
+    steps = rows_of(
+        traj, checkpoints=[make_checkpoint(1, "toolu_w1")], calls=[make_call(1, "toolu_w1")]
+    )
+    assert steps.interrupted_calls == ("toolu_b9",) and steps.unanswered_calls == ()
+    assert steps.hooked_calls == ("toolu_w1", "toolu_b9")
+    assert [row.checkpoint_seq for row in steps.rows] == [1, 1, None]
+    assert steps.final_state_recorded is False
+
+
+def test_the_final_state_is_recorded_only_by_a_last_stop() -> None:
+    stop = {"trigger": "stop", "tool_name": "Stop"}
+    traj = trajectory(
+        agent(1, calls=[call("toolu_w1", "Write", file_path="/a", content="a")]),
+        agent(3, calls=[call("toolu_w2", "Write", file_path="/b", content="b")]),
+    )
+    checkpoints = [make_checkpoint(1, "toolu_w1"), make_checkpoint(2, "toolu_w2")]
+    first = make_call(1, "toolu_w1", requested_at=at_time(1.5))
+    early_stop = unchanged(2, "stop_1790000002_1", 1, requested_at=at_time(2), **stop)
+    second = make_call(3, "toolu_w2", checkpoint_seq=2, requested_at=at_time(3.5))
+    late_stop = unchanged(4, "stop_1790000004_1", 2, requested_at=at_time(4), **stop)
+
+    # A stop hook kept the agent going after the first stop, and the second stop timed out.
+    worked_on = rows_of(traj, checkpoints=checkpoints, calls=[first, early_stop, second])
+    assert worked_on.final_state_recorded is False
+    ended = rows_of(traj, checkpoints=checkpoints, calls=[first, early_stop, second, late_stop])
+    assert ended.final_state_recorded is True
+
+
+def test_two_checkpoint_steps_with_one_seq_are_refused() -> None:
+    traj = trajectory(
+        agent(1, calls=[call("toolu_w1", "Write", file_path="/a", content="a")]),
+        agent(2, calls=[call("toolu_w2", "Write", file_path="/b", content="b")]),
+    )
+    checkpoints = [make_checkpoint(1, "toolu_w1"), make_checkpoint(1, "toolu_w2")]
+    with pytest.raises(StepsError, match="two checkpoint steps for seq 1"):
+        rows_of(traj, checkpoints=checkpoints)

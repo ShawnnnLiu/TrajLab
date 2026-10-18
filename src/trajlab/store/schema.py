@@ -6,18 +6,24 @@ A store is a directory:
     <store>/heldout.duckdb   checks, faults, blame, chains, store_meta: never shown to an agent
     <store>/blobs/<sha256>   binary file versions that deltas name in `blob_ref`
 
-Keeping held-out tables in their own file makes "an agent cannot reach them" a property of which
-file a connection opens, not of permissions inside one database (ADR-0014). Every table's
-columns are, in order, the fields of its row model in `trajlab.contracts.store`; a test keeps
-them equal. A shape change bumps `SCHEMA_VERSION` and needs an ADR.
+Held-out tables live in their own file, and an agent's connection (`connect_agent`) opens only
+`record.duckdb`, read-only, with DuckDB's access to other files turned off and its configuration
+locked: no `read_blob`, `glob`, `read_csv`, `ATTACH`, or `COPY` can reach `heldout.duckdb` or
+`blobs/` (ADR-0014, item 2). A default DuckDB connection could read either.
+
+Every table's columns are, in order, the fields of its row model in `trajlab.contracts.store`; a
+test keeps them equal. A shape change bumps `SCHEMA_VERSION` and needs an ADR.
 """
 
 import json
+import os
+import tempfile
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 import duckdb
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from trajlab.contracts import (
     BLOBS_DIRNAME,
@@ -125,6 +131,8 @@ HELDOUT_TABLES: dict[str, str] = {
             answered_calls INTEGER NOT NULL,
             timed_out_calls VARCHAR[] NOT NULL,
             unanswered_calls VARCHAR[] NOT NULL,
+            interrupted_calls VARCHAR[] NOT NULL,
+            rejected_calls VARCHAR[] NOT NULL,
             checkpoints INTEGER NOT NULL,
             images_checked BOOLEAN NOT NULL,
             missing_images INTEGER[] NOT NULL,
@@ -157,7 +165,12 @@ def blobs_dir(store_dir: Path) -> Path:
 
 
 def _create(path: Path, tables: dict[str, str], meta: StoreMeta) -> None:
-    with duckdb.connect(str(path)) as con:
+    """Create a database file whole or not at all: it is built under a temporary name and
+    renamed, so a build killed midway leaves no file without its tables and meta."""
+    tmp = path.with_name(f".{path.name}.tmp")
+    for leftover in (tmp, tmp.with_name(tmp.name + ".wal")):
+        leftover.unlink(missing_ok=True)
+    with duckdb.connect(str(tmp)) as con:
         for ddl in tables.values():
             con.execute(ddl)
         con.execute(META_TABLE)
@@ -165,11 +178,16 @@ def _create(path: Path, tables: dict[str, str], meta: StoreMeta) -> None:
             "INSERT INTO store_meta VALUES (?, ?)",
             [(key, json.dumps(value)) for key, value in meta.model_dump(mode="json").items()],
         )
+    os.replace(tmp, path)
 
 
 def read_meta(con: duckdb.DuckDBPyConnection) -> StoreMeta:
-    rows = con.execute("SELECT key, value FROM store_meta").fetchall()
-    return StoreMeta.model_validate({key: json.loads(value) for key, value in rows})
+    """The store_meta of an open store file; `StoreError` if it has none that reads."""
+    try:
+        rows = con.execute("SELECT key, value FROM store_meta").fetchall()
+        return StoreMeta.model_validate({key: json.loads(value) for key, value in rows})
+    except (duckdb.Error, ValidationError, json.JSONDecodeError) as error:
+        raise StoreError(f"not a complete store: no readable store_meta ({error})") from error
 
 
 def create_store(store_dir: Path, meta: StoreMeta) -> None:
@@ -190,7 +208,10 @@ def create_store(store_dir: Path, meta: StoreMeta) -> None:
             _create(path, tables, meta)
             continue
         with duckdb.connect(str(path), read_only=True) as con:
-            found = read_meta(con)
+            try:
+                found = read_meta(con)
+            except StoreError as error:
+                raise StoreError(f"{path}: {error}; delete it to build the store again") from error
         if found != meta:
             raise StoreError(f"{path} was built under {found}, not {meta}")
 
@@ -204,27 +225,74 @@ def connect(path: Path, *, read_only: bool) -> duckdb.DuckDBPyConnection:
     if not path.is_file():
         raise StoreError(f"{path} does not exist")
     con = duckdb.connect(str(path), read_only=read_only)
-    con.execute("SET TimeZone = 'UTC'")
-    version = read_meta(con).schema_version
-    if version != SCHEMA_VERSION:
-        con.close()
-        raise StoreError(f"{path} has schema {version}; this code reads {SCHEMA_VERSION}")
+    _check(con, path)
     return con
 
 
+def connect_agent(store_dir: Path) -> duckdb.DuckDBPyConnection:
+    """`record.duckdb` as an agent's queries must see it: read-only, with no access to any other
+    file (DuckDB's `enable_external_access` off: no `read_blob`, `glob`, `read_csv`, `ATTACH`,
+    `COPY`, or extension install), and the configuration locked so no query can undo that.
+    This is what keeps `heldout.duckdb` and `blobs/` out of an agent's reach (ADR-0014)."""
+    path = record_path(store_dir)
+    if not path.is_file():
+        raise StoreError(f"{path} does not exist")
+    con = duckdb.connect(str(path), read_only=True, config={"enable_external_access": False})
+    _check(con, path)
+    con.execute("SET lock_configuration = true")
+    return con
+
+
+def _check(con: duckdb.DuckDBPyConnection, path: Path) -> None:
+    """Set the session's time zone to UTC and check the schema version; close on failure."""
+    try:
+        con.execute("SET TimeZone = 'UTC'")
+        version = read_meta(con).schema_version
+    except BaseException:
+        con.close()
+        raise
+    if version != SCHEMA_VERSION:
+        con.close()
+        raise StoreError(f"{path} has schema {version}; this code reads {SCHEMA_VERSION}")
+
+
 def insert_rows(con: duckdb.DuckDBPyConnection, table: str, rows: Sequence[BaseModel]) -> None:
-    """Insert row models into `table`, columns named by the models' fields, in field order."""
+    """Insert row models into `table`, columns named by the models' fields, in field order.
+
+    Rows are written as newline-delimited JSON to a temporary file and loaded with `read_json`,
+    typed by the table's own columns: about a thousand times faster than `executemany`, which
+    managed some 600 rows a second (a package install can give tens of thousands of delta rows).
+    A string holding a lone surrogate, which neither JSON nor DuckDB accepts, is stored with it
+    written as `\\uXXXX`.
+    """
     if not rows:
         return
     fields = list(type(rows[0]).model_fields)
-    placeholders = ", ".join("?" for _ in fields)
-    con.executemany(
-        f"INSERT INTO {table} ({', '.join(fields)}) VALUES ({placeholders})",
-        [
-            [
-                list(value) if isinstance(value, tuple) else value
-                for value in row.model_dump().values()
-            ]
-            for row in rows
-        ],
-    )
+    types = dict(con.execute("SELECT name, type FROM pragma_table_info(?)", [table]).fetchall())
+    columns = ", ".join(f"'{name}': '{types[name]}'" for name in fields)
+    with tempfile.TemporaryDirectory(prefix="trajlab-insert-") as directory:
+        path = Path(directory) / f"{table}.ndjson"
+        with path.open("w", encoding="utf-8") as out:
+            for row in rows:
+                out.write(json.dumps(_storable(row.model_dump(mode="json")), ensure_ascii=False))
+                out.write("\n")
+        con.execute(
+            f"INSERT INTO {table} ({', '.join(fields)}) SELECT {', '.join(fields)} "
+            f"FROM read_json(?, format = 'newline_delimited', columns = {{{columns}}})",
+            [str(path)],
+        )
+
+
+def _storable(value: Any) -> Any:
+    """`value` with every string's lone surrogates written as `\\uXXXX`."""
+    if isinstance(value, str):
+        try:
+            value.encode("utf-8")
+        except UnicodeEncodeError:
+            return value.encode("utf-8", "backslashreplace").decode("utf-8")
+        return value
+    if isinstance(value, dict):
+        return {key: _storable(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_storable(item) for item in value]
+    return value

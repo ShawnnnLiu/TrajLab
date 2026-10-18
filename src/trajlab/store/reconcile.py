@@ -1,12 +1,14 @@
 """Deltas from `docker commit` checkpoints (ADR-0014).
 
-A `docker commit` image of a trial container is the image the trial started from (the derived
-image, ADR-0008) plus one layer on top: the container's whole writable layer at that moment
+A `docker commit` image of a trial container is the trial's *start image* (the image its
+container started from: the derived image, ADR-0008, or for a resumed trial the checkpoint it
+resumed from) plus one layer on top: the container's whole writable layer at that moment
 (Docker adds no layer when the container has no change; that top layer is empty). So the top
 layer of checkpoint k holds every change since the container started, and every checkpoint of a
-trial shares the same lower layers. The environment's state at checkpoint k is
-the *view*: the base image's filesystem with top layer k applied. The delta of checkpoint k is
-the difference between view k-1 and view k; view 0 is the base itself (an empty top layer).
+trial shares the start image's layers. The environment's state at checkpoint k is the *view*:
+the start image's filesystem with top layer k applied. The delta of checkpoint k is the
+difference between view k-1 and view k; view 0 is the start image itself (an empty top layer).
+In the code, `base` is short for the start image's filesystem.
 
 Layer format (OCI image spec, "Representing Changes"; as Docker 29 with the containerd
 snapshotter writes it, checked 2026-10-18 on this repo's development Mac):
@@ -29,8 +31,8 @@ snapshotter writes it, checked 2026-10-18 on this repo's development Mac):
 
 View(k)[p] is top layer k's entry for p if it has one; else nothing if p is hidden in layer k (p
 or an ancestor whited out, or a strict ancestor opaque or not a directory, in that layer); else
-the base's entry for p, which may be nothing. The base is its own layers applied bottom to top
-by the same rules.
+the start image's entry for p, which may be nothing. The start image's filesystem is its own
+layers applied bottom to top by the same rules.
 
 Two entries are equal when their kind (file, dir, symlink, other), permission bits
 (mode & 0o7777), uid, and gid are equal, and for a file the sha256 of its content, for a symlink
@@ -38,7 +40,7 @@ the sha256 of its target (UTF-8), are equal. Times are never compared.
 
 The paths whose view can differ between k-1 and k are exactly the entries of layer k-1 or layer
 k, and the paths under a root that layer k-1 or layer k hides (a whiteout, an opaque directory,
-or a non-directory entry); every other path is the base's in both views.
+or a non-directory entry); every other path is the start image's in both views.
 
 Rows: one `DeltaRow` per path whose entries differ, directories included. Excluded paths
 (`trajlab.store.exclusions`) never give a row, and neither does an added or deleted directory
@@ -54,10 +56,16 @@ and `+++ b<path>` (`/dev/null` for a side without content), 3 lines of context, 
 "\\n" only (a "\\r" stays in its line), and "\\ No newline at end of file" after a last line
 without one. Lines are matched after trimming common leading and trailing lines: exactly
 (difflib without autojunk) when that is cheap, else by a shortest edit script (Myers) within a
-step budget, else by difflib with autojunk, so a hunk is small and is made in bounded time.
-A non-text later file version whose content changed is written to `<blobs_dir>/<sha256>` and
-named `blobs/<sha256>` in `blob_ref`; a mode- or owner-only change stores nothing. Earlier
-versions are never stored; their sha256 and size are.
+step budget, else by anchoring on lines unique to both sides (patience diff) with the gaps
+matched exactly within a budget, so a hunk is small and is made in a few seconds at most.
+A row whose content changed but which gets no hunk (a version that is not text) stores its
+later version instead, if it has one: a file's bytes or a symlink's target go to
+`<blobs_dir>/<sha256>`, named `blobs/<sha256>` in `blob_ref`. A mode- or owner-only change
+stores nothing. Earlier versions are never stored; their sha256 and size are.
+
+A path holding bytes that are not UTF-8 is stored with each such byte written as `\\xNN`
+(`backslashreplace`), as are such bytes in a symlink target shown in a hunk; sha256 and size
+are always of the raw bytes.
 
 Rows are ordered by (step_idx, path).
 """
@@ -101,10 +109,11 @@ TEXT_RULE = (
     f"file at most {MAX_TEXT_BYTES} bytes, no NUL byte, valid UTF-8; symlink targets are text"
 )
 RECONCILE_METHOD = (
-    "top-layer-view-v1: view k = base image + checkpoint k's top layer (OCI whiteouts, opaque "
+    "top-layer-view-v1: view k = start image + checkpoint k's top layer (OCI whiteouts, opaque "
     "directories, non-directory entries replacing subtrees); delta k = view k-1 vs view k by "
-    "kind, mode, owner, content sha256; hunks: common ends trimmed, then exact difflib, Myers "
-    "within a step budget, or difflib with autojunk; blobs: non-text files whose content changed"
+    "kind, mode, owner, content sha256; hunks for text: common ends trimmed, then exact difflib "
+    "(line product <= 250000), Myers (<= 2000000 steps), or unique-line anchors; blobs: the "
+    "later version of a changed row without a hunk; non-UTF-8 path bytes as \\xNN"
 )
 
 
@@ -120,11 +129,11 @@ class LayerSource(Protocol):
 class ImageChain:
     """The layers a trial's deltas are computed from.
 
-    `base_layers` are the derived image's layers, bottom to top. `tops` maps a checkpoint's
+    `start_layers` are the start image's layers, bottom to top. `tops` maps a checkpoint's
     `seq` to its image's top layer; a checkpoint whose image is gone has no entry.
     """
 
-    base_layers: tuple[LayerSource, ...]
+    start_layers: tuple[LayerSource, ...]
     tops: Mapping[int, LayerSource]
 
 
@@ -183,7 +192,8 @@ def reconcile(
 # 1. Names: every available top layer, for its entry and marker paths only. Their union is the
 #    set of paths whose base entry can matter: an entry path of some top, or a path at or under
 #    a root some top hides.
-# 2. Base: the base layers bottom to top, keeping only those paths, applied by the view rule.
+# 2. Base: the start image's layers bottom to top, keeping only those paths, applied by the
+#    view rule (a layer is read again when a hard link it keeps names a member it did not).
 # 3. Compare: each available top in seq order, hashing every file. Only layer k-1 and layer k
 #    are held at a time; delta k compares their views over the docstring's candidate paths.
 #
@@ -195,17 +205,23 @@ def reconcile(
 
 _CONTENT_KINDS = frozenset({"file", "symlink"})
 _CONTEXT_LINES = 3
-# Hunks should show what changed and no more, in bounded time. difflib without autojunk is
-# quadratic on repetitive text (minutes for 1 MiB of braces), and with autojunk a one-line edit
-# to such a file rewrites every line. So common leading and trailing lines are trimmed, and the
-# rest is matched by difflib without autojunk when the number of equal line pairs across the two
-# sides (its cost) is at most _EXACT_MATCH_LIMIT, else by a shortest edit script (Myers) if one
-# takes at most _EDIT_SCRIPT_BUDGET steps, else by difflib with autojunk. Each is at most a few
-# tenths of a second on a 1 MiB file.
-_EXACT_MATCH_LIMIT = 1_000_000
+# Hunks should show what changed and no more, in bounded time. difflib without autojunk is close
+# to cubic when lines repeat (0.8 s for 1,000 lines of pretty-printed JSON, 21 s for 3,000), and
+# with autojunk a one-line edit to such a file rewrites every line. So common leading and trailing
+# lines are trimmed, and the rest is matched:
+# 1. exactly, by difflib without autojunk, when the two sides' line counts multiply to at most
+#    _EXACT_LINE_PRODUCT (at most about 0.1 s);
+# 2. else by a shortest edit script (Myers) if one takes at most _EDIT_SCRIPT_BUDGET steps
+#    (about 0.5 s; 500 scattered edits in 30,000 lines take 0.13 s);
+# 3. else, for a wholesale rewrite, by anchoring on lines that occur exactly once on each side
+#    (patience diff) and matching the gaps between anchors exactly while the gaps' line products
+#    add up to at most _GAP_BUDGET, and as replacements after that.
+# So no hunk takes more than a few seconds, and each is a correct diff.
+_EXACT_LINE_PRODUCT = 250_000
 _EDIT_SCRIPT_BUDGET = 2_000_000
+_GAP_BUDGET = 2_000_000
 _CHUNK = 1 << 20
-_EMPTY_TOP = Layer()  # view 0 is the base with an empty top layer
+_EMPTY_TOP = Layer()  # view 0 is the start image with an empty top layer
 
 
 class _Change(NamedTuple):
@@ -220,9 +236,16 @@ def _same(a: Entry | None, b: Entry | None) -> bool:
     return a.state == b.state
 
 
-def _content_changed(before: Entry | None, after_file_sha256: str) -> bool:
+def _file_content_changed(before: Entry | None, after_file_sha256: str) -> bool:
     """True unless `before` is a file with exactly this content."""
     return before is None or before.kind != "file" or before.sha256 != after_file_sha256
+
+
+def _content_changed(before: Entry | None, after: Entry | None) -> bool:
+    """True if the two versions differ in content: kind or sha256 (a directory has none)."""
+    if before is None or after is None:
+        return before is not after
+    return before.kind != after.kind or before.sha256 != after.sha256
 
 
 class _View:
@@ -388,12 +411,21 @@ class _Contents:
             return sha256
         if text:
             _put(self.work_dir, sha256, content)
-        elif previous is not None and _content_changed(previous.get(path), sha256):
+        elif previous is not None and _file_content_changed(previous.get(path), sha256):
             _put(self.blobs_dir, sha256, content)
         return sha256
 
     def entry_is_text(self, entry: Entry) -> bool:
         return entry.kind == "symlink" or self.is_text[entry.sha256 or ""]
+
+    def store_blob(self, entry: Entry) -> None:
+        """Put a later version in the blob dir: a file's bytes (which `ensure` made present) or
+        a symlink's target."""
+        sha256 = entry.sha256 or ""
+        if entry.kind == "symlink":
+            _put(self.blobs_dir, sha256, symlink_bytes(entry.link_target or ""))
+        elif self.is_text[sha256]:
+            _put(self.blobs_dir, sha256, (self.work_dir / sha256).read_bytes())
 
     def location(self, sha256: str) -> Path:
         return (self.work_dir if self.is_text[sha256] else self.blobs_dir) / sha256
@@ -493,7 +525,7 @@ class _Reconciler:
 
     def _read_base(self, keep: Callable[[str], bool]) -> dict[str, Entry]:
         view: dict[str, Entry] = {}
-        for index, source in enumerate(self.chain.base_layers):
+        for index, source in enumerate(self.chain.start_layers):
             layer = self._read_base_layer(index, source, keep)
             if layer.whiteouts or layer.opaque or layer.nondirs:
                 view = {path: entry for path, entry in view.items() if not layer.hidden(path)}
@@ -524,7 +556,7 @@ class _Reconciler:
         sources = [(tops[seq], f"top layer of checkpoint {seq}")]
         if seq - 1 in tops:
             sources.append((tops[seq - 1], f"top layer of checkpoint {seq - 1}"))
-        base = self.chain.base_layers
+        base = self.chain.start_layers
         sources.extend((base[i], f"base layer {i}") for i in reversed(range(len(base))))
         return sources
 
@@ -553,6 +585,9 @@ class _Reconciler:
                     needed[entry.sha256 or ""] = entry.size or 0
         if needed:
             self.contents.ensure(needed, self._sources(seq))
+        for change, (_, _, blob) in shaped:
+            if blob and change.after is not None:
+                self.contents.store_blob(change.after)
         return [self._row(step_idx, change, shape) for change, shape in shaped]
 
     def _shape(self, change: _Change) -> tuple[bool | None, bool, bool]:
@@ -569,16 +604,11 @@ class _Reconciler:
         if not versions:
             return None, False, False
         is_text = all(self.contents.entry_is_text(entry) for entry in versions)
-        sha_before = change.before.sha256 if change.before is not None else None
-        sha_after = change.after.sha256 if change.after is not None else None
-        hunk = is_text and sha_before != sha_after
+        changed = _content_changed(change.before, change.after)
+        hunk = is_text and changed
+        # Without a hunk, the later version is the only record of what the step wrote.
         after = change.after
-        blob = (
-            after is not None
-            and after.kind == "file"
-            and not self.contents.is_text[after.sha256 or ""]
-            and _content_changed(change.before, after.sha256 or "")
-        )
+        blob = not is_text and changed and after is not None and after.kind in _CONTENT_KINDS
         return is_text, hunk, blob
 
     def _row(
@@ -589,13 +619,13 @@ class _Reconciler:
         return DeltaRow(
             trial_id=self.trial_id,
             step_idx=step_idx,
-            path=change.path,
+            path=_printable(change.path),
             op="add" if b is None else "delete" if a is None else "modify",
             kind_before=b.kind if b else None,
             kind_after=a.kind if a else None,
             is_text=is_text,
             hunk=(
-                _unified_diff(change.path, self.contents.text(b), self.contents.text(a))
+                _unified_diff(_printable(change.path), self.contents.text(b), self.contents.text(a))
                 if hunk
                 else None
             ),
@@ -609,6 +639,11 @@ class _Reconciler:
             owner_before=f"{b.uid}:{b.gid}" if b else None,
             owner_after=f"{a.uid}:{a.gid}" if a else None,
         )
+
+
+def _printable(text: str) -> str:
+    """`text` with the bytes `tarfile` could not decode (surrogate escapes) as `\\xNN`."""
+    return text.encode("utf-8", "surrogateescape").decode("utf-8", "backslashreplace")
 
 
 def _lines(text: str | None) -> list[str]:
@@ -644,14 +679,83 @@ def _opcodes(old: list[str], new: list[str]) -> list[_Opcode]:
 
 
 def _match(old: list[str], new: list[str]) -> list[_Opcode]:
-    counts = Counter(new)
-    if sum(counts[line] for line in old) <= _EXACT_MATCH_LIMIT:
+    if len(old) * len(new) <= _EXACT_LINE_PRODUCT:
         return SequenceMatcher(None, old, new, autojunk=False).get_opcodes()
     script = _edit_script(old, new, _EDIT_SCRIPT_BUDGET)
     if script is not None:
         return script
-    logger.debug("%d and %d lines differ widely; matching with autojunk", len(old), len(new))
-    return SequenceMatcher(None, old, new).get_opcodes()
+    logger.debug("%d and %d lines differ widely; matching on unique lines", len(old), len(new))
+    return _anchored(old, new)
+
+
+def _anchored(old: list[str], new: list[str]) -> list[_Opcode]:
+    """Opcodes anchored on lines that occur exactly once in `old` and once in `new`, kept in
+    their longest common order (patience diff); the gaps between anchors are matched exactly
+    while `_GAP_BUDGET` lasts and are replacements after that."""
+    codes: list[_Opcode] = []
+    budget = _GAP_BUDGET
+    i = j = 0
+    for ai, aj in [*_unique_anchors(old, new), (len(old), len(new))]:
+        a, b = old[i:ai], new[j:aj]
+        if a and b and len(a) * len(b) <= min(budget, _EXACT_LINE_PRODUCT):
+            budget -= len(a) * len(b)
+            gap = SequenceMatcher(None, a, b, autojunk=False).get_opcodes()
+            codes.extend((t, x1 + i, x2 + i, y1 + j, y2 + j) for t, x1, x2, y1, y2 in gap)
+        elif a or b:
+            tag = "replace" if a and b else "delete" if a else "insert"
+            codes.append((tag, i, ai, j, aj))
+        if ai < len(old):
+            codes.append(("equal", ai, ai + 1, aj, aj + 1))
+        i, j = ai + 1, aj + 1
+    return _merged(codes)
+
+
+def _unique_anchors(old: list[str], new: list[str]) -> list[tuple[int, int]]:
+    """(i, j) pairs of lines unique on both sides, a longest run increasing in both."""
+    in_old, in_new = Counter(old), Counter(new)
+    where_new = {line: j for j, line in enumerate(new) if in_new[line] == 1}
+    pairs = [
+        (i, where_new[line])
+        for i, line in enumerate(old)
+        if in_old[line] == 1 and line in where_new
+    ]
+    # Longest increasing subsequence of j over pairs (already in i order), by patience sorting.
+    tails: list[int] = []  # tails[k]: index into pairs of the smallest tail of a run of k + 1
+    tail_js: list[int] = []  # the j of each of those tails, increasing
+    previous: list[int] = [-1] * len(pairs)
+    for index, (_, j) in enumerate(pairs):
+        k = bisect_left(tail_js, j)
+        if k:
+            previous[index] = tails[k - 1]
+        if k == len(tails):
+            tails.append(index)
+            tail_js.append(j)
+        else:
+            tails[k] = index
+            tail_js[k] = j
+    run: list[tuple[int, int]] = []
+    index = tails[-1] if tails else -1
+    while index >= 0:
+        run.append(pairs[index])
+        index = previous[index]
+    return run[::-1]
+
+
+def _merged(codes: list[_Opcode]) -> list[_Opcode]:
+    """Adjacent opcodes coalesced: equal runs into one, edit runs into one replace (or a
+    delete or insert), as difflib's opcodes alternate."""
+    out: list[_Opcode] = []
+    for tag, i1, i2, j1, j2 in codes:
+        if i1 == i2 and j1 == j2:
+            continue
+        if out and (out[-1][0] == "equal") == (tag == "equal"):
+            _, pi1, _, pj1, _ = out[-1]
+            if tag != "equal":
+                tag = "replace" if i2 > pi1 and j2 > pj1 else "delete" if i2 > pi1 else "insert"
+            out[-1] = (tag, pi1, i2, pj1, j2)
+        else:
+            out.append((tag, i1, i2, j1, j2))
+    return out
 
 
 def _edit_script(old: list[str], new: list[str], budget: int) -> list[_Opcode] | None:

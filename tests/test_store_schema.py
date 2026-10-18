@@ -180,23 +180,10 @@ def db_path(store: Path, table: str) -> Path:
 
 
 def read_back[M: BaseModel](con: duckdb.DuckDBPyConnection, table: str, model: type[M]) -> list[M]:
-    """Rows in insertion order. DuckDB returns TIMESTAMPTZ values only with pytz installed, so
-    they are read as epoch microseconds."""
-    kinds = dict(con.execute("SELECT name, type FROM pragma_table_info(?)", [table]).fetchall())
+    """Rows in insertion order."""
     names = list(model.model_fields)
-    select = ", ".join(f"epoch_us({n})" if kinds[n] == TIMESTAMPTZ else n for n in names)
-    rows = con.execute(f"SELECT {select} FROM {table} ORDER BY rowid").fetchall()
-    return [
-        model.model_validate(
-            {
-                n: EPOCH + timedelta(microseconds=v)
-                if kinds[n] == TIMESTAMPTZ and v is not None
-                else v
-                for n, v in zip(names, row, strict=True)
-            }
-        )
-        for row in rows
-    ]
+    rows = con.execute(f"SELECT {', '.join(names)} FROM {table} ORDER BY rowid").fetchall()
+    return [model.model_validate(dict(zip(names, row, strict=True))) for row in rows]
 
 
 def _optional_args(annotation: Any) -> tuple[list[Any], bool]:
@@ -558,3 +545,117 @@ def test_chain_report_is_complete_exactly_without_reasons() -> None:
 @pytest.mark.parametrize("row", [*FULL_ROWS.values(), *SPARSE_ROWS.values(), META])
 def test_json_round_trip(row: BaseModel) -> None:
     assert type(row).model_validate_json(row.model_dump_json()) == row
+
+
+# -- review findings, 2026-10-18 ----------------------------------------------------------------
+
+# Integer widths that matter: sizes past 2 GiB and token counts need 64 bits.
+BIGINT_COLUMNS = {
+    ("trials", "tokens_in"),
+    ("trials", "tokens_out"),
+    ("trials", "wall_ms"),
+    ("deltas", "bytes_before"),
+    ("deltas", "bytes_after"),
+}
+
+
+def test_sizes_and_counts_are_64_bit(tmp_path: Path) -> None:
+    schema.create_store(tmp_path, META)
+    with schema.connect(schema.record_path(tmp_path), read_only=True) as con:
+        found = {
+            (table, name)
+            for table, name, kind in con.execute(
+                "SELECT table_name, column_name, data_type FROM information_schema.columns"
+            ).fetchall()
+            if kind == "BIGINT"
+        }
+    assert found == BIGINT_COLUMNS
+
+
+@pytest.mark.parametrize(
+    ("table", "key"),
+    [
+        ("trials", {}),
+        ("steps", {"tool": "Bash", "args_json": "{}"}),
+        ("deltas", {"op": "modify", "kind_after": "dir", "kind_before": "dir"}),
+        ("checks", {"passed": True}),
+        ("faults", {"kind": "wrong_edit"}),
+        ("chains", {"hooked_calls": 99}),
+    ],
+)
+def test_primary_keys_refuse_a_second_row(tmp_path: Path, table: str, key: dict[str, Any]) -> None:
+    schema.create_store(tmp_path, META)
+    row = FULL_ROWS[table]
+    twin = type(row).model_validate(row.model_dump() | key)  # same key, other values
+    with schema.connect(db_path(tmp_path, table), read_only=False) as con:
+        schema.insert_rows(con, table, [row])
+        with pytest.raises(duckdb.ConstraintException):
+            schema.insert_rows(con, table, [twin])
+
+
+def test_a_store_file_without_its_meta_is_refused_clearly(tmp_path: Path) -> None:
+    # What a build killed while creating the file used to leave behind.
+    duckdb.connect(str(schema.record_path(tmp_path))).close()
+    with pytest.raises(schema.StoreError, match="delete it to build the store again"):
+        schema.create_store(tmp_path, META)
+
+
+def test_creating_a_store_leaves_no_temporary_files(tmp_path: Path) -> None:
+    schema.create_store(tmp_path / "store", META)
+    assert sorted(p.name for p in (tmp_path / "store").iterdir()) == [
+        "blobs",
+        "heldout.duckdb",
+        "record.duckdb",
+    ]
+
+
+def test_the_agent_connection_cannot_reach_held_out_data(tmp_path: Path) -> None:
+    schema.create_store(tmp_path, META)
+    with schema.connect(schema.heldout_path(tmp_path), read_only=False) as con:
+        schema.insert_rows(
+            con, "checks", [CheckRow(trial_id=TRIAL_ID, check_id="pytest:secret", passed=False)]
+        )
+    heldout, blobs = schema.heldout_path(tmp_path), schema.blobs_dir(tmp_path)
+    (blobs / ("0" * 64)).write_bytes(b"blob")
+    with schema.connect_agent(tmp_path) as con:
+        assert con.execute("SELECT count(*) FROM trials").fetchone() == (0,)
+        assert con.execute("SELECT current_setting('TimeZone')").fetchone() == ("UTC",)
+        for query in [
+            f"SELECT count(*) FROM read_blob('{heldout}')",
+            f"SELECT * FROM glob('{tmp_path}/*')",
+            f"SELECT * FROM read_text('{blobs}/{'0' * 64}')",
+            f"ATTACH '{heldout}' AS h",
+            f"COPY trials TO '{tmp_path}/out.csv'",
+        ]:
+            with pytest.raises(duckdb.PermissionException):
+                con.execute(query)
+        for setting in ["enable_external_access = true", "lock_configuration = false"]:
+            with pytest.raises(duckdb.InvalidInputException):
+                con.execute(f"SET {setting}")
+        with pytest.raises(duckdb.Error):
+            con.execute("DELETE FROM trials")  # read-only
+
+
+def test_bulk_insert_is_fast_and_exact(tmp_path: Path) -> None:
+    import time
+
+    schema.create_store(tmp_path, META)
+    base = FULL_ROWS["deltas"]
+    rows = [
+        DeltaRow.model_validate(
+            base.model_dump() | {"path": f"/opt/pkg/{i}.py", "step_idx": 1 + i % 7}
+        )
+        for i in range(20_000)
+    ]
+    rows.append(DeltaRow.model_validate(base.model_dump() | {"path": "/x", "hunk": "+caf\udce9\n"}))
+    with schema.connect(schema.record_path(tmp_path), read_only=False) as con:
+        start = time.monotonic()
+        schema.insert_rows(con, "deltas", rows)
+        assert time.monotonic() - start < 5  # executemany took about 30 s for this many
+        assert con.execute("SELECT count(*) FROM deltas").fetchone() == (len(rows),)
+        # A lone surrogate, which JSON and DuckDB refuse, is stored written out.
+        assert con.execute("SELECT hunk FROM deltas WHERE path = '/x'").fetchone() == (
+            "+caf\\udce9\n",
+        )
+        first = read_back(con, "deltas", DeltaRow)[0]
+    assert first == rows[0]

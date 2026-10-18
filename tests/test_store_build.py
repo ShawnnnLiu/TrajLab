@@ -140,7 +140,7 @@ class MemoryImages:
     def chain(self, checkpoints: Sequence[CheckpointRecord]) -> ImageChain:
         self.requests.append(tuple(checkpoints))
         return ImageChain(
-            base_layers=(BASE,),
+            start_layers=(BASE,),
             tops={
                 r.seq: self.tops[r.checkpoint_id]
                 for r in checkpoints
@@ -290,7 +290,7 @@ def test_fixture_trial_builds_to_the_hand_count(trial_copy: Path, tmp_path: Path
     with schema.connect(schema.heldout_path(store), read_only=True) as con:
         assert schema.read_meta(con) == store_meta()
         assert con.execute("SELECT * FROM chains").fetchall() == [
-            (TRIAL_ID, True, 1, 1, [], [], 2, True, [], True, [])
+            (TRIAL_ID, True, 1, 1, [], [], [], [], 2, True, [], True, [])
         ]
     assert not any(schema.blobs_dir(store).iterdir())  # the one version is text
     assert not any((tmp_path / "work").iterdir())  # scratch is removed
@@ -605,9 +605,12 @@ def test_chain_report_reasons() -> None:
         answered_calls=("toolu_a", "toolu_b", "c"),
         timed_out_calls=("d", "e"),
         unanswered_calls=("f",),
+        interrupted_calls=("g",),
+        rejected_calls=("h",),
         stop_calls=(),
+        final_state_recorded=False,
     )
-    chain = ImageChain(base_layers=(BASE,), tops={1: BASE})
+    chain = ImageChain(start_layers=(BASE,), tops={1: BASE})
 
     report = chain_report(TRIAL_ID, steps, chain)
 
@@ -618,6 +621,7 @@ def test_chain_report_reasons() -> None:
     assert report.reasons == (
         "2 hooked calls timed out",
         "1 hooked call without a call record",
+        "1 hooked call stopped while running (no result), so its changes may be in no checkpoint",
         "checkpoint 2 has no image",
         "checkpoint 3 has no image",
     )
@@ -667,3 +671,61 @@ def test_start_image_prefers_the_resumed_checkpoint(fixture_trial: Path, tmp_pat
     (trial / "trajlab-resume.json").write_text(json.dumps(resume))
     # A resumed trial's checkpoints extend the checkpoint it started from, not the derived image.
     assert build.start_image(trial) == "trajlab-checkpoint:task__x.0003"
+
+
+# -- review findings, 2026-10-18 ----------------------------------------------------------------
+
+
+@pytest.mark.parametrize("failing", ["chains", "trials", "steps", "deltas"])
+def test_a_build_that_fails_while_writing_leaves_the_trial_buildable(
+    trial_copy: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failing: str
+) -> None:
+    capture(trial_copy)
+    store = tmp_path / "store"
+    real = build.insert_rows
+
+    def insert(con: Any, table: str, rows: Sequence[Any]) -> None:
+        if table == failing:
+            raise RuntimeError(f"disk full writing {table}")
+        real(con, table, rows)
+
+    monkeypatch.setattr(build, "insert_rows", insert)
+    with pytest.raises(RuntimeError, match="disk full"):
+        build_trial(trial_copy, store, images=all_images(), work_dir=tmp_path / "w")
+    # The record transaction is the commit point: nothing of the trial is in record.duckdb.
+    assert [count(store, table) for table in ("trials", "steps", "deltas")] == [0, 0, 0]
+
+    monkeypatch.setattr(build, "insert_rows", real)
+    result = build_trial(trial_copy, store, images=all_images(), work_dir=tmp_path / "w")
+    assert result.skipped_existing is False and result.chain.complete
+    assert [count(store, table) for table in ("trials", "steps", "deltas", "chains")] == [
+        1,
+        3,
+        1,
+        1,
+    ]
+
+
+def test_a_trial_built_without_images_is_rebuilt_with_them(
+    trial_copy: Path, tmp_path: Path
+) -> None:
+    capture(trial_copy)
+    store = tmp_path / "store"
+    first = build_trial(trial_copy, store, images=None, work_dir=tmp_path / "w")
+    assert first.chain.images_checked is False and first.deltas == ()
+    # Building again without images is still skipped.
+    assert build_trial(trial_copy, store, images=None, work_dir=tmp_path / "w").skipped_existing
+
+    second = build_trial(trial_copy, store, images=all_images(), work_dir=tmp_path / "w")
+    assert second.skipped_existing is False
+    assert second.chain.complete and len(second.deltas) == 1
+    assert [count(store, table) for table in ("trials", "steps", "deltas", "chains")] == [
+        1,
+        3,
+        1,
+        1,
+    ]
+    # And now it is reconciled, so a third build is skipped.
+    assert build_trial(
+        trial_copy, store, images=all_images(), work_dir=tmp_path / "w"
+    ).skipped_existing

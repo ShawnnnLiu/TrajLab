@@ -7,22 +7,25 @@
    `trajlab-checkpoint:` tag from then on, since Harbor's teardown removes untagged images a
    trial used (trajlab.capture.resume). An image that is gone, or has no such tag, gives its
    seq no top layer; the build reports that seq as a missing image.
-2. The `.RootFS.Layers` of every found image must be one shared base plus at most one layer.
-   `docker commit` adds the container's whole writable layer as one layer, and adds no layer
-   at all when the container has no changes (Docker 29.8, containerd store, checked
-   2026-10-18). With `base_image` given, the base must equal that image's layers; without it,
-   every image must have exactly one layer over a shared prefix.
+2. The `.RootFS.Layers` of every found image must be the start image's layers plus at most
+   one. `docker commit` adds the container's whole writable layer as one layer, and adds no
+   layer at all when the container has no changes (Docker 29.8, containerd store, checked
+   2026-10-18). The start image is required: without it, a commit that added no layer would
+   be indistinguishable from one that did, and the start image's own last layer would be read
+   as the checkpoint's changes.
 3. One `docker image save -o <file>` writes every found image, shared layers once. The save
    lands in a file because its tar puts `manifest.json` after the blobs (OCI layout), so a
    stream would have to be read to its end before any layer could be found.
 4. `manifest.json` maps each tag to its layer members. The members every image starts with are
-   the base layers; an image's member after them is its top layer. An image with no layer over
-   the base gets an empty top layer: its view is the base.
+   the start image's layers; an image's member after them is its top layer. An image with no
+   layer over the start image gets an empty top layer: its view is the start image.
 
 A `SavedLayer` reads its member straight out of the save file, which must exist for as long as
-the chain is used; the provider deletes its save files when closed. A save holds the derived
-image plus every checkpoint's top layer, and top layers are cumulative (each is the whole
-writable layer), so a build should close the provider, or use a new one, after each trial.
+the chain is used. Saves go to a directory of the provider's own, under `work_dir`, which
+`close()` removes with anything in it (the docker CLI writes its own temporary file there, and
+leaves it behind if killed). A save holds the start image plus every checkpoint's top layer,
+and top layers are cumulative (each is the whole writable layer), so a build should use one
+provider per trial and close it after the trial.
 """
 
 import io
@@ -30,6 +33,7 @@ import json
 import logging
 import os
 import shlex
+import shutil
 import subprocess
 import tarfile
 import tempfile
@@ -50,7 +54,7 @@ logger = logging.getLogger(__name__)
 CHECKPOINT_REPOSITORY = "trajlab-checkpoint"
 MANIFEST_MEMBER = "manifest.json"
 INSPECT_TIMEOUT_S = 120
-# A save writes the derived image (often over 1 GB) and every top layer.
+# A save writes the start image (often over 1 GB) and every top layer.
 SAVE_TIMEOUT_S = 1800
 _NO_SUCH_IMAGE = "no such image"
 _READ_BUFFER = 1 << 20
@@ -59,7 +63,7 @@ Runner = Callable[..., subprocess.CompletedProcess[str]]
 
 
 class DockerImagesError(ValueError):
-    """A docker command failed, or the images are not checkpoints over one base."""
+    """A docker command failed, or an image is not a commit over the start image."""
 
 
 def _empty_tar() -> bytes:
@@ -158,26 +162,27 @@ class _Found:
 class DockerImageProvider:
     """The `ImageChain` of a trial's checkpoints, from the local Docker daemon.
 
-    `work_dir` holds the save files until the provider is closed; it needs room for the derived
-    image plus every checkpoint's top layer, compressed. `base_image` is the image the trial's
-    container started from: the derived image named in `trajlab-preinstall.json`, or for a
-    trial started from a checkpoint, that checkpoint image. `runner` stands in for
-    `subprocess.run` in tests.
+    `work_dir` holds the provider's save directory until it is closed; it needs room for the
+    start image plus every checkpoint's top layer, compressed. `start_image` is the image the
+    trial's container started from (`trajlab.store.build.start_image` reads it from the trial
+    dir): the derived image named in `trajlab-preinstall.json`, or for a trial resumed from a
+    checkpoint, that checkpoint image. `runner` stands in for `subprocess.run` in tests.
     """
 
     def __init__(
         self,
         work_dir: Path,
         *,
+        start_image: str,
         docker: str = "docker",
         runner: Runner = subprocess.run,
-        base_image: str | None = None,
     ) -> None:
         self.work_dir = work_dir
-        self.base_image = base_image
+        self.start_image = start_image
         self._docker_bin = docker
         self._run = runner
         self._archives: list[Path] = []
+        self._save_dir: Path | None = None
 
     def __enter__(self) -> Self:
         return self
@@ -191,17 +196,21 @@ class DockerImageProvider:
         self.close()
 
     def close(self) -> None:
-        """Delete every save file this provider wrote; chains it returned can no longer open."""
+        """Delete this provider's save directory and everything in it; chains it returned can
+        no longer open."""
         for archive in self._archives:
             archive.unlink(missing_ok=True)
         self._archives.clear()
+        if self._save_dir is not None:
+            shutil.rmtree(self._save_dir, ignore_errors=True)
+            self._save_dir = None
 
     def chain(self, checkpoints: Sequence[CheckpointRecord]) -> ImageChain:
-        """The base layers and each found checkpoint's top layer, keyed by seq.
+        """The start image's layers and each found checkpoint's top layer, keyed by seq.
 
         `checkpoints` are one trial's records, in any order. A record whose image is gone or
         untagged has no entry in `tops`. Raises `DockerImagesError` if a docker command fails
-        or the images are not commits over one base.
+        or an image is not a commit over the start image.
         """
         seqs = [record.seq for record in checkpoints]
         if len(set(seqs)) != len(seqs):
@@ -212,12 +221,12 @@ class DockerImageProvider:
             if image is not None:
                 found.append(image)
         if not found:
-            return ImageChain(base_layers=(), tops={})
-        base = self._base_layers(found)
+            return ImageChain(start_layers=(), tops={})
+        start = self._start_layers(found)
         tags = list(dict.fromkeys(image.tag for image in found))
         archive = self._save(tags)
         try:
-            return self._assemble(archive, found, base, self._read_manifest(archive, tags))
+            return self._assemble(archive, found, start, self._read_manifest(archive, tags))
         except BaseException:
             self._discard(archive)
             raise
@@ -274,41 +283,32 @@ class DockerImageProvider:
             raise DockerImagesError(f"{ref}: .RootFS.Layers is {layers!r}, not a list of ids")
         return tuple(layers)
 
-    def _base_layers(self, found: Sequence[_Found]) -> tuple[str, ...]:
-        """The diff ids of the shared base; raises unless every image is a commit over it."""
-        if self.base_image is not None:
-            base = self._layers(self.base_image)
-            if base is None:
-                raise DockerImagesError(f"base image {self.base_image} not found")
-            for image in found:
-                if image.layers == base:
-                    logger.info(
-                        "checkpoint %d (%s) has no layer over the base: its container had "
-                        "no changes",
-                        image.seq,
-                        image.tag,
-                    )
-                elif image.layers[:-1] != base:
-                    raise DockerImagesError(
-                        f"{image.tag} is not a commit over the base image {self.base_image}: "
-                        f"{len(image.layers)} layers, {_overlap(image.layers, base)} of them "
-                        f"the base's {len(base)}; a commit adds at most one layer"
-                    )
-            return base
-        base = found[0].layers[:-1]
+    def _start_layers(self, found: Sequence[_Found]) -> tuple[str, ...]:
+        """The start image's diff ids; raises unless every image is a commit over it."""
+        start = self._layers(self.start_image)
+        if start is None:
+            raise DockerImagesError(f"start image {self.start_image} not found")
         for image in found:
-            if len(image.layers) != len(base) + 1 or image.layers[:-1] != base:
-                raise DockerImagesError(
-                    f"{image.tag} ({len(image.layers)} layers) and {found[0].tag} "
-                    f"({len(found[0].layers)} layers) do not share all but their top layer; "
-                    "checkpoints of one container add one layer each to the same base (pass "
-                    "base_image to accept a commit that added none)"
+            if image.layers == start:
+                logger.info(
+                    "checkpoint %d (%s) has no layer over the start image: its container had "
+                    "no changes",
+                    image.seq,
+                    image.tag,
                 )
-        return base
+            elif image.layers[:-1] != start:
+                raise DockerImagesError(
+                    f"{image.tag} is not a commit over the start image {self.start_image}: "
+                    f"{len(image.layers)} layers, {_overlap(image.layers, start)} of them the "
+                    f"start image's {len(start)}; a commit adds at most one layer"
+                )
+        return start
 
     def _save(self, tags: Sequence[str]) -> Path:
-        self.work_dir.mkdir(parents=True, exist_ok=True)
-        descriptor, name = tempfile.mkstemp(prefix="images-", suffix=".tar", dir=self.work_dir)
+        if self._save_dir is None:
+            self.work_dir.mkdir(parents=True, exist_ok=True)
+            self._save_dir = Path(tempfile.mkdtemp(prefix="trajlab-images-", dir=self.work_dir))
+        descriptor, name = tempfile.mkstemp(prefix="images-", suffix=".tar", dir=self._save_dir)
         os.close(descriptor)
         archive = Path(name).absolute()  # SavedLayer opens it later, maybe from another cwd
         self._archives.append(archive)
@@ -372,10 +372,10 @@ class DockerImageProvider:
         self,
         archive: Path,
         found: Sequence[_Found],
-        base: tuple[str, ...],
+        start: tuple[str, ...],
         members: Mapping[str, list[SavedLayer]],
     ) -> ImageChain:
-        base_members = members[found[0].tag][: len(base)]
+        start_members = members[found[0].tag][: len(start)]
         tops: dict[int, LayerSource] = {}
         for image in found:
             layers = members[image.tag]
@@ -384,15 +384,15 @@ class DockerImageProvider:
                     f"{archive}: {image.tag} has {len(layers)} layers in {MANIFEST_MEMBER} but "
                     f"{len(image.layers)} in docker image inspect"
                 )
-            if [layer.member for layer in layers[: len(base)]] != [
-                layer.member for layer in base_members
+            if [layer.member for layer in layers[: len(start)]] != [
+                layer.member for layer in start_members
             ]:
                 raise DockerImagesError(
-                    f"{archive}: {image.tag} and {found[0].tag} store the base layers as "
-                    "different blobs"
+                    f"{archive}: {image.tag} and {found[0].tag} store the start image's layers "
+                    "as different blobs"
                 )
-            tops[image.seq] = layers[-1] if len(layers) > len(base) else EmptyLayer()
-        return ImageChain(base_layers=tuple(base_members), tops=tops)
+            tops[image.seq] = layers[-1] if len(layers) > len(start) else EmptyLayer()
+        return ImageChain(start_layers=tuple(start_members), tops=tops)
 
 
 def _failure(completed: subprocess.CompletedProcess[str]) -> str:
@@ -400,9 +400,9 @@ def _failure(completed: subprocess.CompletedProcess[str]) -> str:
     return f"{command} exited {completed.returncode}: {completed.stderr.strip()}"
 
 
-def _overlap(layers: Sequence[str], base: Sequence[str]) -> int:
+def _overlap(layers: Sequence[str], start: Sequence[str]) -> int:
     count = 0
-    for mine, theirs in zip(layers, base, strict=False):
+    for mine, theirs in zip(layers, start, strict=False):
         if mine != theirs:
             break
         count += 1

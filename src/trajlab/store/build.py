@@ -8,9 +8,11 @@ reported incomplete because its images were not checked.
 
 Writes go to `record.duckdb` (trials, steps, deltas) and `heldout.duckdb` (the trial's
 `ChainReport` in `chains`), each in one transaction. The chain row is written first and replaces
-any earlier one; the record transaction is the commit point. A trial whose id is already in
-`trials` is skipped and nothing is written, so building a trial again is safe, including after a
-build that stopped between the two files.
+any earlier one; the record transaction is the commit point. A trial already in `trials` is
+skipped and nothing is written, so building a trial again is safe, including after a build
+that stopped between the two files; the exception is a trial built without images, which a
+build with images rebuilds (its old rows are deleted first, in their own transaction, so a stop
+at any point leaves the trial either whole or absent).
 """
 
 import hashlib
@@ -68,7 +70,7 @@ class ImageProvider(Protocol):
     """Where a trial's checkpoint images are read from (the Docker adapter, or a test's)."""
 
     def chain(self, checkpoints: Sequence[CheckpointRecord]) -> ImageChain:
-        """The derived image's layers and each checkpoint's top layer; a checkpoint whose image
+        """The start image's layers and each checkpoint's top layer; a checkpoint whose image
         is gone has no top."""
         ...
 
@@ -89,8 +91,8 @@ def start_image(trial_dir: Path) -> str | None:
     extends by one layer: the checkpoint it resumed from (`trajlab-resume.json`), else its
     derived image (`trajlab-preinstall.json`); None when neither record is there.
 
-    Pass it as the Docker provider's `base_image`, so a checkpoint image on another base is
-    refused instead of diffed (ADR-0014, item 5).
+    The Docker provider needs it (`DockerImageProvider(start_image=...)`), so a checkpoint image
+    over another image is refused instead of diffed (ADR-0014, item 5).
     """
     resume = trial_dir / RESUME_RECORD_FILENAME
     if resume.is_file():
@@ -172,6 +174,11 @@ def chain_report(trial_id: UUID, steps: TrialSteps, chain: ImageChain | None) ->
         reasons.append(f"{_calls(len(steps.timed_out_calls))} timed out")
     if steps.unanswered_calls:
         reasons.append(f"{_calls(len(steps.unanswered_calls))} without a call record")
+    if steps.interrupted_calls:
+        reasons.append(
+            f"{_calls(len(steps.interrupted_calls))} stopped while running (no result), "
+            "so its changes may be in no checkpoint"
+        )
     if chain is None:
         reasons.append("images were not checked")
     reasons.extend(f"checkpoint {seq} has no image" for seq in missing)
@@ -182,10 +189,12 @@ def chain_report(trial_id: UUID, steps: TrialSteps, chain: ImageChain | None) ->
         answered_calls=len(steps.answered_calls),
         timed_out_calls=steps.timed_out_calls,
         unanswered_calls=steps.unanswered_calls,
+        interrupted_calls=steps.interrupted_calls,
+        rejected_calls=steps.rejected_calls,
         checkpoints=len(steps.checkpoints),
         images_checked=chain is not None,
         missing_images=missing,
-        final_state_recorded=bool(steps.stop_calls),
+        final_state_recorded=steps.final_state_recorded,
         reasons=tuple(reasons),
     )
 
@@ -242,8 +251,8 @@ def _deltas(
     if images is None:
         return None, ()
     if not steps.checkpoints:
-        # Nothing to diff: every view is the task image's.
-        return ImageChain(base_layers=(), tops={}), ()
+        # Nothing to diff: every view is the start image's.
+        return ImageChain(start_layers=(), tops={}), ()
     chain = images.chain(steps.checkpoints)
     work_dir.mkdir(parents=True, exist_ok=True)
     scratch = Path(tempfile.mkdtemp(prefix=f"{trial_name}.", dir=work_dir))
@@ -308,8 +317,13 @@ def build_trial(
     create_store(store_dir, store_meta())
     stored = _stored(store_dir, result.id)
     if stored is not None:
-        logger.info("%s: trial %s is already in %s; skipped", trial_dir, result.id, store_dir)
-        return stored
+        if stored.chain.images_checked or images is None:
+            logger.info("%s: trial %s is already in %s; skipped", trial_dir, result.id, store_dir)
+            return stored
+        logger.info("%s: rebuilding trial %s, built before without images", trial_dir, result.id)
+        with connect(record_path(store_dir), read_only=False) as con, _transaction(con):
+            for table in ("deltas", "steps", "trials"):
+                con.execute(f"DELETE FROM {table} WHERE trial_id = ?", [result.id])
 
     chain, deltas = _deltas(
         steps,

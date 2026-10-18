@@ -2,7 +2,8 @@
 
 The store has two DuckDB files (`trajlab.store.schema` holds their DDL):
 
-- `record.duckdb`, the record an agent may read: `trials`, `steps`, `deltas`, and `store_meta`.
+- `record.duckdb`, the record of prior attempts that an agent may read: `trials`, `steps`,
+  `deltas`, and `store_meta`.
 - `heldout.duckdb`, never opened by an agent connection or exported to an agent: `checks`,
   `faults`, and `blame` (ground truth, for scoring), and `chains` (capture completeness).
 
@@ -72,7 +73,9 @@ class StepRow(_Row):
     trial_id: UUID
     step_idx: int = Field(ge=1, description="Order within the trial, from 1.")
     atif_step_id: int | None = Field(
-        default=None, ge=1, description="step_id in Harbor's trajectory.json; null for a stop row."
+        default=None,
+        ge=1,
+        description="step_id in Harbor's trajectory.json; null for a stop or compaction row.",
     )
     source: StepSource
     tool_call_id: str | None = Field(
@@ -91,14 +94,17 @@ class StepRow(_Row):
     reasoning: str | None = Field(default=None, description="ATIF reasoning_content, first row.")
     t_start: AwareDatetime | None = Field(default=None, description="The ATIF step's timestamp.")
     t_end: AwareDatetime | None = Field(
-        default=None, description="When the hook saw the call finish; null for unhooked calls."
+        default=None,
+        description="When the hook saw the call finish; null for a call without a call record "
+        "(an unhooked tool, or a hooked call that timed out, was rejected, or was interrupted).",
     )
     checkpoint_seq: int | None = Field(
         default=None,
         ge=1,
         description="The checkpoint holding the environment state right after this row; null "
-        "before the first checkpoint (the task image's state) or when unknown (a timed-out call, "
-        "or a call deferred under every-N whose changes are in a later checkpoint).",
+        "before the first checkpoint (the start image's state) or when no checkpoint holds it "
+        "(after a hooked call that timed out, was deferred under every-N, or was stopped while "
+        "it ran, until a call's record names a checkpoint again).",
     )
     checkpoint_id: str | None = Field(default=None, description="That checkpoint's image id.")
     # Derived columns (ADR-0014; trajlab.store.derive, build-order step 3). Null until derived.
@@ -125,7 +131,10 @@ class DeltaRow(_Row):
 
     trial_id: UUID
     step_idx: int = Field(ge=1)
-    path: str = Field(pattern=r"^/", description="Absolute path in the container.")
+    path: str = Field(
+        pattern=r"^/",
+        description="Absolute path in the container; a byte that is not UTF-8 is written \\xNN.",
+    )
     op: DeltaOp
     kind_before: EntryKind | None = None
     kind_after: EntryKind | None = None
@@ -141,8 +150,9 @@ class DeltaRow(_Row):
     )
     blob_ref: str | None = Field(
         default=None,
-        description="`blobs/<sha256>` of the later version, when it is a non-text file whose "
-        "content changed.",
+        description="`blobs/<sha256>` of the later version (a file's bytes or a symlink's "
+        "target), when the content changed and the row has no hunk because a version is not "
+        "text.",
     )
     sha256_before: str | None = Field(default=None, pattern=SHA256)
     sha256_after: str | None = Field(default=None, pattern=SHA256)
@@ -225,21 +235,36 @@ class BlameRow(_Row):
 
 
 class ChainReport(_Row):
-    """Whether a trial's checkpoint chain is complete: every hooked call answered and every
-    checkpoint image readable (ADR-0014). Held out; `exp2 run` refuses incomplete chains."""
+    """Whether a trial's checkpoint chain is complete: every hooked call that ran was answered
+    and every checkpoint image read (ADR-0014). Held out; `exp2 run` refuses incomplete chains.
+    """
 
     trial_id: UUID
     complete: bool
-    hooked_calls: int = Field(ge=0, description="Tool calls of hooked tools in the trajectory.")
+    hooked_calls: int = Field(
+        ge=0, description="Calls of hooked tools in the trajectory that ran (not rejected)."
+    )
     answered_calls: int = Field(ge=0, description="Of those, calls with a CallRecord.")
     timed_out_calls: tuple[str, ...] = Field(default=(), description="Calls with only a .timeout.")
     unanswered_calls: tuple[str, ...] = Field(
-        default=(), description="Hooked calls with neither a record nor a .timeout."
+        default=(), description="Hooked calls with a result but no record or .timeout."
+    )
+    interrupted_calls: tuple[str, ...] = Field(
+        default=(),
+        description="Hooked calls with no result: the agent was stopped while they ran (the time "
+        "cap), so what they changed may be in no checkpoint.",
+    )
+    rejected_calls: tuple[str, ...] = Field(
+        default=(),
+        description="Calls of hooked tools that Claude Code refused before running them "
+        "(`<tool_use_error>`); no hook fires and nothing changes, so they do not count.",
     )
     checkpoints: int = Field(ge=0)
     images_checked: bool = Field(description="False when deltas were not computed at all.")
     missing_images: tuple[int, ...] = Field(default=(), description="Seqs whose image is gone.")
-    final_state_recorded: bool = Field(description="A stop record names the final state.")
+    final_state_recorded: bool = Field(
+        description="The last step row is a stop record's: it names the state the agent left."
+    )
     reasons: tuple[str, ...] = Field(default=(), description="Why the chain is incomplete.")
 
     @model_validator(mode="after")

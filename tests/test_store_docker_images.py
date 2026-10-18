@@ -74,6 +74,11 @@ class FakeDocker:
     edit_manifest: Callable[[list[dict[str, Any]]], None] | None = None
     calls: list[list[str]] = field(default_factory=list)
 
+    def __post_init__(self) -> None:
+        # Every checkpoint here is a commit over BASE_IMAGE, the start image providers are given.
+        if all(image.id != BASE_IMAGE.id for image in self.images):
+            self.images.append(BASE_IMAGE)
+
     def resolve(self, ref: str) -> Image | None:
         return next((i for i in self.images if ref == i.id or ref in i.tags), None)
 
@@ -144,6 +149,7 @@ TOPS = {
     for seq in (1, 2, 3)
 }
 BASE_IMAGE = Image("sha256:" + "b" * 64, ["trajlab-preinstalled:hello"], list(BASE))
+START = BASE_IMAGE.tags[0]
 
 
 def tag(seq: int) -> str:
@@ -183,13 +189,11 @@ def work_dir(tmp_path: Path) -> Path:
     return tmp_path / "work"
 
 
-def provide(
-    docker: FakeDocker, work_dir: Path, *seqs: int, base_image: str | None = None
-) -> ImageChain:
-    with DockerImageProvider(work_dir, runner=docker, base_image=base_image) as provider:
+def provide(docker: FakeDocker, work_dir: Path, *seqs: int, start_image: str = START) -> ImageChain:
+    with DockerImageProvider(work_dir, runner=docker, start_image=start_image) as provider:
         chain = provider.chain(records(*seqs))
         # Read everything before the provider deletes its save file.
-        for source in [*chain.base_layers, *chain.tops.values()]:
+        for source in [*chain.start_layers, *chain.tops.values()]:
             assert read(source) is not None
         return chain
 
@@ -200,22 +204,22 @@ def test_repository_is_the_backends() -> None:
 
 def test_chain_yields_exactly_the_saved_layers(work_dir: Path) -> None:
     docker = FakeDocker([BASE_IMAGE, *(checkpoint_image(seq) for seq in (1, 2, 3))])
-    with DockerImageProvider(work_dir, runner=docker) as provider:
+    with DockerImageProvider(work_dir, runner=docker, start_image=START) as provider:
         chain = provider.chain(records(1, 2, 3))
 
-        assert [read(source) for source in chain.base_layers] == [layer.blob for layer in BASE]
+        assert [read(source) for source in chain.start_layers] == [layer.blob for layer in BASE]
         assert sorted(chain.tops) == [1, 2, 3]
         for seq, layer in TOPS.items():
             assert read(chain.tops[seq]) == layer.blob
             assert layer_files(chain.tops[seq]) == dict(layer.files)
-        assert [layer_files(source) for source in chain.base_layers] == [
+        assert [layer_files(source) for source in chain.start_layers] == [
             dict(layer.files) for layer in BASE
         ]
 
 
 def test_layer_source_opens_twice_and_independently(work_dir: Path) -> None:
     docker = FakeDocker([checkpoint_image(1), checkpoint_image(2)])
-    with DockerImageProvider(work_dir, runner=docker) as provider:
+    with DockerImageProvider(work_dir, runner=docker, start_image=START) as provider:
         source = provider.chain(records(1, 2)).tops[2]
         expected = TOPS[2].blob
         with source.open() as first, source.open() as second:
@@ -228,7 +232,7 @@ def test_layer_source_opens_twice_and_independently(work_dir: Path) -> None:
 
 def test_layer_source_is_seekable(work_dir: Path) -> None:
     docker = FakeDocker([checkpoint_image(1)])
-    with DockerImageProvider(work_dir, runner=docker) as provider:
+    with DockerImageProvider(work_dir, runner=docker, start_image=START) as provider:
         source = provider.chain(records(1)).tops[1]
         with source.open() as stream:
             assert stream.seekable()
@@ -244,7 +248,7 @@ def test_layer_source_is_seekable(work_dir: Path) -> None:
 
 def test_closing_a_stream_closes_the_save_file(work_dir: Path) -> None:
     docker = FakeDocker([checkpoint_image(1)])
-    with DockerImageProvider(work_dir, runner=docker) as provider:
+    with DockerImageProvider(work_dir, runner=docker, start_image=START) as provider:
         source = provider.chain(records(1)).tops[1]
         before = len(os.listdir("/dev/fd"))
         streams = [source.open() for _ in range(10)]
@@ -260,7 +264,7 @@ def test_relative_work_dir_survives_a_change_of_directory(
 ) -> None:
     monkeypatch.chdir(tmp_path)
     docker = FakeDocker([checkpoint_image(1)])
-    with DockerImageProvider(Path("work"), runner=docker) as provider:
+    with DockerImageProvider(Path("work"), runner=docker, start_image=START) as provider:
         source = provider.chain(records(1)).tops[1]
         monkeypatch.chdir(tmp_path.parent)
         assert read(source) == TOPS[1].blob
@@ -314,20 +318,21 @@ def test_save_runs_once_with_every_found_tag_into_work_dir(
 ) -> None:
     caplog.set_level(logging.INFO)
     docker = FakeDocker([checkpoint_image(seq) for seq in (1, 2, 3)])
-    with DockerImageProvider(work_dir, runner=docker) as provider:
+    with DockerImageProvider(work_dir, runner=docker, start_image=START) as provider:
         provider.chain(list(reversed(records(1, 2, 3))))
 
     assert len(docker.saves) == 1
     save = docker.saves[0]
     assert save[1:4] == ["image", "save", "-o"]
-    assert Path(save[4]).parent == work_dir
+    assert Path(save[4]).parent.parent == work_dir  # the provider's own save directory
+    assert Path(save[4]).parent.name.startswith("trajlab-images-")
     assert save[5:] == [tag(1), tag(2), tag(3)]
     assert "saved 3 checkpoint images in" in caplog.text and " MB in " in caplog.text
 
 
 def test_closing_removes_every_save_file(work_dir: Path) -> None:
     docker = FakeDocker([checkpoint_image(1), checkpoint_image(2)])
-    with DockerImageProvider(work_dir, runner=docker) as provider:
+    with DockerImageProvider(work_dir, runner=docker, start_image=START) as provider:
         first = provider.chain(records(1)).tops[1]
         second = provider.chain(records(1, 2)).tops[2]
         assert isinstance(first, SavedLayer) and isinstance(second, SavedLayer)
@@ -341,77 +346,81 @@ def test_closing_removes_every_save_file(work_dir: Path) -> None:
 
 def test_no_records_runs_no_docker(work_dir: Path) -> None:
     docker = FakeDocker([checkpoint_image(1)])
-    with DockerImageProvider(work_dir, runner=docker) as provider:
-        assert provider.chain([]) == ImageChain(base_layers=(), tops={})
+    with DockerImageProvider(work_dir, runner=docker, start_image=START) as provider:
+        assert provider.chain([]) == ImageChain(start_layers=(), tops={})
     assert docker.calls == []
 
 
 def test_no_image_found_runs_no_save(work_dir: Path) -> None:
     docker = FakeDocker([BASE_IMAGE])
-    chain = provide(docker, work_dir, 1, 2, base_image=BASE_IMAGE.id)
+    chain = provide(docker, work_dir, 1, 2, start_image=BASE_IMAGE.id)
 
-    assert chain == ImageChain(base_layers=(), tops={})
+    assert chain == ImageChain(start_layers=(), tops={})
     assert docker.saves == []
     assert not work_dir.exists() or list(work_dir.iterdir()) == []
 
 
-def test_base_image_with_matching_layers(work_dir: Path) -> None:
+def test_start_image_with_matching_layers(work_dir: Path) -> None:
     docker = FakeDocker([BASE_IMAGE, checkpoint_image(1), checkpoint_image(2)])
-    chain = provide(docker, work_dir, 1, 2, base_image="trajlab-preinstalled:hello")
+    chain = provide(docker, work_dir, 1, 2, start_image="trajlab-preinstalled:hello")
 
-    assert len(chain.base_layers) == 2 and sorted(chain.tops) == [1, 2]
+    assert len(chain.start_layers) == 2 and sorted(chain.tops) == [1, 2]
     assert ["image", "inspect", "--format", "{{json .RootFS.Layers}}", BASE_IMAGE.tags[0]] in [
         call[1:] for call in docker.calls
     ]
 
 
-def test_base_image_mismatch_raises(work_dir: Path) -> None:
+def test_start_image_mismatch_raises(work_dir: Path) -> None:
     shorter = Image("sha256:" + "c" * 64, ["trajlab-preinstalled:short"], [BASE[0]])
     docker = FakeDocker([shorter, checkpoint_image(1)])
-    with pytest.raises(DockerImagesError, match="not a commit over the base image"):
-        provide(docker, work_dir, 1, base_image=shorter.id)
+    with pytest.raises(DockerImagesError, match="not a commit over the start image"):
+        provide(docker, work_dir, 1, start_image=shorter.id)
     assert docker.saves == []
 
 
-def test_missing_base_image_raises(work_dir: Path) -> None:
+def test_missing_start_image_raises(work_dir: Path) -> None:
     docker = FakeDocker([checkpoint_image(1)])
-    with pytest.raises(DockerImagesError, match="base image trajlab-preinstalled:gone not found"):
-        provide(docker, work_dir, 1, base_image="trajlab-preinstalled:gone")
+    with pytest.raises(DockerImagesError, match="start image trajlab-preinstalled:gone not found"):
+        provide(docker, work_dir, 1, start_image="trajlab-preinstalled:gone")
 
 
-def test_different_base_layers_raise(work_dir: Path) -> None:
+def test_different_start_layers_raise(work_dir: Path) -> None:
     other_base = [BASE[0], make_layer({"usr/lib/liby.so": b"other"})]
     docker = FakeDocker([checkpoint_image(1), checkpoint_image(2, [*other_base, TOPS[2]])])
-    with pytest.raises(DockerImagesError, match="do not share all but their top layer"):
+    with pytest.raises(DockerImagesError, match="not a commit over the start image"):
         provide(docker, work_dir, 1, 2)
     assert docker.saves == []
 
 
-@pytest.mark.parametrize("base_image", [None, BASE_IMAGE.id])
-def test_image_with_two_layers_over_the_base_raises(work_dir: Path, base_image: str | None) -> None:
+def test_image_with_two_layers_over_the_start_image_raises(work_dir: Path) -> None:
     extra = make_layer({"opt/extra": b"extra"})
     docker = FakeDocker(
         [BASE_IMAGE, checkpoint_image(1), checkpoint_image(2, [*BASE, extra, TOPS[2]])]
     )
-    with pytest.raises(DockerImagesError, match="a commit adds|do not share"):
-        provide(docker, work_dir, 1, 2, base_image=base_image)
+    with pytest.raises(DockerImagesError, match="a commit adds at most one layer"):
+        provide(docker, work_dir, 1, 2)
 
 
 def test_commit_without_a_layer_has_an_empty_top_given_the_base(work_dir: Path) -> None:
     docker = FakeDocker([BASE_IMAGE, checkpoint_image(1, list(BASE)), checkpoint_image(2)])
-    with DockerImageProvider(work_dir, runner=docker, base_image=BASE_IMAGE.id) as provider:
+    with DockerImageProvider(work_dir, runner=docker, start_image=BASE_IMAGE.id) as provider:
         chain = provider.chain(records(1, 2))
         assert isinstance(chain.tops[1], EmptyLayer)
         assert layer_files(chain.tops[1]) == {}
         assert layer_files(chain.tops[2]) == dict(TOPS[2].files)
-        assert [read(source) for source in chain.base_layers] == [layer.blob for layer in BASE]
+        assert [read(source) for source in chain.start_layers] == [layer.blob for layer in BASE]
     assert docker.saves[0][5:] == [tag(1), tag(2)]
 
 
-def test_commit_without_a_layer_raises_without_the_base(work_dir: Path) -> None:
-    docker = FakeDocker([checkpoint_image(1, list(BASE)), checkpoint_image(2)])
-    with pytest.raises(DockerImagesError, match="pass base_image"):
-        provide(docker, work_dir, 1, 2)
+def test_closing_removes_what_a_killed_save_left(work_dir: Path) -> None:
+    # The docker CLI saves to `.tmp-<name><random>` beside the target and renames it at the
+    # end; killed (the save timeout, a signal), it leaves that file behind.
+    docker = FakeDocker([checkpoint_image(1)])
+    with DockerImageProvider(work_dir, runner=docker, start_image=START) as provider:
+        archive = provider.chain(records(1)).tops[1]
+        assert isinstance(archive, SavedLayer)
+        (archive.archive.parent / f".tmp-{archive.archive.name}123").write_bytes(b"partial")
+    assert list(work_dir.iterdir()) == []
 
 
 def test_base_stored_as_different_blobs_raises(work_dir: Path) -> None:
@@ -447,7 +456,7 @@ def test_uncompressed_layers_are_returned_as_saved(work_dir: Path) -> None:
     raw_base = [make_layer(dict(layer.files), compress=False) for layer in BASE]
     raw_top = make_layer(dict(TOPS[1].files), compress=False)
     docker = FakeDocker([checkpoint_image(1, [*raw_base, raw_top])])
-    with DockerImageProvider(work_dir, runner=docker) as provider:
+    with DockerImageProvider(work_dir, runner=docker, start_image=START) as provider:
         chain = provider.chain(records(1))
         assert read(chain.tops[1]) == raw_top.tar
         assert layer_files(chain.tops[1]) == dict(TOPS[1].files)
@@ -477,11 +486,15 @@ def test_missing_docker_binary_raises(work_dir: Path) -> None:
         raise FileNotFoundError(2, "No such file or directory", command[0])
 
     with pytest.raises(DockerImagesError, match="no-such-docker image inspect"):
-        DockerImageProvider(work_dir, docker="no-such-docker", runner=runner).chain(records(1))
+        DockerImageProvider(
+            work_dir, docker="no-such-docker", runner=runner, start_image=START
+        ).chain(records(1))
 
 
 def test_repeated_seq_raises(work_dir: Path) -> None:
     docker = FakeDocker([checkpoint_image(1)])
     with pytest.raises(DockerImagesError, match="repeat a seq"):
-        DockerImageProvider(work_dir, runner=docker).chain([*records(1), *records(1)])
+        DockerImageProvider(work_dir, runner=docker, start_image=START).chain(
+            [*records(1), *records(1)]
+        )
     assert docker.calls == []

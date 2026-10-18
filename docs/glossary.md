@@ -109,11 +109,14 @@ One trial is one task executed by one attempt.
 - **held-out tables** - `checks`, `faults`, `blame`, and `chains` in `heldout.duckdb`; never opened by an agent connection or exported to an agent.
 - **step row** - one row of `steps`: a tool call, an ATIF step without tool calls, a compaction step, or a stop record (ADR-0014, item 4).
   Not the same as an ATIF step: a step with k tool calls gives k step rows.
-- **top layer** - the last layer of a checkpoint image: the container's whole writable layer when it was committed, so it holds every change since the container started.
-- **view** - the filesystem at a checkpoint: the derived image with that checkpoint's top layer applied by the OCI rules (whiteouts, opaque directories).
-- **delta** - the delta rows of one checkpoint: the paths whose kind, mode, owner, or content differ between the previous checkpoint's view (the derived image, for the first) and this one's; keyed to the step row that owns the checkpoint.
+- **start image** - the image a trial's container started from: its derived image, or for a trial resumed from a checkpoint, that checkpoint image (or the task image, for a trial without pre-install).
+  Every checkpoint image of the trial is its start image plus at most one layer.
+  Not: "base image" (see derived image).
+- **top layer** - the layer a `docker commit` added over the start image: the container's whole writable layer when it was committed, so it holds every change since the container started; empty when the commit added no layer (a container with no changes).
+- **view** - the filesystem at a checkpoint: the start image with that checkpoint's top layer applied by the OCI rules (whiteouts, opaque directories, non-directory members replacing subtrees).
+- **delta** - the delta rows of one checkpoint: the paths whose kind, mode, owner, or content differ between the previous checkpoint's view (the start image, for the first) and this one's; keyed to the step row that owns the checkpoint.
   Not: the detector's `changed_paths` in a call record, which compare change times and are capped.
-- **checkpoint chain** - a trial's checkpoints in `seq` order; complete when every hooked call has a call record and every checkpoint image was read (ADR-0014, item 8).
+- **checkpoint chain** - a trial's checkpoints in `seq` order; complete when every hooked call that ran has a call record and every checkpoint image was read (ADR-0014, item 8).
 - **retry** - one more attempt at a failed task in Exp 2, started after the harness verifier scored the previous attempt; tests the agent runs inside an attempt are not retries.
 - **retry chain** - a failure's attempts under one Exp 2 arm, in order: attempt 0 (the corpus first attempt), then retries 1 to N, each naming the one before in `parent_trial_id`.
   Not to be confused with a checkpoint chain.
@@ -123,7 +126,7 @@ One trial is one task executed by one attempt.
 - **ADR** - Architecture Decision Record, in `docs/decisions/`.
   Accepted ADRs are historical: amend, do not rewrite.
 - **capture** - this project's current phase (versus the later analysis phase); also the act of taking a checkpoint (`capture_ms`, "capture order").
-- **contracts** - `src/trajlab/contracts/`: the shared pydantic models, and the only capture module analysis code will import.
+- **contracts** - `src/trajlab/contracts/`: the shared pydantic models; with `atif/`, the only capture modules analysis code (`store/`) imports (ADR-0014).
 - **fixture** - `tests/fixtures/hello-world-trial/`: one real, trimmed trial dir; every offline test runs against it.
 - **bind mount** - Harbor mounts the trial's `agent/` dir at `/logs/agent` in the container, so container writes appear on the host immediately; this is the hook-to-watcher channel.
 - **manifest** - unqualified, the corpus manifest.

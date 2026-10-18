@@ -28,15 +28,27 @@ capture; a test keeps the two equal.
 
 `checkpoint_seq` is the checkpoint whose state the environment is in right after the row.
 Walking the rows in order with `current`, the latest checkpoint reached (none at the start: the
-task image's state):
+start image's state):
 
 - A call whose CallRecord names a checkpoint takes that seq, and `current` becomes the larger
   of the two. Parallel calls of one step can be answered out of order, so a later row may name
   an earlier checkpoint; the state after the step is still the latest one.
-- A hooked call that timed out, or one deferred under every-N (ADR-0007), has no state on
-  record: null, and `current` is unchanged.
+- A hooked call that timed out, was deferred under every-N (ADR-0007), or was stopped while it
+  ran has changes no checkpoint holds yet: null, and every row after it is null too, until a
+  call's record names a checkpoint again.
 - Every other row (read-only calls, message and compaction rows, unchanged calls before any
-  checkpoint) takes `current`.
+  checkpoint, calls Claude Code rejected) takes `current`.
+
+Hooked calls (`HOOKED_TOOLS`) are sorted for the chain report (ADR-0014, item 8):
+
+- answered: a CallRecord exists;
+- timed out: the hook gave up (`.timeout`);
+- rejected: Claude Code refused the call before running it (its result is a
+  `<tool_use_error>`, e.g. Edit's "String to replace not found"), so no hook fired and nothing
+  changed; it does not make the chain incomplete;
+- interrupted: no result at all, because the agent was stopped while the call ran (the time
+  cap); what it changed may be in no checkpoint;
+- unanswered: anything else, a capture fault.
 """
 
 import json
@@ -67,6 +79,8 @@ from trajlab.contracts import (
 logger = logging.getLogger(__name__)
 
 _STEP_EXTRA = TypeAdapter(TrajlabStepExtra)
+# How Claude Code answers a tool call it refused before running it (input validation).
+TOOL_USE_ERROR = "<tool_use_error>"
 
 
 class StepsError(ValueError):
@@ -79,8 +93,8 @@ class _Spec:
 
     fields: dict[str, Any]
     record: CallRecord | None = None
-    timed_out: bool = False
-    current: bool = False  # takes `current` (message and compaction rows)
+    unknown: bool = False  # a timed-out, deferred, or interrupted call: no checkpoint holds it
+    current: bool = False  # takes `current` (message, compaction, and rejected-call rows)
 
 
 def _place_stops(specs: list[_Spec], stops: tuple[CallRecord, ...]) -> list[_Spec]:
@@ -120,11 +134,14 @@ class TrialSteps:
     rows: tuple[StepRow, ...]
     owner_step: Mapping[str, int]  # tool_call_id (a stop's request id included) -> step_idx
     checkpoints: tuple[CheckpointRecord, ...]  # from the checkpoint steps, in seq order
-    hooked_calls: tuple[str, ...]  # tool calls of HOOKED_TOOLS, in trajectory order
+    hooked_calls: tuple[str, ...]  # tool calls of HOOKED_TOOLS that ran, in trajectory order
     answered_calls: tuple[str, ...]  # of those, the ones with a CallRecord
     timed_out_calls: tuple[str, ...]  # every original step's timed_out_tool_call_ids
-    unanswered_calls: tuple[str, ...]  # hooked calls with neither a record nor a .timeout
+    interrupted_calls: tuple[str, ...]  # hooked calls without a result: stopped while running
+    rejected_calls: tuple[str, ...]  # hooked calls Claude Code refused to run (not in hooked)
+    unanswered_calls: tuple[str, ...]  # hooked calls with no record, .timeout, or excuse
     stop_calls: tuple[CallRecord, ...]  # the root's stop CallRecords, in call_seq order
+    final_state_recorded: bool  # the last row is a stop row: a record names the final state
 
 
 def as_text(content: str | list[ContentPart] | None) -> str:
@@ -162,6 +179,12 @@ def seen_output(result: ObservationResult) -> str:
     if isinstance(raw, dict) and "content" in raw:
         return blocks_as_text(raw["content"])
     return as_text(result.content)
+
+
+def _rejected(result: ObservationResult) -> bool:
+    """True if Claude Code refused the call before running it: an error whose content is a
+    `<tool_use_error>` (input validation, e.g. Edit's "String to replace not found")."""
+    return is_error(result) is True and seen_output(result).lstrip().startswith(TOOL_USE_ERROR)
 
 
 def is_error(result: ObservationResult) -> bool | None:
@@ -236,19 +259,20 @@ class _Walk:
         self.trial_id = trial_id
         self.images = images
         self.current: int | None = None
+        self.unknown = False  # a call's changes are in no checkpoint yet
         self.rows: list[StepRow] = []
         self.owner: dict[str, int] = {}
 
-    def state_after(self, record: CallRecord | None, *, timed_out: bool = False) -> int | None:
-        if timed_out:
-            return None
+    def state_after(self, spec: _Spec) -> int | None:
+        record = spec.record
         if record is not None and record.checkpoint_seq is not None:
             seq = record.checkpoint_seq
             self.current = seq if self.current is None else max(self.current, seq)
+            self.unknown = False
             return seq
-        if record is not None and record.outcome == "deferred":
-            return None
-        return self.current
+        if spec.unknown or (record is not None and record.outcome == "deferred"):
+            self.unknown = True
+        return None if self.unknown else self.current
 
     def add(self, checkpoint_seq: int | None, **fields: Any) -> None:
         step_idx = len(self.rows) + 1
@@ -301,6 +325,8 @@ def build_steps(trajectory: Trajectory, *, trial_id: UUID) -> TrialSteps:
     hooked: list[str] = []
     answered: list[str] = []
     timed_out_all: list[str] = []
+    interrupted: list[str] = []
+    rejected: list[str] = []
     unanswered: list[str] = []
     for step, extra in parsed:
         if isinstance(extra, CheckpointStepExtra):
@@ -326,13 +352,23 @@ def build_steps(trajectory: Trajectory, *, trial_id: UUID) -> TrialSteps:
         results = _results_by_call(step)
         for n, call in enumerate(step.tool_calls):
             record = records.get(call.tool_call_id)
-            if call.function_name in HOOKED_TOOLS:
-                hooked.append(call.tool_call_id)
-                if record is not None:
-                    answered.append(call.tool_call_id)
-                elif call.tool_call_id not in timed_out:
-                    unanswered.append(call.tool_call_id)
             result = results.get(call.tool_call_id)
+            stopped = False  # interrupted: no result, so the agent was stopped while it ran
+            if call.function_name in HOOKED_TOOLS:
+                if record is not None:
+                    hooked.append(call.tool_call_id)
+                    answered.append(call.tool_call_id)
+                elif call.tool_call_id in timed_out:
+                    hooked.append(call.tool_call_id)
+                elif result is None:
+                    hooked.append(call.tool_call_id)
+                    interrupted.append(call.tool_call_id)
+                    stopped = True
+                elif _rejected(result):
+                    rejected.append(call.tool_call_id)
+                else:
+                    hooked.append(call.tool_call_id)
+                    unanswered.append(call.tool_call_id)
             fields = {
                 "atif_step_id": extra.original_step_id,
                 "source": step.source,
@@ -346,16 +382,14 @@ def build_steps(trajectory: Trajectory, *, trial_id: UUID) -> TrialSteps:
                 "t_start": step_time(step),
                 "t_end": None if record is None else record.requested_at,
             }
-            specs.append(_Spec(fields, record=record, timed_out=call.tool_call_id in timed_out))
+            unknown = stopped or call.tool_call_id in timed_out
+            specs.append(_Spec(fields, record=record, unknown=unknown))
 
     stop_calls = tuple(sorted(root.stop_calls, key=lambda record: record.call_seq))
     walk = _Walk(trial_id, {seq: record.checkpoint_id for seq, record in checkpoints.items()})
-    for spec in _place_stops(specs, stop_calls):
-        seq = (
-            walk.current
-            if spec.current
-            else walk.state_after(spec.record, timed_out=spec.timed_out)
-        )
+    placed = _place_stops(specs, stop_calls)
+    for spec in placed:
+        seq = (None if walk.unknown else walk.current) if spec.current else walk.state_after(spec)
         walk.add(seq, **spec.fields)
 
     return TrialSteps(
@@ -367,6 +401,11 @@ def build_steps(trajectory: Trajectory, *, trial_id: UUID) -> TrialSteps:
         hooked_calls=tuple(hooked),
         answered_calls=tuple(answered),
         timed_out_calls=tuple(timed_out_all),
+        interrupted_calls=tuple(interrupted),
+        rejected_calls=tuple(rejected),
         unanswered_calls=tuple(unanswered),
         stop_calls=stop_calls,
+        final_state_recorded=bool(placed)
+        and placed[-1].record is not None
+        and placed[-1].record.trigger == "stop",
     )
