@@ -57,7 +57,11 @@ and `+++ b<path>` (`/dev/null` for a side without content), 3 lines of context, 
 without one. Lines are matched after trimming common leading and trailing lines: exactly
 (difflib without autojunk) when that is cheap, else by a shortest edit script (Myers) within a
 step budget, else by anchoring on lines unique to both sides (patience diff) with the gaps
-matched exactly within a budget, so a hunk is small and is made in a few seconds at most.
+matched exactly within a budget, so a hunk is made in a few seconds at most; it is small except
+for a file of few distinct lines edited in many scattered places, which gets one hunk replacing
+the whole file. A path with a newline, tab, double quote, or backslash is quoted in the headers
+the way GNU diff and git quote it (`+++ "b/app/x\\n.txt"`), with a byte that is not UTF-8
+as an octal escape.
 A row whose content changed but which gets no hunk (a version that is not text) stores its
 later version instead, if it has one: a file's bytes or a symlink's target go to
 `<blobs_dir>/<sha256>`, named `blobs/<sha256>` in `blob_ref`. A mode- or owner-only change
@@ -210,16 +214,19 @@ _CONTEXT_LINES = 3
 # with autojunk a one-line edit to such a file rewrites every line. So common leading and trailing
 # lines are trimmed, and the rest is matched:
 # 1. exactly, by difflib without autojunk, when the two sides' line counts multiply to at most
-#    _EXACT_LINE_PRODUCT (at most about 0.1 s);
+#    _EXACT_LINE_PRODUCT (its cost grows about as that product to the 1.5: 0.09 s at the cap on
+#    the worst shape measured, blank lines against blank lines interleaved with distinct ones);
 # 2. else by a shortest edit script (Myers) if one takes at most _EDIT_SCRIPT_BUDGET steps
 #    (about 0.5 s; 500 scattered edits in 30,000 lines take 0.13 s);
 # 3. else, for a wholesale rewrite, by anchoring on lines that occur exactly once on each side
-#    (patience diff) and matching the gaps between anchors exactly while the gaps' line products
-#    add up to at most _GAP_BUDGET, and as replacements after that.
-# So no hunk takes more than a few seconds, and each is a correct diff.
-_EXACT_LINE_PRODUCT = 250_000
+#    (patience diff) and matching each gap between anchors exactly while the gaps' line products
+#    add up to at most _GAP_BUDGET (about 2 s at worst), and as replacements after that.
+# So a hunk takes under about 3 s and is always a correct diff. It is not always small: a file
+# of few distinct lines (say, of 0s and 1s) edited in many scattered places has no unique lines
+# to anchor on, and gets one hunk replacing the whole file.
+_EXACT_LINE_PRODUCT = 60_000
 _EDIT_SCRIPT_BUDGET = 2_000_000
-_GAP_BUDGET = 2_000_000
+_GAP_BUDGET = 1_200_000
 _CHUNK = 1 << 20
 _EMPTY_TOP = Layer()  # view 0 is the start image with an empty top layer
 
@@ -242,10 +249,10 @@ def _file_content_changed(before: Entry | None, after_file_sha256: str) -> bool:
 
 
 def _content_changed(before: Entry | None, after: Entry | None) -> bool:
-    """True if the two versions differ in content: kind or sha256 (a directory has none)."""
-    if before is None or after is None:
-        return before is not after
-    return before.kind != after.kind or before.sha256 != after.sha256
+    """True if the two versions' content differs: the sha256 of a file's bytes or a symlink's
+    target, none for an absent path, a directory, or another kind. A file replaced by a symlink
+    whose target is that file's bytes has the same content: its kinds tell the change."""
+    return (before.sha256 if before else None) != (after.sha256 if after else None)
 
 
 class _View:
@@ -625,7 +632,7 @@ class _Reconciler:
             kind_after=a.kind if a else None,
             is_text=is_text,
             hunk=(
-                _unified_diff(_printable(change.path), self.contents.text(b), self.contents.text(a))
+                _unified_diff(change.path, self.contents.text(b), self.contents.text(a))
                 if hunk
                 else None
             ),
@@ -863,6 +870,28 @@ def _range(start: int, stop: int) -> str:
     return f"{start if length == 0 else start + 1},{length}"
 
 
+_HEADER_ESCAPES = {"\\": "\\\\", '"': '\\"', "\n": "\\n", "\t": "\\t"}
+
+
+def _header_name(name: str) -> str:
+    """A diff header's file name, C-quoted as git and GNU diff quote it when it holds a
+    newline, tab, double quote, backslash, or a byte that is not UTF-8 (a surrogate escape from
+    `tarfile`, written as an octal escape), so the header stays one line and names the file's
+    real bytes."""
+    quoted = False
+    out: list[str] = []
+    for char in name:
+        if char in _HEADER_ESCAPES:
+            out.append(_HEADER_ESCAPES[char])
+            quoted = True
+        elif "\udc80" <= char <= "\udcff":
+            out.append(f"\\{ord(char) - 0xDC00:03o}")
+            quoted = True
+        else:
+            out.append(char)
+    return f'"{"".join(out)}"' if quoted else name
+
+
 def _unified_diff(path: str, before: str | None, after: str | None) -> str:
     """The unified diff from `before` to `after` (None: the side does not exist); "" when no
     line differs."""
@@ -877,8 +906,8 @@ def _unified_diff(path: str, before: str | None, after: str | None) -> str:
 
     for group in _groups(_opcodes(old, new), _CONTEXT_LINES):
         if not out:
-            out.append(f"--- {'/dev/null' if before is None else 'a' + path}\n")
-            out.append(f"+++ {'/dev/null' if after is None else 'b' + path}\n")
+            out.append(f"--- {'/dev/null' if before is None else _header_name('a' + path)}\n")
+            out.append(f"+++ {'/dev/null' if after is None else _header_name('b' + path)}\n")
         first, last = group[0], group[-1]
         out.append(f"@@ -{_range(first[1], last[2])} +{_range(first[3], last[4])} @@\n")
         for tag, i1, i2, j1, j2 in group:

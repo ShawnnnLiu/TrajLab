@@ -4,7 +4,7 @@ A store is a directory:
 
     <store>/record.duckdb    trials, steps, deltas, store_meta: what an agent may read
     <store>/heldout.duckdb   checks, faults, blame, chains, store_meta: never shown to an agent
-    <store>/blobs/<sha256>   binary file versions that deltas name in `blob_ref`
+    <store>/blobs/<sha256>   later versions of changed rows without a hunk (`blob_ref`)
 
 Held-out tables live in their own file, and an agent's connection (`connect_agent`) opens only
 `record.duckdb`, read-only, with DuckDB's access to other files turned off and its configuration
@@ -204,14 +204,21 @@ def create_store(store_dir: Path, meta: StoreMeta) -> None:
         (record_path(store_dir), RECORD_TABLES),
         (heldout_path(store_dir), HELDOUT_TABLES),
     ):
+        wal = path.with_name(path.name + ".wal")
         if not path.exists():
+            if wal.exists():
+                # DuckDB would replay it into the new file: old rows back, or a failed replay.
+                raise StoreError(f"{wal} is left from a deleted {path.name}; delete it too")
             _create(path, tables, meta)
             continue
         with duckdb.connect(str(path), read_only=True) as con:
             try:
                 found = read_meta(con)
             except StoreError as error:
-                raise StoreError(f"{path}: {error}; delete it to build the store again") from error
+                raise StoreError(
+                    f"{path}: {error}; delete it (and {wal.name}, if there) to build the store "
+                    "again"
+                ) from error
         if found != meta:
             raise StoreError(f"{path} was built under {found}, not {meta}")
 
@@ -232,14 +239,38 @@ def connect(path: Path, *, read_only: bool) -> duckdb.DuckDBPyConnection:
 def connect_agent(store_dir: Path) -> duckdb.DuckDBPyConnection:
     """`record.duckdb` as an agent's queries must see it: read-only, with no access to any other
     file (DuckDB's `enable_external_access` off: no `read_blob`, `glob`, `read_csv`, `ATTACH`,
-    `COPY`, or extension install), and the configuration locked so no query can undo that.
-    This is what keeps `heldout.duckdb` and `blobs/` out of an agent's reach (ADR-0014)."""
+    `COPY`, or extension install), its time zone UTC, and its configuration locked so no query
+    can undo either. This is what keeps `heldout.duckdb` and `blobs/` out of an agent's reach
+    (ADR-0014).
+
+    Connections to one store in one process share a DuckDB instance: the first sets the time
+    zone globally and locks it, and later ones find both already done. One gap the lock leaves:
+    `enable_logging()` still runs, and logging to a file it cannot write makes every later
+    query on the instance fail and closing it abort the process. No file is read, but the step-4
+    query runner must therefore run each agent query in a disposable child process and refuse
+    statements that name the logging functions (ADR-0014, open question 2).
+    """
     path = record_path(store_dir)
     if not path.is_file():
         raise StoreError(f"{path} does not exist")
     con = duckdb.connect(str(path), read_only=True, config={"enable_external_access": False})
-    _check(con, path)
-    con.execute("SET lock_configuration = true")
+    try:
+        zone, locked = con.execute(
+            "SELECT current_setting('TimeZone'), current_setting('lock_configuration')"
+        ).fetchone()  # type: ignore[misc]
+        if not locked:
+            if zone != "UTC":
+                con.execute("SET GLOBAL TimeZone = 'UTC'")
+            con.execute("SET lock_configuration = true")
+        elif zone != "UTC":
+            raise StoreError(f"{path} is open in this process with time zone {zone}, not UTC")
+        version = read_meta(con).schema_version
+    except BaseException:
+        con.close()
+        raise
+    if version != SCHEMA_VERSION:
+        con.close()
+        raise StoreError(f"{path} has schema {version}; this code reads {SCHEMA_VERSION}")
     return con
 
 

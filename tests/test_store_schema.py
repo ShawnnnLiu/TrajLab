@@ -596,7 +596,7 @@ def test_primary_keys_refuse_a_second_row(tmp_path: Path, table: str, key: dict[
 def test_a_store_file_without_its_meta_is_refused_clearly(tmp_path: Path) -> None:
     # What a build killed while creating the file used to leave behind.
     duckdb.connect(str(schema.record_path(tmp_path))).close()
-    with pytest.raises(schema.StoreError, match="delete it to build the store again"):
+    with pytest.raises(schema.StoreError, match=r"delete it \(and record.duckdb.wal"):
         schema.create_store(tmp_path, META)
 
 
@@ -626,6 +626,8 @@ def test_the_agent_connection_cannot_reach_held_out_data(tmp_path: Path) -> None
             f"SELECT * FROM read_text('{blobs}/{'0' * 64}')",
             f"ATTACH '{heldout}' AS h",
             f"COPY trials TO '{tmp_path}/out.csv'",
+            f"SELECT * FROM read_csv('{tmp_path}/out.csv')",
+            "INSTALL httpfs",
         ]:
             with pytest.raises(duckdb.PermissionException):
                 con.execute(query)
@@ -659,3 +661,21 @@ def test_bulk_insert_is_fast_and_exact(tmp_path: Path) -> None:
         )
         first = read_back(con, "deltas", DeltaRow)[0]
     assert first == rows[0]
+
+
+def test_two_agent_connections_can_be_open_at_once(tmp_path: Path) -> None:
+    # They share one DuckDB instance, which the first locks; the second must not need a SET.
+    schema.create_store(tmp_path, META)
+    with schema.connect_agent(tmp_path) as first, schema.connect_agent(tmp_path) as second:
+        for con in (first, second):
+            assert con.execute("SELECT current_setting('TimeZone')").fetchone() == ("UTC",)
+            assert con.execute("SELECT count(*) FROM trials").fetchone() == (0,)
+
+
+def test_a_wal_left_from_a_deleted_store_file_is_refused(tmp_path: Path) -> None:
+    # DuckDB would replay it into the new file, bringing old rows back.
+    schema.create_store(tmp_path, META)
+    schema.record_path(tmp_path).unlink()
+    (tmp_path / "record.duckdb.wal").write_bytes(b"old")
+    with pytest.raises(schema.StoreError, match=r"record.duckdb.wal is left .* delete it too"):
+        schema.create_store(tmp_path, META)

@@ -20,7 +20,8 @@ from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validato
 SCHEMA_VERSION = 1
 RECORD_DB_FILENAME = "record.duckdb"
 HELDOUT_DB_FILENAME = "heldout.duckdb"
-# Content-addressed blobs of binary file versions: <store>/blobs/<sha256>.
+# Content-addressed later versions of changed rows without a hunk (a file's bytes, text or
+# not, or a symlink's target): <store>/blobs/<sha256>.
 BLOBS_DIRNAME = "blobs"
 SHA256 = r"^[0-9a-f]{64}$"
 
@@ -92,7 +93,9 @@ class StepRow(_Row):
     is_error: bool | None = Field(default=None, description="Claude Code flagged the result.")
     message: str | None = Field(default=None, description="The step's text, on its first row.")
     reasoning: str | None = Field(default=None, description="ATIF reasoning_content, first row.")
-    t_start: AwareDatetime | None = Field(default=None, description="The ATIF step's timestamp.")
+    t_start: AwareDatetime | None = Field(
+        default=None, description="The ATIF step's timestamp; for a stop row, its requested_at."
+    )
     t_end: AwareDatetime | None = Field(
         default=None,
         description="When the hook saw the call finish; null for a call without a call record "
@@ -140,13 +143,14 @@ class DeltaRow(_Row):
     kind_after: EntryKind | None = None
     is_text: bool | None = Field(
         default=None,
-        description="Both versions are text under the store's text rule; null for directories "
-        "and other kinds.",
+        description="Every file or symlink version of the row is text under the store's text "
+        "rule (a version without content counts as text); null when neither version is a file "
+        "or symlink.",
     )
     hunk: str | None = Field(
         default=None,
         description="Unified diff from the earlier to the later version, for text whose content "
-        "changed; may be empty when neither version has a line.",
+        "(sha256) changed; empty only when neither version has a line.",
     )
     blob_ref: str | None = Field(
         default=None,
@@ -175,7 +179,7 @@ class DeltaRow(_Row):
         if self.hunk is not None and self.is_text is not True:
             raise ValueError("only text has a hunk")
         if self.blob_ref is not None and (self.is_text is not False or self.kind_after is None):
-            raise ValueError("a blob_ref is the later version of a non-text file")
+            raise ValueError("a blob_ref is the later version of a row that is not text")
         return self
 
 

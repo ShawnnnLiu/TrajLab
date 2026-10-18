@@ -104,13 +104,14 @@ One trial is one task executed by one attempt.
 
 - **store** - the Exp 2 store (ADR-0014): a directory holding `record.duckdb`, `heldout.duckdb`, and `blobs/`.
   Not: "database" for the `record-files` export, which is files.
-- **record of prior attempts** - what a record arm gives the repair agent: the store's agent-visible tables (`trials`, `steps`, `deltas`), through the query tool (`record-engine`) or as exported files (`record-files`).
+- **record of prior attempts** - what a record arm gives the repair agent: the store's agent-visible tables (`trials`, `steps`, `deltas`, and `store_meta`), through the query tool (`record-engine`) or as exported files (`record-files`).
   Always qualify it ("record of prior attempts", "record arm"); unqualified, "record" names a capture record (checkpoint record, call record, stop record, compaction record).
 - **held-out tables** - `checks`, `faults`, `blame`, and `chains` in `heldout.duckdb`; never opened by an agent connection or exported to an agent.
 - **step row** - one row of `steps`: a tool call, an ATIF step without tool calls, a compaction step, or a stop record (ADR-0014, item 4).
   Not the same as an ATIF step: a step with k tool calls gives k step rows.
-- **start image** - the image a trial's container started from: its derived image, or for a trial resumed from a checkpoint, that checkpoint image (or the task image, for a trial without pre-install).
+- **start image** - the image a trial's container started from: its derived image, or for a trial resumed from a checkpoint, that checkpoint image.
   Every checkpoint image of the trial is its start image plus at most one layer.
+  A trial run without pre-install starts from its task image, but `trajlab.store.build.start_image` names only the first two (ADR-0014, known limits).
   Not: "base image" (see derived image).
 - **top layer** - the layer a `docker commit` added over the start image: the container's whole writable layer when it was committed, so it holds every change since the container started; empty when the commit added no layer (a container with no changes).
 - **view** - the filesystem at a checkpoint: the start image with that checkpoint's top layer applied by the OCI rules (whiteouts, opaque directories, non-directory members replacing subtrees).

@@ -23,7 +23,7 @@ from bisect import bisect_left
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import BinaryIO, Protocol
+from typing import Any, BinaryIO, Protocol
 
 from trajlab.contracts import EntryKind
 
@@ -279,8 +279,10 @@ def for_each_file(
 def _tar(stream: BinaryIO) -> Iterator[tarfile.TarFile]:
     """The layer as a stream-mode tar, gzip or plain; read errors, including those raised while
     a hook reads a member's content, become `LayerError`."""
-    buffered = stream if isinstance(stream, io.BufferedReader) else io.BufferedReader(stream)
-    magic = buffered.peek(4)[:4]
+    magic = b""
+    while len(magic) < 4 and (chunk := stream.read(4 - len(magic))):
+        magic += chunk
+    buffered = io.BufferedReader(_Prefixed(magic, stream), _CHUNK)
     if magic.startswith(_ZSTD_MAGIC):
         raise LayerError("cannot read layer: zstd-compressed layers are not supported")
     try:
@@ -295,6 +297,30 @@ def _tar(stream: BinaryIO) -> Iterator[tarfile.TarFile]:
                 yield tar
     except (tarfile.TarError, EOFError, zlib.error, gzip.BadGzipFile) as error:
         raise LayerError(f"cannot read layer: {error}") from error
+
+
+class _Prefixed(io.RawIOBase):
+    """`prefix` (bytes already read from `stream`), then the rest of `stream`, as one raw
+    stream; only `read` is asked of `stream`, and it may return short reads."""
+
+    def __init__(self, prefix: bytes, stream: BinaryIO) -> None:
+        super().__init__()
+        self._prefix = prefix
+        self._stream = stream
+
+    def readable(self) -> bool:
+        return True
+
+    def readinto(self, buffer: Any) -> int:
+        view = memoryview(buffer).cast("B")
+        if self._prefix:
+            count = min(len(view), len(self._prefix))
+            view[:count] = self._prefix[:count]
+            self._prefix = self._prefix[count:]
+            return count
+        data = self._stream.read(len(view))
+        view[: len(data)] = data
+        return len(data)
 
 
 def _marker(path: str) -> tuple[str, str] | None:

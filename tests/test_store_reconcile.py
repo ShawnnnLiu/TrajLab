@@ -1,5 +1,6 @@
 import difflib
 import hashlib
+import io
 import random
 import re
 import tarfile
@@ -1685,7 +1686,8 @@ def test_bytes_that_are_not_utf8_are_escaped_in_paths_and_hunks(tmp_path: Path) 
     name, target = "root/caf\udce9.txt", "caf\udce9"
     layer = top(d("root", 0o700), f(name, "hello\n"), sym("root/link", target))
     rows = rows_of(run(tmp_path, [alpine()], {1: layer}))
-    assert rows["/root/caf\\xe9.txt"].hunk.startswith("--- /dev/null\n+++ b/root/caf\\xe9.txt\n")
+    # The path column escapes the byte; the diff header quotes it as git does, in octal.
+    assert rows["/root/caf\\xe9.txt"].hunk.startswith('--- /dev/null\n+++ "b/root/caf\\351.txt"\n')
     link = rows["/root/link"]
     assert (link.sha256_after, link.bytes_after) == (sha(b"caf\xe9"), 4)  # the raw bytes
     assert link.hunk == "--- /dev/null\n+++ b/root/link\n@@ -0,0 +1 @@\n+caf\\xe9\n" + (
@@ -1766,3 +1768,48 @@ def test_a_rewrite_of_every_record_near_the_text_limit_is_quick(shape: str) -> N
     assert apply_patch(before, hunk) == after
     changed = sum(1 for line in hunk.splitlines() if line[:1] in "+-") - 2
     assert changed == 2 * n  # only the changed lines: each record's one value, out and in
+
+
+def test_a_path_with_a_newline_is_quoted_in_the_hunk_header(tmp_path: Path) -> None:
+    rows = rows_of(run(tmp_path, [alpine()], {1: top(d("root", 0o700), f("root/a\nb.txt", "x\n"))}))
+    hunk = rows["/root/a\nb.txt"].hunk
+    assert hunk.splitlines()[:2] == ["--- /dev/null", '+++ "b/root/a\\nb.txt"']
+    assert apply_patch("", hunk) == "x\n"
+
+
+def test_a_file_replaced_by_a_symlink_to_its_own_bytes_has_no_content_change(
+    tmp_path: Path,
+) -> None:
+    base = BytesLayer.of(d("etc"), f("etc/alias", "/usr/bin/real"))
+    rows = rows_of(run(tmp_path, [base], {1: top(d("etc"), sym("etc/alias", "/usr/bin/real"))}))
+    row = rows["/etc/alias"]
+    assert (row.kind_before, row.kind_after) == ("file", "symlink")
+    assert row.sha256_before == row.sha256_after
+    assert (row.is_text, row.hunk, row.blob_ref) == (True, None, None)
+
+
+class _Trickle(BytesLayer):
+    """A layer stream that returns at most one byte per read, as some pipes do."""
+
+    def open(self):  # type: ignore[override]
+        class Stream(io.RawIOBase):
+            def __init__(self, data: bytes) -> None:
+                self.data = data
+
+            def readable(self) -> bool:
+                return True
+
+            def read(self, n: int = -1) -> bytes:
+                chunk, self.data = self.data[:1], self.data[1:]
+                return chunk
+
+        return Stream(self.data)
+
+
+def test_a_gzip_layer_read_one_byte_at_a_time_is_still_gzip(tmp_path: Path) -> None:
+    import gzip
+
+    plain = tar_bytes(d("etc"), f("etc/config", "a=1\n"))
+    layer = top(d("etc"), f("etc/config", "a=2\n"))
+    rows = rows_of(run(tmp_path, [_Trickle(gzip.compress(plain), [])], {1: layer}))
+    assert rows["/etc/config"].op == "modify"

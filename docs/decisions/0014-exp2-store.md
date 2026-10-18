@@ -1,7 +1,7 @@
 # ADR-0014: The Exp 2 store: steps joined to filesystem deltas, in DuckDB
 
 Status: proposed (2026-10-18).
-Amends CLAUDE.md constraint 6 and "What not to do" (no database) for this store only.
+Amends CLAUDE.md constraints 2 and 6 and "What not to do" (no database) for this store only.
 
 ## Context
 
@@ -10,7 +10,7 @@ It gives a repair agent the record of a task's prior attempts, either as a query
 The record joins each step of an attempt to the filesystem change the step made; ground truth that scores the experiment is held out from both record arms.
 Build-order step 1 of the technical spec (§7) is the store's schema and the reconciliation that turns checkpoint images into per-step deltas.
 
-CLAUDE.md constraint 6 forbids a `store/` directory, and "What not to do" forbids a database; both predate the analysis phase.
+CLAUDE.md constraint 6 forbids a `store/` directory, constraint 2 lets analysis code import only `contracts/` from capture, and "What not to do" forbids a database; all three predate the analysis phase.
 ADR-0013 (verifier-replay ground truth) exists only on the unmerged branch `sl/groundtruth-replay`, so this ADR takes the next free number, 0014.
 
 The technical spec leaves seven questions to ADRs (§8).
@@ -32,7 +32,7 @@ Questions 2, 3, 6, and 7 stay open (last section).
 ```
 <store>/record.duckdb    trials, steps, deltas, store_meta: what an agent may read
 <store>/heldout.duckdb   checks, faults, blame, chains, store_meta: never shown to an agent
-<store>/blobs/<sha256>   binary file versions named by deltas.blob_ref
+<store>/blobs/<sha256>   later versions of changed rows without a hunk, named by deltas.blob_ref
 ```
 
 - **Held-out tables live in their own file** (question 4: a separate file, not a restricted schema in one file).
@@ -40,6 +40,9 @@ Questions 2, 3, 6, and 7 stay open (last section).
   The agent's query connection is `store.schema.connect_agent`: `record.duckdb`, read-only, with DuckDB's `enable_external_access` off and the configuration locked.
   The separate file alone is not enough: a default DuckDB connection can read any file the process can, so one `SELECT` on `read_blob('<store>/heldout.duckdb')` would return the held-out rows, failing check names included.
   With external access off, `read_blob`, `glob`, `read_text`, `read_csv`, `ATTACH`, `COPY`, and extension installs all fail, and no query can turn access back on; a test checks each.
+  Agent connections to one store in one process share a DuckDB instance: the first sets its time zone to UTC and locks it, and later ones find both done, so several can be open at once.
+  The lock has one gap: `enable_logging()` still runs, and file logging to a path it cannot write makes every later query on the instance fail and closing it abort the process.
+  It reads no file, so nothing held out leaks, but step 4's query runner must run each agent query in a disposable child process and refuse statements that name the logging functions (open question 2).
 - Both files carry `store_meta`: `SCHEMA_VERSION`, the exclusion list, the text rule, and the reconcile method.
   `create_store` refuses an existing store built under different values, so rows built under two rules never mix.
   A shape change bumps `SCHEMA_VERSION` (now 1) and needs an ADR.
@@ -62,7 +65,8 @@ Questions 2, 3, 6, and 7 stay open (last section).
   `atif_step_id` maps a row back to `trajectory.json`.
 - `checkpoint_seq` is the checkpoint holding the environment state right after the row: the call's own `CallRecord.checkpoint_seq` when it has one, otherwise the highest seen so far (ADR-0001's join for read-only steps; the highest, because parallel calls of one step can be answered out of order).
   It is null before the first checkpoint (the start image's state).
-  It is also null after a hooked call that timed out, was deferred under every-N (ADR-0007), or was stopped while it ran, for that row and every later one, until a call's record names a checkpoint again: no checkpoint holds that state.
+  It is also null after a hooked call that timed out, was deferred under every-N (ADR-0007), was stopped while it ran, or has no record at all, for that row and every later one, until a call's record names a checkpoint again: no checkpoint holds that state.
+  A call whose changes a checkpoint already reached covers (in its `covered_tool_call_ids`, as when parallel calls are answered out of order) keeps that checkpoint instead.
 - Rows come from the enriched trajectory (`trajlab postprocess`), which already carries every `CallRecord` and `CheckpointRecord` on the right step (ADR-0003).
 
 ### 5. Deltas come from checkpoint top layers (question 1)
@@ -93,7 +97,7 @@ The delta's rows carry the `step_idx` of the step that owns the checkpoint (`Che
 **How it is read** (`store/docker_images.py`, `store/reconcile.py`).
 One `docker image save` per trial, of all its checkpoint tags, writes the start image's layers once and every top layer.
 Each top layer is then read twice (names, then content hashes) and the start image's layers once, restricted to the paths the top layers touch, delete, or replace; a start-image layer is read again when a hard link it keeps names a member it did not keep.
-A layer is read a third time only when a row needs a non-text version the second read did not keep (a file over 1 MiB, or a hard link to an unchanged member), found by size and then hash.
+A layer is read a third time only when a row needs a version the second read did not keep (a non-text file over 1 MiB, a hard link to an unchanged member, or a hard link whose member is under an excluded path), found by size and then hash.
 At most two top layers are in memory at a time; every distinct text version of a non-excluded file is written once to scratch space, by hash, so any earlier version is at hand for a hunk.
 Every checkpoint image must be the start image plus at most one layer.
 `trajlab.store.build.start_image` names the start image from `trajlab-resume.json` or `trajlab-preinstall.json`, and the Docker provider requires it: a checkpoint image over any other image is refused instead of diffed, and a commit that added no layer gets an empty top layer.
@@ -109,9 +113,12 @@ A file version is text if it is at most 1 MiB, contains no NUL byte, and decodes
 A version without content (absent, a directory, another kind) counts as text, so a row is text when each of its file or symlink versions is; `is_text` is null for a directory or other kind on both sides.
 A text row whose content changed gets a unified diff (3 lines of context, lines split on `\n` only, `\ No newline at end of file` where needed, `/dev/null` for a side without content).
 Lines are matched after trimming common leading and trailing lines, in three stages, so every hunk is a correct diff made in a few seconds at most:
-- exactly, by difflib without autojunk, when the two sides' line counts multiply to at most 250,000;
-- else by a shortest edit script (Myers) within 2,000,000 steps (500 scattered edits in 30,000 lines take 0.13 s);
-- else, for a wholesale rewrite, by anchoring on lines that occur once on each side (patience diff), matching the gaps between anchors exactly within a budget, and as replacements after that.
+- exactly, by difflib without autojunk, when the two sides' line counts multiply to at most 60,000 (its cost grows about as that product to the 1.5; 0.09 s at the cap on the worst shape measured);
+- else by a shortest edit script (Myers) within 2,000,000 steps, about 0.5 s (500 scattered edits in 30,000 lines take 0.13 s);
+- else, for a wholesale rewrite, by anchoring on lines that occur once on each side (patience diff), matching each gap between anchors exactly while the gaps' line products add up to at most 1,200,000 (about 2 s at worst), and as replacements after that.
+
+So a hunk takes under about 3 s.
+It is small, except for a file of few distinct lines (say, of 0s and 1s) edited in many scattered places: with no unique line to anchor on, it gets one hunk replacing the whole file, up to about 3 MB for a 1 MiB file.
 
 Plain difflib is near cubic when lines repeat: 207 s for one inserted line in 1 MiB of repetitive text, and 167 s for a 1 MiB pretty-printed JSON whose every record's score changed.
 With autojunk, the one-line edit became a 632 KB hunk.
@@ -122,6 +129,8 @@ So the content a step wrote is always stored, as a hunk or a blob: a UTF-16 file
 A mode- or owner-only change stores nothing, as it gets no hunk either.
 Earlier versions keep only their sha256 and size.
 A path holding bytes that are not UTF-8 is stored with each such byte written `\xNN`, as are such bytes of a symlink target shown in a hunk; sha256 and size are of the raw bytes.
+In hunk headers, a path with a newline, tab, double quote, backslash, or such a byte is C-quoted as git and GNU diff quote it (the byte as an octal escape), so the header stays one line and names the real file.
+A row's content changes when its sha256 does; a file replaced by a symlink whose target is that file's bytes has a kind change and no content change, so no hunk and no blob.
 There is no rename operation: a rename is a delete and an add, which a derived column can pair later by sha256.
 
 ### 6. Exclusions (question 5)
@@ -170,6 +179,7 @@ Each column is an interface: `DerivedSpec` names it, and the implementation is a
    As the design spec defines it ("same tool and args as an earlier step, empty delta"), every repeated read-only call is a loop; step 3 should say whether that is intended.
 2. **Question 3, at step 4:** the query tool's channel.
    The recommendation stands: a host process answering `.sql` files through the bind-mounted `/logs/agent`, separate from the checkpoint watcher, so a slow query never delays an ack the agent is waiting on, and every query is logged on the host by construction.
+   It must open the store with `connect_agent`, run each query in a disposable child process (which also gives the statement timeout), and refuse statements that name DuckDB's logging functions (item 2).
 3. **Question 6, the owner's call:** a fresh environment for every retry in every arm (recommended in the design spec).
 4. **Question 7, at step 3:** derived columns in the `record-files` bundle (recommended: yes, so the two record arms differ only in access).
 
@@ -185,7 +195,7 @@ Each column is an interface: `DerivedSpec` names it, and the implementation is a
 - `store_meta` is in `record.duckdb` and so visible to an agent; the `record-files` README will state the same values.
 - Rows are loaded in bulk (newline-delimited JSON read by DuckDB with the table's own column types): 20,000 delta rows load in under a second, where `executemany` managed about 600 rows a second.
   A string with a lone surrogate, which DuckDB refuses, is stored with it written `\uXXXX`.
-- A store's database files are created under a temporary name and renamed, so a build killed while creating them leaves no file without its tables; an existing file without readable `store_meta` is refused with a message to delete it.
+- A store's database files are created under a temporary name and renamed, so a build killed while creating them leaves no file without its tables; an existing file without readable `store_meta` is refused with a message to delete it, and a `.wal` left beside a deleted database file is refused rather than replayed into the new one.
 - A trial built without images (steps only) is rebuilt by the first build that has them; its old rows are deleted first, in their own transaction, so a stop at any point leaves the trial whole or absent.
 - Tests run offline on synthetic layers built to the observed format, including a differential test against an independent filesystem simulator; the check against real Docker is a dated script run by hand.
 
@@ -223,7 +233,7 @@ Per checkpoint, reconcile took 0.03 to 0.05 s for small steps and 0.7 s for the 
 These are not the corpus's times: the derived images there are 1 to 10 GB; step 2 measures them on the capture server.
 Every container and image the script made was removed afterwards.
 
-**Offline tests** (`make test`: 697 passing, 293 of them the store's; the store's also pass with `TZ=Pacific/Kiritimati LANG=C`):
+**Offline tests** (`make test`: 704 passing, 300 of them the store's; the store's also pass with `TZ=Pacific/Kiritimati LANG=C`):
 - scenario tests for each layer encoding and row rule, including a reproduction of the two layers the Docker probe saw;
 - a differential test over 320 seeded sequences of a filesystem simulator that writes cumulative containerd-shaped layers (explicit whiteouts, opaque markers, a whiteout beside a recreated directory, a non-directory over a subtree, hard links, `./` and trailing `/` names), with expected rows from comparing consecutive simulated filesystems directly, every hunk applied by a standalone patcher, and the blob directory holding exactly the blobs some row names;
 - the step-1 acceptance check: the hello-world fixture builds to its hand count (1 delta row, 3 step rows, a complete chain), the second build is skipped, and a build that fails while writing any table leaves the trial buildable;
@@ -239,7 +249,11 @@ All are addressed in this ADR and the code:
 - *docs:* terminology against the glossary ("base image", the top layer of a no-change commit, unqualified "record"), CLAUDE.md constraint 2, field descriptions, counts in this section;
 - *tests:* each surviving mutant now fails a test (write atomicity, duplicate checkpoint seqs, 64-bit size columns, composite keys, file-type bits in tar modes, unreferenced blobs, the 1 MiB text limit, `.wh.` inside a name, records of two trials, non-UTF-8 symlink targets).
 
+A second review of the fixes (two lenses, each with a refuting verifier) reported 20 findings, of which none was refuted; all are addressed above: the logging gap in the agent connection's lock (documented, for step 4), a second agent connection failing while one was open, a stale `.wal` replayed into a new store, rows after a call without a record naming a checkpoint, deferred calls already covered, hunk time bounds stated too low, paths with a newline breaking hunk headers, a file-to-symlink change with equal bytes, a single short read misjudging a gzip layer, and docs.
+
 **Known limits.**
 zstd-compressed layers are refused; Docker's default is gzip.
+A layer with two members for one path (Docker writes none) can resolve a hard link through the wrong one when the start image is read filtered, and can leave a blob no row names.
+`start_image` names a start image only from `trajlab-resume.json` or `trajlab-preinstall.json`; a trial run without pre-install (its start image is its task image) needs the image passed to the provider by hand.
 `other` entries (FIFOs, devices) compare by kind, mode, and owner only, not device numbers.
 A path's bytes that are not UTF-8 are stored escaped (`\xNN`), so two paths differing only in how such bytes are spelled would collide; no such path is known in the corpus.

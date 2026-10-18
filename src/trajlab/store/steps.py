@@ -33,9 +33,11 @@ start image's state):
 - A call whose CallRecord names a checkpoint takes that seq, and `current` becomes the larger
   of the two. Parallel calls of one step can be answered out of order, so a later row may name
   an earlier checkpoint; the state after the step is still the latest one.
-- A hooked call that timed out, was deferred under every-N (ADR-0007), or was stopped while it
-  ran has changes no checkpoint holds yet: null, and every row after it is null too, until a
-  call's record names a checkpoint again.
+- A hooked call that timed out, was deferred under every-N (ADR-0007), was stopped while it
+  ran, or has no record at all (a capture fault) has changes no checkpoint holds yet: null, and
+  every row after it is null too, until a call's record names a checkpoint again. A call whose
+  changes a checkpoint already reached covers (its `covered_tool_call_ids`; parallel calls are
+  answered out of order) takes `current` instead.
 - Every other row (read-only calls, message and compaction rows, unchanged calls before any
   checkpoint, calls Claude Code rejected) takes `current`.
 
@@ -93,7 +95,7 @@ class _Spec:
 
     fields: dict[str, Any]
     record: CallRecord | None = None
-    unknown: bool = False  # a timed-out, deferred, or interrupted call: no checkpoint holds it
+    unknown: bool = False  # timed out, interrupted, or unanswered: no record names its state
     current: bool = False  # takes `current` (message, compaction, and rejected-call rows)
 
 
@@ -255,9 +257,12 @@ def _results_by_call(step: Step) -> dict[str, ObservationResult]:
 class _Walk:
     """Step rows in order, with the checkpoint the environment is in after each."""
 
-    def __init__(self, trial_id: UUID, images: Mapping[int, str]) -> None:
+    def __init__(
+        self, trial_id: UUID, images: Mapping[int, str], covered_by: Mapping[str, int]
+    ) -> None:
         self.trial_id = trial_id
         self.images = images
+        self.covered_by = covered_by  # tool_call_id -> the seq whose checkpoint first holds it
         self.current: int | None = None
         self.unknown = False  # a call's changes are in no checkpoint yet
         self.rows: list[StepRow] = []
@@ -271,7 +276,9 @@ class _Walk:
             self.unknown = False
             return seq
         if spec.unknown or (record is not None and record.outcome == "deferred"):
-            self.unknown = True
+            covering = self.covered_by.get(spec.fields.get("tool_call_id") or "")
+            if covering is None or self.current is None or covering > self.current:
+                self.unknown = True
         return None if self.unknown else self.current
 
     def add(self, checkpoint_seq: int | None, **fields: Any) -> None:
@@ -353,7 +360,7 @@ def build_steps(trajectory: Trajectory, *, trial_id: UUID) -> TrialSteps:
         for n, call in enumerate(step.tool_calls):
             record = records.get(call.tool_call_id)
             result = results.get(call.tool_call_id)
-            stopped = False  # interrupted: no result, so the agent was stopped while it ran
+            stopped = False  # interrupted or unanswered: no record names the state after it
             if call.function_name in HOOKED_TOOLS:
                 if record is not None:
                     hooked.append(call.tool_call_id)
@@ -369,6 +376,7 @@ def build_steps(trajectory: Trajectory, *, trial_id: UUID) -> TrialSteps:
                 else:
                     hooked.append(call.tool_call_id)
                     unanswered.append(call.tool_call_id)
+                    stopped = True  # no record names its state either
             fields = {
                 "atif_step_id": extra.original_step_id,
                 "source": step.source,
@@ -386,7 +394,13 @@ def build_steps(trajectory: Trajectory, *, trial_id: UUID) -> TrialSteps:
             specs.append(_Spec(fields, record=record, unknown=unknown))
 
     stop_calls = tuple(sorted(root.stop_calls, key=lambda record: record.call_seq))
-    walk = _Walk(trial_id, {seq: record.checkpoint_id for seq, record in checkpoints.items()})
+    images = {seq: record.checkpoint_id for seq, record in checkpoints.items()}
+    covered_by = {
+        call_id: seq
+        for seq, record in sorted(checkpoints.items(), reverse=True)
+        for call_id in record.covered_tool_call_ids
+    }
+    walk = _Walk(trial_id, images, covered_by)
     placed = _place_stops(specs, stop_calls)
     for spec in placed:
         seq = (None if walk.unknown else walk.current) if spec.current else walk.state_after(spec)

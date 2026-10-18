@@ -685,3 +685,55 @@ def test_two_checkpoint_steps_with_one_seq_are_refused() -> None:
     checkpoints = [make_checkpoint(1, "toolu_w1"), make_checkpoint(1, "toolu_w2")]
     with pytest.raises(StepsError, match="two checkpoint steps for seq 1"):
         rows_of(traj, checkpoints=checkpoints)
+
+
+def test_rows_after_a_call_without_a_record_have_no_state() -> None:
+    # A capture fault: the Write ran (it has a result) but the watcher answered nothing, so no
+    # checkpoint is known to hold what it wrote.
+    traj = trajectory(
+        agent(1, calls=[call("toolu_w1", "Write", file_path="/a", content="a")]),
+        agent(
+            2,
+            calls=[call("toolu_w2", "Write", file_path="/b", content="b")],
+            results=[result("toolu_w2", "File created successfully at: /b")],
+        ),
+        agent(3, "Done."),
+    )
+    steps = rows_of(
+        traj, checkpoints=[make_checkpoint(1, "toolu_w1")], calls=[make_call(1, "toolu_w1")]
+    )
+    assert steps.unanswered_calls == ("toolu_w2",)
+    assert [row.checkpoint_seq for row in steps.rows] == [1, None, None]
+
+
+def test_a_deferred_call_already_covered_keeps_the_state() -> None:
+    # Every-N, parallel calls answered out of order: the second listed call's checkpoint covers
+    # the first, which the watcher answered as deferred after it.
+    traj = trajectory(
+        agent(
+            1,
+            calls=[
+                call("toolu_d1", "Bash", command="a"),
+                call("toolu_c1", "Bash", command="b"),
+            ],
+        ),
+        agent(2, "Done."),
+    )
+    checkpoints = [
+        make_checkpoint(
+            1, "toolu_c1", tool_name="Bash", covered_tool_call_ids=("toolu_d1", "toolu_c1")
+        )
+    ]
+    deferred = {"tool_name": "Bash", "outcome": "deferred", "change": "not_checked"}
+    calls = [
+        make_call(1, "toolu_c1", tool_name="Bash", checkpoint_seq=1, change="not_checked"),
+        make_call(2, "toolu_d1", checkpoint_seq=None, **deferred),
+    ]
+    steps = rows_of(traj, checkpoints=checkpoints, calls=calls, policy=CheckpointPolicy(every=2))
+    # d1 is listed first, before the checkpoint is reached: unknown then; once c1's checkpoint
+    # (which covers d1) is reached, the state after the step is known.
+    assert [(row.tool_call_id, row.checkpoint_seq) for row in steps.rows] == [
+        ("toolu_d1", None),
+        ("toolu_c1", 1),
+        (None, 1),
+    ]

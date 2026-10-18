@@ -292,7 +292,8 @@ def build_trial(
     parent_trial_id: UUID | None = None,
 ) -> BuildResult:
     """Build one finished, postprocessed trial into the store at `store_dir`, creating it if
-    needed. Binary file versions go to the store's blobs dir; `work_dir` holds scratch files,
+    needed. Blobs (later versions of rows without a hunk) go to the store's blobs dir;
+    `work_dir` holds scratch files,
     removed before returning. Skips a trial already in the store (`skipped_existing`).
 
     Raises `BuildError` without `result.json` or the enriched trajectory, or with an enriched
