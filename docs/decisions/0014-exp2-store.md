@@ -1,0 +1,206 @@
+# ADR-0014: The Exp 2 store: steps joined to filesystem deltas, in DuckDB
+
+Status: proposed (2026-10-18).
+Amends CLAUDE.md constraint 6 and "What not to do" (no database) for this store only.
+
+## Context
+
+Experiment 2 replaces Experiment 1 as the paper's experiment (`docs/experiments/exp2/`: motivation, design spec, and technical spec, all 2026-10-18).
+It gives a repair agent the record of a task's prior attempts, either as a queryable store (arm `record-engine`) or as the same record exported to files (arm `record-files`), against a control with no record.
+The record joins each step of an attempt to the filesystem change the step made; ground truth that scores the experiment is held out from both record arms.
+Build-order step 1 of the technical spec (§7) is the store's schema and the reconciliation that turns checkpoint images into per-step deltas.
+
+CLAUDE.md constraint 6 forbids a `store/` directory, and "What not to do" forbids a database; both predate the analysis phase.
+ADR-0013 (verifier-replay ground truth) exists only on the unmerged branch `sl/groundtruth-replay`, so this ADR takes the next free number, 0014.
+
+The technical spec leaves seven questions to ADRs (§8).
+This ADR settles three of them: the diff method and text rule (question 1), how held-out tables are kept from agents (question 4), and the path exclusion list (question 5).
+It also settles choices the spec's schema leaves open: what a step row is, what `trial_id` means, the shape of the held-out ground truth, and when a checkpoint chain is complete.
+Questions 2, 3, 6, and 7 stay open (last section).
+
+## Decision
+
+### 1. Scope and placement
+
+- The store is `src/trajlab/store/`, on the analysis side: it imports `trajlab.contracts`, `trajlab.atif`, Harbor, and DuckDB, never `capture` or `checkpoint`.
+  Its row models are in `contracts/store.py`, one model per table, fields in column order; a test keeps the models and the DDL (`store/schema.py`) equal.
+- The engine is DuckDB, in-process (`duckdb` 1.5.6).
+- Step 1 adds no query tool, no export, and no derived-column implementation; those are steps 3 and 4.
+
+### 2. A store is a directory of two databases
+
+```
+<store>/record.duckdb    trials, steps, deltas, store_meta: what an agent may read
+<store>/heldout.duckdb   checks, faults, blame, chains, store_meta: never shown to an agent
+<store>/blobs/<sha256>   binary file versions named by deltas.blob_ref
+```
+
+- **Held-out tables live in their own file** (question 4: a separate file, not a restricted schema in one file).
+  The agent's query connection and the `record-files` export open `record.duckdb` only, so the held-out tables cannot be reached by construction, not by a permission inside one database.
+- Both files carry `store_meta`: `SCHEMA_VERSION`, the exclusion list, the text rule, and the reconcile method.
+  `create_store` refuses an existing store built under different values, so rows built under two rules never mix.
+  A shape change bumps `SCHEMA_VERSION` (now 1) and needs an ADR.
+
+### 3. Keys
+
+- `trial_id` is Harbor's trial id (the UUID in `result.json`), as the glossary defines it; `trial_name` is stored beside it.
+  The store holds finished trials only, so the id always exists.
+- `tool_call_id` is the join key to the trajectory, the checkpoints, and the ground truth, and is never re-derived.
+- `attempt_idx` is the position in a retry chain: 0 for the corpus first attempt, then 1 to N, each retry naming the attempt it followed in `parent_trial_id`.
+
+### 4. A step row is a tool call
+
+- An ATIF step with k tool calls gives k rows, in call order, because checkpoints, deltas, and ground-truth blame are all per tool call.
+- An ATIF step without tool calls gives one row (the agent's final message, a later user turn), and so does a compaction step.
+- Each stop record (ADR-0011) gives a row with `tool` `Stop` or `StopFailure`, so changes a background process made after the last tool call have a step to belong to.
+  The row goes where the stop happened: before the first row that started after its `requested_at`.
+  Under a stop hook that turns a stop into another turn (the repair protocol's), a trial has several stops, and each sits between its turns rather than at the end, where postprocess puts stop checkpoints.
+- The first user step is `trials.prompt`, not a row; a step's message and reasoning sit on its first row only, so no text is stored twice.
+  `atif_step_id` maps a row back to `trajectory.json`.
+- `checkpoint_seq` is the checkpoint holding the environment state right after the row: the call's own `CallRecord.checkpoint_seq` when it has one, otherwise the highest seen so far (ADR-0001's join for read-only steps; the highest, because parallel calls of one step can be answered out of order).
+  It is null before the first checkpoint (the task image's state), and for a timed-out call or a call deferred under every-N (ADR-0007), whose state no checkpoint holds.
+- Rows come from the enriched trajectory (`trajlab postprocess`), which already carries every `CallRecord` and `CheckpointRecord` on the right step (ADR-0003).
+
+### 5. Deltas come from checkpoint top layers (question 1)
+
+**What a delta is.**
+A `docker commit` image of a trial container is the image the trial started from (the derived image, ADR-0008, or for a resumed trial the checkpoint it started from) plus one layer: the container's whole writable layer at that moment.
+So checkpoint k's top layer holds every change since the container started.
+The environment at checkpoint k is the **view**: the derived image's filesystem with top layer k applied by the OCI rules: `.wh.<name>` deletes a path and its subtree, `.wh..wh..opq` hides a directory's lower contents, and a member that is not a directory replaces the lower subtree at its path.
+The **delta** of checkpoint k is the set of paths whose entries differ between view k-1 and view k, with view 0 the derived image itself.
+Entries are compared by kind, permission bits, owner, and the sha256 of a file's content or a symlink's target; times are never compared.
+The delta's rows carry the `step_idx` of the step that owns the checkpoint (`CheckpointRecord.tool_call_id`).
+
+**Alternatives considered.**
+- *Export and diff whole filesystems* (`docker export` of a container from each checkpoint): exact, but every export is the whole root filesystem, several GB per checkpoint for the larger TB 4.0 images.
+  It is kept as the independent oracle of the validation script.
+- *The detector's paths* (`changed_paths` in `calls.jsonl`, contents by `docker cp`): cheap, but capped at 100 paths per call, absent for the baseline call, judged by change time rather than content, and it would make the record depend on the detector, whose soundness rests on 14 audited calls (`docs/paper-notes.md`, C3).
+- *Top layers* (chosen): exact, independent of the detector, and each top layer holds only the trial's own changes (ADR-0008).
+
+**Facts this rests on**, checked on 2026-10-18 with Docker 29.8 and the containerd image store (the capture server's storage driver family), on an Alpine container committed twice:
+- a commit's top layer is cumulative: the second repeated every still-present entry and whiteout of the first;
+- a copied-up file appears in the layer even with unchanged content (a rewrite with the same bytes), so presence in a layer is not a change;
+- `rm -rf` of a base directory gives one whiteout and no listing of the subtree, so the base must be read to enumerate what was deleted, and a file first modified at step k has its earlier version only in the base;
+- a removed and recreated base directory gave one whiteout per removed child, no opaque marker; opaque markers are still handled, since other writers use them;
+- a base directory replaced by a file or symlink appears as that one member, with no whiteouts for its old children, so a non-directory member hides the lower subtree at its path;
+- committing a container with no changes adds no layer;
+- `docker image save` writes layer blobs first and `manifest.json` last, and the layer blobs are gzip, so a save must land in a file before it can be read.
+
+**How it is read** (`store/docker_images.py`, `store/reconcile.py`).
+One `docker image save` per trial, of all its checkpoint tags, writes the derived image's layers once and every top layer.
+Each top layer is then read twice (names, then content hashes) and the base layers once, restricted to the paths the top layers touch, delete, or replace.
+A layer is read a third time only when a row needs a non-text version the second read did not keep (a file over 1 MiB, or a hard link to an unchanged member), found by size and then hash.
+At most two top layers are in memory at a time; every distinct text version of a non-excluded file is written once to scratch space, by hash, so any earlier version is at hand for a hunk.
+Every checkpoint image must be the start image plus at most one layer.
+`trajlab.store.build.start_image` names the start image from `trajlab-resume.json` or `trajlab-preinstall.json`; given it, the Docker provider refuses a checkpoint image on any other base instead of diffing it.
+`reconcile` also refuses records with gaps or repeats in their seqs, records of more than one trial, a checkpoint with no owning step or two sharing one, and an unreadable layer.
+
+**Rows.**
+One row per changed path, directories included (added, deleted, or mode or owner changed).
+A file version is text if it is at most 1 MiB, contains no NUL byte, and decodes as UTF-8; a symlink target is text.
+A version without content (absent, a directory, another kind) counts as text, so a row is text when each of its file or symlink versions is; `is_text` is null for a directory or other kind on both sides.
+A text row whose content changed gets a unified diff (3 lines of context, lines split on `\n` only, `\ No newline at end of file` where needed, `/dev/null` for a side without content).
+Lines are matched after trimming common leading and trailing lines: exactly (difflib without autojunk) when that is cheap, else by a shortest edit script (Myers) within a step budget, else by difflib with autojunk.
+Plain difflib took 207 s for one inserted line in 1 MiB of repetitive text, and with autojunk turned that one-line edit into a 632 KB hunk; the trimmed match gives a 112-character hunk in 0.02 s.
+The method, hunks included, is recorded in `store_meta` as `reconcile_method`, so stores built under different methods never mix.
+A non-text later file version whose content changed is stored once in `blobs/<sha256>` and named in `blob_ref`; a mode- or owner-only change stores nothing, as it gets no hunk.
+Earlier versions keep only their sha256 and size.
+There is no rename operation: a rename is a delete and an add, which a derived column can pair later by sha256.
+
+### 6. Exclusions (question 5)
+
+- The store excludes exactly the change detector's harness paths (ADR-0010, item 5, found from the top layers of real checkpoints), plus `/proc` and `/sys`: `/logs/**`, `/tmp/claude-<uid>/**`, `/tmp/claude-code-settings/**`, and per user `~/.claude/**`, `~/.claude.json`, `~/.cache/claude/**`, `~/.local/state/claude/**`.
+  An added or deleted directory whose only changes underneath are excluded gives no row either, as in the detector.
+  A call the detector judged unchanged therefore has no delta rows.
+- `/tmp` as a whole is not excluded, though the technical spec suggests excluding "/tmp scratch": an agent's own scripts and outputs often live there, and only Claude Code's `/tmp/claude-<uid>` is the harness's.
+- `__pycache__` files stay: they are effects of the agent running Python (`docs/paper-notes.md`, threats).
+- The list is one file, `store/exclusions.py`, recorded in `store_meta`; a test keeps it a superset of the detector's.
+
+### 7. Ground truth is held out per fault
+
+ADR-0013's ground truth is a set of items per failed trial, each with one or more failing checks, zero to 17 blamed calls, alternative confirmed fixes with their own blamed calls, and related calls that are neutral to cite.
+The technical spec's single `checks` table, with one blamed step per check, cannot hold that.
+So the held-out side has three tables:
+- `checks` (trial, check, passed, fault): every verifier check and the fault a failing one belongs to;
+- `faults` (trial, fault, kind, method, flags): one row per ground-truth item;
+- `blame` (trial, fault, role, fix, call, step): the calls an item names, with role `blamed`, `alternative` (grouped by fix), or `related`.
+They are loaded from each trial's `groundtruth/items.jsonl` once `sl/groundtruth-replay` is merged (`store/checks.py`, a later step); the spec's `blamed_step_idx` is `blame.step_idx` with role `blamed`.
+
+### 8. When a checkpoint chain is complete
+
+A trial's chain is **complete** when every hooked call in its trajectory has a `CallRecord` (none timed out, none missing) and every checkpoint's image was read.
+Whether a stop record names the final state is reported beside it (`final_state_recorded`) but is not part of completeness: a trial stopped at its time cap has no stop record, and its last checkpoint still covers every finished call.
+Each trial's `ChainReport`, with one reason per problem, is written to `heldout.duckdb` (`chains`).
+Incomplete chains are built and flagged; `exp2 run` will refuse them.
+
+### 9. Derived columns
+
+`is_loop`, `is_revert`, and `files_touched` are columns of `steps` from schema version 1, null until step 3 fills them, so step 3 does not change the schema.
+Each column is an interface: `DerivedSpec` names it, and the implementation is a registered, versioned function, so a later LLM implementation of the same name changes the recorded implementation, not the schema.
+
+## Open questions, decided in later steps
+
+1. **Question 2, at step 3:** the `args_json` normalization for `is_loop`, and whether derived columns are recomputed or appended when a retry is ingested.
+   As the design spec defines it ("same tool and args as an earlier step, empty delta"), every repeated read-only call is a loop; step 3 should say whether that is intended.
+2. **Question 3, at step 4:** the query tool's channel.
+   The recommendation stands: a host process answering `.sql` files through the bind-mounted `/logs/agent`, separate from the checkpoint watcher, so a slow query never delays an ack the agent is waiting on, and every query is logged on the host by construction.
+3. **Question 6, the owner's call:** a fresh environment for every retry in every arm (recommended in the design spec).
+4. **Question 7, at step 3:** derived columns in the `record-files` bundle (recommended: yes, so the two record arms differ only in access).
+
+## Consequences
+
+- Deltas are what Docker's own view of each checkpoint says changed, independent of the change detector; a disagreement between a `CallRecord`'s verdict and a delta becomes observable.
+- Every trial's save includes its derived image's layers (0.04 to 3.6 GB compressed for ADR-0012's tasks).
+  Step 2 measures the per-trial time on the capture server and writes it to `docs/experiments/exp2/sample.md`.
+  In the retry loop each retry is saved again; if that misses the spec's one-minute ingest target, a later ADR can record each checkpoint's changes at capture time instead, which changes what a trial records and needs a new `corpus_id`.
+- The record is the filesystem only (ADR-0004): processes, shell state, and network are not in it; the paper says so in its first paragraph.
+- A package install gives one row, and for text one hunk, per installed file; step 2 reports store size per trial.
+- The first checkpoint's delta includes harness writes outside the exclusion list, such as Harbor's mount points; ADR-0013 flags blame on it as `baseline_checkpoint`.
+- `store_meta` is in `record.duckdb` and so visible to an agent; the `record-files` README will state the same values.
+- Tests run offline on synthetic layers built to the observed format, including a differential test against an independent filesystem simulator; the check against real Docker is a dated script run by hand.
+
+## Validation (2026-10-18)
+
+**Against Docker, with an independent oracle.**
+`scripts/2026-10-18_reconcile_docker_check.py` runs an Alpine 3.20 container on the development Mac (Docker 29.8, containerd store).
+It applies 22 scripted steps and commits after each exactly as the watcher does (`DockerCommitBackend.snapshot`: repository `trajlab-checkpoint`, the watcher's tag and labels).
+It then compares the rows of `DockerImageProvider` plus `reconcile` with an oracle that shares no code with them: `docker export` of a container created from the base and from each checkpoint image, parsed as whole filesystems and compared consecutively.
+Only the exclusion predicate is shared, since it is the contract.
+Besides the ten identity fields of each row, it checks `is_text` against the text rule, file sizes, every blob's content, and that each hunk turns the earlier text into the later one.
+It also checks that computing a checkpoint from layers k-1 and k alone gives the same rows as the whole chain.
+The steps cover: text and binary adds; appends; deletes of base files and of base directories with children; a base directory removed and recreated; chmod (setuid included, and a binary whose content did not change), chown, and `chown -h` on a symlink; same-byte rewrites and `touch` (no rows); symlink create and retarget; hard links; text over 1 MiB; a FIFO; empty directories; CRLF and missing final newlines; text turning binary; file to directory, directory to file, symlink to directory, and directory to symlink; harness paths, and a directory holding only them; and a bulk step that adds 2,000 files and deletes a base directory of many.
+
+The first run failed on one step: a base directory replaced by a file or symlink kept its old children in the view, because Docker writes no whiteouts for them.
+The view rule now treats a non-directory member as replacing the lower subtree, the differential test's simulator now emits that encoding, and the run passes:
+
+| Step | Rows (oracle = reconcile) | Step | Rows |
+|---|---:|---|---:|
+| add-text | 6 | mkdir-and-temp-file | 3 |
+| append-base | 1 | rmdir-and-rm-temp-file | 2 |
+| rm-base-file | 1 | excluded-only | 0 |
+| rm-rf-base-dirs | 14 | cache-sibling | 1 |
+| replace-base-dir | 47 | text-edits | 6 |
+| chmod-only | 3 | kind-changes | 13 |
+| chown-only | 3 | rm-cache-dir | 2 |
+| same-bytes-and-touch | 0 | bulk | 2,225 |
+| symlink-create, -retarget | 1, 1 | after-bulk | 55 |
+| hard-links | 2 | binary | 2 |
+| big-text | 2 | | |
+
+Whole chain: 22 checkpoints, 2,390 rows, 0 mismatches.
+Times on Alpine: the provider (44 inspects, one 4.4 MB save, the manifest) took 1.4 s, and reconcile took 1.1 s for the chain.
+Per checkpoint, reconcile took 0.03 to 0.05 s for small steps and 0.8 to 1.0 s for the bulk step and the one after it.
+These are not the corpus's times: the derived images there are 1 to 10 GB; step 2 measures them on the capture server.
+Every container and image the script made was removed afterwards.
+
+**Offline tests** (`make test`, 664 passing, of which about 260 are the store's):
+- scenario tests for each layer encoding and row rule, including a reproduction of the two layers the Docker probe saw;
+- a differential test over 320 seeded sequences of a filesystem simulator that writes cumulative containerd-shaped layers (explicit whiteouts, opaque markers, a whiteout beside a recreated directory, a non-directory over a subtree, hard links, `./` and trailing `/` names), with expected rows from comparing consecutive simulated filesystems directly and every hunk applied by a standalone patcher;
+- the step-1 acceptance check: the hello-world fixture builds to its hand count (1 delta row, 3 step rows, a complete chain), the second build is skipped, and each refusal writes nothing;
+- with non-directory hiding disabled, the differential test fails in 8 of its 9 parts.
+
+**Known limits.**
+zstd-compressed layers cannot be read (Python 3.12's `tarfile`); Docker's default is gzip.
+Member names that are not UTF-8 reach `path` with surrogate escapes, which DuckDB may refuse.
+`other` entries (FIFOs, devices) compare by kind, mode, and owner only, not device numbers.
+A row from a binary file to a symlink has no hunk and no blob, so the new target appears only as `sha256_after` and `bytes_after`.

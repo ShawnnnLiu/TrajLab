@@ -12,6 +12,7 @@ One trial is one task executed by one attempt.
 
 - **task** - one Terminal-Bench task (e.g. `hello-world/hello-world`): the unit Harbor executes and verifies.
 - **attempt** - one of the `n_attempts` repetitions of a task within a job.
+  In Exp 2, `attempt_idx` is instead a position in a retry chain (see "Exp 2 store" below): 0 is the corpus first attempt.
   Say "attempt" when you mean the repetition index, "trial" when you mean the execution itself.
 - **trial** - one execution of one task by one attempt.
   Harbor writes one trial dir per trial.
@@ -98,6 +99,24 @@ One trial is one task executed by one attempt.
 - **join** - the association between a checkpoint and the trajectory step that caused it, keyed by `tool_use_id`; realized as ATIF system steps (ADR-0003).
   Steps of read-only tools join to the most recent earlier checkpoint (ADR-0001), which in the enriched file is the last checkpoint step before them; each hooked call's `CallRecord` sits on its step as `extra.trajlab.calls` (ADR-0003, 2026-10-01 amendment).
 - **compaction record** - the `CompactionRecord` postprocess builds from one native `compact_boundary` event; it is the `observation.results[0].extra` of a compaction step.
+
+## Exp 2 store
+
+- **store** - the Exp 2 store (ADR-0014): a directory holding `record.duckdb`, `heldout.duckdb`, and `blobs/`.
+  Not: "database" for the `record-files` export, which is files.
+- **record of prior attempts** - what a record arm gives the repair agent: the store's agent-visible tables (`trials`, `steps`, `deltas`), through the query tool (`record-engine`) or as exported files (`record-files`).
+  Always qualify it ("record of prior attempts", "record arm"); unqualified, "record" names a capture record (checkpoint record, call record, stop record, compaction record).
+- **held-out tables** - `checks`, `faults`, `blame`, and `chains` in `heldout.duckdb`; never opened by an agent connection or exported to an agent.
+- **step row** - one row of `steps`: a tool call, an ATIF step without tool calls, a compaction step, or a stop record (ADR-0014, item 4).
+  Not the same as an ATIF step: a step with k tool calls gives k step rows.
+- **top layer** - the last layer of a checkpoint image: the container's whole writable layer when it was committed, so it holds every change since the container started.
+- **view** - the filesystem at a checkpoint: the derived image with that checkpoint's top layer applied by the OCI rules (whiteouts, opaque directories).
+- **delta** - the delta rows of one checkpoint: the paths whose kind, mode, owner, or content differ between the previous checkpoint's view (the derived image, for the first) and this one's; keyed to the step row that owns the checkpoint.
+  Not: the detector's `changed_paths` in a call record, which compare change times and are capped.
+- **checkpoint chain** - a trial's checkpoints in `seq` order; complete when every hooked call has a call record and every checkpoint image was read (ADR-0014, item 8).
+- **retry** - one more attempt at a failed task in Exp 2, started after the harness verifier scored the previous attempt; tests the agent runs inside an attempt are not retries.
+- **retry chain** - a failure's attempts under one Exp 2 arm, in order: attempt 0 (the corpus first attempt), then retries 1 to N, each naming the one before in `parent_trial_id`.
+  Not to be confused with a checkpoint chain.
 
 ## Everything else
 
