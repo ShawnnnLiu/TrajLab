@@ -4,6 +4,7 @@ import tarfile
 from trajlab.checkpoint.diffs import (
     MAX_FILES_PER_CALL,
     MAX_LINE_PRODUCT,
+    MAX_RECORDED_FILES,
     Candidate,
     candidates,
     file_change,
@@ -13,6 +14,7 @@ from trajlab.checkpoint.diffs import (
     sha256,
     tar_members,
     to_read,
+    to_record,
     unified_diff,
 )
 from trajlab.contracts import MAX_TEXT_BYTES
@@ -154,3 +156,16 @@ def test_prior_versions_splits_held_from_unknown() -> None:
     held, unknown = prior_versions(["/a", "/b", "/c"], {"/a": b"1", "/c": None})
     assert held == {"/a": b"1", "/c": None}
     assert unknown == ["/b"]
+
+
+def test_to_record_keeps_read_files_then_quiet_paths_and_caps_the_count() -> None:
+    noisy = [
+        Candidate(f"/root/.cache/pip/f{i}", "added", "file", 5)
+        for i in range(MAX_RECORDED_FILES + 100)
+    ]
+    quiet = Candidate("/app/notes.md", "added", "file", 5)
+    read = Candidate("/app/main.py", "modified", "file", 5)
+    recorded = to_record([*noisy, quiet, read], ["/app/main.py"])
+    assert len(recorded) == MAX_RECORDED_FILES
+    assert recorded[:2] == [read, quiet]  # what was read, then the agent's own paths
+    assert recorded[2] == noisy[0]  # then noisy ones, in listing order

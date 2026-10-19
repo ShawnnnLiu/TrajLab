@@ -36,6 +36,7 @@ from trajlab.checkpoint.diffs import (
     file_change,
     prior_versions,
     to_read,
+    to_record,
 )
 from trajlab.checkpoint.join import (
     REQ_SUFFIX,
@@ -425,7 +426,7 @@ class Watcher:
             if image is not None:
                 fetched = self.backend.read_image_files(image, unknown)
         files = []
-        for candidate in found:
+        for candidate in to_record(found, wanted):
             path = candidate.path
             if candidate.op == "added":
                 before, before_known = None, True

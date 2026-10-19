@@ -837,3 +837,21 @@ def test_extras_before_any_checkpoint_use_the_start_image(running_trial: Path) -
     [config] = _changes(running_trial)[-1].files
     assert backend.image_reads[-1] == (ExtrasBackend.START_IMAGE, ["/app/config.ini"])
     assert config.before_sha256 == sha256(b"x=1\n")
+
+
+def test_extras_cap_the_files_recorded_for_one_call(running_trial: Path) -> None:
+    from trajlab.checkpoint.diffs import MAX_RECORDED_FILES
+
+    backend = ExtrasBackend()
+    watcher = _watcher(running_trial, backend, gate="change", extras=True)
+    watcher.process(_request(running_trial, "toolu_baseline"))
+    for i in range(MAX_RECORDED_FILES + 100):  # a package install
+        backend.put(f"/usr/lib/python3/site-packages/pkg/m{i}.py", b"x = 1\n")
+    backend.put("/app/solve.py", b"print(1)\n")
+    watcher.process(_request(running_trial, "toolu_install"))
+
+    install = _changes(running_trial)[-1]
+    assert install.files_total == MAX_RECORDED_FILES + 101
+    assert len(install.files) == MAX_RECORDED_FILES
+    assert install.files[0].path == "/app/solve.py"  # the agent's own file is never cut
+    assert install.files[0].diff is not None

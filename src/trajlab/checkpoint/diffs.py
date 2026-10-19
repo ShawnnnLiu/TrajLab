@@ -11,8 +11,9 @@ Everything here but `read_tar` is pure. Limits keep it inside the hook's wait: a
 diff when the two sides' line counts multiply past `MAX_LINE_PRODUCT` (difflib's cost grows
 with that product; ADR-0014 measured minutes on large repetitive files); and the watcher stops
 reading before-versions once `BUDGET_S` has passed. Beyond a limit a file keeps its path, size,
-and whatever hash is known. This is our own diff, not ADR-0014's; it may be replaced by that
-one once it is shared outside `store/`.
+and whatever hash is known. At most `MAX_RECORDED_FILES` changes are recorded per call,
+files that were read first; `files_total` keeps the full count. This is our own diff, not
+ADR-0014's; it may be replaced by that one once it is shared outside `store/`.
 """
 
 import difflib
@@ -27,6 +28,9 @@ from trajlab.checkpoint.changes import Listing
 from trajlab.contracts import MAX_TEXT_BYTES, FileChange, SkipReason
 
 MAX_FILES_PER_CALL = 20
+# A package install can change tens of thousands of paths in one call; recording them all made
+# one changes.jsonl line several MB of cache files. The count is always kept in files_total.
+MAX_RECORDED_FILES = 500
 MAX_LINE_PRODUCT = 1_000_000
 BUDGET_S = 2.0
 CONTEXT_LINES = 3
@@ -114,6 +118,16 @@ def to_read(found: Sequence[Candidate]) -> list[str]:
     ]
     readable.sort(key=lambda c: (NOISY.search(c.path) is not None, c.path))
     return [c.path for c in readable[:MAX_FILES_PER_CALL]]
+
+
+def to_record(found: Sequence[Candidate], read: Sequence[str]) -> list[Candidate]:
+    """The changes to record, at most MAX_RECORDED_FILES: files that were read first, then the
+    rest with quiet paths before noisy ones, each group in listing order."""
+    chosen = set(read)
+    first = [c for c in found if c.path in chosen]
+    rest = [c for c in found if c.path not in chosen]
+    rest.sort(key=lambda c: NOISY.search(c.path) is not None)  # stable: keeps listing order
+    return (first + rest)[:MAX_RECORDED_FILES]
 
 
 def file_change(
