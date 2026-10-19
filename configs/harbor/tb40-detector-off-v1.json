@@ -1,0 +1,37 @@
+{
+    "job_name": "tb40-detector-off-v1",
+    "jobs_dir": "corpus/jobs",
+    "n_attempts": 5,
+    "n_concurrent_trials": 3,
+    "agent_timeout_multiplier": 0.5,
+    "agents": [
+        {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+                "reasoning_effort": "medium",
+                "version": "2.1.278",
+                "config": "configs/claude-code/settings.hooks.json"
+            }
+        }
+    ],
+    "datasets": [
+        {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "4.0.0",
+            "task_names": [
+                "terminal-bench/layout-config-recreation2",
+                "terminal-bench/sound-change-cascade",
+                "terminal-bench/vba-userform-port",
+                "terminal-bench/cad-model",
+                "terminal-bench/mvcc-lsm-compaction",
+                "terminal-bench/vf2-speedup-networkx",
+                "terminal-bench/pretrain-shard-corruption",
+                "terminal-bench/layout-config-recreation"
+            ]
+        }
+    ],
+    "environment": {
+        "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+    }
+}

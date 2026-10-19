@@ -155,7 +155,10 @@ The watcher's policy sets one arm per corpus, recorded in `policy.json` and the 
   - at least 2 where agents run servers (`vba-userform-port`, `sound-change-cascade`).
   - **Candidates:** `layout-config-recreation2` (1/3), `sound-change-cascade` (2/3), `vba-userform-port` (2/3), `cad-model`, `mvcc-lsm-compaction`, `vf2-speedup-networkx`, `pretrain-shard-corruption` (0/3 with passing repairs), and `layout-config-recreation` (0/3; its ground-truth items blame 11 to 17 edits each, the closest case to a loop).
   - **Excluded:** `sglang-qwen-burst` (8.8 GB containers made commits time out), `freecad-platform-drawing` (a trial lost every checkpoint), `interleaved-vigenere` (6 safety refusals in ADR-0012 round 1).
-  - Confirmed or swapped after phase 0, fixed before phase 1, and listed in the manifest.
+  - **Fixed 2026-10-19 after phase 0: all 8 candidates kept** (`configs/harbor/tb40-detector-off-v1.json`).
+    - The pilot (`tb40-detector-pilot-v1`): 8 trials, 2 passed (`mvcc-lsm-compaction`, `vba-userform-port`), and no checkpoint timeouts.
+    - `pretrain-shard-corruption` hit the 4 h cap (`AgentTimeoutError`) after 274 hooked calls and 95 checkpoints. It is kept anyway: its long run of unchanged calls is the corpus's best case for `loop` and `stall`.
+    - Its place in the feedback arms is decided after phase 2.
 - **Setup:** Sonnet 5.5, medium effort, Claude Code 2.1.278, `--gate change`, pre-installed images (ADR-0008), 4 h agent cap. All as in `tb40-sonnet-v2`, so the arms differ only in §4.
 - **Size:** 5 attempts per task per arm, 160 trials.
   - Five matches the Terminal-Bench leaderboard and Anthropic's TB 4.0 protocol, and resolves a task's pass rate in steps of 20%.
@@ -252,6 +255,6 @@ The watcher's policy sets one arm per corpus, recorded in `policy.json` and the 
      - at `Stop`, the copy already held the final assistant text.
    - That trial's only call had no text before it. The stream is written in order, so a copy that holds a `tool_use` holds all text before it.
    - **Closed.**
-3. The 8 tasks, chosen from ADR-0012's per-task results before phase 1.
+3. **Closed (2026-10-19):** the 8 tasks. All 8 candidates kept after phase 0 (§5).
 4. Who the second labeler is.
 5. Whether ADR-0014 wants `is_loop` and `is_revert` to come from this detector, and the diff function shared.
