@@ -293,6 +293,14 @@ def watch(
     sweep_interval: Annotated[
         float, typer.Option(help="Seconds between rescans for missed requests.")
     ] = DEFAULT_SWEEP_INTERVAL_S,
+    extras: Annotated[
+        bool,
+        typer.Option(
+            "--extras/--no-extras",
+            help="Also record each call's processes, listening ports, and file diffs under "
+            "<trial>/trajlab/ (ADR-0015). Changes what a trial records: use a new corpus_id.",
+        ),
+    ] = False,
 ) -> None:
     """Watch running trials and checkpoint their state-mutating calls. Stop with Ctrl-C."""
     if gate is not Gate.none and every != 1:
@@ -315,6 +323,7 @@ def watch(
                 every=every,
                 gate=gate.value,
                 sweep_interval=sweep_interval,
+                extras=extras,
             ).run(stop)
     except WatcherLockedError as error:
         typer.echo(f"trajlab watch: {error}", err=True)

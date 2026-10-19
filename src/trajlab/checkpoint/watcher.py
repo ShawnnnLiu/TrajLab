@@ -5,6 +5,8 @@ Under gate `change` it checkpoints only calls that changed the filesystem (ADR-0
 gate `none` it checkpoints every Nth call and defers the others (ADR-0007). The end of the
 agent's turn (Stop, StopFailure) is answered like a call, but under gate `none` it always gets a
 checkpoint (ADR-0011). Every answered request gets a `CallRecord`.
+With `extras` on, each answered call also gets a process snapshot and the content of what it
+changed, under `<trial>/trajlab/`, before its ack (ADR-0015 §2).
 `checkpoint/` does not import `capture/` (CLAUDE.md constraint 3), so the caller supplies how a
 trial dir maps to its name and compose project.
 """
@@ -28,12 +30,20 @@ from watchdog.observers import Observer
 from trajlab.checkpoint.backends.base import BackendError, SnapshotBackend
 from trajlab.checkpoint.backends.docker_commit import image_tag
 from trajlab.checkpoint.changes import Listing, changed_paths, parse_listing
+from trajlab.checkpoint.diffs import (
+    BUDGET_S,
+    candidates,
+    file_change,
+    prior_versions,
+    to_read,
+)
 from trajlab.checkpoint.join import (
     REQ_SUFFIX,
     WATCHER_LOG_FILENAME,
     CheckpointRequest,
     answered_requests,
     append_call,
+    append_line,
     append_record,
     is_pending,
     read_calls,
@@ -45,7 +55,19 @@ from trajlab.checkpoint.join import (
     write_ack,
     write_policy,
 )
-from trajlab.contracts import MAX_LISTED_PATHS, CallRecord, CheckpointPolicy, CheckpointRecord
+from trajlab.checkpoint.processes import parse_probe
+from trajlab.contracts import (
+    CHANGES_FILENAME,
+    MAX_LISTED_PATHS,
+    MAX_TEXT_BYTES,
+    PROCESSES_FILENAME,
+    TRAJLAB_DIRNAME,
+    CallChanges,
+    CallRecord,
+    CheckpointPolicy,
+    CheckpointRecord,
+    ProcessSnapshot,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +153,10 @@ class _Trial:
     # Filesystem listings (ADR-0010), in memory only: a restarted watcher starts a new baseline.
     reference: Listing | None = None  # at the last checkpoint
     previous: Listing | None = None  # after the last measured call
+    # Detector capture (ADR-0015), in memory only: a restarted watcher reads older versions
+    # from the last checkpoint's image instead.
+    contents: dict[str, bytes | None] = field(default_factory=dict)  # last version seen per path
+    start_image: str | None = None
 
     def covering(self, tool_call_id: str) -> CheckpointRecord | None:
         """The record whose checkpoint first shows this call's effects, if any."""
@@ -153,6 +179,7 @@ class Watcher:
         gate: str = "none",
         sweep_interval: float = DEFAULT_SWEEP_INTERVAL_S,
         workers: int = DEFAULT_WORKERS,
+        extras: bool = False,
     ) -> None:
         # Observers report absolute paths and the sweep reports paths under jobs_dir; both are
         # resolved so one request and one trial have exactly one key.
@@ -162,6 +189,7 @@ class Watcher:
         self.identify = identify
         self.sweep_interval = sweep_interval
         self.workers = workers
+        self.extras = extras
         self._trials: dict[Path, _Trial] = {}
         self._trials_lock = threading.Lock()
         self._in_flight: set[Path] = set()
@@ -233,6 +261,10 @@ class Watcher:
         trigger = "stop" if stop else "tool_call"
         measured = self._measure(trial) if self.policy.gate != "none" else None
         change = measured.change if measured else "not_checked"
+        if self.extras:
+            # Before the snapshot and the ack: the agent is still waiting, the last checkpoint
+            # still holds the state before this call.
+            self._record_extras(trial_dir_of(req_path), trial, request, measured)
 
         def answer(outcome: str, checkpoint_seq: int | None) -> CallRecord:
             call = CallRecord(
@@ -314,6 +346,126 @@ class Watcher:
         else:
             change = "changed" if changed_paths(trial.reference, current) else "unchanged"
         return _Measurement(change=change, own=own, current=current, detect_ms=detect_ms)
+
+    def _record_extras(
+        self,
+        trial_dir: Path,
+        trial: _Trial,
+        request: CheckpointRequest,
+        measured: "_Measurement | None",
+    ) -> None:
+        """The process snapshot and the call's changes (ADR-0015 §2). Never blocks the ack."""
+        out = trial_dir / TRAJLAB_DIRNAME
+        out.mkdir(exist_ok=True)
+        call_seq = len(trial.calls) + 1
+        try:
+            snapshot = self._process_snapshot(trial, request.tool_use_id, call_seq)
+            if snapshot is not None:
+                append_line(out / PROCESSES_FILENAME, snapshot.model_dump_json())
+        except Exception:
+            trial.log.warning("no process snapshot for %s", request.tool_use_id, exc_info=True)
+        try:
+            changes = self._call_changes(trial, request.tool_use_id, call_seq, measured)
+            if changes is not None:
+                append_line(out / CHANGES_FILENAME, changes.model_dump_json())
+        except Exception:
+            trial.log.warning("no changes recorded for %s", request.tool_use_id, exc_info=True)
+
+    def _process_snapshot(
+        self, trial: _Trial, tool_call_id: str, call_seq: int
+    ) -> ProcessSnapshot | None:
+        assert trial.container is not None
+        start = time.monotonic()
+        raw = self.backend.processes(trial.container)
+        if raw is None:
+            return None
+        processes, listening = parse_probe(raw)
+        return ProcessSnapshot(
+            tool_call_id=tool_call_id,
+            call_seq=call_seq,
+            processes=processes,
+            listening=listening,
+            capture_ms=round((time.monotonic() - start) * 1000),
+            captured_at=datetime.now(UTC),
+        )
+
+    def _call_changes(
+        self,
+        trial: _Trial,
+        tool_call_id: str,
+        call_seq: int,
+        measured: "_Measurement | None",
+    ) -> CallChanges | None:
+        """Diffs and hashes of the files the call changed, within the limits of `diffs`."""
+        assert trial.container is not None
+        if measured is None or measured.current is None:
+            return None  # gate none, or no GNU find: which paths changed is unknown
+        start = time.monotonic()
+
+        def elapsed_ms() -> int:
+            return round((time.monotonic() - start) * 1000)
+
+        if measured.own is None:
+            return CallChanges(
+                tool_call_id=tool_call_id,
+                call_seq=call_seq,
+                files=(),
+                files_total=0,
+                baseline=True,
+                capture_ms=elapsed_ms(),
+            )
+        found = candidates(measured.own, measured.current)
+        wanted = to_read(found)
+        after = (self.backend.read_files(trial.container, wanted) if wanted else {}) or {}
+        modified = [c.path for c in found if c.op == "modified" and c.path in wanted]
+        held, unknown = prior_versions(modified, trial.contents)
+        fetched: dict[str, bytes] | None = None
+        if unknown and time.monotonic() - start < BUDGET_S:
+            image = trial.records[-1].checkpoint_id if trial.records else self._start_image(trial)
+            if image is not None:
+                fetched = self.backend.read_image_files(image, unknown)
+        files = []
+        for candidate in found:
+            path = candidate.path
+            if candidate.op == "added":
+                before, before_known = None, True
+            elif path in held:
+                before, before_known = held[path], True
+            elif fetched is not None and path in unknown:
+                # Read from the image: a path it lacks did not exist before this call.
+                before, before_known = fetched.get(path), True
+            else:
+                before, before_known = trial.contents.get(path), path in trial.contents
+            reason = None
+            if candidate.kind == "file" and candidate.op != "removed" and path not in wanted:
+                reason = "over_file_cap" if (candidate.size or 0) <= MAX_TEXT_BYTES else None
+            files.append(
+                file_change(
+                    candidate,
+                    after=after.get(path),
+                    before=before,
+                    before_known=before_known,
+                    skipped=reason,
+                )
+            )
+        for path, content in after.items():
+            trial.contents[path] = content
+        for candidate in found:
+            if candidate.op == "removed":
+                trial.contents[candidate.path] = None
+        return CallChanges(
+            tool_call_id=tool_call_id,
+            call_seq=call_seq,
+            files=tuple(files),
+            files_total=len(found),
+            capture_ms=elapsed_ms(),
+        )
+
+    def _start_image(self, trial: _Trial) -> str | None:
+        assert trial.container is not None
+        if trial.start_image is None:
+            trial.start_image = self.backend.image_of(trial.container)
+        return trial.start_image
 
     def _uncovered(self, directory: Path, trial: _Trial, request: CheckpointRequest) -> list[str]:
         """Calls since the last checkpoint whose effects no checkpoint holds yet, then this one.

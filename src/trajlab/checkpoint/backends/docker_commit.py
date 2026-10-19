@@ -14,12 +14,14 @@ import logging
 import re
 import subprocess
 import time
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from datetime import UTC, datetime
 from typing import Any
 
 from trajlab.checkpoint.backends.base import BackendError, Snapshot, SnapshotBackend
 from trajlab.checkpoint.changes import FIND_PRINTF
+from trajlab.checkpoint.diffs import read_tar, tar_members
+from trajlab.checkpoint.processes import PROBE_SCRIPT
 
 logger = logging.getLogger(__name__)
 
@@ -159,3 +161,43 @@ class DockerCommitBackend(SnapshotBackend):
 
     def discard(self, snapshot: Snapshot) -> None:
         self._docker("image", "rm", "--force", snapshot.checkpoint_id)
+
+    # Detector capture (ADR-0015 §2) -----------------------------------------------------
+
+    def processes(self, container: str) -> str | None:
+        return self._docker("exec", "-u", "0", container, "sh", "-c", PROBE_SCRIPT)
+
+    def read_files(self, container: str, paths: Sequence[str]) -> dict[str, bytes] | None:
+        return self._tar([self._docker_bin, "exec", "-u", "0", container], paths)
+
+    def image_of(self, container: str) -> str | None:
+        return self._docker("container", "inspect", "--format", "{{.Image}}", container) or None
+
+    def read_image_files(self, image: str, paths: Sequence[str]) -> dict[str, bytes] | None:
+        prefix = [
+            self._docker_bin, "run", "--rm", "--network", "none", "-u", "0",
+            "--entrypoint", "tar", image,
+        ]  # fmt: skip
+        return self._tar(prefix, paths, entrypoint=True)
+
+    def _tar(
+        self, prefix: list[str], paths: Sequence[str], *, entrypoint: bool = False
+    ) -> dict[str, bytes] | None:
+        """Run `tar -cf - -C / <paths>` after `prefix`; missing paths are simply absent.
+
+        tar exits 1 or 2 when some paths are missing and still writes the others. No tar in the
+        image (exit 126 or 127, or no output at all) gives None.
+        """
+        if not paths:
+            return {}
+        args = ["-cf", "-", "-C", "/", "--", *tar_members(paths)]
+        command = [*prefix, *args] if entrypoint else [*prefix, "tar", *args]
+        try:
+            completed: Any = self._run(
+                command, check=False, capture_output=True, timeout=COMMAND_TIMEOUT_S
+            )
+        except (OSError, subprocess.TimeoutExpired) as error:
+            raise BackendError(f"tar in {prefix[-1]}: {error}") from error
+        if completed.returncode not in (0, 1, 2) or not completed.stdout:
+            return None
+        return read_tar(completed.stdout)

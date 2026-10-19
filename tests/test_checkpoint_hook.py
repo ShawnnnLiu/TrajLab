@@ -169,3 +169,44 @@ def test_hook_names_the_end_of_the_turn(tmp_path: Path, event: str) -> None:
     assert request.tool_use_id.startswith("stop_")
     assert (request.tool_name, request.event) == (event, event)
     assert (tmp_path / "checkpoints" / f"{request.tool_use_id}.timeout").exists()
+
+
+def test_hook_keeps_its_whole_input_before_the_request(tmp_path: Path) -> None:
+    # ADR-0015: the call's input and output, for the detector; written before the .req, so the
+    # watcher always finds it when it answers.
+    checkpoints = tmp_path / "checkpoints"
+    req = checkpoints / f"{TOOL_USE_ID}.req"
+    seen_with_req: list[bool] = []
+
+    def acknowledge() -> None:
+        deadline = time.monotonic() + 10
+        while not req.exists() and time.monotonic() < deadline:
+            time.sleep(0.01)
+        seen_with_req.append((checkpoints / f"{TOOL_USE_ID}.call.json").exists())
+        (checkpoints / f"{TOOL_USE_ID}.ack").write_text("{}")
+
+    thread = threading.Thread(target=acknowledge)
+    thread.start()
+    stdin = _stdin()
+    assert _run_hook(tmp_path, stdin, wait="20").returncode == 0
+    thread.join()
+
+    assert seen_with_req == [True]
+    call_input = checkpoints / f"{TOOL_USE_ID}.call.json"
+    assert json.loads(call_input.read_text()) == json.loads(stdin)
+    assert not (checkpoints / f"{TOOL_USE_ID}.call.json.tmp").exists()
+
+
+def test_hook_keeps_the_input_of_the_end_of_the_turn(tmp_path: Path) -> None:
+    stdin = json.dumps(
+        {"hook_event_name": "Stop", "stop_hook_active": False, "last_assistant_message": "Done."}
+    )
+    assert _run_hook(tmp_path, stdin).returncode == 0
+    [req] = (tmp_path / "checkpoints").glob("*.req")
+    call_input = req.with_name(req.name.removesuffix(".req") + ".call.json")
+    assert json.loads(call_input.read_text())["last_assistant_message"] == "Done."
+
+
+def test_hook_keeps_no_input_without_a_usable_id(tmp_path: Path) -> None:
+    assert _run_hook(tmp_path, _stdin(tool_use_id="../x")).returncode == 0
+    assert list((tmp_path / "checkpoints").glob("*.call.json")) == []

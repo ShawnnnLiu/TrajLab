@@ -16,6 +16,19 @@ from trajlab.contracts.checkpoint import (
     CheckpointRecord,
 )
 from trajlab.contracts.corpus import CorpusJob, CorpusManifest, CorpusTask
+from trajlab.contracts.patterns import (
+    CALL_INPUT_SUFFIX,
+    CHANGES_FILENAME,
+    MAX_TEXT_BYTES,
+    PROCESSES_FILENAME,
+    TRAJLAB_DIRNAME,
+    CallChanges,
+    FileChange,
+    ListeningPort,
+    ProcessEntry,
+    ProcessSnapshot,
+    SkipReason,
+)
 from trajlab.contracts.preinstall import PREINSTALL_RECORD_FILENAME, PreinstallRecord
 from trajlab.contracts.repair import (
     CHECKPOINT_ARMS,
@@ -47,6 +60,17 @@ from trajlab.contracts.steps import (
 from trajlab.contracts.trial import TrialRecord
 
 __all__ = [
+    "CALL_INPUT_SUFFIX",
+    "CHANGES_FILENAME",
+    "MAX_TEXT_BYTES",
+    "PROCESSES_FILENAME",
+    "TRAJLAB_DIRNAME",
+    "CallChanges",
+    "FileChange",
+    "ListeningPort",
+    "ProcessEntry",
+    "ProcessSnapshot",
+    "SkipReason",
     "CALLS_FILENAME",
     "CHECKPOINT_RECORDS_FILENAME",
     "COMPACTION_STEP_MESSAGE",

@@ -38,6 +38,14 @@ Vocabulary for these roles, and for everything else in this doc, is in `docs/glo
 | `policy.json` | watcher | the `CheckpointPolicy` (`backend`, `every`, `gate`) this trial is captured under; written on first contact |
 | `watcher.log` | watcher | per-trial log |
 | `hook-errors.log` | hook | one line per hook invocation that could not extract a `tool_use_id` |
+| `<tool_use_id>.call.json` | hook | the hook's whole stdin (the call's input and output), written before the `.req` (ADR-0015) |
+
+With `trajlab watch --extras` (ADR-0015), the watcher also writes, under `<trial>/trajlab/` on the host, outside the bind mount, before each call's `.ack`:
+
+| File | Content |
+| --- | --- |
+| `processes.jsonl` | one `ProcessSnapshot` per answered call: running processes and listening TCP ports |
+| `changes.jsonl` | one `CallChanges` per answered call: per changed file, the op, size, sha256 before and after, and a unified diff for text, within the limits of `checkpoint/diffs.py` |
 
 ## Sequence
 

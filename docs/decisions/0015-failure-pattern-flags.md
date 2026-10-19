@@ -63,30 +63,50 @@ Each flag names the `tool_call_id` of the call that triggered it, with evidence 
 ### 2. Capture additions
 
 These change what a trial records; the first corpus under them gets a new `corpus_id`.
+- The hook change is always on.
+- The watcher's additions are opt-in, with `trajlab watch --extras`, so corpora captured without them stay reproducible.
 
-- **Full hook input:** the hook writes its whole stdin (`tool_input`, `tool_response`, ids) to `<tool_use_id>.call.json` beside the `.req`. Today it keeps only the ids.
-- **Process snapshot:** after each hooked call the watcher records the container's process list (command lines, without PIDs) and listening ports, in the `docker exec` it already runs for change detection.
-- **Per-call diffs and hashes:**
-  - for each path the change gate reports, the watcher reads the new version from the running container and diffs it against the previous version, which it keeps cached;
-  - a file's first version comes from the trial's start image, read once;
-  - every changed file gets a sha256, and text files also get a unified diff.
+- **Full hook input:** the hook writes its whole stdin (`tool_input`, `tool_response`, ids) to `<tool_use_id>.call.json` beside the `.req`, before the `.req`. Today it keeps only the ids.
+- **Process snapshot:** after each hooked call the watcher runs a POSIX `sh` probe as root in the container (`checkpoint/processes.py`).
+  - It reads `/proc` directly, since task images may lack `ps` or `ss`, and records each process's pid, parent pid, and command line, cut to 500 characters, plus the listening TCP ports.
+  - The probe's own processes are dropped.
+  - Detection compares processes by command line, so a restarted server shows up as a new pid with the same command.
+  - It is a second `docker exec`, beside the change gate's `find`: about 60 ms on a test container.
+  - One `ProcessSnapshot` per call goes to `processes.jsonl`.
+- **Per-call diffs and hashes** (`checkpoint/diffs.py`), for each file and symlink the change gate reports (directories are not recorded):
+  - **Now:** the watcher reads the new version from the running container with `tar`.
+  - **Before:**
+    - from the versions it holds from earlier calls;
+    - otherwise from the last checkpoint's image, which under `--gate change` holds the state before the call;
+    - before any checkpoint, from the trial's start image.
+  - Image reads use `docker run --rm --network none`, so a restarted watcher still finds before-versions.
+  - Every file read gets a sha256 of its new content, and the before-version's sha256 when known; text files also get a unified diff.
+  - Removed paths and symlinks are recorded without content.
+  - The trial's first measured call has no earlier listing, so it is recorded as `baseline` with no files.
+  - One `CallChanges` per call goes to `changes.jsonl`.
 - **Diff function:**
-  - our own, built on `difflib`, behind one interface (`make_diff(path, before, after)`);
+  - our own, built on `difflib`, behind one function (`file_change` over `unified_diff`);
   - it uses ADR-0014's text rule (at most 1 MiB, no NUL byte, valid UTF-8) and the change gate's exclusions (`checkpoint/changes.py`);
-  - **limits**, from ADR-0014's measurements: no diff when lines before × lines after exceed 1,000,000; at most 20 files diffed per call, preferring files outside package and cache directories; a 2 s budget per call. Beyond any limit, a file gets its path, size, and hash only;
+  - **limits**, from ADR-0014's measurements:
+    - no diff when lines before × lines after exceed 1,000,000;
+    - at most 20 files read per call, files outside package, cache, and system directories first;
+    - no before-version reads once 2 s have passed.
+  - Beyond any limit, a file keeps its path and size, plus its hash if it was read, and a `skipped` reason;
   - it may be replaced by ADR-0014's diff function once that is shared outside `store/`.
-- **Flags:** the watcher runs the detector after each answered call and appends `FlagRecord`s (`tool_call_id`, pattern, evidence, detector version, timestamp). `FlagRecord` goes in `contracts/`.
+- **Flags:** the watcher runs the detector after each answered call and appends `FlagRecord`s (`tool_call_id`, pattern, evidence, detector version, timestamp). `FlagRecord` goes in `contracts/`, with the detector (§3).
 - **Where these are stored:**
-  - Process snapshots, diffs, hashes, and flags go in `<trial>/trajlab/` on the host, outside the bind-mounted `agent/` directory, so no arm's agent can read them. Each is keyed by `tool_call_id`.
+  - Process snapshots, diffs, hashes, and flags go in `<trial>/trajlab/` on the host, outside the bind-mounted `agent/` directory, so no arm's agent can read them. Each is keyed by `tool_call_id` and `call_seq`.
   - Only `.call.json` sits beside the existing hook files, where the agent can reach it. It holds nothing the agent has not already seen.
+  - All of it is written before the call's `.ack`, while the agent waits. A failure is logged and never blocks the ack.
 - **Contracts:**
-  - The new models (`ProcessSnapshot`, `FileChange`, `FlagRecord`) go in a new `contracts/patterns.py`.
+  - The new models (`ProcessSnapshot`, `CallChanges`, `FileChange`; later `FlagRecord`) are in a new `contracts/patterns.py`.
   - `CallRecord` is unchanged, so this ADR does not edit `contracts/checkpoint.py`, which ADR-0014 also edits.
 - **Code:**
-  - the hook input copy is in `checkpoint/hook/post_tool_use.sh`, with `settings.hooks.json` regenerated;
-  - the process snapshot is in the watcher's existing in-container command (`checkpoint/watcher.py`, `checkpoint/changes.py`);
-  - diffs and hashes are in a new `checkpoint/diffs.py`.
-  - Each comes with offline tests against the hello-world fixture.
+  - `checkpoint/hook/post_tool_use.sh`, with `settings.hooks.json` regenerated;
+  - `checkpoint/processes.py` and `checkpoint/diffs.py`;
+  - optional backend methods (`processes`, `read_files`, `image_of`, `read_image_files`), which default to unsupported;
+  - the watcher's `extras` option.
+  - Each comes with offline tests; the probe and the `tar` reads were also checked by hand against real `ubuntu:24.04` and `busybox` containers.
 
 ### 3. Detector
 
