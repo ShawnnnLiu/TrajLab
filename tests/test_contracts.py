@@ -26,10 +26,12 @@ from trajlab.contracts import (
     CorpusManifest,
     CorpusTask,
     EnrichedTrajectoryExtra,
+    Label,
     OriginalStepExtra,
     RepairSource,
     ResumeRecord,
     TrajlabStepExtra,
+    TrialLabels,
     TrialRecord,
 )
 from trajlab.contracts.repair import (
@@ -204,6 +206,28 @@ INSTANCES += [
         checkpoint_image_id="sha256:3f1c9e",
         session_file="corpus/jobs/_repair-inputs/j/c404114e.jsonl",
         **NO_TRANSCRIPT,
+    ),
+]
+
+
+LABELED_AT = datetime(2026, 10, 19, 12, 0, tzinfo=UTC)
+INSTANCES += [
+    TrialLabels(job_name="j", trial_name="t", labeler="amina", updated_at=LABELED_AT),
+    TrialLabels(
+        job_name="tb40-detector-off-v1",
+        trial_name="cad-model__AbC123",
+        labeler="petra.h",
+        trial=Label(patterns=("loop", "unverified_completion"), updated_at=LABELED_AT),
+        steps={
+            "toolu_01": Label(patterns=(), updated_at=LABELED_AT),
+            "toolu_02": Label(
+                patterns=("stall",), unsure=True, note="4 polls", updated_at=LABELED_AT
+            ),
+            "stop_1_2": Label(note="look again", updated_at=LABELED_AT),
+        },
+        done=True,
+        hints_seen=True,
+        updated_at=LABELED_AT,
     ),
 ]
 
@@ -449,3 +473,28 @@ def test_repair_source_written_before_the_transcript_fields_still_loads() -> Non
 def test_repair_source_rejects(overrides: dict[str, Any]) -> None:
     with pytest.raises(ValidationError):
         _repair_source(**overrides)
+
+
+def test_label_patterns_are_kept_in_canonical_order() -> None:
+    label = Label(patterns=("server_state", "loop"), updated_at=LABELED_AT)
+    assert label.patterns == ("loop", "server_state")
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        {"patterns": ["loop", "loop"]},
+        {"patterns": ["looping"]},
+        {"note": "x" * 20_001},
+        {"verdict": "yes"},
+    ],
+)
+def test_label_rejects(data: dict[str, Any]) -> None:
+    with pytest.raises(ValidationError):
+        Label.model_validate(data | {"updated_at": LABELED_AT})
+
+
+@pytest.mark.parametrize("labeler", ["", "-amina", "amina lee", "a" * 41, "../x"])
+def test_trial_labels_reject_bad_labeler_names(labeler: str) -> None:
+    with pytest.raises(ValidationError):
+        TrialLabels(job_name="j", trial_name="t", labeler=labeler, updated_at=LABELED_AT)

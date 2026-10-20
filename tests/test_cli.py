@@ -10,7 +10,7 @@ from trajlab.checkpoint.watcher import hold_watcher_lock
 from trajlab.cli import app, identify_trial
 from trajlab.contracts import CorpusManifest
 
-COMMANDS = {"run", "watch", "repair", "postprocess", "manifest", "validate"}
+COMMANDS = {"run", "watch", "repair", "postprocess", "manifest", "validate", "trace"}
 
 
 def test_help_lists_all_commands() -> None:
@@ -241,3 +241,9 @@ def test_repair_refuses_an_env_file_that_does_not_exist(job_dir: Path) -> None:
     args = ["repair", str(job_dir), "--prefix", "rep-v1", "--jobs-dir", str(jobs)]
     result = CliRunner().invoke(app, [*args, "--env-file", str(jobs / "missing.env")])
     assert result.exit_code == 2 and "does not exist" in flat(result.output)
+
+
+def test_trace_needs_a_directory(tmp_path: Path) -> None:
+    result = CliRunner().invoke(app, ["trace", str(tmp_path / "missing")])
+    assert result.exit_code == 1
+    assert "not a directory" in result.output

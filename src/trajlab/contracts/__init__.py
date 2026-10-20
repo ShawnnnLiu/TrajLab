@@ -16,6 +16,13 @@ from trajlab.contracts.checkpoint import (
     CheckpointRecord,
 )
 from trajlab.contracts.corpus import CorpusJob, CorpusManifest, CorpusTask
+from trajlab.contracts.labels import (
+    LABEL_PATTERNS,
+    LABELER_NAME_PATTERN,
+    Label,
+    LabelPattern,
+    TrialLabels,
+)
 from trajlab.contracts.patterns import (
     CALL_INPUT_SUFFIX,
     CHANGES_FILENAME,
@@ -60,6 +67,11 @@ from trajlab.contracts.steps import (
 from trajlab.contracts.trial import TrialRecord
 
 __all__ = [
+    "LABEL_PATTERNS",
+    "LABELER_NAME_PATTERN",
+    "Label",
+    "LabelPattern",
+    "TrialLabels",
     "CALL_INPUT_SUFFIX",
     "CHANGES_FILENAME",
     "MAX_TEXT_BYTES",
