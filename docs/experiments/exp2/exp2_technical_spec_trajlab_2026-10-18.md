@@ -179,7 +179,7 @@ Numbered here for reference; the ADR gets the next free number on `main`.
 3. Query tool mechanism: file channel through the existing watcher vs MCP server; result format; cap behavior.
 4. How `checks` is kept out of agent-visible connections: separate file vs restricted schema.
 5. Path exclusion list for reconciliation.
-6. Fresh environment per retry (recommended) vs resume in the failed environment, for all arms. Experiment design decision; needs Shawn, and the Exp 2 design spec updated to match.
+6. Fresh environment per retry (recommended) vs resume in the failed environment, for all arms. Experiment design decision; needs Shawn, and the Exp 2 design spec updated to match. **Decided 2026-10-19 by Shawn: fresh environment in every arm** (design spec §2 updated).
 7. Whether derived columns appear in the arm-2 bundle (recommended yes, so the comparison isolates the engine).
 
 ## 9. Invariants (test these)

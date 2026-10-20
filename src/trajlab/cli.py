@@ -2,7 +2,9 @@
 
 import logging
 import os
+import shutil
 import signal
+import tempfile
 import threading
 import time
 from enum import StrEnum
@@ -42,8 +44,12 @@ from trajlab.checkpoint.watcher import (
     watcher_running,
 )
 from trajlab.contracts import REPAIR_ARMS, RepairArm
+from trajlab.store.build import BuildError, BuildResult, build_trial, start_image
+from trajlab.store.docker_images import DockerImageProvider
 
 app = typer.Typer(help="Capture Claude Code trajectories on Harbor with environment checkpoints.")
+store_app = typer.Typer(help="The Exp 2 store: steps joined to filesystem deltas (ADR-0014).")
+app.add_typer(store_app, name="store")
 
 MANIFESTS_DIR = Path("corpus/manifests")
 DEFAULT_ENV_FILE = Path(".env")
@@ -361,6 +367,102 @@ def postprocess(
             )
     if failed:
         raise typer.Exit(code=1)
+
+
+@store_app.command("build")
+def store_build(
+    paths: Annotated[
+        list[Path], typer.Argument(help="Job dirs or trial dirs; every trial postprocessed.")
+    ],
+    store_dir: Annotated[
+        Path, typer.Option("--store", help="Store dir: record.duckdb, heldout.duckdb, blobs/.")
+    ],
+    no_images: Annotated[
+        bool,
+        typer.Option(
+            "--no-images", help="Build steps only: no deltas, and the chain is reported unchecked."
+        ),
+    ] = False,
+    start_image_ref: Annotated[
+        str | None,
+        typer.Option(
+            "--start-image",
+            help="The image every checkpoint of these trials extends by one layer. Default: "
+            "each trial's trajlab-preinstall.json or trajlab-resume.json (ADR-0014, item 5).",
+        ),
+    ] = None,
+    work_dir: Annotated[
+        Path | None,
+        typer.Option(
+            help="Where each trial's `docker image save` and scratch files go, with room for "
+            "its start image plus every top layer, compressed. Default: the system temp dir."
+        ),
+    ] = None,
+) -> None:
+    """Build finished, postprocessed trials into the store as first attempts, one line each."""
+    failed = 0
+    scratch = Path(tempfile.mkdtemp(prefix="trajlab-store-build-", dir=work_dir))
+    try:
+        for path in paths:
+            if not path.is_dir():
+                typer.echo(f"trajlab store build: {path}: not a directory", err=True)
+                failed += 1
+                continue
+            trial_dirs = _trial_dirs(path)
+            if not trial_dirs:
+                typer.echo(f"trajlab store build: {path}: no trial dirs", err=True)
+                failed += 1
+            for trial_dir in trial_dirs:
+                started = time.perf_counter()
+                try:
+                    result = _build_one(
+                        trial_dir,
+                        store_dir,
+                        no_images=no_images,
+                        start_image_ref=start_image_ref,
+                        scratch=scratch,
+                    )
+                # Every error the store reports is a ValueError (BuildError, StepsError,
+                # ReconcileError, StoreError, DockerImagesError); OSError is docker itself or the
+                # disk.
+                except (ValueError, OSError) as error:
+                    typer.echo(f"failed {trial_dir}: {error}", err=True)
+                    failed += 1
+                    continue
+                seconds = time.perf_counter() - started
+                if result.skipped_existing:
+                    typer.echo(f"skipped {trial_dir}: already in {store_dir}")
+                    continue
+                chain = result.chain
+                state = "complete" if chain.complete else f"incomplete ({'; '.join(chain.reasons)})"
+                typer.echo(
+                    f"built {trial_dir}: {len(result.steps)} steps, {len(result.deltas)} deltas, "
+                    f"{chain.checkpoints} checkpoints, chain {state}, {seconds:.1f} s"
+                )
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
+    if failed:
+        raise typer.Exit(code=1)
+
+
+def _build_one(
+    trial_dir: Path,
+    store_dir: Path,
+    *,
+    no_images: bool,
+    start_image_ref: str | None,
+    scratch: Path,
+) -> BuildResult:
+    if no_images:
+        return build_trial(trial_dir, store_dir, images=None, work_dir=scratch)
+    image = start_image_ref or start_image(trial_dir)
+    if image is None:
+        raise BuildError(
+            f"{trial_dir}: neither trajlab-preinstall.json nor trajlab-resume.json names its "
+            "start image; pass --start-image, or --no-images for steps only"
+        )
+    with DockerImageProvider(scratch, start_image=image) as images:
+        return build_trial(trial_dir, store_dir, images=images, work_dir=scratch)
 
 
 @app.command()

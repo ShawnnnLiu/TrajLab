@@ -5,12 +5,14 @@ import pytest
 from typer.testing import CliRunner
 
 from tests.conftest import FIXTURE_TRIAL_NAME, assemble_job_dir, make_checkpoint, write_capture
+from trajlab.atif.postprocess import postprocess_trial
 from trajlab.capture.repair_launcher import Launcher
 from trajlab.checkpoint.watcher import hold_watcher_lock
 from trajlab.cli import app, identify_trial
 from trajlab.contracts import CorpusManifest
+from trajlab.store import schema
 
-COMMANDS = {"run", "watch", "repair", "postprocess", "manifest", "validate"}
+COMMANDS = {"run", "watch", "repair", "postprocess", "manifest", "validate", "store"}
 
 
 def test_help_lists_all_commands() -> None:
@@ -241,3 +243,96 @@ def test_repair_refuses_an_env_file_that_does_not_exist(job_dir: Path) -> None:
     args = ["repair", str(job_dir), "--prefix", "rep-v1", "--jobs-dir", str(jobs)]
     result = CliRunner().invoke(app, [*args, "--env-file", str(jobs / "missing.env")])
     assert result.exit_code == 2 and "does not exist" in flat(result.output)
+
+
+# -- store build -------------------------------------------------------------------------------
+
+
+def _trials_in(store: Path) -> int:
+    with schema.connect(schema.record_path(store), read_only=True) as con:
+        return con.execute("SELECT count(*) FROM trials").fetchone()[0]
+
+
+def test_store_build_without_images_builds_steps_and_skips_a_second_time(
+    trial_copy: Path, tmp_path: Path
+) -> None:
+    postprocess_trial(trial_copy)
+    store = tmp_path / "store"
+    args = ["store", "build", str(trial_copy), "--store", str(store), "--no-images"]
+
+    result = CliRunner().invoke(app, args)
+
+    assert result.exit_code == 0, result.output
+    assert result.output.startswith(f"built {trial_copy}: ")
+    # The stock fixture has no call records, so its chain has two reasons.
+    assert "chain incomplete (" in result.output
+    assert "images were not checked" in result.output
+    assert result.output.rstrip().endswith(" s")
+    assert _trials_in(store) == 1
+
+    again = CliRunner().invoke(app, args)
+
+    assert again.exit_code == 0, again.output
+    assert again.output.startswith(f"skipped {trial_copy}: already in {store}")
+    assert _trials_in(store) == 1
+
+
+def test_store_build_takes_a_job_dir(job_dir: Path, tmp_path: Path) -> None:
+    trial_dir = job_dir / FIXTURE_TRIAL_NAME
+    postprocess_trial(trial_dir)
+    store = tmp_path / "store"
+
+    result = CliRunner().invoke(
+        app, ["store", "build", str(job_dir), "--store", str(store), "--no-images"]
+    )
+
+    assert result.exit_code == 0, result.output
+    assert result.output.startswith(f"built {trial_dir}: ")
+    assert _trials_in(store) == 1
+
+
+def test_store_build_needs_a_start_image_for_deltas(trial_copy: Path, tmp_path: Path) -> None:
+    postprocess_trial(trial_copy)
+    store = tmp_path / "store"
+
+    result = CliRunner().invoke(app, ["store", "build", str(trial_copy), "--store", str(store)])
+
+    assert result.exit_code == 1
+    assert f"failed {trial_copy}: " in result.output
+    assert "--start-image" in result.output
+    assert not store.exists()
+
+
+def test_store_build_reports_an_unpostprocessed_trial(trial_copy: Path, tmp_path: Path) -> None:
+    store = tmp_path / "store"
+    args = ["store", "build", str(trial_copy), "--store", str(store), "--no-images"]
+
+    result = CliRunner().invoke(app, args)
+
+    assert result.exit_code == 1
+    assert f"failed {trial_copy}: " in result.output
+    assert "trajlab postprocess" in result.output
+
+
+def test_store_build_reports_bad_paths(tmp_path: Path) -> None:
+    store = tmp_path / "store"
+    missing = tmp_path / "missing"
+    (tmp_path / "empty").mkdir()
+    args = ["store", "build", str(missing), str(tmp_path / "empty"), "--store", str(store)]
+
+    result = CliRunner().invoke(app, args)
+
+    assert result.exit_code == 1
+    assert f"{missing}: not a directory" in result.output
+    assert f"{tmp_path / 'empty'}: no trial dirs" in result.output
+
+
+def test_store_build_leaves_no_scratch_behind(trial_copy: Path, tmp_path: Path) -> None:
+    postprocess_trial(trial_copy)
+    work = tmp_path / "work"
+    work.mkdir()
+    args = ["store", "build", str(trial_copy), "--store", str(tmp_path / "store")]
+    args += ["--no-images", "--work-dir", str(work)]
+
+    assert CliRunner().invoke(app, args).exit_code == 0
+    assert list(work.iterdir()) == []
