@@ -450,13 +450,16 @@ def trace(
         str, typer.Option(help="Address to listen on. Keep 127.0.0.1 and reach it with ssh -L.")
     ] = "127.0.0.1",
     port: Annotated[int, typer.Option(min=1, max=65535)] = 8765,
+    guide: Annotated[
+        Path, typer.Option(help="The labeling guide (Markdown) the site shows beside labels.")
+    ] = Path("docs/labeling-guide.md"),
 ) -> None:
     """Serve a site to read each trial call by call beside its diffs, and to label it (ADR-0015)."""
     if not root.is_dir():
         typer.echo(f"trajlab trace: {root}: not a directory", err=True)
         raise typer.Exit(code=1)
     extra_hosts = frozenset() if host in LOCAL_HOSTS | {"0.0.0.0", "::"} else frozenset({host})
-    site = TraceSite(root, LabelStore(labels_dir), extra_hosts=extra_hosts)
+    site = TraceSite(root, LabelStore(labels_dir), extra_hosts=extra_hosts, guide=guide)
     typer.echo(f"trajlab trace: http://{host}:{port}/ (jobs: {root}, labels: {labels_dir})")
     typer.echo("Ctrl+C stops it.")
     try:

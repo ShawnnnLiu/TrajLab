@@ -7,10 +7,27 @@ from typing import Any
 
 import pytest
 
-from tests.conftest import FIXTURE_JOB_NAME, FIXTURE_TOOL_CALL_ID, FIXTURE_TRIAL_NAME
+from tests.conftest import (
+    FIXTURE_JOB_NAME,
+    FIXTURE_TOOL_CALL_ID,
+    FIXTURE_TRIAL_NAME,
+    make_call,
+    make_checkpoint,
+    write_capture,
+)
+from tests.test_capture_replay import FakeDocker
 from trajlab.capture.labels import LabelStore
+from trajlab.capture.replay import SnapshotReader
 from trajlab.capture.trace_server import Response, TraceSite
-from trajlab.contracts import LABEL_PATTERNS, TrialLabels
+from trajlab.checkpoint.diffs import sha256, unified_diff
+from trajlab.contracts import (
+    CHANGES_FILENAME,
+    LABEL_PATTERNS,
+    TRAJLAB_DIRNAME,
+    CallChanges,
+    FileChange,
+    TrialLabels,
+)
 
 LOCAL = {"host": "localhost:8765"}
 SAVE = LOCAL | {"x-trajlab": "1"}
@@ -205,3 +222,82 @@ def test_the_transcript_and_the_raw_trajectory(site: TraceSite, job_dir: Path) -
 
 def test_a_save_from_a_page_older_than_the_hints_seen_removal_is_kept(site: TraceSite) -> None:
     assert put_labels(site, labels_doc(hints_seen=True)).status == 200
+
+
+def test_the_page_modules_are_served(site: TraceSite) -> None:
+    assert get(site, "/static/app.js").content_type == "text/javascript"
+    assert get(site, "/static/app.css").content_type == "text/css"
+    for bad in ("/static/App.js", "/static/missing.js", "/static/app.py", "/static/a/b.js"):
+        assert get(site, bad).status == 404, bad
+
+
+def test_a_file_the_agent_created_is_rebuilt_from_its_diff(site: TraceSite, job_dir: Path) -> None:
+    trial = job_dir / FIXTURE_TRIAL_NAME
+    write_capture(trial, checkpoints=[make_checkpoint(1)], calls=[make_call(1, change="changed")])
+    content = b"Hello, world!"
+    file = FileChange(
+        path="/app/hello.txt",
+        op="added",
+        kind="file",
+        size=len(content),
+        sha256=sha256(content),
+        is_text=True,
+        diff=unified_diff("/app/hello.txt", None, content),
+    )
+    change = CallChanges(
+        tool_call_id=FIXTURE_TOOL_CALL_ID, call_seq=1, files=(file,), files_total=1, capture_ms=5
+    )
+    (trial / TRAJLAB_DIRNAME).mkdir()
+    (trial / TRAJLAB_DIRNAME / CHANGES_FILENAME).write_text(change.model_dump_json() + "\n")
+
+    view = body(get(site, f"/api/file/{TRIAL_URL}?path=/app/hello.txt&call={FIXTURE_TOOL_CALL_ID}"))
+
+    assert (view["source"], view["text"], view["verified"]) == ("diffs", "Hello, world!", True)
+    assert view["changed_lines"] == [1]
+
+
+def test_otherwise_the_file_is_read_from_the_calls_checkpoint(
+    job_dir: Path, tmp_path: Path
+) -> None:
+    trial = job_dir / FIXTURE_TRIAL_NAME
+    calls = [make_call(1, change="changed", changed_paths=("~/app/hello.txt",))]
+    write_capture(trial, checkpoints=[make_checkpoint(1)], calls=calls)
+    docker = FakeDocker(stdout=b"from the snapshot\n")
+    site = TraceSite(
+        job_dir.parent, LabelStore(tmp_path / "labels"), snapshots=SnapshotReader(docker)
+    )
+
+    target = f"/api/file/{TRIAL_URL}?path=/app/hello.txt&call={FIXTURE_TOOL_CALL_ID}"
+    view = body(get(site, target))
+
+    assert (view["source"], view["checkpoint"], view["text"]) == (
+        "snapshot",
+        1,
+        "from the snapshot\n",
+    )
+    assert docker.calls[0][-3:] == [make_checkpoint(1).checkpoint_id, "--", "/app/hello.txt"]
+    assert (
+        get(site, f"/api/file/{TRIAL_URL}?path=/etc/passwd&call={FIXTURE_TOOL_CALL_ID}").status
+        == 404
+    )
+    assert get(site, f"/api/file/{TRIAL_URL}?path=/app/hello.txt&call=nope").status == 404
+
+
+def test_the_queue_agreement_and_guide(site: TraceSite, tmp_path: Path) -> None:
+    queue = body(get(site, f"/api/queue/{FIXTURE_JOB_NAME}?labeler=amina"))
+    assert [s["key"] for s in queue["sections"]] == ["all"]
+    assert queue["sections"][0]["trials"][0]["name"] == FIXTURE_TRIAL_NAME
+
+    assert body(get(site, f"/api/agreement/{FIXTURE_JOB_NAME}"))["result"] is None
+    put_labels(site, labels_doc())
+    put_labels(site, labels_doc(labeler="petra"), labeler="petra")
+    shared = body(get(site, f"/api/agreement/{FIXTURE_JOB_NAME}"))
+    assert (shared["a"], shared["b"], shared["result"]["items"]["step"]) == ("amina", "petra", 1)
+
+    assert body(get(site, "/api/guide"))["text"] is None
+    guide = tmp_path / "guide.md"
+    guide.write_text("## Loop\nRepeating without progress.\n")
+    with_guide = TraceSite(site.root, site.labels, guide=guide)
+    assert body(get(with_guide, "/api/guide"))["sections"] == {
+        "loop": "Repeating without progress."
+    }

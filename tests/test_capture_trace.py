@@ -272,6 +272,14 @@ def test_trace_joins_records_diffs_and_processes_by_tool_call_id(trial_copy: Pat
     assert all("claude" not in cmd for cmd in calls["c3"]["processes"]["running"])
     assert trace["capture"]["counts"] == {"baseline": 1, "changed": 2, "unchanged": 2}
     assert trace["capture"]["stops"] == 1
+    # Which checkpoint holds the state after each call, and where the time went.
+    assert [calls[c]["state_of"] for c in ("c1", "c2", "c3", "c4", "c5")] == [1, 2, 2, 2, 3]
+    assert set(trace["checkpoint_images"]) == {"1", "2", "3"}
+    assert all(calls[c]["tool_s"] >= 0 for c in ("c1", "c2", "c3", "c4", "c5"))
+    assert trace["steps"]["3"]["model_s"] is not None
+    assert trace["timing"]["pause_s"] > 0
+    events = [v["event"] for v in trace["files"]["/app/a.py"]]
+    assert events == sorted(events) and len(events) == 2
 
 
 def test_the_stop_comes_after_the_final_message(trial_copy: Path) -> None:

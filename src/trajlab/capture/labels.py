@@ -13,10 +13,11 @@ import csv
 import io
 import json
 import os
+import random
 import re
 import tempfile
 import threading
-from collections.abc import Callable, Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -87,7 +88,13 @@ EXPORT_FIELDS = (
     "note",
     "updated_at",
     "trial_done",
+    "first_wrong_step",
+    "first_wrong_call",
 )
+# ADR-0015 §8's sample sizes for the labeling queue.
+QUEUE_PILOT = 5
+QUEUE_STEP_LEVEL = 12
+QUEUE_SECOND_LABELER = 6
 # A spreadsheet runs a cell that starts with one of these as a formula.
 _FORMULA_START = ("=", "+", "-", "@", "\t", "\r")
 _LABELER = re.compile(LABELER_NAME_PATTERN)
@@ -199,6 +206,7 @@ def progress(labels: TrialLabels | None) -> dict[str, Any]:
             "trial_judged": False,
             "steps_judged": 0,
             "done": False,
+            "first_wrong": False,
             "found": [],
         }
     judged = [label for label in labels.steps.values() if label.patterns is not None]
@@ -209,6 +217,7 @@ def progress(labels: TrialLabels | None) -> dict[str, Any]:
         "trial_judged": labels.trial is not None and labels.trial.patterns is not None,
         "steps_judged": len(judged),
         "done": labels.done,
+        "first_wrong": labels.first_wrong_step is not None,
         "found": [p for p in LABEL_PATTERNS if p in found],
     }
 
@@ -244,7 +253,13 @@ def _row(
         "note": label.note,
         "updated_at": label.updated_at.isoformat(),
         "trial_done": labels.done,
+        "first_wrong_step": "",
+        "first_wrong_call": None,
     }
+    if level == "trial" and labels.first_wrong_step:
+        wrong = (context.get("steps") or {}).get(labels.first_wrong_step, {})
+        row["first_wrong_step"] = labels.first_wrong_step
+        row["first_wrong_call"] = wrong.get("call")
     return row
 
 
@@ -253,8 +268,11 @@ def export_rows(labels: Iterable[TrialLabels], context: TrialContext) -> list[di
     rows = []
     for trial_labels in labels:
         trial_context = context(trial_labels.job_name, trial_labels.trial_name)
-        if trial_labels.trial is not None:
-            rows.append(_row(trial_labels, trial_context, trial_labels.trial, level="trial"))
+        whole = trial_labels.trial
+        if whole is None and (trial_labels.first_wrong_step or trial_labels.done):
+            whole = Label(updated_at=trial_labels.updated_at)
+        if whole is not None:
+            rows.append(_row(trial_labels, trial_context, whole, level="trial"))
         order = {call_id: i for i, call_id in enumerate(trial_context.get("steps") or {})}
         steps = sorted(
             trial_labels.steps.items(), key=lambda item: (order.get(item[0], len(order)), item[0])
@@ -288,3 +306,180 @@ def rows_csv(rows: Iterable[dict[str, Any]]) -> str:
     for row in rows:
         writer.writerow({field: _cell(row.get(field)) for field in EXPORT_FIELDS})
     return out.getvalue()
+
+
+def _task_of(trial_name: str) -> str:
+    return trial_name.rsplit("__", 1)[0]
+
+
+def labeling_queue(job_name: str, trials: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """ADR-0015 §8's order of work for a job, drawn with fixed seeds so it is the same every time.
+
+    Over the job's finished trials (`name`, `finished`, `reward`):
+    1. pilot: 5 trials from 5 different tasks (seed "<job> labeling pilot"), labeled at every
+       step. They are for revising the guide and are not scored.
+    2. step: 12 of the rest, labeled at every step (seed "<job> step-level sample"): one per
+       task, then one with the other outcome for each task that has both, then any others.
+       6 of them (seed "<job> second labeler") are labeled again by a second labeler.
+    3. trial: the rest, which get the whole-trial checklist only.
+    A job with fewer than 17 finished trials, or fewer than 5 tasks, gets one section with all.
+    """
+    names = sorted(t["name"] for t in trials if t["finished"])
+    passed = {t["name"]: t.get("reward") == 1 for t in trials}
+    by_task: dict[str, list[str]] = {}
+    for name in names:
+        by_task.setdefault(_task_of(name), []).append(name)
+    if len(names) < QUEUE_PILOT + QUEUE_STEP_LEVEL or len(by_task) < QUEUE_PILOT:
+        section = {"key": "all", "steps": True, "scored": True, "trials": names}
+        return {"drawn": False, "sections": [section], "second_labeler": []}
+    rng = random.Random(f"{job_name} labeling pilot")
+    pilot = [rng.choice(by_task[task]) for task in rng.sample(sorted(by_task), QUEUE_PILOT)]
+    rest = {task: [n for n in group if n not in pilot] for task, group in by_task.items()}
+    rest = {task: group for task, group in rest.items() if group}
+    rng = random.Random(f"{job_name} step-level sample")
+    tasks = sorted(rest)
+    if len(tasks) > QUEUE_STEP_LEVEL:
+        tasks = sorted(rng.sample(tasks, QUEUE_STEP_LEVEL))
+    step = [rng.choice(rest[task]) for task in tasks]
+    for task in tasks:
+        if len(step) == QUEUE_STEP_LEVEL:
+            break
+        have = {passed[n] for n in step if _task_of(n) == task}
+        other = [n for n in rest[task] if passed[n] not in have]
+        if other:
+            step.append(rng.choice(other))
+    pool = sorted(n for group in rest.values() for n in group if n not in step)
+    while len(step) < QUEUE_STEP_LEVEL and pool:
+        step.append(pool.pop(rng.randrange(len(pool))))
+    second = random.Random(f"{job_name} second labeler").sample(
+        sorted(step), min(QUEUE_SECOND_LABELER, len(step))
+    )
+    sections = [
+        {"key": "pilot", "steps": True, "scored": False, "trials": sorted(pilot)},
+        {"key": "step", "steps": True, "scored": True, "trials": sorted(step)},
+        {
+            "key": "trial",
+            "steps": False,
+            "scored": True,
+            "trials": [n for n in names if n not in pilot and n not in step],
+        },
+    ]
+    return {"drawn": True, "sections": sections, "second_labeler": sorted(second)}
+
+
+def cohen_kappa(pairs: Sequence[tuple[bool, bool]]) -> float | None:
+    """Cohen's kappa of two raters' yes/no judgments; None when undefined (no pairs, or both
+    raters always gave the same single answer)."""
+    if not pairs:
+        return None
+    n = len(pairs)
+    observed = sum(a == b for a, b in pairs) / n
+    first = sum(a for a, _ in pairs) / n
+    second = sum(b for _, b in pairs) / n
+    expected = first * second + (1 - first) * (1 - second)
+    return None if expected == 1 else (observed - expected) / (1 - expected)
+
+
+def agreement(
+    first: Sequence[TrialLabels], second: Sequence[TrialLabels], context: TrialContext
+) -> dict[str, Any]:
+    """Two labelers' agreement on the trials both labeled: per pattern, Cohen's kappa at the
+    trial level and at the step level (steps both judged), every disagreement, and how often
+    their first wrong steps match."""
+    by_a = {x.trial_name: x for x in first}
+    by_b = {x.trial_name: x for x in second}
+    common = sorted(set(by_a) & set(by_b))
+    pairs: dict[str, dict[str, list[tuple[bool, bool]]]] = {
+        level: {p: [] for p in LABEL_PATTERNS} for level in ("trial", "step")
+    }
+    items = {"trial": 0, "step": 0}
+    disagreements: list[dict[str, Any]] = []
+    wrong = {"both_marked": 0, "same": 0}
+    for name in common:
+        a, b = by_a[name], by_b[name]
+        steps = context(a.job_name, name).get("steps") or {}
+        order = {call_id: i for i, call_id in enumerate(steps)}
+        judged: list[tuple[str, str, Label, Label]] = []
+        if a.trial is not None and b.trial is not None:
+            judged.append(("trial", "", a.trial, b.trial))
+        for call_id in sorted(set(a.steps) & set(b.steps), key=lambda c: (order.get(c, 1e9), c)):
+            judged.append(("step", call_id, a.steps[call_id], b.steps[call_id]))
+        for level, call_id, x, y in judged:
+            if x.patterns is None or y.patterns is None:
+                continue
+            items[level] += 1
+            for pattern in LABEL_PATTERNS:
+                verdicts = (pattern in x.patterns, pattern in y.patterns)
+                pairs[level][pattern].append(verdicts)
+                if verdicts[0] != verdicts[1]:
+                    disagreements.append(
+                        {
+                            "trial": name,
+                            "level": level,
+                            "tool_call_id": call_id,
+                            "call": (steps.get(call_id) or {}).get("call"),
+                            "pattern": pattern,
+                            "a": verdicts[0],
+                            "b": verdicts[1],
+                        }
+                    )
+        if a.first_wrong_step and b.first_wrong_step:
+            wrong["both_marked"] += 1
+            wrong["same"] += a.first_wrong_step == b.first_wrong_step
+    table = {
+        level: [
+            {
+                "pattern": pattern,
+                "n": len(found),
+                "both_yes": sum(1 for x, y in found if x and y),
+                "a_only": sum(1 for x, y in found if x and not y),
+                "b_only": sum(1 for x, y in found if y and not x),
+                "both_no": sum(1 for x, y in found if not x and not y),
+                "kappa": cohen_kappa(found),
+            }
+            for pattern, found in by_pattern.items()
+        ]
+        for level, by_pattern in pairs.items()
+    }
+    return {
+        "trials": common,
+        "items": items,
+        "table": table,
+        "disagreements": disagreements,
+        "first_wrong": wrong,
+    }
+
+
+def _heading_key(text: str) -> str:
+    return " ".join(re.sub(r"[`*_:\-]+", " ", text).lower().split())
+
+
+def guide_sections(text: str) -> dict[str, str]:
+    """Each pattern's first paragraph in the labeling guide, from under a heading that starts
+    with the pattern's title or key (`## Loop`, `## no_effect_write: definition`), for the
+    checklist's tooltips."""
+    names: dict[str, str] = {}
+    for key, (title, _) in PATTERN_HELP.items():
+        names[_heading_key(title)] = key
+        names[_heading_key(key)] = key
+    by_length = sorted(names, key=len, reverse=True)
+
+    def pattern_of(heading: str) -> str | None:
+        found = _heading_key(heading)
+        name = next((n for n in by_length if found == n or found.startswith(n + " ")), None)
+        return names[name] if name else None
+
+    sections: dict[str, str] = {}
+    current: str | None = None
+    paragraph: list[str] = []
+    for line in [*text.splitlines(), "#"]:
+        if line.startswith("#"):
+            if current and paragraph and current not in sections:
+                sections[current] = " ".join(paragraph)
+            current, paragraph = pattern_of(line.lstrip("#")), []
+        elif current and current not in sections:
+            if line.strip():
+                paragraph.append(line.strip())
+            elif paragraph:
+                sections[current] = " ".join(paragraph)
+    return sections

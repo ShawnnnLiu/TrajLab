@@ -202,7 +202,8 @@ The watcher's policy sets one arm per corpus, recorded in `policy.json` and the 
    - the accuracy of the live phrase-based claim detection, measured on its own.
 6. A pattern with κ below 0.6, or fewer than 10 positive labels, is reported as a count, not scored. The feedback arms use only the patterns that pass.
 7. **Labeling tool:** `trajlab trace <jobs dir>` serves a local site that shows each call's input and output beside its diffs and process changes, with a checklist per hooked call, per stop, and per trial.
-   - Labels cover the 7 patterns plus `stall`, which §1 reports apart from `loop`.
+   - Labels cover the 7 patterns plus `stall`, which §1 reports apart from `loop`, and optionally the trial's first wrong step: the call where it first went wrong.
+   - The site draws this section's samples with fixed seeds (the 5 pilot trials, the 12 step-level trials, 6 of them for the second labeler) and computes Cohen's κ per pattern between two labelers.
    - One `TrialLabels` file (`contracts/labels.py`) per labeler per trial, under `corpus/labels/`, which git ignores. The site exports them as CSV or JSON, one row per trial and per judged step, keyed by trial and `tool_call_id`, the key the flags carry.
    - The site's hints (repeated commands, files back to an earlier version, claim cross-checks) resemble the detector's rules, so they are off by default and stay off while labeling trials that are scored.
 

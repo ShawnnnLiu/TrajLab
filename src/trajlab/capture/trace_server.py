@@ -9,6 +9,10 @@ It serves one page (`trace_site/`) and a small JSON API over a jobs dir:
     GET /api/trace/<job>/<trial>               one trial's trace (`trace.build_trace`)
     GET /api/transcript/<job>/<trial>          the whole run as plain text, nothing cut
     GET /api/raw/<job>/<trial>                 Harbor's agent/trajectory.json as it is
+    GET /api/file/<job>/<trial>?path=&call=    a changed file as it was after a call (replay)
+    GET /api/queue/<job>?labeler=              ADR-0015 §8's labeling queue, with progress
+    GET /api/agreement/<job>?a=&b=             two labelers' kappa per pattern, disagreements
+    GET /api/guide                             the labeling guide (Markdown), and its sections
     GET /api/labels/<job>/<trial>?labeler=     the labeler's saved labels, or null
     PUT /api/labels/<job>/<trial>?labeler=     save them: a `TrialLabels` document
     GET /api/export?format=csv|json&job=&trial=&labeler=   labels as a download
@@ -19,8 +23,10 @@ page from reading it, and a save must carry an `X-Trajlab` header, which another
 cannot send without a CORS approval this server never gives.
 """
 
+import hashlib
 import json
 import logging
+import re
 import threading
 from collections import OrderedDict
 from collections.abc import Mapping
@@ -39,12 +45,16 @@ from trajlab.capture.labels import (
     PATTERN_HELP,
     LabelError,
     LabelStore,
+    agreement,
     check_labeler,
     export_rows,
+    guide_sections,
+    labeling_queue,
     parse_labels,
     progress,
     rows_csv,
 )
+from trajlab.capture.replay import SnapshotReader, file_after
 from trajlab.capture.trace import (
     TRAJECTORY_FILENAME,
     build_trace,
@@ -62,12 +72,15 @@ from trajlab.contracts import (
     LABEL_PATTERNS,
     PROCESSES_FILENAME,
     TRAJLAB_DIRNAME,
+    CallChanges,
 )
 
 logger = logging.getLogger(__name__)
 
 SITE_DIR = "trace_site"
-STATIC = {"app.js": "text/javascript", "app.css": "text/css"}
+# The page's own scripts (ES modules) and styles: flat names in trace_site/.
+_STATIC_NAME = re.compile(r"^[a-z0-9-]+\.(js|css)$")
+_STATIC_TYPES = {"js": "text/javascript", "css": "text/css"}
 LOCAL_HOSTS = frozenset({"localhost", "127.0.0.1", "::1"})
 SAVE_HEADER = "x-trajlab"
 MAX_BODY_BYTES = 8 * 1024 * 1024
@@ -108,12 +121,20 @@ class TraceSite:
     """The site's routes as a plain function of a request, so tests need no sockets."""
 
     def __init__(
-        self, root: Path, labels: LabelStore, extra_hosts: frozenset[str] = frozenset()
+        self,
+        root: Path,
+        labels: LabelStore,
+        extra_hosts: frozenset[str] = frozenset(),
+        guide: Path | None = None,
+        snapshots: SnapshotReader | None = None,
     ) -> None:
         self.root = root
         self.labels = labels
         self.hosts = LOCAL_HOSTS | extra_hosts
+        self.guide = guide
+        self.snapshots = snapshots or SnapshotReader()
         self._traces: OrderedDict[Path, tuple[tuple[Any, ...], dict[str, Any]]] = OrderedDict()
+        self._diffs: OrderedDict[Path, tuple[Any, dict[str, dict[str, str]]]] = OrderedDict()
         self._lock = threading.Lock()
 
     def handle(
@@ -136,8 +157,8 @@ class TraceSite:
                 return self._static("index.html", "text/html; charset=utf-8")
             if parts == ["favicon.ico"]:
                 return Response(204, b"", "text/plain")
-            if parts[0] == "static" and len(parts) == 2 and parts[1] in STATIC:
-                return self._static(parts[1], STATIC[parts[1]])
+            if parts[0] == "static" and len(parts) == 2 and _STATIC_NAME.match(parts[1]):
+                return self._static(parts[1], _STATIC_TYPES[parts[1].rsplit(".", 1)[1]])
             if parts[0] == "api":
                 return self._get(parts[1:], query)
         except _NotFound as error:
@@ -151,7 +172,10 @@ class TraceSite:
         return name in self.hosts
 
     def _static(self, name: str, content_type: str) -> Response:
-        body = files(__package__).joinpath(SITE_DIR, name).read_bytes()
+        resource = files(__package__).joinpath(SITE_DIR, name)
+        if not resource.is_file():
+            raise _NotFound(f"no file {name}")
+        body = resource.read_bytes()
         headers = (("Content-Security-Policy", _CSP),) if name == "index.html" else ()
         return Response(200, body, content_type, headers)
 
@@ -236,7 +260,122 @@ class TraceSite:
                 return _json(labels.model_dump(mode="json") if labels else None)
             case ["export"]:
                 return self._export(query)
+            case ["file", job_name, trial_name]:
+                trial = self._trial(job_name, trial_name)
+                return _json(self._file(trial, query.get("path", ""), query.get("call", "")))
+            case ["queue", job_name]:
+                return _json(self._queue(job_name, labeler))
+            case ["agreement", job_name]:
+                return _json(self._agreement(job_name, query.get("a"), query.get("b")))
+            case ["guide"]:
+                return _json(self._guide())
         raise _NotFound("no such API route")
+
+    def _diffs_of(self, trial: Path) -> dict[str, dict[str, str]]:
+        """The full recorded diffs of a trial, by call id and path (the trace cuts long ones)."""
+        source = trial / TRAJLAB_DIRNAME / CHANGES_FILENAME
+        key = (source.stat().st_mtime_ns, source.stat().st_size) if source.is_file() else None
+        with self._lock:
+            cached = self._diffs.get(trial)
+            if cached is not None and cached[0] == key:
+                return cached[1]
+        diffs: dict[str, dict[str, str]] = {}
+        if source.is_file():
+            for line in source.read_text().splitlines():
+                if not line.strip():
+                    continue
+                try:
+                    change = CallChanges.model_validate_json(line)
+                except ValidationError:
+                    continue
+                diffs[change.tool_call_id] = {f.path: f.diff for f in change.files if f.diff}
+        with self._lock:
+            self._diffs[trial] = (key, diffs)
+            while len(self._diffs) > CACHED_TRACES:
+                self._diffs.popitem(last=False)
+        return diffs
+
+    def _file(self, trial: Path, path: str, call: str) -> dict[str, Any]:
+        """A changed path after a call: from the diffs when they rebuild it, else from the
+        checkpoint image that holds the state after the call."""
+        trace = self._trace(trial)
+        versions = trace["files"].get(path)
+        if versions is None:
+            raise _NotFound("no call in this trial changed that path")
+        index = next(
+            (i for i, e in enumerate(trace["events"]) if e.get("id") == call and "state_of" in e),
+            None,
+        )
+        if index is None:
+            raise _NotFound("no such call in this trial")
+        diffs = {
+            call_id: by_path[path]
+            for call_id, by_path in self._diffs_of(trial).items()
+            if path in by_path
+        }
+        view = file_after(versions, diffs, index) | {"path": path, "call": call, "source": None}
+        if view["text"] is not None and view["verified"]:
+            view["source"] = "diffs"
+            return view
+        if view["exists"] is False:
+            return view
+        seq = trace["events"][index]["state_of"]
+        image = trace["checkpoint_images"].get(str(seq)) if seq is not None else None
+        if image is None:
+            view["note"] += " No checkpoint holds this state, so there is no snapshot to read."
+            return view
+        data, problem = self.snapshots.read(image, path)
+        if data is None:
+            view["note"] += f" Reading checkpoint #{seq} failed: {problem}"
+            return view
+        try:
+            text = data.decode("utf-8")
+            binary = "\0" in text
+        except UnicodeDecodeError:
+            text, binary = None, True
+        view |= {
+            "exists": True,
+            "source": "snapshot",
+            "checkpoint": seq,
+            "size": len(data),
+            "binary": binary,
+            "text": None if binary else text,
+            "verified": hashlib.sha256(data).hexdigest() == view.get("sha256"),
+            "note": f"Read from checkpoint #{seq}." + (" (binary)" if binary else ""),
+        }
+        return view
+
+    def _queue(self, job_name: str, labeler: str | None) -> dict[str, Any]:
+        rows = {}
+        for trial in trial_dirs(self._job(job_name)):
+            row = trial_summary(trial)
+            labels = self.labels.load(job_name, labeler, trial.name) if labeler else None
+            row["progress"] = progress(labels) if labeler else None
+            rows[trial.name] = row
+        queue = labeling_queue(job_name, list(rows.values()))
+        for section in queue["sections"]:
+            section["trials"] = [rows[name] for name in section["trials"]]
+        return queue
+
+    def _agreement(self, job_name: str, a: str | None, b: str | None) -> dict[str, Any]:
+        self._job(job_name)
+        labelers = self.labels.labelers(job_name)
+        a = a or (labelers[0] if labelers else None)
+        b = b or next((x for x in labelers if x != a), None)
+        if a is None or b is None or a == b:
+            return {"labelers": labelers, "a": a, "b": b, "result": None}
+        result = agreement(
+            list(self.labels.iter_labels(job=job_name, labeler=a)),
+            list(self.labels.iter_labels(job=job_name, labeler=b)),
+            self._context,
+        )
+        return {"labelers": labelers, "a": a, "b": b, "result": result}
+
+    def _guide(self) -> dict[str, Any]:
+        if self.guide is None or not self.guide.is_file():
+            return {"path": str(self.guide) if self.guide else None, "text": None, "sections": {}}
+        text = self.guide.read_text()
+        return {"path": str(self.guide), "text": text, "sections": guide_sections(text)}
 
     def _job_row(self, name: str, job: Path, labeler: str | None) -> dict[str, Any]:
         done = 0

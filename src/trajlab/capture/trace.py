@@ -625,7 +625,7 @@ def _add_call_hints(events: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[
     changed: dict[str, list[int]] = {}
     keys: dict[str, list[int]] = {}
     changing_calls: list[int] = []
-    for event in events:
+    for index, event in enumerate(events):
         if event["kind"] not in ("call", "stop"):
             continue
         label = event.get("n")
@@ -650,7 +650,9 @@ def _add_call_hints(events: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[
                 {
                     "call": label,
                     "id": event["id"],
+                    "event": index,
                     "op": entry["op"],
+                    "kind": entry.get("kind"),
                     "sha256": new_hash,
                     "before_sha256": entry.get("before_sha256"),
                     "size": entry.get("size"),
@@ -710,6 +712,61 @@ def _add_message_hints(events: list[dict[str, Any]], changed: dict[str, list[int
                     if c["status"] in CHANGING and (last is None or c["n"] > last["n"])
                 ],
             }
+
+
+def _add_timing(
+    events: list[dict[str, Any]],
+    trajectory: Trajectory | None,
+    record_of: dict[str, CallRecord],
+    offset: Offset,
+) -> dict[str, Any]:
+    """Each agent step's tokens and cost, and about how long the model took: from when the
+    previous step's tools finished (its last hook answer, else the previous step) to this step.
+    Each call gets `tool_s`, about how long its tool ran: from its step to the hook's request.
+    Returns the steps by id."""
+    steps: dict[str, Any] = {}
+    if trajectory is None:
+        return steps
+    calls_of: dict[int, list[dict[str, Any]]] = {}
+    for event in events:
+        if event["kind"] == "call" and event.get("step_id") is not None:
+            calls_of.setdefault(event["step_id"], []).append(event)
+    resume: datetime | None = None
+    for step in trajectory.steps:
+        moment = _time(step.timestamp)
+        model_s = None
+        if step.source == "agent" and moment and resume:
+            model_s = round(max(0.0, (moment - resume).total_seconds()), 1)
+        metrics = step.metrics
+        steps[str(step.step_id)] = {
+            "t": offset(step.timestamp),
+            "model_s": model_s,
+            "prompt_tokens": metrics.prompt_tokens if metrics else None,
+            "completion_tokens": metrics.completion_tokens if metrics else None,
+            "cached_tokens": metrics.cached_tokens if metrics else None,
+            "cost_usd": metrics.cost_usd if metrics else None,
+        }
+        answers = []
+        for event in calls_of.get(step.step_id, []):
+            record = record_of.get(event["id"])
+            if record is not None and moment is not None:
+                event["tool_s"] = round(max(0.0, (record.requested_at - moment).total_seconds()), 1)
+                answers.append(record.answered_at)
+        resume = max(answers) if answers else (moment or resume)
+    return steps
+
+
+def _add_states(events: list[dict[str, Any]]) -> None:
+    """Each call's and stop's `state_of`: the checkpoint that holds the filesystem after it. An
+    unhooked call changes nothing, so it shares the state after the hooked call before it."""
+    seq = None
+    for event in events:
+        if event["kind"] not in ("call", "stop"):
+            continue
+        record = event["record"]
+        if record is not None and record.get("checkpoint_seq") is not None:
+            seq = record["checkpoint_seq"]
+        event["state_of"] = seq
 
 
 def _argument_lines(arguments: Any) -> list[str]:
@@ -856,6 +913,18 @@ def build_trace(trial_dir: Path) -> dict[str, Any]:
     )
     files, changed = _add_call_hints(events)
     _add_message_hints(events, changed)
+    steps = _add_timing(events, trajectory, record_of, offset)
+    _add_states(events)
+    final = trajectory.final_metrics if trajectory is not None else None
+    timing = {
+        "model_s": round(sum(s["model_s"] or 0 for s in steps.values()), 1),
+        "tool_s": round(sum(e.get("tool_s") or 0 for e in events if e["kind"] == "call"), 1),
+        "pause_s": round(sum(e.get("pause_ms") or 0 for e in events if "pause_ms" in e) / 1000, 1),
+        "prompt_tokens": final.total_prompt_tokens if final else None,
+        "completion_tokens": final.total_completion_tokens if final else None,
+        "cached_tokens": final.total_cached_tokens if final else None,
+        "cost_usd": final.total_cost_usd if final else None,
+    }
 
     counts: dict[str, int] = {}
     for event in events:
@@ -878,4 +947,7 @@ def build_trace(trial_dir: Path) -> dict[str, Any]:
         },
         "events": events,
         "files": files,
+        "steps": steps,
+        "timing": timing,
+        "checkpoint_images": {str(c.seq): c.checkpoint_id for c in checkpoints},
     }

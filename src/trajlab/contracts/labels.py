@@ -67,4 +67,9 @@ class TrialLabels(BaseModel):
         "entry was not reviewed.",
     )
     done: bool = Field(default=False, description="The labeler finished this trial.")
+    first_wrong_step: str | None = Field(
+        default=None,
+        description="The tool_call_id of the call where the trial first went wrong, as the "
+        "labeling guide defines it; None when not marked.",
+    )
     updated_at: AwareDatetime
