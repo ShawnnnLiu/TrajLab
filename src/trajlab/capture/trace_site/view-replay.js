@@ -234,7 +234,15 @@ function renderExplorer() {
   const r = state.replay;
   const at = current().i;
   const root = { dirs: new Map(), files: [] };
-  for (const path of Object.keys(state.trace.files).sort()) {
+  const all = Object.keys(state.trace.files).sort();
+  // A run with paths only lists folders too; a path with other paths under it is a folder.
+  const folders = new Set();
+  for (const p of all) {
+    const parts = p.split("/");
+    for (let k = 2; k < parts.length; k++) folders.add(parts.slice(0, k).join("/"));
+  }
+  for (const path of all) {
+    if (folders.has(path)) continue;
     const s = stateOf(path, at);
     if (s.kind === "future" && !r.showFuture) continue;
     const parts = path.split("/").filter(Boolean);

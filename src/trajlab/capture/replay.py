@@ -152,6 +152,8 @@ def file_after(
         note = "Rebuilt from the recorded diffs; the sha256 matches."
     elif text is not None:
         note = "Rebuilt from the recorded diffs, but the sha256 does not match."
+    elif not diffs:
+        note = "Only that this path changed was recorded, not its contents."
     else:
         note = "The recorded diffs cannot rebuild this version."
     return {
@@ -167,6 +169,26 @@ def file_after(
 
 
 Runner = Callable[..., subprocess.CompletedProcess[bytes]]
+
+_DOCKER_PREFIX = re.compile(r"^docker: (?:Error response from daemon: )?")
+
+
+def docker_problem(stderr: bytes) -> str:
+    """Why a `docker run` failed, in words: Docker's last line is only "Run 'docker run --help'
+    for more information", and the reason is on a line before it."""
+    lines = [line.strip() for line in stderr.decode(errors="replace").splitlines() if line.strip()]
+    reasons = [
+        line for line in lines if not line.startswith(("Run 'docker", "See 'docker", "WARNING"))
+    ]
+    reason = _DOCKER_PREFIX.sub("", reasons[0] if reasons else (lines[-1] if lines else ""))
+    if "No such image" in reason:
+        return (
+            "its image is not on this machine. Snapshots stay on the machine that ran the "
+            "trial, unless they were removed."
+        )
+    if "Cannot connect to the Docker daemon" in reason or "permission denied" in reason.lower():
+        return f"the site cannot use Docker here ({reason})."
+    return reason or "docker failed."
 
 
 class SnapshotReader:
@@ -197,8 +219,7 @@ class SnapshotReader:
             except (OSError, subprocess.TimeoutExpired) as error:
                 return None, f"could not run docker: {error}"
         if done.returncode != 0:
-            message = done.stderr.decode(errors="replace").strip().splitlines()
-            result: tuple[bytes | None, str] = (None, message[-1] if message else "docker failed")
+            result: tuple[bytes | None, str] = (None, docker_problem(done.stderr))
         else:
             result = (done.stdout[:MAX_FILE_BYTES], "")
         with self._lock:

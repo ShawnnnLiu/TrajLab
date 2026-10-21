@@ -29,7 +29,7 @@ export function renderGuide() {
     : h(
         "div",
         null,
-        h("p", { class: "note" }, `No guide yet. Write ${guide.path || "docs/labeling-guide.md"} in Markdown, and restart the site. A heading that starts with a pattern's name (## Loop) makes its first paragraph that pattern's definition in the checklist.`),
+        h("p", { class: "note" }, `No guide yet. Write ${guide.path || "docs/labeling-guide.md"} in Markdown, then reload this page. A heading that starts with a pattern's name (## Loop) makes its first paragraph that pattern's definition in the checklist.`),
         h("h4", { class: "md-h" }, "Current definitions (ADR-0015 §1)"),
         h("dl", { class: "defs" }, (state.meta ? state.meta.patterns : []).map((p) => [h("dt", null, p.title), h("dd", null, p.help)])),
       );

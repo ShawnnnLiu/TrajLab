@@ -79,8 +79,8 @@ logger = logging.getLogger(__name__)
 
 SITE_DIR = "trace_site"
 # The page's own scripts (ES modules) and styles: flat names in trace_site/.
-_STATIC_NAME = re.compile(r"^[a-z0-9-]+\.(js|css)$")
-_STATIC_TYPES = {"js": "text/javascript", "css": "text/css"}
+_STATIC_NAME = re.compile(r"^[a-z0-9-]+\.(js|css|md)$")
+_STATIC_TYPES = {"js": "text/javascript", "css": "text/css", "md": "text/markdown; charset=utf-8"}
 LOCAL_HOSTS = frozenset({"localhost", "127.0.0.1", "::1"})
 SAVE_HEADER = "x-trajlab"
 MAX_BODY_BYTES = 8 * 1024 * 1024

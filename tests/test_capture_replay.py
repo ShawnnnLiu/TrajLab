@@ -120,6 +120,14 @@ def test_the_snapshot_reader_runs_cat_offline_and_caches() -> None:
     assert {"--pull", "never", "--network", "none", "--rm"} <= set(command)
 
 
-def test_the_snapshot_reader_reports_dockers_error() -> None:
-    reader = SnapshotReader(runner=FakeDocker(1, b"", b"Error: No such image: sha256:abc\n"))
-    assert reader.read("sha256:abc", "/app/a.py") == (None, "Error: No such image: sha256:abc")
+def test_the_snapshot_reader_says_why_docker_failed() -> None:
+    # What Docker 29 prints for an image that is not there (checked 2026-10-20).
+    help_line = b"\n\nRun 'docker run --help' for more information\n"
+    missing = b"docker: Error response from daemon: No such image: sha256:abc" + help_line
+    data, problem = SnapshotReader(runner=FakeDocker(125, b"", missing)).read("sha256:abc", "/x")
+    assert data is None and problem.startswith("its image is not on this machine")
+    other = b"docker: Error response from daemon: something else broke" + help_line
+    assert SnapshotReader(runner=FakeDocker(125, b"", other)).read("i", "/x") == (
+        None,
+        "something else broke",
+    )

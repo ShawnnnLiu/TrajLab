@@ -1,6 +1,7 @@
 import csv
 import io
 import json
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -301,3 +302,12 @@ def test_the_queue_agreement_and_guide(site: TraceSite, tmp_path: Path) -> None:
     assert body(get(with_guide, "/api/guide"))["sections"] == {
         "loop": "Repeating without progress."
     }
+
+
+def test_the_tutorial_is_served_and_its_examples_exist(site: TraceSite) -> None:
+    tutorial = get(site, "/static/tutorial.md")
+    assert tutorial.content_type == "text/markdown; charset=utf-8"
+    names = set(re.findall(r"^```sample\n([\w-]+)\n```$", tutorial.body.decode(), re.MULTILINE))
+    script = get(site, "/static/view-tutorial.js").body.decode()
+    known = set(re.findall(r'case "([\w-]+)":', script))
+    assert names and names <= known

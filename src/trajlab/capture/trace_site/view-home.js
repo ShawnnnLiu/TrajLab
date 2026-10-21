@@ -10,6 +10,7 @@ export async function showHome(seq) {
   put(
     viewRoot("page"),
     h("div", { class: "page-head" }, h("h1", null, "Experiments"), h("p", { class: "muted" }, `Job dirs under ${data.root}. Labels are saved under ${state.meta.labels_dir}.`)),
+    h("a", { class: "callout", href: "#/tutorial" }, icon("book"), h("span", null, h("strong", null, "New here? "), "Read the tutorial: how to read a trial, label it, and export your labels (10 minutes)."), icon("arrowRight")),
     labelerNotice(),
     data.jobs.length ? h("div", { class: "cards" }, data.jobs.map(card)) : h("div", { class: "empty" }, "No job dirs found."),
     exportBar({}, "every experiment"),

@@ -8,6 +8,7 @@ import { showCompare } from "./view-compare.js";
 import { showHome } from "./view-home.js";
 import { showJob } from "./view-job.js";
 import { showTrial } from "./view-trial.js";
+import { showTutorial } from "./view-tutorial.js";
 
 // Routes: #/, #/job/<job>[/queue|/agreement], #/trial/<job>/<trial>[/trace|/replay|/files[/<x>]],
 // #/compare/<job>/<a>/<b>. Links from the first version of the site (#/<job>/<trial>) still work.
@@ -18,6 +19,7 @@ export function parseRoute() {
   if (first === "job") return { view: "job", job: parts[1], tab: parts[2] || "trials" };
   if (first === "trial") return { view: "trial", job: parts[1], trial: parts[2], tab: parts[3] || "trace", select: parts.slice(4).join("/") || null };
   if (first === "compare") return { view: "compare", job: parts[1], a: parts[2], b: parts[3] };
+  if (first === "tutorial") return { view: "tutorial", section: parts[1] || null };
   if (parts.length === 1) return { view: "job", job: parts[0], tab: "trials" };
   return { view: "trial", job: parts[0], trial: parts[1], tab: "trace", select: parts[2] || null };
 }
@@ -44,6 +46,7 @@ async function route() {
       renderSaveStatus();
       if (r.view === "job") await showJob(r, seq);
       else if (r.view === "compare") await showCompare(r, seq);
+      else if (r.view === "tutorial") await showTutorial(r, seq);
       else await showHome(seq);
     }
   } catch (error) {
@@ -127,6 +130,7 @@ function toggleKeys(open) {
       { class: "modal" },
       h("div", { class: "drawer-head" }, icon("keyboard"), h("strong", null, "Keyboard shortcuts"), h("button", { class: "icon-btn", onclick: () => toggleKeys(false) }, icon("x"))),
       h("div", { class: "keys-grid" }, KEYS.map(([group, rows]) => h("div", null, h("h4", null, group), h("dl", null, rows.map(([k, text]) => [h("dt", null, h("kbd", null, k)), h("dd", null, text)]))))),
+      h("div", { class: "modal-foot" }, h("a", { href: "#/tutorial", onclick: () => toggleKeys(false) }, icon("book"), "Read the tutorial")),
     ),
   );
 }
