@@ -99,6 +99,12 @@
   const shortHash = (hash) => (hash ? hash.slice(0, 8) : "");
   const td = (value, cls) => h("td", { class: cls }, value === null || value === undefined ? "–" : value);
 
+  // The plain-text transcript and the raw trajectory, each in a new tab.
+  function runLinks(job, trial) {
+    const open = (path, text) => h("a", { href: `/api/${path}/${enc(job)}/${enc(trial)}`, target: "_blank", rel: "noopener" }, text);
+    return [open("transcript", "Full transcript"), " · ", open("raw", "trajectory.json")];
+  }
+
   function rewardPill(reward) {
     if (reward === null || reward === undefined) return h("span", { class: "pill" }, "no reward");
     return h("span", { class: `pill ${reward >= 1 ? "ok" : "bad"}` }, `reward ${reward}`);
@@ -127,7 +133,6 @@
       trial: null,
       steps: {},
       done: false,
-      hints_seen: false,
       updated_at: new Date().toISOString(),
     };
   }
@@ -169,13 +174,6 @@
     state.labels.updated_at = new Date().toISOString();
     scheduleSave();
     renderTrialBar();
-  }
-
-  function markHintsSeen() {
-    if (!state.labels || state.labels.hints_seen) return;
-    state.labels.hints_seen = true;
-    state.labels.updated_at = new Date().toISOString();
-    scheduleSave();
   }
 
   // ---------- saving: every change is saved to the server, and kept in this browser until it is ----------
@@ -398,7 +396,7 @@
     const view = $("#view");
     view.className = "page";
     const titles = Object.fromEntries(state.meta.patterns.map((p) => [p.key, p.title]));
-    const head = ["Trial", "Task", "Reward", "Exception", "Agent min", "Hooked calls", "Checkpoints", "Timeouts", "Capture", "Trial label", "Steps judged", "Patterns found", "Done"];
+    const head = ["Trial", "Task", "Reward", "Exception", "Agent min", "Hooked calls", "Checkpoints", "Timeouts", "Capture", "Trial label", "Steps judged", "Patterns found", "Done", "Run"];
     const rows = data.trials.map((t) => {
       const p = t.progress;
       const steps = t.hooked_calls + t.stops;
@@ -418,6 +416,7 @@
         td(p ? `${p.steps_judged} of ${steps}` : "–", "num"),
         td(p && p.found.length ? p.found.map((k) => titles[k] || k).join(", ") : "–"),
         td(p ? (p.done ? "✓" : "") : "–"),
+        h("td", { class: "nowrap" }, t.has_trajectory ? runLinks(job, t.name) : "–"),
       );
     });
     put(
@@ -447,7 +446,6 @@
     state.labels = state.labeler ? restorePending(saved) : null;
     state.save.savedAt = null;
     state.save.error = null;
-    if (state.hints) markHintsSeen();
     let index = -1;
     if (select && select.startsWith("@")) index = Number(select.slice(1));
     else if (select) index = state.events.findIndex((e) => e.id === select);
@@ -502,11 +500,11 @@
       h("span", { class: "fact" }, `${plural(capture.hooked_calls, "hooked call")}: ${callFacts.join(", ")}`),
       h("span", { class: "fact" }, capture.extras ? "diffs recorded" : capture.captured ? "paths only (no --extras)" : "not captured"),
       state.labels ? h("span", { class: "fact progress" }, `judged ${stats.judged} of ${stats.total} steps${state.labels.done ? " · done ✓" : ""}`) : null,
-      state.labels && state.labels.hints_seen ? h("span", { class: "pill warn", title: "Hints were shown while labeling this trial." }, "not blind") : null,
       state.trace.source === "hook_files"
         ? h("span", { class: "pill warn" }, state.events.length ? "no trajectory yet: calls from the hook's files, no messages" : "no trajectory and no hook records")
         : null,
       state.notice ? h("span", { class: "pill warn" }, state.notice) : null,
+      state.trace.source === "trajectory" ? h("span", { class: "run-links" }, runLinks(state.job, state.trialName)) : null,
     );
   }
 
@@ -1214,7 +1212,6 @@
   const hintsInput = $("#hints");
   hintsInput.addEventListener("change", () => {
     state.hints = hintsInput.checked;
-    if (state.hints) markHintsSeen();
     if (state.trace && $("#detail")) {
       renderTrialBar();
       renderDetail();

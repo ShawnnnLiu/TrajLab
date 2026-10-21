@@ -1,5 +1,6 @@
 import csv
 import io
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -114,14 +115,12 @@ def test_progress_counts_judged_steps_only() -> None:
             "c2": label(()),
             "c3": label(None, note="look again"),
         },
-        hints_seen=True,
     )
 
     assert progress(saved) == {
         "trial_judged": True,
         "steps_judged": 2,
         "done": False,
-        "hints_seen": True,
         "found": ["loop", "stall", "unverified_completion"],
     }
     assert progress(None)["steps_judged"] == 0
@@ -166,3 +165,15 @@ def test_rows_csv_has_a_column_per_pattern_and_defuses_formulas() -> None:
     assert row["summary"] == "'=HYPERLINK(1)"
     assert row["note"] == "'-> same file"
     assert row["reward"] == "0.0"
+
+
+def test_a_file_saved_with_the_retired_hints_seen_field_still_loads(tmp_path: Path) -> None:
+    store = LabelStore(tmp_path)
+    path = store.path("job-a", "amina", "t1")
+    path.parent.mkdir(parents=True)
+    old = labels(steps={"c1": label(("loop",))})
+    path.write_text(json.dumps(old.model_dump(mode="json") | {"hints_seen": True}))
+
+    assert store.load("job-a", "amina", "t1") == old
+    store.save(old)
+    assert "hints_seen" not in path.read_text()

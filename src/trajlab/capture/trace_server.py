@@ -7,6 +7,8 @@ It serves one page (`trace_site/`) and a small JSON API over a jobs dir:
     GET /api/jobs?labeler=                     the experiments (job dirs), with counts
     GET /api/jobs/<job>?labeler=               a job's trials, with the labeler's progress
     GET /api/trace/<job>/<trial>               one trial's trace (`trace.build_trace`)
+    GET /api/transcript/<job>/<trial>          the whole run as plain text, nothing cut
+    GET /api/raw/<job>/<trial>                 Harbor's agent/trajectory.json as it is
     GET /api/labels/<job>/<trial>?labeler=     the labeler's saved labels, or null
     PUT /api/labels/<job>/<trial>?labeler=     save them: a `TrialLabels` document
     GET /api/export?format=csv|json&job=&trial=&labeler=   labels as a download
@@ -39,6 +41,7 @@ from trajlab.capture.labels import (
     LabelStore,
     check_labeler,
     export_rows,
+    parse_labels,
     progress,
     rows_csv,
 )
@@ -46,6 +49,7 @@ from trajlab.capture.trace import (
     TRAJECTORY_FILENAME,
     build_trace,
     find_jobs,
+    full_transcript,
     job_summary,
     trial_dirs,
     trial_summary,
@@ -58,7 +62,6 @@ from trajlab.contracts import (
     LABEL_PATTERNS,
     PROCESSES_FILENAME,
     TRAJLAB_DIRNAME,
-    TrialLabels,
 )
 
 logger = logging.getLogger(__name__)
@@ -89,6 +92,12 @@ def _json(data: Any, status: int = 200) -> Response:
 
 def _error(status: int, message: str) -> Response:
     return _json({"error": message}, status)
+
+
+def _inline(body: bytes, media_type: str, filename: str) -> Response:
+    """A file the browser shows in its own tab, and saves under `filename`."""
+    disposition = (("Content-Disposition", f'inline; filename="{filename}"'),)
+    return Response(200, body, f"{media_type}; charset=utf-8", disposition)
 
 
 class _NotFound(Exception):
@@ -203,6 +212,22 @@ class TraceSite:
                 )
             case ["trace", job_name, trial_name]:
                 return _json(self._trace(self._trial(job_name, trial_name)))
+            case ["transcript", job_name, trial_name]:
+                trial = self._trial(job_name, trial_name)
+                events = self._trace(trial)["events"]
+                numbers = {e["id"]: e["n"] for e in events if e["kind"] == "call"}
+                try:
+                    text = full_transcript(trial, numbers)
+                except FileNotFoundError as error:
+                    raise _NotFound(f"{trial_name} has no agent/trajectory.json yet") from error
+                return _inline(text.encode(), "text/plain", f"{trial_name}.transcript.txt")
+            case ["raw", job_name, trial_name]:
+                path = TrialPaths(self._trial(job_name, trial_name)).agent_dir / TRAJECTORY_FILENAME
+                if not path.is_file():
+                    raise _NotFound(f"{trial_name} has no agent/trajectory.json yet")
+                return _inline(
+                    path.read_bytes(), "application/json", f"{trial_name}.trajectory.json"
+                )
             case ["labels", job_name, trial_name]:
                 self._trial(job_name, trial_name)
                 if labeler is None:
@@ -301,7 +326,7 @@ class TraceSite:
             case ["labels", job_name, trial_name]:
                 self._trial(job_name, trial_name)
                 labeler = check_labeler(query.get("labeler", ""))
-                labels = TrialLabels.model_validate_json(body)
+                labels = parse_labels(body)
                 if (labels.job_name, labels.trial_name, labels.labeler) != (
                     job_name,
                     trial_name,

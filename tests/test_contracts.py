@@ -226,7 +226,6 @@ INSTANCES += [
             "stop_1_2": Label(note="look again", updated_at=LABELED_AT),
         },
         done=True,
-        hints_seen=True,
         updated_at=LABELED_AT,
     ),
 ]

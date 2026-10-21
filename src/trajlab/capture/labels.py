@@ -11,6 +11,7 @@ detector's flags on (trial name, tool_call_id).
 
 import csv
 import io
+import json
 import os
 import re
 import tempfile
@@ -86,11 +87,13 @@ EXPORT_FIELDS = (
     "note",
     "updated_at",
     "trial_done",
-    "hints_seen",
 )
 # A spreadsheet runs a cell that starts with one of these as a formula.
 _FORMULA_START = ("=", "+", "-", "@", "\t", "\r")
 _LABELER = re.compile(LABELER_NAME_PATTERN)
+# Fields TrialLabels no longer has: `hints_seen` (removed 2026-10-20) is still in files saved
+# before then, and in saves from a page loaded before then.
+_RETIRED_FIELDS = ("hints_seen",)
 
 # (job, trial) -> {"task", "reward", "steps": {tool_call_id: {"call", "tool", "summary"}}};
 # steps in the trial's order.
@@ -99,6 +102,17 @@ TrialContext = Callable[[str, str], dict[str, Any]]
 
 class LabelError(ValueError):
     """A label file or a name that cannot be used."""
+
+
+def parse_labels(data: bytes | str) -> TrialLabels:
+    """A TrialLabels document from JSON, without the retired fields."""
+    try:
+        document = json.loads(data)
+    except ValueError as error:
+        raise LabelError(f"not JSON: {error}") from error
+    if isinstance(document, dict):
+        document = {k: v for k, v in document.items() if k not in _RETIRED_FIELDS}
+    return TrialLabels.model_validate(document)
 
 
 def check_labeler(name: str) -> str:
@@ -129,8 +143,8 @@ class LabelStore:
         if not path.is_file():
             return None
         try:
-            return TrialLabels.model_validate_json(path.read_bytes())
-        except ValidationError as error:
+            return parse_labels(path.read_bytes())
+        except (LabelError, ValidationError) as error:
             raise LabelError(f"{path}: not a TrialLabels file: {error}") from error
 
     def save(self, labels: TrialLabels) -> Path:
@@ -185,7 +199,6 @@ def progress(labels: TrialLabels | None) -> dict[str, Any]:
             "trial_judged": False,
             "steps_judged": 0,
             "done": False,
-            "hints_seen": False,
             "found": [],
         }
     judged = [label for label in labels.steps.values() if label.patterns is not None]
@@ -196,7 +209,6 @@ def progress(labels: TrialLabels | None) -> dict[str, Any]:
         "trial_judged": labels.trial is not None and labels.trial.patterns is not None,
         "steps_judged": len(judged),
         "done": labels.done,
-        "hints_seen": labels.hints_seen,
         "found": [p for p in LABEL_PATTERNS if p in found],
     }
 
@@ -232,7 +244,6 @@ def _row(
         "note": label.note,
         "updated_at": label.updated_at.isoformat(),
         "trial_done": labels.done,
-        "hints_seen": labels.hints_seen,
     }
     return row
 

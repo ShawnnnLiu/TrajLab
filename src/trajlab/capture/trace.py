@@ -712,6 +712,69 @@ def _add_message_hints(events: list[dict[str, Any]], changed: dict[str, list[int
             }
 
 
+def _argument_lines(arguments: Any) -> list[str]:
+    """A tool call's arguments, one per line. A multi-line string (a file's content, an edit, a
+    script) is printed as its own lines between markers, exactly as written."""
+    if not isinstance(arguments, dict):
+        return [json.dumps(arguments, ensure_ascii=False, indent=2, default=str)]
+    lines = []
+    for key, value in arguments.items():
+        if isinstance(value, str) and "\n" in value:
+            lines += [f"----- {key} -----", value, f"----- end of {key} -----"]
+        elif isinstance(value, str | int | float | bool) or value is None:
+            lines.append(f"{key}: {value}")
+        else:
+            lines.append(f"{key}: {json.dumps(value, ensure_ascii=False, default=str)}")
+    return lines
+
+
+def full_transcript(trial_dir: Path, numbers: dict[str, int] | None = None) -> str:
+    """The whole run as plain text, in order and with nothing cut: the task instruction, then
+    each step's thinking, message, tool calls with their full arguments, and each output as the
+    agent saw it. `numbers` maps tool_call_id to the call numbers the site shows. Raises
+    FileNotFoundError when the trial has no trajectory."""
+    trajectory = Trajectory.model_validate_json(
+        (TrialPaths(trial_dir).agent_dir / TRAJECTORY_FILENAME).read_bytes()
+    )
+    info = _trial_info(trial_dir, trajectory)
+    numbers = numbers or {}
+    started = next((t for t in (_time(s.timestamp) for s in trajectory.steps) if t), None)
+    lines = [
+        f"Trial:  {info['name']}",
+        f"Task:   {info['task']}",
+        f"Model:  {info['model']}, Claude Code {info['agent_version']}",
+        f"Reward: {'none' if info['reward'] is None else info['reward']}",
+        "The whole run from Harbor's agent/trajectory.json, nothing cut. Tool outputs are the",
+        "tool results the agent read.",
+        "",
+    ]
+    for step in trajectory.steps:
+        moment = _time(step.timestamp)
+        when = ""
+        if moment and started:
+            seconds = int((moment - started).total_seconds())
+            when = f" · +{seconds // 60}:{seconds % 60:02d}"
+        lines.append(f"==== step {step.step_id} · {step.source}{when} ====")
+        if (step.reasoning_content or "").strip():
+            lines += ["[thinking]", step.reasoning_content.strip(), ""]
+        text = as_text(step.message).strip()
+        if text:
+            lines += ["[message]", text, ""]
+        results = {
+            r.source_call_id: r for r in (step.observation.results if step.observation else [])
+        }
+        for call in step.tool_calls or []:
+            label = f"#{numbers[call.tool_call_id]} " if call.tool_call_id in numbers else ""
+            result = results.pop(call.tool_call_id, None)
+            lines.append(f"[tool call {label}{call.function_name} · {call.tool_call_id}]")
+            lines += _argument_lines(call.arguments)
+            lines += [f"[output of {label}{call.function_name}]"]
+            lines += [seen_output(result) if result else "(no output recorded)", ""]
+        for result in results.values():
+            lines += [f"[output · {result.source_call_id}]", seen_output(result), ""]
+    return "\n".join(lines) + "\n"
+
+
 def build_trace(trial_dir: Path) -> dict[str, Any]:
     """Everything the site shows for one trial."""
     paths = TrialPaths(trial_dir)

@@ -181,3 +181,27 @@ def test_export_csv_and_json(site: TraceSite) -> None:
 
 def test_other_methods_are_refused(site: TraceSite) -> None:
     assert site.handle("POST", "/api/meta", LOCAL).status == 405
+
+
+def test_the_transcript_and_the_raw_trajectory(site: TraceSite, job_dir: Path) -> None:
+    transcript = get(site, f"/api/transcript/{TRIAL_URL}")
+
+    assert transcript.content_type == "text/plain; charset=utf-8"
+    assert "inline" in dict(transcript.headers)["Content-Disposition"]
+    text = transcript.body.decode()
+    assert text.index("Create a file called hello.txt") < text.index(
+        f"#1 Write · {FIXTURE_TOOL_CALL_ID}"
+    )
+
+    raw = get(site, f"/api/raw/{TRIAL_URL}")
+    trajectory = job_dir / FIXTURE_TRIAL_NAME / "agent" / "trajectory.json"
+    assert raw.content_type == "application/json; charset=utf-8"
+    assert raw.body == trajectory.read_bytes()
+
+    trajectory.unlink()
+    assert get(site, f"/api/transcript/{TRIAL_URL}").status == 404
+    assert get(site, f"/api/raw/{TRIAL_URL}").status == 404
+
+
+def test_a_save_from_a_page_older_than_the_hints_seen_removal_is_kept(site: TraceSite) -> None:
+    assert put_labels(site, labels_doc(hints_seen=True)).status == 200

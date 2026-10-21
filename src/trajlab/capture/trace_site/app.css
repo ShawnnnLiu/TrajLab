@@ -153,6 +153,8 @@ table.grid tr.done td:first-child { box-shadow: inset 3px 0 0 var(--ok); }
 .trialbar .trial-name { font-size: 15px; }
 .trialbar .fact { color: var(--muted); font-size: 13px; }
 .trialbar .progress { color: var(--fg); }
+.trialbar .run-links { margin-left: auto; font-size: 13px; white-space: nowrap; }
+td.nowrap { white-space: nowrap; }
 
 .strip {
   display: flex;

@@ -204,7 +204,7 @@ The watcher's policy sets one arm per corpus, recorded in `policy.json` and the 
 7. **Labeling tool:** `trajlab trace <jobs dir>` serves a local site that shows each call's input and output beside its diffs and process changes, with a checklist per hooked call, per stop, and per trial.
    - Labels cover the 7 patterns plus `stall`, which §1 reports apart from `loop`.
    - One `TrialLabels` file (`contracts/labels.py`) per labeler per trial, under `corpus/labels/`, which git ignores. The site exports them as CSV or JSON, one row per trial and per judged step, keyed by trial and `tool_call_id`, the key the flags carry.
-   - The site's hints (repeated commands, files back to an earlier version, claim cross-checks) resemble the detector's rules, so they are off by default. Turning them on marks that trial's labels `hints_seen`, and those labels are reported apart from blind ones.
+   - The site's hints (repeated commands, files back to an earlier version, claim cross-checks) resemble the detector's rules, so they are off by default and stay off while labeling trials that are scored.
 
 ## Consequences
 

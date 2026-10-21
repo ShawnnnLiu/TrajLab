@@ -67,9 +67,4 @@ class TrialLabels(BaseModel):
         "entry was not reviewed.",
     )
     done: bool = Field(default=False, description="The labeler finished this trial.")
-    hints_seen: bool = Field(
-        default=False,
-        description="The page's hints (repeats, reverts, claim cross-checks) were shown while "
-        "labeling, so the labels are not blind.",
-    )
     updated_at: AwareDatetime

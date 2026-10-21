@@ -4,6 +4,8 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 from tests.conftest import (
     FIXTURE_TOOL_CALL_ID,
     T0,
@@ -13,7 +15,15 @@ from tests.conftest import (
     make_checkpoint,
     write_capture,
 )
-from trajlab.capture.trace import build_trace, find_jobs, trial_dirs, trial_summary
+from trajlab.capture.trace import (
+    OUTPUT_HEAD,
+    OUTPUT_TAIL,
+    build_trace,
+    find_jobs,
+    full_transcript,
+    trial_dirs,
+    trial_summary,
+)
 from trajlab.contracts import (
     CALL_INPUT_SUFFIX,
     CHANGES_FILENAME,
@@ -390,3 +400,51 @@ def test_trial_summary_reads_only_small_files(tmp_path: Path) -> None:
         summary["timeouts"],
     ) == (2, 1, 1, 1)
     assert summary["extras"] is False
+
+
+def test_full_transcript_has_the_whole_run_in_order_with_nothing_cut(trial_copy: Path) -> None:
+    long_output = "x" * (OUTPUT_HEAD + OUTPUT_TAIL + 500)
+
+    def mutate(data: dict[str, Any]) -> None:
+        data["steps"][1]["reasoning_content"] = "The file should hold exactly that text."
+        result = data["steps"][1]["observation"]["results"][0]
+        result["content"] = long_output
+        result.pop("extra", None)  # no raw tool_result: the ATIF content is what was seen
+
+    edit_trajectory(trial_copy, mutate)
+
+    text = full_transcript(trial_copy, {FIXTURE_TOOL_CALL_ID: 7})
+
+    order = [
+        "Create a file called hello.txt",
+        "[thinking]\nThe file should hold exactly that text.",
+        "[message]\nI'll create the file now.",
+        f"[tool call #7 Write · {FIXTURE_TOOL_CALL_ID}]",
+        "file_path: /app/hello.txt",
+        "[output of #7 Write]",
+        long_output,
+        "Created `/app/hello.txt`",
+    ]
+    positions = [text.index(piece) for piece in order]
+    assert positions == sorted(positions)
+    assert text.startswith("Trial:  hello-world-trial\nTask:   hello-world/hello-world")
+
+
+def test_full_transcript_needs_a_trajectory(trial_copy: Path) -> None:
+    (trial_copy / "agent" / "trajectory.json").unlink()
+
+    with pytest.raises(FileNotFoundError):
+        full_transcript(trial_copy)
+
+
+def test_full_transcript_prints_multi_line_arguments_as_written(trial_copy: Path) -> None:
+    script = "cat > /app/run.sh <<'X'\necho \"hi\"\nX"
+
+    def mutate(data: dict[str, Any]) -> None:
+        data["steps"][1]["tool_calls"][0]["arguments"] = {"command": script, "timeout": 60}
+
+    edit_trajectory(trial_copy, mutate)
+
+    text = full_transcript(trial_copy)
+
+    assert f"----- command -----\n{script}\n----- end of command -----\ntimeout: 60" in text
