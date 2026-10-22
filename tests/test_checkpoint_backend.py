@@ -215,10 +215,12 @@ class TarDocker:
     def __init__(self, returncode: int, stdout: bytes) -> None:
         self.returncode, self.stdout = returncode, stdout
         self.calls: list[list[str]] = []
+        self.timeouts: list[float] = []
 
     def __call__(self, command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
         assert not kwargs["check"] and "text" not in kwargs
         self.calls.append(command)
+        self.timeouts.append(kwargs["timeout"])
         return subprocess.CompletedProcess(command, self.returncode, stdout=self.stdout, stderr=b"")
 
 
@@ -238,8 +240,10 @@ def _tarball(files: dict[str, bytes]) -> bytes:
 def test_read_files_runs_tar_in_the_container() -> None:
     # tar exits 2 when a path is missing; the files it did write are still read.
     docker = TarDocker(2, _tarball({"app/a.txt": b"A"}))
-    files = DockerCommitBackend(runner=docker).read_files("c0ffee", ["/app/a.txt", "/app/gone"])
-    assert files == {"/app/a.txt": b"A"}
+    files = DockerCommitBackend(runner=docker).read_files(
+        "c0ffee", ["/app/a.txt", "/app/gone"], timeout=5
+    )
+    assert files == {"/app/a.txt": b"A"} and docker.timeouts == [5]
     assert docker.calls == [
         ["docker", "exec", "-u", "0", "c0ffee", "tar", "-cf", "-", "-C", "/", "--",
          "app/a.txt", "app/gone"],
@@ -248,8 +252,8 @@ def test_read_files_runs_tar_in_the_container() -> None:
 
 def test_read_image_files_runs_tar_as_the_entrypoint_without_network() -> None:
     docker = TarDocker(0, _tarball({"app/a.txt": b"old"}))
-    files = DockerCommitBackend(runner=docker).read_image_files(IMAGE_ID, ["/app/a.txt"])
-    assert files == {"/app/a.txt": b"old"}
+    files = DockerCommitBackend(runner=docker).read_image_files(IMAGE_ID, ["/app/a.txt"], timeout=5)
+    assert files == {"/app/a.txt": b"old"} and docker.timeouts == [5]
     assert docker.calls == [
         ["docker", "run", "--rm", "--network", "none", "-u", "0", "--entrypoint", "tar",
          IMAGE_ID, "-cf", "-", "-C", "/", "--", "app/a.txt"],
@@ -259,10 +263,24 @@ def test_read_image_files_runs_tar_as_the_entrypoint_without_network() -> None:
 @pytest.mark.parametrize("returncode", [126, 127])
 def test_read_files_without_tar_is_unsupported(returncode: int) -> None:
     docker = TarDocker(returncode, b"")
-    assert DockerCommitBackend(runner=docker).read_files("c0ffee", ["/app/a.txt"]) is None
+    assert (
+        DockerCommitBackend(runner=docker).read_files("c0ffee", ["/app/a.txt"], timeout=5) is None
+    )
 
 
 def test_read_files_of_nothing_runs_nothing() -> None:
     docker = TarDocker(0, b"")
-    assert DockerCommitBackend(runner=docker).read_files("c0ffee", []) == {}
+    assert DockerCommitBackend(runner=docker).read_files("c0ffee", [], timeout=5) == {}
     assert docker.calls == []
+
+
+def test_the_process_probe_keeps_its_time_limit_and_any_bytes() -> None:
+    seen: dict[str, Any] = {}
+
+    def runner(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        seen.update(kwargs)
+        return subprocess.CompletedProcess(command, 0, stdout="self\t9\n", stderr="")
+
+    DockerCommitBackend(runner=runner).processes("c0ffee", timeout=7.5)
+    # A command line that is not UTF-8 is replaced, not a reason to drop the snapshot.
+    assert (seen["timeout"], seen["errors"]) == (7.5, "replace")

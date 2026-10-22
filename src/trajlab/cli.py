@@ -299,8 +299,9 @@ def watch(
         bool,
         typer.Option(
             "--extras/--no-extras",
-            help="Also record each call's processes, listening ports, and file diffs under "
-            "<trial>/trajlab/ (ADR-0015). Changes what a trial records: use a new corpus_id.",
+            help="Also record each call's processes and listening ports, and under --gate change "
+            "or audit its file diffs, in <trial>/trajlab/ (ADR-0015). Changes what a trial "
+            "records: use a new corpus_id.",
         ),
     ] = False,
 ) -> None:
@@ -313,6 +314,12 @@ def watch(
             f"trajlab watch: unknown backend {backend!r}; one of {sorted(BACKENDS)}", err=True
         )
         raise typer.Exit(code=1)
+    if extras and gate is Gate.none:
+        typer.echo(
+            "trajlab watch: --extras under --gate none records processes only; "
+            "file diffs need --gate change or audit",
+            err=True,
+        )
     stop = threading.Event()
     for signum in (signal.SIGINT, signal.SIGTERM):
         signal.signal(signum, lambda *_: stop.set())

@@ -92,6 +92,13 @@ def test_watch_requires_every_and_gate(tmp_path: Path) -> None:
     assert CliRunner().invoke(app, [*watch, "--every", "1", "--gate", "maybe"]).exit_code != 0
 
 
+def test_watch_says_extras_without_a_gate_record_no_diffs(tmp_path: Path) -> None:
+    watch = ["watch", str(tmp_path), "--every", "1", "--gate", "none", "--extras"]
+    with hold_watcher_lock(tmp_path):  # stops the command right after its checks
+        result = CliRunner().invoke(app, watch)
+    assert "records processes only" in flat(result.output)
+
+
 def test_watch_refuses_gate_with_every_n(tmp_path: Path) -> None:
     result = CliRunner().invoke(app, ["watch", str(tmp_path), "--every", "3", "--gate", "change"])
     assert result.exit_code == 1

@@ -288,7 +288,10 @@ class TraceSite:
                     change = CallChanges.model_validate_json(line)
                 except ValidationError:
                     continue
-                diffs[change.tool_call_id] = {f.path: f.diff for f in change.files if f.diff}
+                # The first line per call, as in `build_trace`.
+                diffs.setdefault(
+                    change.tool_call_id, {f.path: f.diff for f in change.files if f.diff}
+                )
         with self._lock:
             self._diffs[trial] = (key, diffs)
             while len(self._diffs) > CACHED_TRACES:

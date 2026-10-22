@@ -282,6 +282,17 @@ def test_trace_joins_records_diffs_and_processes_by_tool_call_id(trial_copy: Pat
     assert events == sorted(events) and len(events) == 2
 
 
+def test_a_call_recorded_twice_keeps_its_first_changes(trial_copy: Path) -> None:
+    # Before 2026-10-22, a call retried after a failed snapshot got a second, empty line.
+    five_call_trial(trial_copy)
+    empty = CallChanges(tool_call_id="c2", call_seq=2, files=(), files_total=0, capture_ms=1)
+    with (trial_copy / TRAJLAB_DIRNAME / CHANGES_FILENAME).open("a") as stream:
+        stream.write(empty.model_dump_json() + "\n")
+
+    calls = calls_by_id(build_trace(trial_copy))
+    assert calls["c2"]["changes"]["files"][0]["diff"].endswith("-x = 1\n+x = 2")
+
+
 def test_the_stop_comes_after_the_final_message(trial_copy: Path) -> None:
     five_call_trial(trial_copy)
 

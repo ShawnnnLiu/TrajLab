@@ -838,10 +838,14 @@ def build_trace(trial_dir: Path) -> dict[str, Any]:
     extras_dir = trial_dir / TRAJLAB_DIRNAME
     calls = _read_jsonl(checkpoints_dir / CALLS_FILENAME, CallRecord)
     checkpoints = _read_jsonl(checkpoints_dir / CHECKPOINT_RECORDS_FILENAME, CheckpointRecord)
-    changes = {c.tool_call_id: c for c in _read_jsonl(extras_dir / CHANGES_FILENAME, CallChanges)}
-    snapshots = {
-        p.tool_call_id: p for p in _read_jsonl(extras_dir / PROCESSES_FILENAME, ProcessSnapshot)
-    }
+    # The first line per call: before ADR-0015's fixes of 2026-10-22, a call retried after a
+    # failed snapshot got a second, empty one.
+    changes: dict[str, CallChanges] = {}
+    for change in _read_jsonl(extras_dir / CHANGES_FILENAME, CallChanges):
+        changes.setdefault(change.tool_call_id, change)
+    snapshots: dict[str, ProcessSnapshot] = {}
+    for snapshot in _read_jsonl(extras_dir / PROCESSES_FILENAME, ProcessSnapshot):
+        snapshots.setdefault(snapshot.tool_call_id, snapshot)
     timed_out = (
         {p.name.removesuffix(TIMEOUT_SUFFIX) for p in checkpoints_dir.glob(f"*{TIMEOUT_SUFFIX}")}
         if checkpoints_dir.is_dir()
