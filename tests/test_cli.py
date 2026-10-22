@@ -12,7 +12,7 @@ from trajlab.cli import app, identify_trial
 from trajlab.contracts import CorpusManifest
 from trajlab.store import schema
 
-COMMANDS = {"run", "watch", "repair", "postprocess", "manifest", "validate", "store"}
+COMMANDS = {"run", "watch", "repair", "postprocess", "manifest", "validate", "store", "trace"}
 
 
 def test_help_lists_all_commands() -> None:
@@ -92,6 +92,13 @@ def test_watch_requires_every_and_gate(tmp_path: Path) -> None:
     assert CliRunner().invoke(app, [*watch, "--every", "1"]).exit_code != 0
     assert CliRunner().invoke(app, [*watch, "--every", "0", "--gate", "none"]).exit_code != 0
     assert CliRunner().invoke(app, [*watch, "--every", "1", "--gate", "maybe"]).exit_code != 0
+
+
+def test_watch_says_extras_without_a_gate_record_no_diffs(tmp_path: Path) -> None:
+    watch = ["watch", str(tmp_path), "--every", "1", "--gate", "none", "--extras"]
+    with hold_watcher_lock(tmp_path):  # stops the command right after its checks
+        result = CliRunner().invoke(app, watch)
+    assert "records processes only" in flat(result.output)
 
 
 def test_watch_refuses_gate_with_every_n(tmp_path: Path) -> None:
@@ -243,6 +250,12 @@ def test_repair_refuses_an_env_file_that_does_not_exist(job_dir: Path) -> None:
     args = ["repair", str(job_dir), "--prefix", "rep-v1", "--jobs-dir", str(jobs)]
     result = CliRunner().invoke(app, [*args, "--env-file", str(jobs / "missing.env")])
     assert result.exit_code == 2 and "does not exist" in flat(result.output)
+
+
+def test_trace_needs_a_directory(tmp_path: Path) -> None:
+    result = CliRunner().invoke(app, ["trace", str(tmp_path / "missing")])
+    assert result.exit_code == 1
+    assert "not a directory" in result.output
 
 
 # -- store build -------------------------------------------------------------------------------

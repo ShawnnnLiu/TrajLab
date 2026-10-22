@@ -21,3 +21,5 @@ notebooks/**/*.ipynb_checkpoints
 .vscode/
 # harbor reference clone if someone puts it inside by mistake
 harbor-ref/
+# hand labels from `trajlab trace` (ADR-0015 §8); export them from the site
+corpus/labels/

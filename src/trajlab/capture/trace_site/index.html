@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrajLab trace</title>
+<link rel="stylesheet" href="/static/app.css">
+<script type="module" src="/static/app.js"></script>
+</head>
+<body>
+<header id="topbar">
+  <a class="brand" href="#/"><span class="brand-mark"></span>TrajLab <span class="brand-sub">trace</span></a>
+  <nav id="crumbs" aria-label="Breadcrumb"></nav>
+  <div class="spacer"></div>
+  <label class="toggle" id="hints-toggle" hidden title="Hints are cross-references that resemble the detector's rules. Keep them off while labeling trials that will be scored (ADR-0015 §8).">
+    <input type="checkbox" id="hints"><span>Hints</span>
+  </label>
+  <a class="tb-btn" id="tutorial-button" href="#/tutorial" title="How to use this site">Tutorial</a>
+  <button class="tb-btn" id="guide-button" title="Labeling guide (g)">Guide</button>
+  <button class="tb-btn icon-only" id="theme-button" title="Theme"></button>
+  <button class="tb-btn icon-only" id="keys-button" title="Keyboard shortcuts (?)">?</button>
+  <label class="labeler"><span>Labeler</span><input id="labeler" type="text" placeholder="your name" maxlength="40" autocomplete="off" spellcheck="false"></label>
+  <span id="save-status" class="save-status" aria-live="polite"></span>
+</header>
+<main id="view"><p class="loading">Loading…</p></main>
+<aside id="guide-drawer" class="drawer" hidden></aside>
+<div id="overlay" class="overlay" hidden></div>
+</body>
+</html>

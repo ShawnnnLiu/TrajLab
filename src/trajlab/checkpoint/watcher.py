@@ -5,11 +5,14 @@ Under gate `change` it checkpoints only calls that changed the filesystem (ADR-0
 gate `none` it checkpoints every Nth call and defers the others (ADR-0007). The end of the
 agent's turn (Stop, StopFailure) is answered like a call, but under gate `none` it always gets a
 checkpoint (ADR-0011). Every answered request gets a `CallRecord`.
+With `extras` on, each answered call also gets a process snapshot and the content of what it
+changed, under `<trial>/trajlab/`, before its ack (ADR-0015 §2).
 `checkpoint/` does not import `capture/` (CLAUDE.md constraint 3), so the caller supplies how a
 trial dir maps to its name and compose project.
 """
 
 import fcntl
+import json
 import logging
 import os
 import threading
@@ -28,12 +31,21 @@ from watchdog.observers import Observer
 from trajlab.checkpoint.backends.base import BackendError, SnapshotBackend
 from trajlab.checkpoint.backends.docker_commit import image_tag
 from trajlab.checkpoint.changes import Listing, changed_paths, parse_listing
+from trajlab.checkpoint.diffs import (
+    BUDGET_S,
+    candidates,
+    file_change,
+    prior_versions,
+    to_read,
+    to_record,
+)
 from trajlab.checkpoint.join import (
     REQ_SUFFIX,
     WATCHER_LOG_FILENAME,
     CheckpointRequest,
     answered_requests,
     append_call,
+    append_line,
     append_record,
     is_pending,
     read_calls,
@@ -45,7 +57,19 @@ from trajlab.checkpoint.join import (
     write_ack,
     write_policy,
 )
-from trajlab.contracts import MAX_LISTED_PATHS, CallRecord, CheckpointPolicy, CheckpointRecord
+from trajlab.checkpoint.processes import parse_probe
+from trajlab.contracts import (
+    CHANGES_FILENAME,
+    MAX_LISTED_PATHS,
+    MAX_TEXT_BYTES,
+    PROCESSES_FILENAME,
+    TRAJLAB_DIRNAME,
+    CallChanges,
+    CallRecord,
+    CheckpointPolicy,
+    CheckpointRecord,
+    ProcessSnapshot,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +79,9 @@ STOP_EVENTS = ("Stop", "StopFailure")
 REQ_GLOB = f"*/*/agent/checkpoints/*{REQ_SUFFIX}"
 DEFAULT_SWEEP_INTERVAL_S = 2.0
 DEFAULT_WORKERS = 8
+# Everything --extras does for one call, before its snapshot: well inside the hook's 240 s wait,
+# which the commit also needs (80 s after a 2.2 GB install, ADR-0015 §2).
+EXTRAS_BUDGET_S = 30.0
 
 
 class PolicyMismatchError(RuntimeError):
@@ -111,6 +138,24 @@ def watcher_running(jobs_dir: Path) -> bool:
         return False
 
 
+def _left(deadline: float) -> float:
+    return deadline - time.monotonic()
+
+
+def _recorded_calls(path: Path) -> set[str]:
+    """The `tool_call_id`s of a JSONL file of extras, skipping a line cut short by a crash
+    (possibly mid-character, so each line is decoded on its own)."""
+    if not path.is_file():
+        return set()
+    ids = set()
+    for line in path.read_bytes().splitlines():
+        try:
+            ids.add(json.loads(line)["tool_call_id"])
+        except (ValueError, KeyError, TypeError):
+            continue
+    return ids
+
+
 @dataclass(frozen=True)
 class _Measurement:
     change: str
@@ -131,6 +176,11 @@ class _Trial:
     # Filesystem listings (ADR-0010), in memory only: a restarted watcher starts a new baseline.
     reference: Listing | None = None  # at the last checkpoint
     previous: Listing | None = None  # after the last measured call
+    # Detector capture (ADR-0015), in memory only: a restarted watcher reads older versions
+    # from the last checkpoint's image instead.
+    contents: dict[str, bytes | None] = field(default_factory=dict)  # last version seen per path
+    start_image: str | None = None
+    extras_recorded: set[str] | None = None  # calls with extras on disk; read on first use
 
     def covering(self, tool_call_id: str) -> CheckpointRecord | None:
         """The record whose checkpoint first shows this call's effects, if any."""
@@ -153,6 +203,7 @@ class Watcher:
         gate: str = "none",
         sweep_interval: float = DEFAULT_SWEEP_INTERVAL_S,
         workers: int = DEFAULT_WORKERS,
+        extras: bool = False,
     ) -> None:
         # Observers report absolute paths and the sweep reports paths under jobs_dir; both are
         # resolved so one request and one trial have exactly one key.
@@ -162,6 +213,7 @@ class Watcher:
         self.identify = identify
         self.sweep_interval = sweep_interval
         self.workers = workers
+        self.extras = extras
         self._trials: dict[Path, _Trial] = {}
         self._trials_lock = threading.Lock()
         self._in_flight: set[Path] = set()
@@ -233,6 +285,10 @@ class Watcher:
         trigger = "stop" if stop else "tool_call"
         measured = self._measure(trial) if self.policy.gate != "none" else None
         change = measured.change if measured else "not_checked"
+        if self.extras:
+            # Before the snapshot and the ack: the agent is still waiting, the last checkpoint
+            # still holds the state before this call.
+            self._record_extras(trial_dir_of(req_path), trial, request, measured)
 
         def answer(outcome: str, checkpoint_seq: int | None) -> CallRecord:
             call = CallRecord(
@@ -314,6 +370,154 @@ class Watcher:
         else:
             change = "changed" if changed_paths(trial.reference, current) else "unchanged"
         return _Measurement(change=change, own=own, current=current, detect_ms=detect_ms)
+
+    def _record_extras(
+        self,
+        trial_dir: Path,
+        trial: _Trial,
+        request: CheckpointRequest,
+        measured: "_Measurement | None",
+    ) -> None:
+        """The process snapshot and the call's changes (ADR-0015 §2). Never blocks the ack.
+
+        Once per call: when the sweep retries a call whose snapshot failed, the call's changes
+        are already measured, and measuring again would record that it changed nothing.
+        """
+        out = trial_dir / TRAJLAB_DIRNAME
+        out.mkdir(exist_ok=True)
+        if trial.extras_recorded is None:
+            trial.extras_recorded = _recorded_calls(out / PROCESSES_FILENAME) | _recorded_calls(
+                out / CHANGES_FILENAME
+            )
+        if request.tool_use_id in trial.extras_recorded:
+            return
+        trial.extras_recorded.add(request.tool_use_id)
+        deadline = time.monotonic() + EXTRAS_BUDGET_S
+        call_seq = len(trial.calls) + 1
+        try:
+            snapshot = self._process_snapshot(trial, request.tool_use_id, call_seq, deadline)
+            if snapshot is not None:
+                append_line(out / PROCESSES_FILENAME, snapshot.model_dump_json())
+        except Exception:
+            trial.log.warning("no process snapshot for %s", request.tool_use_id, exc_info=True)
+        try:
+            changes = self._call_changes(trial, request.tool_use_id, call_seq, measured, deadline)
+            if changes is not None:
+                append_line(out / CHANGES_FILENAME, changes.model_dump_json())
+        except Exception:
+            trial.log.warning("no changes recorded for %s", request.tool_use_id, exc_info=True)
+
+    def _process_snapshot(
+        self, trial: _Trial, tool_call_id: str, call_seq: int, deadline: float
+    ) -> ProcessSnapshot | None:
+        assert trial.container is not None
+        start = time.monotonic()
+        raw = self.backend.processes(trial.container, timeout=deadline - start)
+        if raw is None:
+            return None
+        processes, listening = parse_probe(raw)
+        return ProcessSnapshot(
+            tool_call_id=tool_call_id,
+            call_seq=call_seq,
+            processes=processes,
+            listening=listening,
+            capture_ms=round((time.monotonic() - start) * 1000),
+            captured_at=datetime.now(UTC),
+        )
+
+    def _call_changes(
+        self,
+        trial: _Trial,
+        tool_call_id: str,
+        call_seq: int,
+        measured: "_Measurement | None",
+        deadline: float,
+    ) -> CallChanges | None:
+        """Diffs and hashes of the files the call changed, within the limits of `diffs`."""
+        assert trial.container is not None
+        if measured is None or measured.current is None:
+            return None  # gate none, or no GNU find: which paths changed is unknown
+        start = time.monotonic()
+
+        def elapsed_ms() -> int:
+            return round((time.monotonic() - start) * 1000)
+
+        if measured.own is None:
+            return CallChanges(
+                tool_call_id=tool_call_id,
+                call_seq=call_seq,
+                files=(),
+                files_total=0,
+                baseline=True,
+                capture_ms=elapsed_ms(),
+            )
+        found = candidates(measured.own, measured.current)
+        # A version held for a path this call changed is out of date from here on. Taken out
+        # first, so a path this call does not read, or a failure below, leaves it unknown (read
+        # from the next checkpoint's image) instead of stale.
+        held_before = {
+            c.path: trial.contents.pop(c.path) for c in found if c.path in trial.contents
+        }
+        wanted = to_read(found)
+        after: dict[str, bytes] = {}
+        if wanted and _left(deadline) > 0:
+            after = self.backend.read_files(trial.container, wanted, timeout=_left(deadline)) or {}
+        modified = [c.path for c in found if c.op == "modified" and c.path in wanted]
+        held, unknown = prior_versions(modified, held_before)
+        fetched: dict[str, bytes] | None = None
+        if unknown and time.monotonic() - start < BUDGET_S and _left(deadline) > 0:
+            try:
+                image = (
+                    trial.records[-1].checkpoint_id
+                    if trial.records
+                    else self._start_image(trial, deadline)
+                )
+                if image is not None and _left(deadline) > 0:
+                    fetched = self.backend.read_image_files(image, unknown, timeout=_left(deadline))
+            except BackendError:
+                # The files are still recorded, with their before-versions unknown.
+                trial.log.warning("no before-versions for %s", tool_call_id, exc_info=True)
+        files = []
+        for candidate in to_record(found, wanted):
+            path = candidate.path
+            if candidate.op == "added":
+                before, before_known = None, True
+            elif path in held:
+                before, before_known = held[path], True
+            elif fetched is not None and path in unknown:
+                # Read from the image: a path it lacks did not exist before this call.
+                before, before_known = fetched.get(path), True
+            else:
+                before, before_known = held_before.get(path), path in held_before
+            reason = None
+            if candidate.kind == "file" and candidate.op != "removed" and path not in wanted:
+                reason = "over_file_cap" if (candidate.size or 0) <= MAX_TEXT_BYTES else None
+            files.append(
+                file_change(
+                    candidate,
+                    after=after.get(path),
+                    before=before,
+                    before_known=before_known,
+                    skipped=reason,
+                )
+            )
+        trial.contents.update(after)
+        for candidate in found:
+            if candidate.op == "removed":
+                trial.contents[candidate.path] = None
+        return CallChanges(
+            tool_call_id=tool_call_id,
+            call_seq=call_seq,
+            files=tuple(files),
+            files_total=len(found),
+            capture_ms=elapsed_ms(),
+        )
+
+    def _start_image(self, trial: _Trial, deadline: float) -> str | None:
+        assert trial.container is not None
+        if trial.start_image is None:
+            trial.start_image = self.backend.image_of(trial.container, timeout=_left(deadline))
+        return trial.start_image
 
     def _uncovered(self, directory: Path, trial: _Trial, request: CheckpointRequest) -> list[str]:
         """Calls since the last checkpoint whose effects no checkpoint holds yet, then this one.

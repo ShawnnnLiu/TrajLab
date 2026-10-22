@@ -2,7 +2,7 @@ import json
 import os
 import threading
 import time
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -10,6 +10,7 @@ import pytest
 
 from tests.conftest import FIXTURE_TOOL_CALL_ID
 from trajlab.checkpoint.backends.base import BackendError, Snapshot, SnapshotBackend
+from trajlab.checkpoint.diffs import sha256
 from trajlab.checkpoint.join import (
     RECORDS_FILENAME,
     WATCHER_LOG_FILENAME,
@@ -28,7 +29,16 @@ from trajlab.checkpoint.watcher import (
     hold_watcher_lock,
     watcher_running,
 )
-from trajlab.contracts import CallRecord, CheckpointPolicy, CheckpointRecord
+from trajlab.contracts import (
+    CHANGES_FILENAME,
+    PROCESSES_FILENAME,
+    TRAJLAB_DIRNAME,
+    CallChanges,
+    CallRecord,
+    CheckpointPolicy,
+    CheckpointRecord,
+    ProcessSnapshot,
+)
 
 TRIAL_NAME = "hello-world__K3GBok3"
 PROJECT = "hello-world__k3gbok3__env"
@@ -656,3 +666,287 @@ def test_stop_is_never_deferred_under_every_n(running_trial: Path) -> None:
     [record] = _records(running_trial)
     assert record.covered_tool_call_ids == ("toolu_1", "toolu_2", stop.tool_call_id)
     assert record.trigger == "stop"
+
+
+# Detector capture (ADR-0015 §2) -----------------------------------------------------------
+
+
+class ExtrasBackend(FakeBackend):
+    """FakeBackend whose files have content, with a process probe and readable images."""
+
+    START_IMAGE = "sha256:start"
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.content: dict[str, bytes] = {}
+        # image id -> path -> content; the start image holds what the task shipped.
+        self.images: dict[str, dict[str, bytes]] = {self.START_IMAGE: {}}
+        self.image_reads: list[tuple[str, list[str]]] = []
+        self.probe: str | None = "self\t90\np\t1\t0\tsleep infinity\np\t91\t90\ttr\n"
+        self.fail_probe = False
+        self.probe_seconds = 0.0
+        self.fail_image_reads = False
+        self.timeouts: list[float] = []
+
+    def put(self, path: str, data: bytes) -> None:
+        self.write(path)
+        self.content[path] = data
+
+    def ship(self, path: str, data: bytes) -> None:
+        """A file the task image already has."""
+        self.put(path, data)
+        self.images[self.START_IMAGE][path] = data
+
+    def remove(self, path: str) -> None:
+        super().remove(path)
+        self.content.pop(path, None)
+
+    def snapshot(self, container: str, *, tag: str, labels: Mapping[str, str]) -> Snapshot:
+        snapshot = super().snapshot(container, tag=tag, labels=labels)
+        self.images[snapshot.checkpoint_id] = dict(self.content)
+        return snapshot
+
+    def processes(self, container: str, *, timeout: float) -> str | None:
+        self.timeouts.append(timeout)
+        if self.fail_probe:
+            raise BackendError("probe failed")
+        time.sleep(self.probe_seconds)
+        return self.probe
+
+    def read_files(
+        self, container: str, paths: Sequence[str], *, timeout: float
+    ) -> dict[str, bytes] | None:
+        self.timeouts.append(timeout)
+        return {p: self.content[p] for p in paths if p in self.content}
+
+    def image_of(self, container: str, *, timeout: float) -> str | None:
+        self.timeouts.append(timeout)
+        return self.START_IMAGE
+
+    def read_image_files(
+        self, image: str, paths: Sequence[str], *, timeout: float
+    ) -> dict[str, bytes] | None:
+        self.timeouts.append(timeout)
+        if self.fail_image_reads:
+            raise BackendError("docker run timed out")
+        self.image_reads.append((image, list(paths)))
+        files = self.images[image]
+        return {p: files[p] for p in paths if p in files}
+
+
+def _changes(trial: Path) -> list[CallChanges]:
+    path = trial / TRAJLAB_DIRNAME / CHANGES_FILENAME
+    return [CallChanges.model_validate_json(line) for line in path.read_text().splitlines()]
+
+
+def _processes(trial: Path) -> list[ProcessSnapshot]:
+    path = trial / TRAJLAB_DIRNAME / PROCESSES_FILENAME
+    return [ProcessSnapshot.model_validate_json(line) for line in path.read_text().splitlines()]
+
+
+def test_extras_are_off_by_default(running_trial: Path) -> None:
+    backend = ExtrasBackend()
+    _watcher(running_trial, backend, gate="change").process(_request(running_trial))
+    assert not (running_trial / TRAJLAB_DIRNAME).exists()
+
+
+def test_extras_record_processes_and_diffs_host_side(running_trial: Path) -> None:
+    backend = ExtrasBackend()
+    backend.ship("/app/parse.py", b"for i in range(n + 1):\n    pass\n")
+    watcher = _watcher(running_trial, backend, gate="change", extras=True)
+    watcher.process(_request(running_trial, "toolu_baseline"))
+
+    backend.put("/app/parse.py", b"for i in range(n):\n    pass\n")
+    backend.put("/app/notes.txt", b"hello\n")
+    edit = watcher.process(_request(running_trial, "toolu_edit", tool="Edit"))
+
+    assert edit is not None and edit.outcome == "checkpoint"
+    baseline, changes = _changes(running_trial)
+    assert (baseline.tool_call_id, baseline.baseline, baseline.files) == (
+        "toolu_baseline",
+        True,
+        (),
+    )
+    assert (changes.tool_call_id, changes.call_seq) == ("toolu_edit", edit.call_seq)
+    by_path = {f.path: f for f in changes.files}
+    parse = by_path["/app/parse.py"]
+    assert parse.op == "modified" and parse.diff is not None
+    assert "-for i in range(n + 1):" in parse.diff and "+for i in range(n):" in parse.diff
+    assert by_path["/app/notes.txt"].op == "added"
+    # The before-version came from the trial's last checkpoint, taken at the baseline call.
+    assert backend.image_reads == [(f"sha256:{1:064x}", ["/app/parse.py"])]
+    [probe_a, probe_b] = _processes(running_trial)
+    assert [p.tool_call_id for p in (probe_a, probe_b)] == ["toolu_baseline", "toolu_edit"]
+    assert [e.cmd for e in probe_b.processes] == ["sleep infinity"]  # the probe itself is dropped
+    # Nothing of this lands where the agent can read it.
+    assert not list(checkpoints_dir(running_trial).glob("*changes*"))
+
+
+def test_extras_reuse_versions_they_have_seen(running_trial: Path) -> None:
+    backend = ExtrasBackend()
+    watcher = _watcher(running_trial, backend, gate="change", extras=True)
+    watcher.process(_request(running_trial, "toolu_baseline"))
+    backend.put("/app/a.txt", b"one\n")
+    watcher.process(_request(running_trial, "toolu_create"))
+    backend.put("/app/a.txt", b"two\n")
+    watcher.process(_request(running_trial, "toolu_edit"))
+    backend.put("/app/a.txt", b"one\n")
+    watcher.process(_request(running_trial, "toolu_revert"))
+
+    edit, revert = _changes(running_trial)[2:]
+    assert backend.image_reads == []  # every before-version was already held
+    [a_edit] = edit.files
+    [a_revert] = revert.files
+    assert (a_edit.before_sha256, a_edit.sha256) == (sha256(b"one\n"), sha256(b"two\n"))
+    # A revert is visible as a hash equal to one an earlier call produced.
+    assert a_revert.sha256 == a_edit.before_sha256
+
+
+def test_extras_without_a_listing_record_processes_only(running_trial: Path) -> None:
+    backend = ExtrasBackend()
+    watcher = _watcher(running_trial, backend, gate="none", extras=True)  # no listing: no diffs
+    watcher.process(_request(running_trial, "toolu_a"))
+    assert not (running_trial / TRAJLAB_DIRNAME / CHANGES_FILENAME).exists()
+    assert len(_processes(running_trial)) == 1
+
+
+def test_extras_after_a_restart_read_the_last_checkpoint(running_trial: Path) -> None:
+    backend = ExtrasBackend()
+    backend.ship("/app/a.txt", b"shipped\n")
+    first = _watcher(running_trial, backend, gate="change", extras=True)
+    first.process(_request(running_trial, "toolu_baseline"))
+    backend.put("/app/a.txt", b"edited\n")
+    first.process(_request(running_trial, "toolu_edit"))
+
+    restarted = _watcher(running_trial, backend, gate="change", extras=True)
+    restarted.process(_request(running_trial, "toolu_new_baseline"))  # a new baseline listing
+    backend.put("/app/a.txt", b"edited again\n")
+    restarted.process(_request(running_trial, "toolu_again"))
+
+    [again] = _changes(running_trial)[-1].files
+    assert again.before_sha256 == sha256(b"edited\n")
+    assert backend.image_reads[-1][0] == _records(running_trial)[-2].checkpoint_id
+
+
+def test_extras_never_block_the_ack(running_trial: Path) -> None:
+    backend = ExtrasBackend()
+    backend.fail_probe = True
+    watcher = _watcher(running_trial, backend, gate="change", extras=True)
+    req = _request(running_trial, "toolu_baseline")
+    call = watcher.process(req)
+    assert call is not None and req.with_suffix(".ack").exists()
+    assert not (running_trial / TRAJLAB_DIRNAME / PROCESSES_FILENAME).exists()
+
+
+def test_extras_before_any_checkpoint_use_the_start_image(running_trial: Path) -> None:
+    backend = ExtrasBackend()
+    backend.ship("/app/config.ini", b"x=1\n")
+    watcher = _watcher(running_trial, backend, gate="change", extras=True)
+    watcher.process(_request(running_trial, "toolu_baseline"))
+    _records(running_trial)  # the baseline checkpoint exists; drop it to model a lost one
+    watcher._trials[running_trial.resolve()].records.clear()
+    backend.put("/app/config.ini", b"x=2\n")
+    watcher.process(_request(running_trial, "toolu_edit"))
+
+    [config] = _changes(running_trial)[-1].files
+    assert backend.image_reads[-1] == (ExtrasBackend.START_IMAGE, ["/app/config.ini"])
+    assert config.before_sha256 == sha256(b"x=1\n")
+
+
+def test_extras_cap_the_files_recorded_for_one_call(running_trial: Path) -> None:
+    from trajlab.checkpoint.diffs import MAX_RECORDED_FILES
+
+    backend = ExtrasBackend()
+    watcher = _watcher(running_trial, backend, gate="change", extras=True)
+    watcher.process(_request(running_trial, "toolu_baseline"))
+    for i in range(MAX_RECORDED_FILES + 100):  # a package install
+        backend.put(f"/usr/lib/python3/site-packages/pkg/m{i}.py", b"x = 1\n")
+    backend.put("/app/solve.py", b"print(1)\n")
+    watcher.process(_request(running_trial, "toolu_install"))
+
+    install = _changes(running_trial)[-1]
+    assert install.files_total == MAX_RECORDED_FILES + 101
+    assert len(install.files) == MAX_RECORDED_FILES
+    assert install.files[0].path == "/app/solve.py"  # the agent's own file is never cut
+    assert install.files[0].diff is not None
+
+
+def test_extras_forget_a_version_they_did_not_read(running_trial: Path) -> None:
+    from trajlab.checkpoint.diffs import MAX_FILES_PER_CALL
+
+    backend = ExtrasBackend()
+    watcher = _watcher(running_trial, backend, gate="change", extras=True)
+    watcher.process(_request(running_trial, "toolu_baseline"))
+    backend.put("/app/main.py", b"v2\n")
+    watcher.process(_request(running_trial, "toolu_v2"))
+    backend.put("/app/main.py", b"v3\n")
+    for i in range(MAX_FILES_PER_CALL):  # read first, so main.py is changed but not read
+        backend.put(f"/app/a{i:02d}.py", b"x\n")
+    watcher.process(_request(running_trial, "toolu_v3"))
+    backend.put("/app/main.py", b"v4\n")
+    watcher.process(_request(running_trial, "toolu_v4"))
+
+    v3, v4 = _changes(running_trial)[2:]
+    assert {f.path: f.skipped for f in v3.files}["/app/main.py"] == "over_file_cap"
+    [main] = v4.files
+    # From v3's checkpoint, not the v2 the watcher read two calls earlier.
+    assert main.before_sha256 == sha256(b"v3\n")
+    assert main.diff is not None and "-v3" in main.diff
+    assert backend.image_reads[-1] == (_records(running_trial)[-2].checkpoint_id, ["/app/main.py"])
+
+
+@pytest.mark.parametrize("restart", [False, True])
+def test_extras_are_recorded_once_for_a_retried_call(running_trial: Path, restart: bool) -> None:
+    backend = ExtrasBackend()
+    watcher = _watcher(running_trial, backend, gate="change", extras=True)
+    watcher.process(_request(running_trial, "toolu_baseline"))
+    backend.put("/app/a.txt", b"one\n")
+    req = _request(running_trial, "toolu_edit")
+    backend.fail_snapshot = True
+    assert watcher.process(req) is None  # unanswered: the sweep retries it
+    backend.fail_snapshot = False
+    retry = watcher
+    if restart:
+        # The crash also cut a line short, mid-character; the new watcher reads past it.
+        with (running_trial / TRAJLAB_DIRNAME / CHANGES_FILENAME).open("ab") as stream:
+            stream.write(b'{"tool_call_id": "toolu_cut", "files": [{"path": "/app/\xc3')
+        retry = _watcher(running_trial, backend, gate="change", extras=True)
+    call = retry.process(req)
+
+    assert call is not None and call.outcome == "checkpoint"
+    lines = (running_trial / TRAJLAB_DIRNAME / CHANGES_FILENAME).read_bytes().splitlines()
+    good = [CallChanges.model_validate_json(line) for line in lines if b"toolu_cut" not in line]
+    edits = [c for c in good if c.tool_call_id == "toolu_edit"]
+    assert [[f.path for f in c.files] for c in edits] == [["/app/a.txt"]]
+    assert [p.tool_call_id for p in _processes(running_trial)].count("toolu_edit") == 1
+
+
+def test_extras_stop_reading_once_their_budget_is_spent(
+    running_trial: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("trajlab.checkpoint.watcher.EXTRAS_BUDGET_S", 0.05)
+    backend = ExtrasBackend()
+    watcher = _watcher(running_trial, backend, gate="change", extras=True)
+    watcher.process(_request(running_trial, "toolu_baseline"))
+    backend.put("/app/a.txt", b"one\n")
+    backend.probe_seconds = 0.1  # the probe spends the whole budget
+    backend.timeouts.clear()
+    call = watcher.process(_request(running_trial, "toolu_edit"))
+
+    assert call is not None and call.outcome == "checkpoint"  # the commit keeps its time
+    [a] = _changes(running_trial)[-1].files
+    assert (a.path, a.sha256, a.skipped) == ("/app/a.txt", None, "unreadable")
+    assert len(backend.timeouts) == 1 and 0 < backend.timeouts[0] <= 0.05  # the probe only
+
+
+def test_extras_keep_a_call_whose_before_versions_cannot_be_read(running_trial: Path) -> None:
+    backend = ExtrasBackend()
+    backend.ship("/app/a.txt", b"shipped\n")
+    watcher = _watcher(running_trial, backend, gate="change", extras=True)
+    watcher.process(_request(running_trial, "toolu_baseline"))
+    backend.put("/app/a.txt", b"edited\n")
+    backend.fail_image_reads = True
+    watcher.process(_request(running_trial, "toolu_edit"))
+
+    [a] = _changes(running_trial)[-1].files
+    assert (a.sha256, a.before_sha256, a.diff) == (sha256(b"edited\n"), None, None)

@@ -23,6 +23,9 @@ case "$id" in
     exit 0
     ;;
 esac
+# Keep the whole input (the call's input and output, ADR-0015) before the .req, so the watcher
+# finds it when it answers. Losing it must never cost the checkpoint.
+printf '%s\n' "$input" > "$d/$id.call.json.tmp" && mv "$d/$id.call.json.tmp" "$d/$id.call.json"
 tool=$(field tool_name)
 if [ -z "$tool" ]; then tool="$event"; fi
 session=$(field session_id)
