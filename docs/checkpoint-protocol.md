@@ -47,6 +47,10 @@ With `trajlab watch --extras` (ADR-0015), the watcher also writes, under `<trial
 | `processes.jsonl` | one `ProcessSnapshot` per answered call: running processes and listening TCP ports |
 | `changes.jsonl` | one `CallChanges` per answered call: per changed file, the op, size, sha256 before and after, and a unified diff for text, within the limits of `checkpoint/diffs.py` |
 
+Each call gets at most one line in each file, even when it is retried.
+All of a call's extras share a 30 s budget, so they never cost the call its checkpoint.
+`changes.jsonl` needs a filesystem listing, so it is written only under `--gate change` or `audit`.
+
 ## Sequence
 
 1. Claude Code finishes a tool call matched by the hook (`Bash|Write|Edit|MultiEdit|NotebookEdit`; `MultiEdit` is not a tool in current Claude Code and matches nothing).

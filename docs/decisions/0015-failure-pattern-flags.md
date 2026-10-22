@@ -1,6 +1,7 @@
 # ADR-0015: A live failure-pattern detector, and an experiment on state-verified feedback mid-run
 
-Status: proposed (2026-10-18). Numbered 0015 because 0013 (two branches) and 0014 (`sl/exp2-store`) are taken.
+Status: accepted (2026-10-22, with the fixes listed under §2's storage rules); proposed 2026-10-18.
+Numbered 0015 because 0013 (two branches) and 0014 (`sl/exp2-store`) are taken.
 Built on `main`, not on ADR-0014's unmerged branch. Needs no existing corpus: it captures its own.
 
 ## TL;DR
@@ -76,7 +77,7 @@ These change what a trial records; the first corpus under them gets a new `corpu
 - **Per-call diffs and hashes** (`checkpoint/diffs.py`), for each file and symlink the change gate reports (directories are not recorded):
   - **Now:** the watcher reads the new version from the running container with `tar`.
   - **Before:**
-    - from the versions it holds from earlier calls;
+    - from the versions it holds from earlier calls (a held version is dropped when a call changes the path without reading it);
     - otherwise from the last checkpoint's image, which under `--gate change` holds the state before the call;
     - before any checkpoint, from the trial's start image.
   - Image reads use `docker run --rm --network none`, so a restarted watcher still finds before-versions.
@@ -99,6 +100,13 @@ These change what a trial records; the first corpus under them gets a new `corpu
   - Process snapshots, diffs, hashes, and flags go in `<trial>/trajlab/` on the host, outside the bind-mounted `agent/` directory, so no arm's agent can read them. Each is keyed by `tool_call_id` and `call_seq`.
   - Only `.call.json` sits beside the existing hook files, where the agent can reach it. It holds nothing the agent has not already seen.
   - All of it is written before the call's `.ack`, while the agent waits. A failure is logged and never blocks the ack.
+  - Everything `--extras` does for one call shares a 30 s budget (`EXTRAS_BUDGET_S`), so the commit keeps the rest of the hook's 240 s wait; a read the budget does not cover is skipped, and its files are recorded without content.
+  - Each call gets at most one line in each file, also when the sweep retries it after a failed commit or a watcher restart.
+  - **Fixed 2026-10-22, in review (PR #32), after the `off` corpus was captured.**
+    Before the fix, a file that a call changed but did not read (a call reads at most 20) kept the version held from an earlier call, so its next diff and `before_sha256` were against that older version.
+    A call retried after a failed commit also got a second, empty line in `changes.jsonl` (`trajlab trace` reads the first).
+    Both are reproduced in tests, and end to end on a container.
+    In the `off` corpus, any call that changed more than 20 files may be followed by such a diff of a file it changed; after-hashes are unaffected.
 - **Contracts:**
   - The new models (`ProcessSnapshot`, `CallChanges`, `FileChange`; later `FlagRecord`) are in a new `contracts/patterns.py`.
   - `CallRecord` is unchanged, so this ADR does not edit `contracts/checkpoint.py`, which ADR-0014 also edits.

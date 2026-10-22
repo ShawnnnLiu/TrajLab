@@ -122,6 +122,20 @@ One trial is one task executed by one attempt.
 - **retry chain** - a failure's attempts under one Exp 2 arm, in order: attempt 0 (the corpus first attempt), then retries 1 to N, each naming the one before in `parent_trial_id`.
   Not to be confused with a checkpoint chain.
 
+## Detector capture and labels (ADR-0015)
+
+- **call input** - `<tool_use_id>.call.json` beside the `.req`: the hook's whole stdin (the call's input, its output, and its ids), written on every hooked call.
+- **extras** - what `trajlab watch --extras` adds per answered call, host-side under `<trial>/trajlab/`: a process snapshot and the call's changes.
+  The call's changes need a filesystem listing, so `--gate change` or `audit`.
+- **process snapshot** - one `ProcessSnapshot` in `processes.jsonl`: the container's processes and listening TCP ports when the watcher answered a call.
+  Not a snapshot in the backend's sense (see snapshot); it is never a checkpoint.
+- **call changes** - one `CallChanges` in `changes.jsonl`: for each file a call changed, the op, size, sha256 before and after, and a unified diff for text, within the limits of `checkpoint/diffs.py`.
+  Not: a delta, which the Exp 2 store computes between checkpoint views.
+- **pattern** - one of ADR-0015's seven failure patterns (`loop`, `no_effect_write`, `false_edit_claim`, `false_test_claim`, `unverified_completion`, `server_state`, `forbidden_action`); `stall` is labeled beside them but reported separately.
+- **flag** - the detector's claim that a pattern occurred at a `tool_call_id` (ADR-0015 §3, phase 2).
+- **label / labeler** - a person's judgment, in `trajlab trace`, of whether a pattern occurred at a call or in a trial, saved per labeler as `TrialLabels` under `corpus/labels/` (git-ignored).
+  Not: a Docker label.
+
 ## Everything else
 
 - **ADR** - Architecture Decision Record, in `docs/decisions/`.
