@@ -39,6 +39,7 @@ from trajlab.contracts import (
     CHANGES_FILENAME,
     CHECKPOINT_RECORDS_FILENAME,
     CHECKPOINTS_DIRNAME,
+    HOOKED_TOOLS,
     POLICY_FILENAME,
     PROCESSES_FILENAME,
     TIMEOUT_SUFFIX,
@@ -54,8 +55,6 @@ logger = logging.getLogger(__name__)
 
 # Harbor's name for the ATIF file (trajlab.atif.load, which capture/ does not import).
 TRAJECTORY_FILENAME = "trajectory.json"
-# The tools the checkpoint hook matches (configs/claude-code/settings.hooks.json).
-HOOKED_TOOLS = frozenset({"Bash", "Write", "Edit", "MultiEdit", "NotebookEdit"})
 # How much of each text the page gets: a tool output keeps its head and tail.
 OUTPUT_HEAD, OUTPUT_TAIL = 12_000, 6_000
 ARGUMENT_CHARS = 20_000
