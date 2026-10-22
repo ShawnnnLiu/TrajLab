@@ -24,6 +24,7 @@ from trajlab.capture.corpus import (
 )
 from trajlab.capture.discover import compose_project_name, iter_trial_dirs, load_trial_config
 from trajlab.capture.harbor_runner import RunRefusedError, execute, plan_run, repo_relative
+from trajlab.capture.labels import DEFAULT_LABELS_DIR, LabelStore
 from trajlab.capture.pins import CLAUDE_CODE_MAX_OUTPUT_TOKENS
 from trajlab.capture.repair_launcher import (
     INPUTS_DIRNAME,
@@ -32,6 +33,7 @@ from trajlab.capture.repair_launcher import (
     check_sources,
     resume_env,
 )
+from trajlab.capture.trace_server import LOCAL_HOSTS, TraceSite, serve
 from trajlab.checkpoint.backends.docker_commit import DockerCommitBackend
 from trajlab.checkpoint.watcher import (
     DEFAULT_SWEEP_INTERVAL_S,
@@ -293,6 +295,15 @@ def watch(
     sweep_interval: Annotated[
         float, typer.Option(help="Seconds between rescans for missed requests.")
     ] = DEFAULT_SWEEP_INTERVAL_S,
+    extras: Annotated[
+        bool,
+        typer.Option(
+            "--extras/--no-extras",
+            help="Also record each call's processes and listening ports, and under --gate change "
+            "or audit its file diffs, in <trial>/trajlab/ (ADR-0015). Changes what a trial "
+            "records: use a new corpus_id.",
+        ),
+    ] = False,
 ) -> None:
     """Watch running trials and checkpoint their state-mutating calls. Stop with Ctrl-C."""
     if gate is not Gate.none and every != 1:
@@ -303,6 +314,12 @@ def watch(
             f"trajlab watch: unknown backend {backend!r}; one of {sorted(BACKENDS)}", err=True
         )
         raise typer.Exit(code=1)
+    if extras and gate is Gate.none:
+        typer.echo(
+            "trajlab watch: --extras under --gate none records processes only; "
+            "file diffs need --gate change or audit",
+            err=True,
+        )
     stop = threading.Event()
     for signum in (signal.SIGINT, signal.SIGTERM):
         signal.signal(signum, lambda *_: stop.set())
@@ -315,6 +332,7 @@ def watch(
                 every=every,
                 gate=gate.value,
                 sweep_interval=sweep_interval,
+                extras=extras,
             ).run(stop)
     except WatcherLockedError as error:
         typer.echo(f"trajlab watch: {error}", err=True)
@@ -425,3 +443,36 @@ def validate(trial_dir: Path) -> None:
             typer.echo(f"valid: {path}")
     if invalid:
         raise typer.Exit(code=1)
+
+
+@app.command()
+def trace(
+    root: Annotated[
+        Path, typer.Argument(help="A jobs dir (each job dir is an experiment), or one job dir.")
+    ] = Path("corpus/jobs"),
+    labels_dir: Annotated[
+        Path, typer.Option("--labels", help="Where label files are saved (ignored by git).")
+    ] = DEFAULT_LABELS_DIR,
+    host: Annotated[
+        str, typer.Option(help="Address to listen on. Keep 127.0.0.1 and reach it with ssh -L.")
+    ] = "127.0.0.1",
+    port: Annotated[int, typer.Option(min=1, max=65535)] = 8765,
+    guide: Annotated[
+        Path, typer.Option(help="The labeling guide (Markdown) the site shows beside labels.")
+    ] = Path("docs/labeling-guide.md"),
+) -> None:
+    """Serve a site to read each trial call by call beside its diffs, and to label it (ADR-0015)."""
+    if not root.is_dir():
+        typer.echo(f"trajlab trace: {root}: not a directory", err=True)
+        raise typer.Exit(code=1)
+    extra_hosts = frozenset() if host in LOCAL_HOSTS | {"0.0.0.0", "::"} else frozenset({host})
+    site = TraceSite(root, LabelStore(labels_dir), extra_hosts=extra_hosts, guide=guide)
+    typer.echo(f"trajlab trace: http://{host}:{port}/ (jobs: {root}, labels: {labels_dir})")
+    typer.echo("Ctrl+C stops it.")
+    try:
+        serve(site, host, port)
+    except OSError as error:
+        typer.echo(f"trajlab trace: cannot listen on {host}:{port}: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    except KeyboardInterrupt:
+        pass

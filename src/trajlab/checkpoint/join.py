@@ -109,7 +109,8 @@ def read_records(directory: Path) -> list[CheckpointRecord]:
     ]
 
 
-def _append_line(path: Path, line: str) -> None:
+def append_line(path: Path, line: str) -> None:
+    """Append one line to a JSONL file and flush it to disk."""
     with path.open("a") as stream:
         stream.write(line + "\n")
         stream.flush()
@@ -117,7 +118,7 @@ def _append_line(path: Path, line: str) -> None:
 
 
 def append_record(directory: Path, record: CheckpointRecord) -> None:
-    _append_line(directory / RECORDS_FILENAME, record.model_dump_json())
+    append_line(directory / RECORDS_FILENAME, record.model_dump_json())
 
 
 def read_calls(directory: Path) -> list[CallRecord]:
@@ -132,7 +133,7 @@ def read_calls(directory: Path) -> list[CallRecord]:
 
 
 def append_call(directory: Path, call: CallRecord) -> None:
-    _append_line(directory / CALLS_FILENAME, call.model_dump_json())
+    append_line(directory / CALLS_FILENAME, call.model_dump_json())
 
 
 def _write_atomic(path: Path, text: str) -> None:
