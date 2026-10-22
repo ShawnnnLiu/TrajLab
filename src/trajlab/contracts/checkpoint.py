@@ -20,6 +20,10 @@ TIMEOUT_SUFFIX = ".timeout"
 # How many of a call's own changed paths a CallRecord lists; the total is always recorded.
 MAX_LISTED_PATHS = 100
 
+# The state-mutating tools the hook matches (ADR-0001; `HOOK_MATCHER` in checkpoint/hook, which
+# a test keeps equal to this). `MultiEdit` no longer exists in Claude Code and matches nothing.
+HOOKED_TOOLS: frozenset[str] = frozenset({"Bash", "Write", "Edit", "MultiEdit", "NotebookEdit"})
+
 Gate = Literal["none", "change", "audit"]
 # What asked for the checkpoint: a hooked tool call, or the end of the agent's turn (ADR-0011).
 Trigger = Literal["tool_call", "stop"]

@@ -4,18 +4,24 @@ Read this file, then `@docs/harbor-facts.md`, before writing or moving anything.
 
 ## What this repo is
 
-Capture harness for COMS 6113 project #16 (Columbia, Fall 2026). We run Claude Code on Terminal-Bench tasks through Harbor, and record three things per trial: the ATIF trajectory Harbor already writes, an environment checkpoint at every tool call (which Harbor does not do), and a join between the two keyed by tool call id. A later phase adds analysis (store, question benchmark, evaluation). This phase is capture only.
+Capture harness for COMS 6113 project #16 (Columbia, Fall 2026). We run Claude Code on Terminal-Bench tasks through Harbor, and record three things per trial: the ATIF trajectory Harbor already writes, an environment checkpoint at every tool call (which Harbor does not do), and a join between the two keyed by tool call id.
+Capture is done (build-order steps 1-7 below).
+Experiment 2 (`docs/experiments/exp2/`, ADR-0014) adds the analysis side: a store of each trial's steps joined to its filesystem deltas, a query tool over it, and a repair retry loop that compares the two.
 
 Owner: Shawn Liu. Team of four. Course milestones: Sep 25 first baseline result (stock Harbor, no checkpoints), Oct 9 baseline demo, Dec 4 final paper.
 
 ## Non-negotiable constraints
 
 1. **Harbor is a pinned dependency, never vendored, never patched in site-packages.** Every custom piece attaches from outside: custom environment via `--env module:Class`, custom agent by import path (subclass `harbor.agents.installed.claude_code.ClaudeCode`), Claude Code hooks via `--ak config=<settings.json>`, and post-processing of the trial directory. If you think Harbor needs a change, write it as a note in `docs/upstream-notes.md` and work around it.
-2. **`src/trajlab/contracts/` holds pydantic models and nothing else.** No I/O, no imports from other trajlab modules. It is the only module the future analysis code will import from capture.
+2. **`src/trajlab/contracts/` holds pydantic models and nothing else.** No I/O, no imports from other trajlab modules.
+   With `atif/`, it is the only capture code that analysis code (`store/`) imports.
 3. **`capture/`, `checkpoint/`, `atif/` import each other only through `contracts/`.** Each exposes one entry point in `cli.py`.
 4. **No trial data in git.** `corpus/jobs/`, `.env`, session JSONLs, notebook outputs are ignored. `corpus/manifests/` is committed.
 5. **Anything that changes what a trial records needs an ADR** in `docs/decisions/` and a new `corpus_id` on the next run. Do not silently change the hook, watcher, backend, or postprocess output.
-6. **Do not design analysis modules.** No `store/`, `analysis/`, `bench/` directories yet. If capture needs a shape that analysis will use, put the model in `contracts/` and stop.
+6. **Do not design analysis modules beyond `src/trajlab/store/`** (ADR-0014: the Exp 2 store).
+   No `analysis/`, `bench/` directories yet.
+   `store/` imports only `contracts/`, `atif/`, Harbor, and DuckDB, never `capture/` or `checkpoint/`.
+   If capture needs a shape that analysis will use, put the model in `contracts/` and stop.
 7. **Reuse Harbor's models.** ATIF is `harbor.models.trajectories`; trial results are `harbor.models.trial.result.TrialResult`; paths are `harbor.models.trial.paths.TrialPaths`. Do not redefine them.
 
 ## Layout
@@ -29,10 +35,12 @@ src/trajlab/contracts/     CheckpointRecord, TrialRecord, ATIF step extras
 src/trajlab/capture/       harbor_runner, corpus manifest, trial/container discovery, preinstall (custom environment, ADR-0008)
 src/trajlab/checkpoint/    hook/ (PostToolUse hook script; delivery per ADR-0003), watcher, changes (ADR-0010), backends/, join
 src/trajlab/atif/          load, compaction recovery, postprocess, validate
+src/trajlab/store/         Exp 2 store (ADR-0014): schema, steps, reconcile (deltas from checkpoint top layers), docker_images, build
 scripts/                   dated one-offs (2026-09-25_baseline.py); never imported by src/
 tests/fixtures/hello-world-trial/   one small real trial dir; every test runs against it
 corpus/manifests/          committed; corpus/jobs/ ignored
 docs/decisions/            ADRs
+docs/experiments/exp2/     Exp 2 motivation, design spec, technical spec (the build order for the store, query tool, retry loop)
 ```
 
 ## Conventions
@@ -57,6 +65,9 @@ docs/decisions/            ADRs
 
 Capture ends at step 7. The formerly planned step 8 (`statefork` backend) was dropped by ADR-0004: `docker_commit` is the only backend.
 
+Exp 2 comes after capture: the store, query tool, and retry loop are built in the order of `docs/experiments/exp2/exp2_technical_spec_trajlab_2026-10-18.md` §7, one step per PR, each with its acceptance check (ADR-0014 for the store).
+Store tests run offline on synthetic layers; anything that needs Docker or the corpus is a dated script run by hand, with its command and output recorded in `docs/experiments/exp2/` or the ADR.
+
 Stop after each step and run `make test`. Do not start step N+1 with step N red.
 
 ## What not to do
@@ -64,7 +75,7 @@ Stop after each step and run `make test`. Do not start step N+1 with step N red.
 - Do not run `harbor run` inside tests or on import. It costs money and needs Docker.
 - Do not put API keys anywhere but `.env`; `harbor_runner.py` reads them from the environment and never logs them.
 - Do not write a `WaypointEnvironment` or any CRIU-based backend. Decided against in ADR-0004; checkpoints are filesystem-only via `docker_commit`.
-- Do not add a database, a query layer, or an LLM judge. That is analysis.
+- Do not add a database or a query layer outside `store/` (ADR-0014), and do not add an LLM judge.
 - Do not "clean up" Harbor's trial directory. Add files next to Harbor's; never rename or rewrite `trajectory.json`, `result.json`, or `lock.json`.
 
 ## When unsure

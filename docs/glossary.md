@@ -12,6 +12,7 @@ One trial is one task executed by one attempt.
 
 - **task** - one Terminal-Bench task (e.g. `hello-world/hello-world`): the unit Harbor executes and verifies.
 - **attempt** - one of the `n_attempts` repetitions of a task within a job.
+  In Exp 2, `attempt_idx` is instead a position in a retry chain (see "Exp 2 store" below): 0 is the corpus first attempt.
   Say "attempt" when you mean the repetition index, "trial" when you mean the execution itself.
 - **trial** - one execution of one task by one attempt.
   Harbor writes one trial dir per trial.
@@ -99,12 +100,34 @@ One trial is one task executed by one attempt.
   Steps of read-only tools join to the most recent earlier checkpoint (ADR-0001), which in the enriched file is the last checkpoint step before them; each hooked call's `CallRecord` sits on its step as `extra.trajlab.calls` (ADR-0003, 2026-10-01 amendment).
 - **compaction record** - the `CompactionRecord` postprocess builds from one native `compact_boundary` event; it is the `observation.results[0].extra` of a compaction step.
 
+## Exp 2 store
+
+- **store** - the Exp 2 store (ADR-0014): a directory holding `record.duckdb`, `heldout.duckdb`, and `blobs/`.
+  Not: "database" for the `record-files` export, which is files.
+- **record of prior attempts** - what a record arm gives the repair agent: the store's agent-visible tables (`trials`, `steps`, `deltas`, and `store_meta`), through the query tool (`record-engine`) or as exported files (`record-files`).
+  Always qualify it ("record of prior attempts", "record arm"); unqualified, "record" names a capture record (checkpoint record, call record, stop record, compaction record).
+- **held-out tables** - `checks`, `faults`, `blame`, and `chains` in `heldout.duckdb`; never opened by an agent connection or exported to an agent.
+- **step row** - one row of `steps`: a tool call, an ATIF step without tool calls, a compaction step, or a stop record (ADR-0014, item 4).
+  Not the same as an ATIF step: a step with k tool calls gives k step rows.
+- **start image** - the image a trial's container started from: its derived image, or for a trial resumed from a checkpoint, that checkpoint image.
+  Every checkpoint image of the trial is its start image plus at most one layer.
+  A trial run without pre-install starts from its task image, but `trajlab.store.build.start_image` names only the first two (ADR-0014, known limits).
+  Not: "base image" (see derived image).
+- **top layer** - the layer a `docker commit` added over the start image: the container's whole writable layer when it was committed, so it holds every change since the container started; empty when the commit added no layer (a container with no changes).
+- **view** - the filesystem at a checkpoint: the start image with that checkpoint's top layer applied by the OCI rules (whiteouts, opaque directories, non-directory members replacing subtrees).
+- **delta** - the delta rows of one checkpoint: the paths whose kind, mode, owner, or content differ between the previous checkpoint's view (the start image, for the first) and this one's; keyed to the step row that owns the checkpoint.
+  Not: the detector's `changed_paths` in a call record, which compare change times and are capped.
+- **checkpoint chain** - a trial's checkpoints in `seq` order; complete when every hooked call that ran has a call record and every checkpoint image was read (ADR-0014, item 8).
+- **retry** - one more attempt at a failed task in Exp 2, started after the harness verifier scored the previous attempt; tests the agent runs inside an attempt are not retries.
+- **retry chain** - a failure's attempts under one Exp 2 arm, in order: attempt 0 (the corpus first attempt), then retries 1 to N, each naming the one before in `parent_trial_id`.
+  Not to be confused with a checkpoint chain.
+
 ## Everything else
 
 - **ADR** - Architecture Decision Record, in `docs/decisions/`.
   Accepted ADRs are historical: amend, do not rewrite.
 - **capture** - this project's current phase (versus the later analysis phase); also the act of taking a checkpoint (`capture_ms`, "capture order").
-- **contracts** - `src/trajlab/contracts/`: the shared pydantic models, and the only capture module analysis code will import.
+- **contracts** - `src/trajlab/contracts/`: the shared pydantic models; with `atif/`, the only capture modules analysis code (`store/`) imports (ADR-0014).
 - **fixture** - `tests/fixtures/hello-world-trial/`: one real, trimmed trial dir; every offline test runs against it.
 - **bind mount** - Harbor mounts the trial's `agent/` dir at `/logs/agent` in the container, so container writes appear on the host immediately; this is the hook-to-watcher channel.
 - **manifest** - unqualified, the corpus manifest.
