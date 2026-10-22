@@ -131,3 +131,19 @@ def test_the_snapshot_reader_says_why_docker_failed() -> None:
         None,
         "something else broke",
     )
+
+
+def test_the_snapshot_reader_tries_again_after_docker_failed() -> None:
+    docker = FakeDocker(125, b"", b"docker: Cannot connect to the Docker daemon at unix:///x\n")
+    reader = SnapshotReader(runner=docker)
+    assert reader.read("sha256:abc", "/x")[0] is None
+    docker.result = subprocess.CompletedProcess([], 0, b"back", b"")  # Docker started again
+    assert reader.read("sha256:abc", "/x") == (b"back", "")
+
+
+def test_the_snapshot_reader_refuses_a_file_it_would_have_to_cut() -> None:
+    from trajlab.capture.replay import MAX_FILE_BYTES
+
+    big = b"x" * (MAX_FILE_BYTES + 1)
+    data, problem = SnapshotReader(runner=FakeDocker(stdout=big)).read("sha256:abc", "/big")
+    assert data is None and problem.startswith("the file is 2.0 MiB, over the 2 MiB")

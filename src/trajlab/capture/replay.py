@@ -192,8 +192,8 @@ def docker_problem(stderr: bytes) -> str:
 
 
 class SnapshotReader:
-    """Reads one file from a checkpoint image, with a small cache (images never change) and
-    at most two reads at once."""
+    """Reads one file from a checkpoint image, with a small cache of successful reads (images
+    never change, but Docker may be stopped for a while) and at most two reads at once."""
 
     def __init__(self, runner: Runner = subprocess.run, cache_size: int = 128) -> None:
         self._run = runner
@@ -203,7 +203,7 @@ class SnapshotReader:
         self._slots = threading.Semaphore(2)
 
     def read(self, image: str, path: str) -> tuple[bytes | None, str]:
-        """The file's bytes (cut to MAX_FILE_BYTES), or None and why not."""
+        """The file's bytes, or None and why not (as for one over MAX_FILE_BYTES)."""
         key = (image, path)
         with self._lock:
             if key in self._cache:
@@ -219,9 +219,17 @@ class SnapshotReader:
             except (OSError, subprocess.TimeoutExpired) as error:
                 return None, f"could not run docker: {error}"
         if done.returncode != 0:
-            result: tuple[bytes | None, str] = (None, docker_problem(done.stderr))
+            return None, docker_problem(done.stderr)
+        if len(done.stdout) > MAX_FILE_BYTES:
+            # A cut copy would show the wrong size and hash, and may end mid-character.
+            mib = len(done.stdout) / (1024 * 1024)
+            result: tuple[bytes | None, str] = (
+                None,
+                f"the file is {mib:.1f} MiB, over the {MAX_FILE_BYTES // (1024 * 1024)} MiB "
+                "this page shows.",
+            )
         else:
-            result = (done.stdout[:MAX_FILE_BYTES], "")
+            result = (done.stdout, "")
         with self._lock:
             self._cache[key] = result
             while len(self._cache) > self._cache_size:
