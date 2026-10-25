@@ -73,3 +73,17 @@ This gap existed since build-order step 6.
 The hook is now registered for both events (Claude Code 2.1.278 sends `tool_use_id` and `tool_name` on both), the `.req` records which event fired, and `CallRecord.tool_failed` marks failed calls.
 Verified on a real trial whose first call was `echo probe > /app/probe.txt && exit 3`: the call was answered and marked failed, and all three of the trial's calls had records.
 `tb21-audit-v1` and `tb21-change-gate-v1` predate this fix; corpora must be captured after it.
+
+## Amendment (2026-10-25): a retried call keeps its own changes
+
+The 2026-10-22 review of PR #32 found that a call whose snapshot fails records no changes of its own once the sweep retries it.
+A failed `docker commit` leaves the request pending, and the sweep answers it on a later pass, but the first try had already moved the listing that a call's own changes are measured against to the listing taken after the call.
+The retry was then measured against itself: its `CallRecord` said `changed_paths` empty and `changed_paths_total` 0.
+The checkpoint and the change verdict were right, because both are judged against the last kept checkpoint, which only a kept snapshot moves; under `--extras` the call's `changes.jsonl` record was right too, because extras are recorded once, on the first try (ADR-0015 §2).
+The watcher now keeps, for each unanswered call, the listing it was first measured against, and measures every retry of that call against it; the entry is dropped when the call is answered or its late snapshot is discarded.
+Reproduced and verified on the development Mac by `scripts/2026-10-25_retried_commit_check.py`: the real watcher and hook on the pre-installed production-planning image, with a `docker` shim that fails the second commit once.
+Before the fix the retried call's ack listed no paths, total 0; after it, `+/app/retried.txt`, total 1, and the next call listed only its own file.
+`scripts/2026-09-30_change_gate_check.py` still judges all 11 of its calls as designed, and `test_a_call_retried_after_a_failed_snapshot_keeps_its_changes` covers the fix offline.
+A retried call in an earlier corpus shows in its trial's `agent/checkpoints/watcher.log` as `no checkpoint for <id>.req` followed by a checkpoint line for the same id.
+Of the 77 trial dirs on the development Mac, only the development run `hello-world-checkpoint-v1.stale-2026-09-30` has one; corpora kept elsewhere, such as `tb40-detector-off-v1`, were not checked.
+Runs after this amendment use a new corpus_id; the first is `tb40-sonnet-v3` (`configs/harbor/tb40-sonnet-v3.json`), the first attempts of Exp 2.

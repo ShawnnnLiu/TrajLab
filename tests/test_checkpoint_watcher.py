@@ -610,6 +610,30 @@ def test_failed_calls_are_measured_and_marked(running_trial: Path) -> None:
     assert (ok.tool_failed, ok.outcome) == (False, "unchanged")
 
 
+def test_a_call_retried_after_a_failed_snapshot_keeps_its_changes(running_trial: Path) -> None:
+    # Regression, found 2026-10-22: the failed try moved the listing the call is measured
+    # against, so the retry recorded no changes (scripts/2026-10-25_retried_commit_check.py).
+    backend = FakeBackend()
+    watcher = _watcher(running_trial, backend, gate="change")
+    watcher.process(_request(running_trial, "toolu_baseline"))
+    backend.write("/app/a.txt")
+    req = _request(running_trial, "toolu_write")
+    backend.fail_snapshot = True
+    assert watcher.process(req) is None  # unanswered: the sweep retries it
+    backend.fail_snapshot = False
+    retried = watcher.process(req)
+    backend.write("/app/b.txt")
+    after = watcher.process(_request(running_trial, "toolu_after"))
+
+    assert retried is not None and after is not None
+    assert (retried.outcome, retried.changed_paths, retried.changed_paths_total) == (
+        "checkpoint",
+        ("+/app/a.txt",),
+        1,
+    )
+    assert (after.changed_paths, after.changed_paths_total) == (("+/app/b.txt",), 1)
+
+
 # The end of the turn (ADR-0011) ------------------------------------------------------------
 
 

@@ -176,6 +176,9 @@ class _Trial:
     # Filesystem listings (ADR-0010), in memory only: a restarted watcher starts a new baseline.
     reference: Listing | None = None  # at the last checkpoint
     previous: Listing | None = None  # after the last measured call
+    # The listing each unanswered call was first measured against: a call the sweep retries
+    # after a failed snapshot is measured again, and its changes are still against this.
+    bases: dict[str, Listing | None] = field(default_factory=dict)
     # Detector capture (ADR-0015), in memory only: a restarted watcher reads older versions
     # from the last checkpoint's image instead.
     contents: dict[str, bytes | None] = field(default_factory=dict)  # last version seen per path
@@ -283,7 +286,7 @@ class Watcher:
             trial.container = self.backend.container_for(trial.identity.compose_project)
         stop = request.event in STOP_EVENTS
         trigger = "stop" if stop else "tool_call"
-        measured = self._measure(trial) if self.policy.gate != "none" else None
+        measured = self._measure(trial, request.tool_use_id) if self.policy.gate != "none" else None
         change = measured.change if measured else "not_checked"
         if self.extras:
             # Before the snapshot and the ack: the agent is still waiting, the last checkpoint
@@ -311,6 +314,7 @@ class Watcher:
             )
             append_call(directory, call)
             trial.calls[call.tool_call_id] = call
+            trial.bases.pop(call.tool_call_id, None)
             write_ack(directory, call)
             return call
 
@@ -337,6 +341,7 @@ class Watcher:
             return call
         record = self._snapshot(req_path, trial, request, requested_at, uncovered, trigger)
         if record is None:
+            trial.bases.pop(request.tool_use_id, None)  # timed out: never measured again
             return None
         if measured and measured.current is not None:
             trial.reference = measured.current
@@ -354,8 +359,12 @@ class Watcher:
         )
         return call
 
-    def _measure(self, trial: _Trial) -> "_Measurement":
-        """List the filesystem and judge it against the last checkpoint (ADR-0010)."""
+    def _measure(self, trial: _Trial, tool_call_id: str) -> "_Measurement":
+        """List the filesystem and judge it against the last checkpoint (ADR-0010).
+
+        The call's own changes are against the listing before it was first measured, so a call
+        retried after a failed snapshot keeps them.
+        """
         assert trial.container is not None
         start = time.monotonic()
         raw = self.backend.listing(trial.container)
@@ -363,7 +372,8 @@ class Watcher:
             return _Measurement(change="unknown", own=None, current=None, detect_ms=None)
         current = parse_listing(raw)
         detect_ms = round((time.monotonic() - start) * 1000)
-        own = tuple(changed_paths(trial.previous, current)) if trial.previous is not None else None
+        base = trial.bases.setdefault(tool_call_id, trial.previous)
+        own = tuple(changed_paths(base, current)) if base is not None else None
         trial.previous = current
         if trial.reference is None:
             change = "baseline"
