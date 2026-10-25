@@ -352,3 +352,9 @@ Round 2 (decision 3 of the 2026-10-03 amendment) is withdrawn by the owner: its 
 
 - Its code (`--note protocol`, `--same-failures-as`), its amendments, its running-repair prune script, and its corpus manifests are not merged; they remain on the unmerged branch `sl/repair-v3-round2`.
 - Its job dirs and checkpoint images stay in `/srv/trajlab/jobs`. No result of it is reported.
+
+## Amendment (2026-10-08): repair checkpoint images deleted
+
+On 2026-10-08 every remaining checkpoint image of the repair jobs was deleted from the capture server to free disk: the round 1 finals of `tb40-repair-v2-*` (`fresh`, `state`, `state-traj`, `traj`, `traj-text`) and the withdrawn round 2 (`tb40-repair-v3-*`), 593 images in all.
+Every `CheckpointRecord` stays; each affected trial's `agent/checkpoints/pruned.json` lists its removed images, with `kept_seq: null` and the reason, in the same shape the launcher's prune writes.
+The 917 first-attempt images of `tb40-sonnet-v2` are untouched: they are the corpus, and ground truth (ADR-0013) reads them for `try-fix` in environment mode and for blame.
