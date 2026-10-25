@@ -1,0 +1,106 @@
+{
+  "corpus_id": "exp2-example-v1",
+  "created_at": "2026-10-20T03:58:07.975817Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "528da126ec9fce69e4503cc37a10fd8204d3c357",
+  "repo_dirty": true,
+  "config_path": "configs/harbor/exp2-example-v1.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 5,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 0.5,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "tasks": [
+    {
+      "name": "terminal-bench/sound-change-cascade",
+      "digest": "sha256:6214ceb80aaa657d72658a6f39a44fa11ea51f443822b6a1212eef1ba65bf91d"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "exp2-example-v1",
+      "job_id": "2f9cd079-55f0-4d09-88c9-1777270ad08a",
+      "job_config": {
+        "job_name": "exp2-example-v1",
+        "jobs_dir": "corpus/jobs",
+        "n_attempts": 5,
+        "agent_timeout_multiplier": 0.5,
+        "n_concurrent_trials": 2,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "sha256:39d9f44b40420cde8fdcc087579c0d72a7e14fa3656d603c3f0d22fb35e27732",
+            "task_names": [
+              "terminal-bench/sound-change-cascade"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "a7c10a66-b9f5-4843-87f2-ced440ab4d9c",
+          "trial_name": "sound-change-cascade__Aig6tmp",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "2f9cd079-55f0-4d09-88c9-1777270ad08a",
+          "job_dir": "exp2-example-v1",
+          "claude_session_id": "581d0da3-24e0-40c3-bcf0-336ef37cf802"
+        },
+        {
+          "trial_id": "c939d657-70d7-4bc1-a36d-358e12867a0f",
+          "trial_name": "sound-change-cascade__GeLgD46",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "2f9cd079-55f0-4d09-88c9-1777270ad08a",
+          "job_dir": "exp2-example-v1",
+          "claude_session_id": "304c1caa-9c6e-4981-b55c-26f7243f5b4a"
+        },
+        {
+          "trial_id": "2993f6f3-932a-41a9-bfe0-1bd9241e25b6",
+          "trial_name": "sound-change-cascade__Uf9Ej5y",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "2f9cd079-55f0-4d09-88c9-1777270ad08a",
+          "job_dir": "exp2-example-v1",
+          "claude_session_id": "cce7d71e-76a9-4ef2-813d-5acbbdfe7b60"
+        },
+        {
+          "trial_id": "ba946cae-45fb-4572-aa96-bc29c15ffa62",
+          "trial_name": "sound-change-cascade__fdjFyt3",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "2f9cd079-55f0-4d09-88c9-1777270ad08a",
+          "job_dir": "exp2-example-v1",
+          "claude_session_id": "247570f2-ca58-489a-8e09-6d756aa7386a"
+        },
+        {
+          "trial_id": "804623fa-797a-4be1-ada1-b6c89d1f0f3d",
+          "trial_name": "sound-change-cascade__pyWAozu",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "2f9cd079-55f0-4d09-88c9-1777270ad08a",
+          "job_dir": "exp2-example-v1",
+          "claude_session_id": "28357668-9270-4bbc-a27f-3b135856e020"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}

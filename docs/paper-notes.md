@@ -101,6 +101,7 @@ Last updated 2026-10-02 (overnight repair pilot); add to it as evidence changes,
 - Capture policy per corpus: `checkpoint_gate`, `checkpoint_every` in the corpus manifest; derived-image recipe version 2 (`trajlab.capture.preinstall.RECIPE_VERSION`).
 - Backend: `docker commit`, filesystem only (ADR-0004); Docker Desktop with the containerd image store on the development Mac.
 - Every number in the paper should cite a `corpus_id`; manifests in `corpus/manifests/` record the repo commit that produced them.
+- Exp 2 example runs on the development Mac (`docs/experiments/exp2/2026-10-19_example-runs.md`, corpora `exp2-example-v1` and `-v2`): 10 TB 4.0 trials under amd64 emulation, every hook request acked, every chain complete with its final stop state; the store built from the checkpoint images in 9.5 to 15 s per trial on a 2 GB start image, 9.6 MB per five trials.
 
 ## Threats to validity
 

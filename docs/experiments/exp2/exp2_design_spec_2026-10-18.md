@@ -21,7 +21,7 @@ Given a failed Terminal-Bench attempt, does giving the repair agent the record o
 Rules:
 - Arms 2 and 3 carry identical information. Arm 2's files are exported from arm 3's database in the same build step, so the only difference is the access form.
 - Arm 2 may install DuckDB or write its own scripts. That is ad hoc cost and is recorded, not forbidden.
-- Fresh environment every retry, all arms **[decide; recommended]**. Exp 1 showed being in the failed environment hurt (23.8% vs 27.0% resuming the session; 7.9% for a fresh agent in the failed filesystem), and the premise is the record, not the environment. Alternative: resume in the failed environment for all arms; then control is the 7.9% condition.
+- Fresh environment every retry, all arms **[fixed 2026-10-19: fresh environment in every arm; the arms differ only in whether the record of every prior attempt is given, and in what form]**. Exp 1 showed being in the failed environment hurt (23.8% vs 27.0% resuming the session; 7.9% for a fresh agent in the failed filesystem), and the premise is the record, not the environment. Alternative: resume in the failed environment for all arms; then control is the 7.9% condition.
 - Same model, effort, timeout, and repair protocol prompt (v2 §1, diagnose-then-fix) in every arm, with the "same environment" paragraph rewritten for a fresh environment. Stop hook from v2 §2 applies in every arm.
 
 ## 3. What the agent is told **[fixed: binary]**
