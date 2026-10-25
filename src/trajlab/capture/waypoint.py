@@ -1,4 +1,4 @@
-"""Run a trial inside a Waypoint session instead of a Docker container (ADR-0016).
+"""Run a trial inside a Waypoint session instead of a Docker container (ADR-0017).
 
 Waypoint saves a running Linux environment: its files and every program running in it. A first
 attempt runs here so that, when its agent stops and before the tests run, its environment can

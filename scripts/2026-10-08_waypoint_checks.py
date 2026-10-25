@@ -1,4 +1,4 @@
-"""Checks ADR-0016 requires on the capture server before a Waypoint corpus run.
+"""Checks ADR-0017 requires on the capture server before a Waypoint corpus run.
 
 Manual: needs root (passwordless sudo), Waypoint >= 0.7.0, CRIU >= 4.0, and Docker. Never run by
 the tests, never imported by `src/`.

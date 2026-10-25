@@ -1,4 +1,4 @@
-# Running the Waypoint repair experiment (ADR-0016)
+# Running the Waypoint repair experiment (ADR-0017)
 
 Every command runs from the repo root on the capture server. `trajlab` is `uv run trajlab`.
 
@@ -19,7 +19,7 @@ If Waypoint is missing, install it from `vendor/waypoint` (its `README.md`, "Scr
 
 Credentials go in `.env`, as for every run (`ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN`, plus `CLAUDE_CODE_MAX_OUTPUT_TOKENS`, ADR-0005).
 
-## 1. Checks (ADR-0016, "Checks before the real run")
+## 1. Checks (ADR-0017, "Checks before the real run")
 
 ```bash
 # Check 2: three copies of one save, each in its own network, all answer on port 8000.

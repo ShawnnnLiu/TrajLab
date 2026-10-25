@@ -1,4 +1,4 @@
-"""What a trial run on Waypoint records about its Waypoint session (ADR-0016).
+"""What a trial run on Waypoint records about its Waypoint session (ADR-0017).
 
 Written by `trajlab.capture.waypoint` to `<trial dir>/trajlab-waypoint.json`. A first attempt
 records the session it ran in and its save (`final`): the files and running programs at the end
@@ -10,7 +10,7 @@ from typing import Literal, Self
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
 WAYPOINT_RECORD_FILENAME = "trajlab-waypoint.json"
-# The one save a first attempt makes (ADR-0016 decision 2).
+# The one save a first attempt makes (ADR-0017 decision 2).
 FINAL_CHECKPOINT = "final"
 
 # source: a trial that starts from the task image (first attempts; `fresh` and `traj` repairs).

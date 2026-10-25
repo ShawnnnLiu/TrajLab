@@ -14,7 +14,7 @@ Pass `--storage /srv/trajlab/jobs` to `trajlab run` and `trajlab repair` so the 
 | 1: TB 4.0 repair | `tb40-sonnet-v2` (first attempts), `tb40-repair-v2-<trial>-<arm>` (repairs) | `docker commit` only: filesystem state, no CRIU, no process or memory state | ADR-0012 |
 | Ground truth: error localization | `tb40-sonnet-v2-gt-v1` (derived from `tb40-sonnet-v2`; `groundtruth/` inside each trial dir) | replays of the graded artifacts at every checkpoint; verifier-confirmed fixes | ADR-0013 |
 | 2: store, query tool, retry loop | `tb40-sonnet-v3` (first attempts: `tb40-sonnet-v2`'s 23 tasks and settings, captured after the ADR-0010 amendment of 2026-10-25; watcher `--every 1 --gate change`, which the manifest records) | `docker commit` only, as Exp 1 | ADR-0014 |
-| Waypoint repair with running programs (configured, not run) | `tb40-sonnet-wp1` (first attempts), `tb40-repair-wp1-<trial>-<arm>` (repairs) | one Waypoint save per first attempt (files and running programs, before the tests); no per-call checkpoints | ADR-0016, `docs/waypoint-runbook.md` |
+| Waypoint repair with running programs (configured, not run) | `tb40-sonnet-wp1` (first attempts), `tb40-repair-wp1-<trial>-<arm>` (repairs) | one Waypoint save per first attempt (files and running programs, before the tests); no per-call checkpoints | ADR-0017, `docs/waypoint-runbook.md` |
 
 Earlier corpora (`hello-world-*`, `tb21-*`, `tb40-sonnet-v1*`, `tb40-repair-v1-*`) are development
 runs and the Mac pilot, also `docker commit` only.

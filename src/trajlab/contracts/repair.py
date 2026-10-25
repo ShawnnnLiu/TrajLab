@@ -23,7 +23,7 @@ REPAIRABLE_KINDS: frozenset[FailureKind] = frozenset({"ended_turn", "timeout", "
 # a new conversation, and the failed trial's history as a plain transcript in the prompt
 # (ADR-0012, amendment of 2026-10-03). REPAIR_ARMS, the 2x2, is the default arm set.
 #
-# On Waypoint (ADR-0016) every arm runs on Waypoint, and three arms open a copy of the failed
+# On Waypoint (ADR-0017) every arm runs on Waypoint, and three arms open a copy of the failed
 # trial's save (`final`): `state-files` with its programs stopped, `state-live` and
 # `state-live-traj` with them still running. WAYPOINT_ARMS is that round's default arm set.
 RepairArm = Literal[
@@ -81,7 +81,7 @@ class RepairSource(BaseModel):
     checkpoint_image_id: str | None = None
     waypoint_save: str | None = Field(
         default=None,
-        description='The save the arm opens, "<Waypoint session>/<checkpoint>" (ADR-0016).',
+        description='The save the arm opens, "<Waypoint session>/<checkpoint>" (ADR-0017).',
     )
     session_file: str | None = Field(
         default=None, description="The copy of the native session loaded, for arms that do."

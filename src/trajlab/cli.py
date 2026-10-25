@@ -261,7 +261,7 @@ def repair(
             help="Arms to run; repeat for several. Other than the round's default, with "
             "--per-task, the prefix's recorded draw is reused and its other jobs are left alone. "
             "Default: fresh, state, state-traj, traj; for Waypoint source jobs, fresh, "
-            "state-files, state-live, state-live-traj, traj (ADR-0016)."
+            "state-files, state-live, state-live-traj, traj (ADR-0017)."
         ),
     ] = None,
     dry_run: Annotated[
@@ -619,7 +619,7 @@ def manifest(
 def waypoint_report(
     job_dir: Annotated[Path, typer.Argument(help="A job dir whose trials ran on Waypoint.")],
 ) -> None:
-    """One line per trial: score, and what its Waypoint save holds (ADR-0016)."""
+    """One line per trial: score, and what its Waypoint save holds (ADR-0017)."""
     typer.echo("trial\treward\texception\tsave\tagent\tprograms\tfiles_mb\tmemory_mb\tsave_s\tkey")
     for trial_dir in iter_trial_dirs(job_dir):
         result = load_result(trial_dir)
@@ -667,7 +667,7 @@ def waypoint_cleanup(
     ] = False,
 ) -> None:
     """Remove first attempts' Waypoint sessions once no repair can still open their save
-    (ADR-0016). Saves still needed are kept and the reason printed."""
+    (ADR-0017). Saves still needed are kept and the reason printed."""
     waypoint = Waypoint(state_dir, waypoint_bin)
     for job in source_jobs:
         for trial_dir in iter_trial_dirs(job):

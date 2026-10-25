@@ -1,7 +1,7 @@
-# ADR-0016: Use Waypoint to save running programs for repairs
+# ADR-0017: Use Waypoint to save running programs for repairs
 
 Status: proposed (2026-10-08). Code landed on `main` from branch `ai/waypoint` (PR #29) on 2026-10-25; checks 1 to 4 below not yet run.
-Numbered 0013 when written; renumbered 0016 on 2026-10-25, because ADR-0013 is the verifier-replay ground truth, written on another branch at the same time and cited by ADR-0014 and ADR-0015.
+Numbered 0013 when written; renumbered 0017 on 2026-10-25, because ADR-0013 is the verifier-replay ground truth, written on another branch at the same time and cited by ADR-0014 and ADR-0015, and ADR-0016 is the Exp 2 retry loop, written that day.
 Replaces ADR-0004 for one new experiment only. Everything else stays on Docker.
 How to run it: `docs/waypoint-runbook.md`.
 

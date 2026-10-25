@@ -46,7 +46,7 @@ from typing import Any
 
 JOBS_DIR = Path("corpus/jobs")
 ARMS = ("fresh", "state", "state-traj", "traj")
-# A Waypoint round's arms (ADR-0016); its source job is its own, so its files keep plain names.
+# A Waypoint round's arms (ADR-0017); its source job is its own, so its files keep plain names.
 WAYPOINT_ARMS = ("fresh", "state-files", "state-live", "state-live-traj", "traj")
 ALL_ARMS = (*ARMS, "traj-text", "state-files", "state-live", "state-live-traj")
 RESUMED_ARMS = ("state-traj", "traj", "state-live-traj")

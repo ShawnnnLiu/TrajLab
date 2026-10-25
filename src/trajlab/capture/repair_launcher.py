@@ -21,7 +21,7 @@ same note that an earlier attempt failed):
 A failure is repaired only if every arm can start: it has a final checkpoint whose image still
 exists and exactly one native session. Otherwise no arm runs, so the arms stay paired.
 
-Source jobs that ran on Waypoint (ADR-0016) get the Waypoint arms instead, all on Waypoint:
+Source jobs that ran on Waypoint (ADR-0017) get the Waypoint arms instead, all on Waypoint:
 
     fresh            task image, new conversation
     state-files      a copy of the failed trial's save, its programs stopped, new conversation
@@ -208,7 +208,7 @@ def final_checkpoint(trial_dir: Path) -> CheckpointRecord | None:
 
 
 def uses_waypoint(job_config: dict[str, Any]) -> bool:
-    """True if a job ran its trials on Waypoint (ADR-0016)."""
+    """True if a job ran its trials on Waypoint (ADR-0017)."""
     environment = job_config.get("environment") or {}
     return str(environment.get("import_path") or "").startswith("trajlab.capture.waypoint:")
 

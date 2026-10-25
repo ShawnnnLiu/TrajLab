@@ -78,7 +78,7 @@ Stop after each step and run `make test`. Do not start step N+1 with step N red.
 - Do not run `harbor run` inside tests or on import. It costs money and needs Docker.
 - Do not put API keys anywhere but `.env`; `harbor_runner.py` reads them from the environment and never logs them.
 - Do not write a CRIU-based snapshot backend: per-call checkpoints are filesystem-only via `docker_commit` (ADR-0004).
-  The one exception is ADR-0016: `capture/waypoint.py` runs a trial on Waypoint to make a single save of files and running programs for the Waypoint repair arms; do not extend it to per-call capture without a new ADR.
+  The one exception is ADR-0017: `capture/waypoint.py` runs a trial on Waypoint to make a single save of files and running programs for the Waypoint repair arms; do not extend it to per-call capture without a new ADR.
 - Do not add a database or a query layer outside `store/` (ADR-0014), and do not add an LLM judge.
 - Do not "clean up" Harbor's trial directory. Add files next to Harbor's; never rename or rewrite `trajectory.json`, `result.json`, or `lock.json`.
 
