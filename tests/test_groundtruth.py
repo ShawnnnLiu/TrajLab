@@ -13,7 +13,7 @@ from harbor.models.trial.paths import EnvironmentPaths
 from harbor.trial.regrade import RegradeTrial
 
 from trajlab.contracts.groundtruth import CheckResult, ReplayRecord
-from trajlab.groundtruth.admission import Claim, Ledger, fits
+from trajlab.groundtruth.admission import Claim, Ledger, fits, process_start
 from trajlab.groundtruth.blame import Hunk, blame, changed_lines, fix_hunks
 from trajlab.groundtruth.checks import read_checks, statuses
 from trajlab.groundtruth.extract import MANIFEST_FILENAME, describe_state, list_files
@@ -277,6 +277,13 @@ def _claim(cpus: float, memory_mb: int = 4096, *, quiet: bool = False) -> Claim:
 )
 def test_admission_fits(running: list[Claim], claim: Claim, expected: bool) -> None:
     assert fits(running, claim) is expected
+
+
+def test_process_start_tells_a_running_process_from_a_gone_one() -> None:
+    # Found 2026-10-25: macOS has no /proc, so every claim looked dead and was torn down.
+    assert process_start(os.getpid()) is not None
+    assert process_start(os.getpid()) == process_start(os.getpid())
+    assert process_start(2**22 + 7) is None
 
 
 def test_ledger_drops_claims_of_dead_processes(tmp_path: Path) -> None:

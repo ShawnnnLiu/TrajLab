@@ -38,12 +38,32 @@ def ledger_dir() -> Path:
 
 
 def process_start(pid: int) -> str | None:
-    """The process's start time in clock ticks since boot, to tell a reused pid apart."""
+    """The process's start time, to tell a reused pid apart; None if it is not running.
+
+    Clock ticks since boot from `/proc` on Linux. Where there is no `/proc` (macOS), `ps`'s start
+    time to the second: without it every claim would look dead, and its environment torn down.
+    """
+    if not Path("/proc/self/stat").is_file():
+        return _ps_start(pid)
     try:
         stat = Path(f"/proc/{pid}/stat").read_text()
     except OSError:
         return None
     return stat.rsplit(")", 1)[1].split()[19]
+
+
+def _ps_start(pid: int) -> str | None:
+    try:
+        listed = subprocess.run(
+            ["ps", "-o", "lstart=", "-p", str(pid)],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return listed.stdout.strip() or None
 
 
 @dataclass(frozen=True)
