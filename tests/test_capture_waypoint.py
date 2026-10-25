@@ -500,6 +500,11 @@ def test_fork_name_is_a_valid_waypoint_id() -> None:
     assert fork_name("a__x__env") != fork_name("a__y__env")
 
 
+# The guest scripts read Linux's /proc, as they do inside a Waypoint guest; macOS has none.
+needs_proc = pytest.mark.skipif(not Path("/proc/self/stat").is_file(), reason="needs Linux /proc")
+
+
+@needs_proc
 def test_guest_process_scan_skips_its_own_chain() -> None:
     """Runs the listing (never the kill) on this machine's /proc."""
     done = subprocess.run(["bash", "-c", GUEST_PROCESSES], capture_output=True, text=True)
@@ -538,6 +543,7 @@ def children(pid: int) -> dict[int, str]:
     return found
 
 
+@needs_proc
 def test_kill_agent_kills_claude_and_leaves_the_rest(
     agent_tree: tuple[subprocess.Popen[bytes], Path],
 ) -> None:
