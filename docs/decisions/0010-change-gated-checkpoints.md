@@ -80,7 +80,9 @@ The 2026-10-22 review of PR #32 found that a call whose snapshot fails records n
 A failed `docker commit` leaves the request pending, and the sweep answers it on a later pass, but the first try had already moved the listing that a call's own changes are measured against to the listing taken after the call.
 The retry was then measured against itself: its `CallRecord` said `changed_paths` empty and `changed_paths_total` 0.
 The checkpoint and the change verdict were right, because both are judged against the last kept checkpoint, which only a kept snapshot moves; under `--extras` the call's `changes.jsonl` record was right too, because extras are recorded once, on the first try (ADR-0015 §2).
-The watcher now keeps, for each unanswered call, the listing it was first measured against, and measures every retry of that call against it; the entry is dropped when the call is answered or its late snapshot is discarded.
+The watcher now keeps, for each pending call, the listing it was first measured against, and measures every retry of that call against it; an entry is dropped when its call is answered, or at the next measurement once the call's hook has given up.
+The simpler fix, moving that listing only when a call is answered, was not taken: a call whose hook gave up would then have its writes listed as the next call's own, which is the misattribution the amendment of 2026-10-01 removed.
+Such a call still has no `CallRecord`, its `.timeout` marks the chain incomplete (ADR-0014 §8), and the next checkpoint covers it, as before.
 Reproduced and verified on the development Mac by `scripts/2026-10-25_retried_commit_check.py`: the real watcher and hook on the pre-installed production-planning image, with a `docker` shim that fails the second commit once.
 Before the fix the retried call's ack listed no paths, total 0; after it, `+/app/retried.txt`, total 1, and the next call listed only its own file.
 `scripts/2026-09-30_change_gate_check.py` still judges all 11 of its calls as designed, and `test_a_call_retried_after_a_failed_snapshot_keeps_its_changes` covers the fix offline.

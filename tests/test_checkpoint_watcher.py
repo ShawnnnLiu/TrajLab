@@ -626,12 +626,30 @@ def test_a_call_retried_after_a_failed_snapshot_keeps_its_changes(running_trial:
     after = watcher.process(_request(running_trial, "toolu_after"))
 
     assert retried is not None and after is not None
-    assert (retried.outcome, retried.changed_paths, retried.changed_paths_total) == (
-        "checkpoint",
-        ("+/app/a.txt",),
-        1,
-    )
+    assert (retried.outcome, retried.change) == ("checkpoint", "changed")
+    assert (retried.changed_paths, retried.changed_paths_total) == (("+/app/a.txt",), 1)
     assert (after.changed_paths, after.changed_paths_total) == (("+/app/b.txt",), 1)
+    assert watcher._trial(running_trial.resolve()).bases == {}
+
+
+def test_a_call_given_up_on_after_a_failed_snapshot_is_forgotten(running_trial: Path) -> None:
+    backend = FakeBackend()
+    watcher = _watcher(running_trial, backend, gate="change")
+    watcher.process(_request(running_trial, "toolu_baseline"))
+    backend.write("/app/a.txt")
+    lost = _request(running_trial, "toolu_lost")
+    backend.fail_snapshot = True
+    assert watcher.process(lost) is None
+    lost.with_suffix(".timeout").touch()  # the hook stopped waiting: no retry will come
+    backend.fail_snapshot = False
+    backend.write("/app/b.txt")
+    call = watcher.process(_request(running_trial, "toolu_next"))
+
+    assert call is not None and call.outcome == "checkpoint"
+    # The lost call's write is not blamed on the next call; the next checkpoint covers both.
+    assert call.changed_paths == ("+/app/b.txt",)
+    assert _records(running_trial)[-1].covered_tool_call_ids == ("toolu_lost", "toolu_next")
+    assert watcher._trial(running_trial.resolve()).bases == {}
 
 
 # The end of the turn (ADR-0011) ------------------------------------------------------------

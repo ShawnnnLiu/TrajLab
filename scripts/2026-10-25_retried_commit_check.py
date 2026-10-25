@@ -126,13 +126,16 @@ def main(image: str) -> int:
             f"{'ok ' if ok else 'BAD'} {commits} commits ({FAIL_COMMIT} failed), "
             f"{len(records)} checkpoints for {len(CALLS)} calls"
         )
-        for record in records:
-            sh("docker", "image", "rm", "--force", record.checkpoint_id)
     finally:
         if watcher is not None:
             watcher.terminate()
             watcher.wait(timeout=10)
         subprocess.run([*up, "down", "--volumes"], capture_output=True)
+        images = sh("docker", "images", "-q", "--filter", f"label=trajlab.trial_name={TRIAL_NAME}")
+        if images.split():
+            subprocess.run(
+                ["docker", "image", "rm", "--force", *images.split()], capture_output=True
+            )
         shutil.rmtree(work, ignore_errors=True)
     print("retried-commit check passed" if not failures else f"{failures} failure(s)")
     return 1 if failures else 0
@@ -142,5 +145,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("image", nargs="?")
     args = parser.parse_args()
-    default = sh("docker", "images", "trajlab-preinstalled", "--format", "{{.Repository}}:{{.Tag}}")
-    sys.exit(main(args.image or default.split()[0]))
+    image = args.image
+    if image is None:
+        found = sh(
+            "docker", "images", "trajlab-preinstalled", "--format", "{{.Repository}}:{{.Tag}}"
+        )
+        if not found.split():
+            parser.error("no trajlab-preinstalled image here; name an image with GNU find")
+        image = found.split()[0]
+    sys.exit(main(image))
