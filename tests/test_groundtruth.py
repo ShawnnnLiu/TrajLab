@@ -462,7 +462,7 @@ def _contract_instances() -> list[Any]:
         StateEntry,
         StateFile,
         TimelinePoint,
-        TrialLabels,
+        TrialCauses,
     )
 
     now = datetime(2026, 10, 7, tzinfo=UTC)
@@ -510,7 +510,7 @@ def _contract_instances() -> list[Any]:
             alternatives=(AlternativeFix(fix_id="fix-2", kind="omission", fix_size=1),),
             flags=("large_fix",),
         ),
-        TrialLabels.model_validate(
+        TrialCauses.model_validate(
             {
                 "trial_name": "t__a",
                 "labeler": "m",

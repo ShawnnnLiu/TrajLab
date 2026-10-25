@@ -277,7 +277,7 @@ def plan_fix_confirmations(trial_dir: Path) -> list[tuple[str, str, str]]:
     the tries of minimization and revert tests. A state that ended without a verdict once gets no
     more replays: it cannot confirm anything.
     """
-    from trajlab.contracts.groundtruth import TrialLabels
+    from trajlab.contracts.groundtruth import TrialCauses
     from trajlab.groundtruth.counterfactual import read_fixes
     from trajlab.groundtruth.gates import excluded_checks
     from trajlab.groundtruth.items import labels_path
@@ -286,7 +286,7 @@ def plan_fix_confirmations(trial_dir: Path) -> list[tuple[str, str, str]]:
 
     if not labels_path(trial_dir).is_file():
         return []
-    labels = TrialLabels.model_validate_json(labels_path(trial_dir).read_text())
+    labels = TrialCauses.model_validate_json(labels_path(trial_dir).read_text())
     fixes = read_fixes(trial_dir)
     test_tries = {lo.fix_id for m in read_minimized(trial_dir).values() for lo in m.leave_outs}
     test_tries |= {r.fix_id for r in read_reverts(trial_dir).values()}

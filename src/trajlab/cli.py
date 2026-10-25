@@ -58,7 +58,7 @@ from trajlab.contracts.groundtruth import (
     POINTS_FILENAME,
     REFUTATIONS_FILENAME,
     RefutationRecord,
-    TrialLabels,
+    TrialCauses,
 )
 from trajlab.groundtruth.blame import blame
 from trajlab.groundtruth.counterfactual import file_history, read_fixes, run_oracle, try_fix
@@ -863,14 +863,16 @@ def gt_reparse(job_dir: JobDirArgument, trial: TrialsOption = None) -> None:
 @gt_app.command("label")
 def gt_label(
     trial_dir: TrialDirArgument,
-    labels: Annotated[Path, typer.Argument(help="A TrialLabels JSON file (contracts).")],
+    labels: Annotated[
+        Path, typer.Argument(help="A TrialCauses JSON file (contracts.groundtruth).")
+    ],
 ) -> None:
     """Validate the labeler's causes for a trial and store them as groundtruth/labels.json."""
     trial_dir = trial_dir.resolve()
     try:
-        parsed = TrialLabels.model_validate_json(labels.read_text())
+        parsed = TrialCauses.model_validate_json(labels.read_text())
     except ValueError as error:
-        typer.echo(f"trajlab gt label: {labels} is not a valid TrialLabels: {error}", err=True)
+        typer.echo(f"trajlab gt label: {labels} is not a valid TrialCauses: {error}", err=True)
         raise typer.Exit(code=1) from error
     if parsed.trial_name != trial_dir.name:
         typer.echo(f"trajlab gt label: trial_name must be {trial_dir.name}", err=True)
@@ -915,7 +917,7 @@ def gt_minimize(job_dir: JobDirArgument, trial: TrialsOption = None) -> None:
         trial_dir = inputs.trial_dir
         if not labels_path(trial_dir).is_file():
             continue
-        labels = TrialLabels.model_validate_json(labels_path(trial_dir).read_text())
+        labels = TrialCauses.model_validate_json(labels_path(trial_dir).read_text())
         fixes = {f.fix_id: f for f in read_fixes(trial_dir)}
         done = read_minimized(trial_dir)
         timeline = trial_timeline(trial_dir)

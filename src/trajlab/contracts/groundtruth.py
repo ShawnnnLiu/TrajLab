@@ -368,7 +368,7 @@ class LabelCause(_Model):
     )
 
 
-class TrialLabels(_Model):
+class TrialCauses(_Model):
     """The labeler's output for one trial, `groundtruth/labels.json`."""
 
     trial_name: str = Field(min_length=1)

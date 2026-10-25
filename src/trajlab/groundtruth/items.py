@@ -46,7 +46,7 @@ from trajlab.contracts.groundtruth import (
     RefutationRecord,
     ReplayRecord,
     TimelinePoint,
-    TrialLabels,
+    TrialCauses,
     TrialProgress,
 )
 from trajlab.groundtruth.blame import (
@@ -737,7 +737,7 @@ def build_items(inputs: TrialInputs) -> list[GroundTruthItem]:
     items = regression_items(inputs, timeline, calls)
     regression_list = list(items)
     if labels_path(trial_dir).is_file():
-        labels = TrialLabels.model_validate_json(labels_path(trial_dir).read_text())
+        labels = TrialCauses.model_validate_json(labels_path(trial_dir).read_text())
         fixes = read_fixes(trial_dir)
         history = HistoryCache(inputs)
         minimized = read_minimized(trial_dir)
