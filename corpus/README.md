@@ -12,6 +12,7 @@ Pass `--storage /srv/trajlab/jobs` to `trajlab run` and `trajlab repair` so the 
 | Experiment | Corpus ids | Checkpoints | Design |
 | --- | --- | --- | --- |
 | 1: TB 4.0 repair | `tb40-sonnet-v2` (first attempts), `tb40-repair-v2-<trial>-<arm>` (repairs) | `docker commit` only: filesystem state, no CRIU, no process or memory state | ADR-0012 |
+| 2: store, query tool, retry loop | `tb40-sonnet-v3` (first attempts: `tb40-sonnet-v2`'s 23 tasks and settings, captured after the ADR-0010 amendment of 2026-10-25; watcher `--every 1 --gate change`, which the manifest records) | `docker commit` only, as Exp 1 | ADR-0014 |
 
 Earlier corpora (`hello-world-*`, `tb21-*`, `tb40-sonnet-v1*`, `tb40-repair-v1-*`) are development
 runs and the Mac pilot, also `docker commit` only.
