@@ -2,13 +2,17 @@
 
 import logging
 import os
+import shutil
 import signal
+import tempfile
 import threading
 import time
+from collections.abc import Sequence
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated, get_args
+from typing import Annotated, NoReturn, get_args
 
+import duckdb
 import typer
 from harbor.utils.env import parse_bool_env_value
 
@@ -43,9 +47,13 @@ from trajlab.checkpoint.watcher import (
     hold_watcher_lock,
     watcher_running,
 )
-from trajlab.contracts import REPAIR_ARMS, RepairArm
+from trajlab.contracts import REPAIR_ARMS, CheckpointRecord, RepairArm
+from trajlab.store.build import BuildError, BuildResult, build_trial, start_image
+from trajlab.store.docker_images import DockerImageProvider
 
 app = typer.Typer(help="Capture Claude Code trajectories on Harbor with environment checkpoints.")
+store_app = typer.Typer(help="The Exp 2 store: steps joined to filesystem deltas (ADR-0014).")
+app.add_typer(store_app, name="store")
 
 MANIFESTS_DIR = Path("corpus/manifests")
 DEFAULT_ENV_FILE = Path(".env")
@@ -346,39 +354,160 @@ def _trial_dirs(path: Path) -> list[Path]:
     return list(iter_trial_dirs(path))
 
 
+def _trial_dirs_of(command: str, paths: list[Path]) -> tuple[list[Path], int]:
+    """The trial dirs `paths` name (trial dirs, or job dirs of them), and how many paths named
+    none, each reported on stderr."""
+    trial_dirs: list[Path] = []
+    bad = 0
+    for path in paths:
+        if not path.is_dir():
+            typer.echo(f"trajlab {command}: {path}: not a directory", err=True)
+            bad += 1
+            continue
+        found = _trial_dirs(path)
+        if not found:
+            typer.echo(f"trajlab {command}: {path}: no trial dirs", err=True)
+            bad += 1
+        trial_dirs.extend(found)
+    return trial_dirs, bad
+
+
 @app.command()
 def postprocess(
     paths: Annotated[list[Path], typer.Argument(help="Job dirs or trial dirs.")],
 ) -> None:
     """Join checkpoints and compactions into each trial's agent/trajectory.enriched.json."""
-    failed = 0
-    for path in paths:
-        if not path.is_dir():
-            typer.echo(f"trajlab postprocess: {path}: not a directory", err=True)
+    trial_dirs, failed = _trial_dirs_of("postprocess", paths)
+    for trial_dir in trial_dirs:
+        if not trajectory_path(trial_dir).is_file():
+            typer.echo(f"skipped {trial_dir}: no agent/trajectory.json", err=True)
+            continue
+        try:
+            result = postprocess_trial(trial_dir)
+        # Every error postprocess reports is a ValueError: unjoinable records, invalid ATIF,
+        # malformed capture files.
+        except ValueError as error:
+            typer.echo(f"failed {trial_dir}: {error}", err=True)
             failed += 1
             continue
-        trial_dirs = _trial_dirs(path)
-        if not trial_dirs:
-            typer.echo(f"trajlab postprocess: {path}: no trial dirs", err=True)
-            failed += 1
+        typer.echo(
+            f"wrote {result.path}: {result.steps} steps, "
+            f"{result.checkpoints} checkpoints, {result.compactions} compactions"
+        )
+    if failed:
+        raise typer.Exit(code=1)
+
+
+@store_app.command("build")
+def store_build(
+    paths: Annotated[
+        list[Path], typer.Argument(help="Job dirs or trial dirs; every trial postprocessed.")
+    ],
+    store_dir: Annotated[
+        Path, typer.Option("--store", help="Store dir: record.duckdb, heldout.duckdb, blobs/.")
+    ],
+    no_images: Annotated[
+        bool,
+        typer.Option(
+            "--no-images", help="Build steps only: no deltas, and the chain is reported unchecked."
+        ),
+    ] = False,
+    start_image_ref: Annotated[
+        str | None,
+        typer.Option(
+            "--start-image",
+            help="The start image of a trial whose dir names none (no trajlab-preinstall.json "
+            "or trajlab-resume.json), such as one run without pre-install, whose start image "
+            "is its task image; a trial's own record always wins (ADR-0014, item 5). Not with "
+            "--no-images.",
+        ),
+    ] = None,
+    work_dir: Annotated[
+        Path | None,
+        typer.Option(
+            help="Where each trial's `docker image save` and scratch files go, with room for "
+            "its start image plus every top layer, compressed; created if missing. Default: "
+            "the system temp dir."
+        ),
+    ] = None,
+) -> None:
+    """Build finished, postprocessed trials into the store as first attempts, one line each."""
+    if no_images and start_image_ref is not None:
+        typer.echo(
+            "trajlab store build: --start-image names the image checkpoints are read against, "
+            "and --no-images reads none; pass one or the other",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+    trial_dirs, failed = _trial_dirs_of("store build", paths)
+    try:
+        if work_dir is not None:
+            work_dir.mkdir(parents=True, exist_ok=True)
+        scratch = Path(tempfile.mkdtemp(prefix="trajlab-store-build-", dir=work_dir))
+    except OSError as error:
+        typer.echo(f"trajlab store build: cannot make scratch space: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    try:
         for trial_dir in trial_dirs:
-            if not trajectory_path(trial_dir).is_file():
-                typer.echo(f"skipped {trial_dir}: no agent/trajectory.json", err=True)
-                continue
+            started = time.perf_counter()
             try:
-                result = postprocess_trial(trial_dir)
-            # Every error postprocess reports is a ValueError: unjoinable records, invalid ATIF,
-            # malformed capture files.
-            except ValueError as error:
+                result = _build_one(
+                    trial_dir,
+                    store_dir,
+                    no_images=no_images,
+                    start_image_ref=start_image_ref,
+                    scratch=scratch,
+                )
+            # Every error the store reports is a ValueError (BuildError, StepsError,
+            # ReconcileError, StoreError, DockerImagesError); OSError is docker itself or the
+            # disk, and duckdb.Error the database (a lock another process holds, a constraint).
+            except (ValueError, OSError, duckdb.Error) as error:
                 typer.echo(f"failed {trial_dir}: {error}", err=True)
                 failed += 1
                 continue
+            seconds = time.perf_counter() - started
+            if result.skipped_existing:
+                typer.echo(f"skipped {trial_dir}: already in {store_dir}")
+                continue
+            chain = result.chain
+            state = "complete" if chain.complete else f"incomplete ({'; '.join(chain.reasons)})"
             typer.echo(
-                f"wrote {result.path}: {result.steps} steps, "
-                f"{result.checkpoints} checkpoints, {result.compactions} compactions"
+                f"built {trial_dir}: {len(result.steps)} steps, {len(result.deltas)} deltas, "
+                f"{chain.checkpoints} checkpoints, chain {state}, {seconds:.1f} s"
             )
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
     if failed:
         raise typer.Exit(code=1)
+
+
+def _build_one(
+    trial_dir: Path,
+    store_dir: Path,
+    *,
+    no_images: bool,
+    start_image_ref: str | None,
+    scratch: Path,
+) -> BuildResult:
+    if no_images:
+        return build_trial(trial_dir, store_dir, images=None, work_dir=scratch)
+    image = start_image(trial_dir) or start_image_ref
+    if image is None:
+        # build_trial asks for images only when it has checkpoints to diff, so a trial already
+        # built with them is still skipped.
+        return build_trial(trial_dir, store_dir, images=_UnknownStartImage(), work_dir=scratch)
+    with DockerImageProvider(scratch, start_image=image) as images:
+        return build_trial(trial_dir, store_dir, images=images, work_dir=scratch)
+
+
+class _UnknownStartImage:
+    """The images of a trial whose start image is not known: they cannot be diffed."""
+
+    def chain(self, checkpoints: Sequence[CheckpointRecord]) -> NoReturn:
+        raise BuildError(
+            "neither trajlab-preinstall.json nor trajlab-resume.json names its start image; "
+            "pass --start-image, or --no-images for steps only"
+        )
 
 
 @app.command()

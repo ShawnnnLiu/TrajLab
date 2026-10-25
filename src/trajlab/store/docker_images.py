@@ -341,17 +341,22 @@ class DockerImageProvider:
 
     def _read_manifest(self, archive: Path, tags: Sequence[str]) -> dict[str, list[SavedLayer]]:
         """Each tag's layer members, bottom to top, located in the save file."""
-        with tarfile.open(archive, mode="r:") as outer:
-            entries = {member.name: member for member in outer.getmembers()}
-            manifest_info = entries.get(MANIFEST_MEMBER)
-            stream = outer.extractfile(manifest_info) if manifest_info is not None else None
-            if stream is None:
-                raise DockerImagesError(f"{archive} has no {MANIFEST_MEMBER}")
-            try:
-                manifest = json.load(stream)
-            except json.JSONDecodeError as error:
-                raise DockerImagesError(f"{archive}: bad {MANIFEST_MEMBER}: {error}") from error
-        if not isinstance(manifest, list):
+        # A save cut short (a full disk) is a tar that ends early: `tarfile` raises its own
+        # errors for that, which are neither ValueError nor OSError.
+        try:
+            with tarfile.open(archive, mode="r:") as outer:
+                entries = {member.name: member for member in outer.getmembers()}
+                manifest_info = entries.get(MANIFEST_MEMBER)
+                stream = outer.extractfile(manifest_info) if manifest_info is not None else None
+                if stream is None:
+                    raise DockerImagesError(f"{archive} has no {MANIFEST_MEMBER}")
+                try:
+                    manifest = json.load(stream)
+                except ValueError as error:  # bad JSON, or bytes that are not text
+                    raise DockerImagesError(f"{archive}: bad {MANIFEST_MEMBER}: {error}") from error
+        except (tarfile.TarError, EOFError) as error:
+            raise DockerImagesError(f"{archive}: cannot read the save: {error}") from error
+        if not isinstance(manifest, list) or not all(isinstance(image, dict) for image in manifest):
             raise DockerImagesError(f"{archive}: {MANIFEST_MEMBER} is not a list of images")
         layers_by_tag: dict[str, list[SavedLayer]] = {}
         for image in manifest:
