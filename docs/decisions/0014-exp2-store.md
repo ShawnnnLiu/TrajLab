@@ -1,6 +1,6 @@
 # ADR-0014: The Exp 2 store: steps joined to filesystem deltas, in DuckDB
 
-Status: proposed (2026-10-18).
+Status: accepted (2026-10-25); proposed 2026-10-18.
 Amends CLAUDE.md constraints 2 and 6 and "What not to do" (no database) for this store only.
 
 ## Context

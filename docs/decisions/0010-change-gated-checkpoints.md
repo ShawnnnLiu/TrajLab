@@ -1,6 +1,6 @@
 # ADR-0010: Checkpoint only calls that changed the filesystem
 
-Status: proposed (2026-09-30).
+Status: accepted (2026-10-25, with its amendments); proposed 2026-09-30.
 Amends ADR-0001; supersedes ADR-0007 as the default policy.
 
 ## Context

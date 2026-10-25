@@ -18,9 +18,9 @@ Owner: Shawn Liu. Team of four. Course milestones: Sep 25 first baseline result 
 3. **`capture/`, `checkpoint/`, `atif/` import each other only through `contracts/`.** Each exposes one entry point in `cli.py`.
 4. **No trial data in git.** `corpus/jobs/`, `.env`, session JSONLs, notebook outputs are ignored. `corpus/manifests/` is committed.
 5. **Anything that changes what a trial records needs an ADR** in `docs/decisions/` and a new `corpus_id` on the next run. Do not silently change the hook, watcher, backend, or postprocess output.
-6. **Do not design analysis modules beyond `src/trajlab/store/`** (ADR-0014: the Exp 2 store).
+6. **Do not design analysis modules beyond `src/trajlab/store/` and `src/trajlab/groundtruth/`** (ADR-0014: the Exp 2 store; ADR-0013: ground truth by verifier replay).
    No `analysis/`, `bench/` directories yet.
-   `store/` imports only `contracts/`, `atif/`, Harbor, and DuckDB, never `capture/` or `checkpoint/`.
+   `store/` imports only `contracts/`, `atif/`, Harbor, and DuckDB, never `capture/` or `checkpoint/`; `groundtruth/` imports only `contracts/` and Harbor.
    If capture needs a shape that analysis will use, put the model in `contracts/` and stop.
 7. **Reuse Harbor's models.** ATIF is `harbor.models.trajectories`; trial results are `harbor.models.trial.result.TrialResult`; paths are `harbor.models.trial.paths.TrialPaths`. Do not redefine them.
 
@@ -30,12 +30,13 @@ Owner: Shawn Liu. Team of four. Course milestones: Sep 25 first baseline result 
 configs/harbor/            one JSON job config per corpus version (the exact command that produced the data)
 configs/claude-code/       settings.hooks.json: PostToolUse hook wiring
 configs/tasks/             task-name lists per subset
-src/trajlab/cli.py         typer app: run | watch | repair | postprocess | manifest | validate | store build | trace
+src/trajlab/cli.py         typer app: run | watch | repair | postprocess | manifest | validate | store build | trace | gt
 src/trajlab/contracts/     CheckpointRecord, TrialRecord, ATIF step extras, ProcessSnapshot/CallChanges, TrialLabels
 src/trajlab/capture/       harbor_runner, corpus manifest, trial/container discovery, preinstall (custom environment, ADR-0008), trace site and labels (ADR-0015)
 src/trajlab/checkpoint/    hook/ (PostToolUse hook script; delivery per ADR-0003), watcher, changes (ADR-0010), diffs and processes (--extras, ADR-0015), backends/, join
 src/trajlab/atif/          load, compaction recovery, postprocess, validate
 src/trajlab/store/         Exp 2 store (ADR-0014): schema, steps, reconcile (deltas from checkpoint top layers), docker_images, build
+src/trajlab/groundtruth/   ground truth by verifier replay (ADR-0013): extract, replay, admission, counterfactual fixes, items
 scripts/                   dated one-offs (2026-09-25_baseline.py); never imported by src/
 tests/fixtures/hello-world-trial/   one small real trial dir; every test runs against it
 corpus/manifests/          committed; corpus/jobs/ ignored
@@ -67,6 +68,8 @@ Capture ends at step 7. The formerly planned step 8 (`statefork` backend) was dr
 
 Exp 2 comes after capture: the store, query tool, and retry loop are built in the order of `docs/experiments/exp2/exp2_technical_spec_trajlab_2026-10-18.md` §7, one step per PR, each with its acceptance check (ADR-0014 for the store).
 Store tests run offline on synthetic layers; anything that needs Docker or the corpus is a dated script run by hand, with its command and output recorded in `docs/experiments/exp2/` or the ADR.
+Ground truth (ADR-0013) also comes after capture: `trajlab gt extract | replay | try-fix | label | confirm | minimize | revert | items | report` write `groundtruth/` inside trial dirs, next to Harbor's files, and never modify Harbor's own files.
+Replays and fix containers are admitted host-wide by declared CPUs and memory (`trajlab.groundtruth.admission`); never start verifier environments outside it.
 
 Stop after each step and run `make test`. Do not start step N+1 with step N red.
 
@@ -74,7 +77,8 @@ Stop after each step and run `make test`. Do not start step N+1 with step N red.
 
 - Do not run `harbor run` inside tests or on import. It costs money and needs Docker.
 - Do not put API keys anywhere but `.env`; `harbor_runner.py` reads them from the environment and never logs them.
-- Do not write a `WaypointEnvironment` or any CRIU-based backend. Decided against in ADR-0004; checkpoints are filesystem-only via `docker_commit`.
+- Do not write a CRIU-based snapshot backend: per-call checkpoints are filesystem-only via `docker_commit` (ADR-0004).
+  The one exception is ADR-0017: `capture/waypoint.py` runs a trial on Waypoint to make a single save of files and running programs for the Waypoint repair arms; do not extend it to per-call capture without a new ADR.
 - Do not add a database or a query layer outside `store/` (ADR-0014), and do not add an LLM judge.
 - Do not "clean up" Harbor's trial directory. Add files next to Harbor's; never rename or rewrite `trajectory.json`, `result.json`, or `lock.json`.
 

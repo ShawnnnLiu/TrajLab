@@ -67,6 +67,12 @@ One trial is one task executed by one attempt.
   "Pre-install" names the whole mechanism.
   Not: "base image", which the Dockerfile `FROM` line already means.
 
+- **Waypoint session** - one Waypoint workspace: a first attempt's environment and its save, under `/srv/trajlab/waypoint/sessions/<id>/` (ADR-0017).
+  Always "Waypoint session", never bare "session", which names Claude Code's or Harbor's.
+- **save** - Waypoint's copy of an environment's files and running programs at one moment; trajlab makes one per first attempt, `final`, after the agent stops and before the tests (ADR-0017).
+  A save is a checkpoint with programs; say "save" only for Waypoint's.
+- **fork** - a live copy of a save; each `state-files`, `state-live`, or `state-live-traj` repair runs in its own fork.
+
 - **pin** - `trajlab.capture.pins.CLAUDE_CODE_VERSION`, the one Claude Code version every capture runs (ADR-0009); enforced by `trajlab run`, by the derived-image build, and in every trial container.
 
 ## Trajectory
@@ -134,7 +140,23 @@ One trial is one task executed by one attempt.
 - **pattern** - one of ADR-0015's seven failure patterns (`loop`, `no_effect_write`, `false_edit_claim`, `false_test_claim`, `unverified_completion`, `server_state`, `forbidden_action`); `stall` is labeled beside them but reported separately.
 - **flag** - the detector's claim that a pattern occurred at a `tool_call_id` (ADR-0015 §3, phase 2).
 - **label / labeler** - a person's judgment, in `trajlab trace`, of whether a pattern occurred at a call or in a trial, saved per labeler as `TrialLabels` under `corpus/labels/` (git-ignored).
-  Not: a Docker label.
+  Not: a Docker label, or the gt labeler (ADR-0013), which is an agent.
+
+## Ground truth (ADR-0013)
+
+- **timeline / point** - a trial's ordered points: `initial` (the derived image it started from), one per checkpoint, and `final` (Harbor's recorded `artifacts/`); `P<i>` names point `i`.
+- **artifact state / `state_id`** - the declared (graded) artifacts' bytes at a point, collected as Harbor collects them; `state_id` hashes the canonical listing. Points with the same bytes share a state.
+- **replay** - one run of a task's verifier on one artifact state through `ReplayTrial` (Harbor's regrade); its `outcome` is `verdict`, `no_verdict`, or `infra`.
+- **gate 1 / gate 2** - fidelity checks: the last checkpoint's state equals the final state; replaying the final state reproduces the recorded reward and each check (`flaky` and `irreproducible` checks are excluded).
+- **regression** - a check that passes at a point and fails from the next point to the end; a mechanical ground-truth item, tested by revert.
+- **fix / try** - a unified diff tried on a trial's final state by `trajlab gt try-fix`, in `artifacts` or `environment` mode; recorded as a `FixRecord`, regraded as a `counterfactual` replay.
+- **confirmed fix** - a fix every replay of which turns its claimed checks from failing to passing and breaks none.
+- **gt labeler** - the Claude Code agent `trajlab gt label` runs to propose causes and fixes for one trial; never the judge.
+  Not: a labeler in `trajlab trace` (ADR-0015), who is a person.
+- **item** - one ground-truth fault of a failed trial (`GroundTruthItem`): its checks, kind, blamed points and calls, hunks, flags.
+- **blame / origin / earliest** - the point that last wrote a line (last-writer blame), and the earliest point at which the file held the same text.
+- **admission / claim / quiet** - the host-wide ledger that starts verifier environments and fix containers by declared CPUs and memory; a claim is one entry; a quiet claim runs beside at most 2 other CPUs.
+  Not: "slot", which the first draft used.
 
 ## Everything else
 

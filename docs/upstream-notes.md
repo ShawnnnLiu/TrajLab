@@ -47,3 +47,26 @@ Linux caps every argument and environment string at 128 KiB (`MAX_ARG_STRLEN`, 1
 A longer prompt cannot start. ADR-0012's `traj-text` prompts carry a transcript of a failed trial: rendered from the tool output text the agent saw, as built, the largest is 7,402 bytes under the cap; rendered from Harbor's ATIF observation `content`, 2 of the 21 are over it.
 Workaround: `trajlab.capture.repair.RepairClaudeCode` overrides `exec_as_agent`. For every `traj-text` run it uploads the prompt to `/tmp/trajlab-prompt-<hex>.txt` (chowned to the agent user, mode 600), drops the variable, and rewrites the command's `<var>="$<VAR>"; unset <VAR>; ` to read and remove the file before `claude` starts. It raises if the command no longer has that exact form; a unit test runs Harbor's own `run()` against a fake environment so an upgrade that changes the form fails the test.
 Upstream option: deliver the prompt as an uploaded file or on stdin of the exec, not in an argument.
+
+## 2026-10-07: Regrade refuses recorded states with absent artifacts
+
+`RegradeTrial._artifact_coverage_problems` (`harbor/trial/regrade.py`) refuses any manifest entry with status `failed`, although a live trial grades such a trial: the uploader simply skips the absent path. Two `tb40-sonnet-v2` trials end with absent artifacts (`pretrain-shard-corruption` `model_final.pt`, `train_metrics.json`), and early timeline points lack outputs not yet written.
+Workaround: `trajlab.groundtruth.replay.ReplayTrial` drops the problem for sources it knows were absent (ADR-0013).
+Upstream option: accept `failed` entries in regrade, as the live uploader does.
+
+## 2026-10-07: Single-step regrade dereferences symlinks
+
+`RegradeTrial._seed_from_source` copies the source's `artifacts/` with `preserve_symlinks=False`; `MultiStepRegradeTrial` and a live trial's upload keep links. A relative link becomes a copy and an absolute link resolves on the host.
+Workaround: `ReplayTrial` seeds with `preserve_symlinks=True`. No state in `tb40-sonnet-v2` has a symlink.
+Upstream option: keep symlinks in single-step regrade too.
+
+## 2026-10-07: An environment-start timeout is reported as a verifier timeout
+
+`RegradeTrial._run` turns any `asyncio.TimeoutError` from `_run_separate_verifier` into `VerifierTimeoutError`, including a timeout while the verifier environment starts (`trial.py`, `env.start` under `wait_for`).
+Workaround: replays classify their outcome from the verifier output instead (`verdict`, `no_verdict`, `infra`).
+Upstream option: a distinct exception for environment start.
+
+## 2026-10-07: Cancelling a regrade can hang while a verifier command runs
+
+Cancelling a running regrade (SIGINT) left the process waiting and its verifier containers running; the exec'd test process does not stop with the client.
+Workaround: `trajlab gt replay` takes down in-flight compose projects itself after a grace period, and the admission ledger takes down projects of dead processes.
