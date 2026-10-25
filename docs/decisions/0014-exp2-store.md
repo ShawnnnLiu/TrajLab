@@ -177,7 +177,8 @@ Each column is an interface: `DerivedSpec` names it, and the implementation is a
 
 1. **Question 2, at step 3:** the `args_json` normalization for `is_loop`, and whether derived columns are recomputed or appended when a retry is ingested.
    As the design spec defines it ("same tool and args as an earlier step, empty delta"), every repeated read-only call is a loop; step 3 should say whether that is intended.
-   On the ten example trials of `docs/experiments/exp2/2026-10-19_example-runs.md` this definition and `is_revert` fired zero times, failures included; the owner's direction (2026-10-20) is that byte-for-byte repetition is the wrong definition, and that patterns are defined later from the record, since the store holds every step joined to its delta. Step 3's ADR records what is defined and frozen before the full run.
+   On the ten example trials of `docs/experiments/exp2/2026-10-19_example-runs.md` this definition and `is_revert` fired zero times, failures included; the owner's direction (2026-10-20) is that byte-for-byte repetition is the wrong definition, and that patterns are defined later from the record, since the store holds every step joined to its delta.
+   Step 3's ADR records what is defined and frozen before the full run.
 2. **Question 3, at step 4:** the query tool's channel.
    The recommendation stands: a host process answering `.sql` files through the bind-mounted `/logs/agent`, separate from the checkpoint watcher, so a slow query never delays an ack the agent is waiting on, and every query is logged on the host by construction.
    It must open the store with `connect_agent`, run each query in a disposable child process (which also gives the statement timeout), and refuse statements that name DuckDB's logging functions (item 2).
