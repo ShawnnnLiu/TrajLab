@@ -57,7 +57,7 @@ Hunks total 457 KB; the largest is 14 KB.
 - The agent iterates on one artifact: in `pyWAozu`, `/app/rules.json` has 18 versions and `/app/ordering.txt` 17, over steps 25 to 59; its scratch files (`r.txt`, `greedy.log`, `out.txt`) have 2 to 9.
 - 167 of the 514 delta rows (32%) are `__pycache__` `.pyc` files written by Python runs, including every row of the first checkpoint in `pyWAozu`.
   ADR-0014 §6 keeps them on purpose; a derived flag that marks them (`is_cache`) is a candidate rule, so an agent can filter them out in one predicate.
-- The spec's three rules are silent on these clean runs, as they should be: 0 reverts (a version whose sha256 equals an earlier version's `sha256_before` on the same path), 0 loops under the spec's definition (same tool and args as an earlier step, zero deltas; also 0 when the outputs must match too), 0 reruns of an errored command within 3 steps.
+- The spec's three rules are silent on these clean runs, as they should be: 0 reverts (a version whose sha256 equals an earlier version's `sha256_before` on the same path), 0 loops under the spec's definition (same tool and args as an earlier step, zero deltas; also 0 when the outputs must match too), 0 reruns of an errored call (same tool and args) within the 3 tool calls before it.
   Their value is judged on a failure.
 - The self-check loop is visible from the deltas alone: per trial, 6 to 13 mutating steps directly follow a Bash step that changed nothing (a check run), out of 18 to 41 mutating steps.
 - The rule queries are in `scripts/2026-10-20_exp2_example_rules.py`, run against the store; the table under Run 2 covers both runs, and step 3's `derive.py` takes its definitions from there.
@@ -115,14 +115,17 @@ Counts per trial from `scripts/2026-10-20_exp2_example_rules.py`:
 | production-planning `5hnrmLq` | 1 | 17 | 15 | 2 | 0 | 0 | 0 | 0 | 7 | 9 | 8 / 36 |
 | production-planning `H2AcDwK` | 0 | 19 | 8 | 11 | 0 | 0 | 0 | 1 (124) | 1 | 16 | 3 / 46 |
 | production-planning `PckZuoA` | 0 | 21 | 19 | 2 | 0 | 0 | 0 | 0 | 3 | 9 | 3 / 51 |
-| production-planning `kugWvNv` | 0 | 32 | 23 | 9 | 0 | 0 | 0 | 2 (245) | 10 | 10 | 3 / 64 |
-| production-planning `qNsiDSN` | 0 | 18 | 15 | 3 | 0 | 0 | 1 | 0 | 5 | 23 | 3 / 39 |
+| production-planning `kugWvNv` | 0 | 32 | 23 | 9 | 0 | 0 | 0 | 1 (123) | 10 | 10 | 3 / 64 |
+| production-planning `qNsiDSN` | 0 | 18 | 15 | 3 | 0 | 0 | 0 | 0 | 5 | 23 | 3 / 39 |
 
 "Deliverable versions" counts delta rows on the paths the task instruction names (`regexp_extract_all` of absolute paths in `trials.prompt`); for sound-change those are `rules.json` and `ordering.txt`, rewritten on every iteration, so the count is the iteration count there, and for production-planning they are the three writebacks and the audit log.
 
-- The spec's `is_loop` and `is_revert` are zero on all ten trials, and `retries` fires once.
+- The spec's `is_loop` and `is_revert` are zero on all ten trials, and so is `retries`.
   As defined, they describe an agent that repeats itself byte for byte; these agents do not, even when they fail.
-- `kugWvNv` is the thrashing failure: 10 scripts added (`p2.py` to `p6.py`, `rnd.py`, `ls.py`, `fin.py` are variants of `plan.py`, trying sort keys and relaxations, then a random local search in the background), two idle waits (`sleep 600` and `sleep 420`, killed at Claude Code's 2-minute Bash limit, so both are error rows), 12.6 minutes and $1.14, the longest and costliest attempt.
+- Corrected 2026-10-25: this table first gave `qNsiDSN` 1 retry and `kugWvNv` 2 idle waits (245 s).
+  The retry was a call to the nonexistent tool `bash` followed by the same command through `Bash`: a rejected call, not a rerun; `retries` now requires the same tool, and its window is the 3 previous tool calls rather than steps.
+  The first wait in `kugWvNv` (`sleep 600`) is not idle under the rule, since the background search's logs changed during it; the script printed 1 (123 s) for that trial from the start.
+- `kugWvNv` is the thrashing failure: 10 scripts added (`p2.py` to `p6.py`, `rnd.py`, `ls.py`, `fin.py` are variants of `plan.py`, trying sort keys and relaxations, then a random local search in the background), two waits on that search (`sleep 600` and `sleep 420`, killed at Claude Code's 2-minute Bash limit, so both are error rows; only the second changed nothing, so the rule counts one), 12.6 minutes and $1.14, the longest and costliest attempt.
 - `H2AcDwK` and `qNsiDSN` rewrote the three deliverables 4 and 3 times (16 and 23 deliverable rows against 9 for the pass, which wrote each once) and still planned 5 and 2 orders.
 - `PckZuoA` looks like the pass on every count: 19 mutating steps, 3 scripts, the deliverables written once.
   It differs only in content: a well-formed plan with the wrong orders.

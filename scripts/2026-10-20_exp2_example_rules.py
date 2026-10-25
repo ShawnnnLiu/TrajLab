@@ -15,7 +15,8 @@ Fields per trial:
   `is_loop`); `loops_same_output`: the same with an identical output too;
 - `reverts`: delta rows whose later version equals the earlier version of some earlier row on the
   same path (the spec's `is_revert`, at the row level);
-- `retries`: tool calls repeating the args of a call within the 3 previous steps that errored;
+- `retries`: tool calls with the same tool and args as an errored call among the 3 tool calls
+  before them;
 - `rejected`: tool calls Claude Code refused (`<tool_use_error>`);
 - `cache_rows` / `delta_rows`: delta rows under `__pycache__`, and all delta rows;
 - `idle_waits`: tool calls that took over 120 s and changed nothing (waiting on a background
@@ -39,6 +40,9 @@ from trajlab.store import schema
 logger = logging.getLogger("exp2_example_rules")
 
 TOOL_CALLS = "tool IS NOT NULL AND tool NOT IN ('Stop', 'StopFailure')"
+# An absolute path in the task instruction. Its last character is not a period, so a path that
+# ends a sentence ("... to /app/plan.json.") is still the path.
+PROMPT_PATH = "(/[A-Za-z0-9_./-]*[A-Za-z0-9_/-])"
 
 RULES: dict[str, str] = {
     "tool_calls": f"SELECT trial_id, count(*) AS n FROM steps WHERE {TOOL_CALLS} GROUP BY 1",
@@ -86,11 +90,14 @@ RULES: dict[str, str] = {
                       AND e.step_idx < d.step_idx AND e.sha256_before = d.sha256_after)
         GROUP BY 1""",
     "retries": f"""
-        SELECT s.trial_id, count(*) AS n FROM steps s
-        WHERE {TOOL_CALLS}
-          AND EXISTS (SELECT 1 FROM steps e WHERE e.trial_id = s.trial_id
-                      AND e.step_idx BETWEEN s.step_idx - 3 AND s.step_idx - 1
-                      AND e.args_json = s.args_json AND e.is_error)
+        WITH calls AS (
+            SELECT trial_id, tool, args_json, is_error,
+                   row_number() OVER (PARTITION BY trial_id ORDER BY step_idx) AS call_idx
+            FROM steps WHERE {TOOL_CALLS})
+        SELECT s.trial_id, count(*) AS n FROM calls s
+        WHERE EXISTS (SELECT 1 FROM calls e WHERE e.trial_id = s.trial_id
+                      AND e.call_idx BETWEEN s.call_idx - 3 AND s.call_idx - 1
+                      AND e.tool = s.tool AND e.args_json = s.args_json AND e.is_error)
         GROUP BY 1""",
     "rejected": f"""
         SELECT trial_id, count(*) AS n FROM steps
@@ -113,18 +120,18 @@ RULES: dict[str, str] = {
     "scripts_added": """
         SELECT trial_id, count(DISTINCT path) AS n FROM deltas
         WHERE op = 'add' AND path LIKE '%.py' AND path NOT LIKE '%/__pycache__/%' GROUP BY 1""",
-    "prompt_path_versions": """
+    "prompt_path_versions": f"""
         WITH named AS (
-            SELECT trial_id, unnest(regexp_extract_all(prompt, '(/[A-Za-z0-9_./-]+)')) AS path
+            SELECT trial_id, unnest(regexp_extract_all(prompt, '{PROMPT_PATH}')) AS path
             FROM trials)
         SELECT d.trial_id, count(*) AS n FROM deltas d
         WHERE EXISTS (SELECT 1 FROM named n WHERE n.trial_id = d.trial_id AND n.path = d.path)
         GROUP BY 1""",
 }
 
-PROMPT_PATHS = """
+PROMPT_PATHS = f"""
     SELECT list(DISTINCT path ORDER BY path) FROM (
-        SELECT unnest(regexp_extract_all(prompt, '(/[A-Za-z0-9_./-]+)')) AS path
+        SELECT unnest(regexp_extract_all(prompt, '{PROMPT_PATH}')) AS path
         FROM trials WHERE trial_id = ?)"""
 
 CHURN = """
