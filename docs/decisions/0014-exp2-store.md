@@ -197,7 +197,7 @@ Each column is an interface: `DerivedSpec` names it, and the implementation is a
 - Rows are loaded in bulk (newline-delimited JSON read by DuckDB with the table's own column types): 20,000 delta rows load in under a second, where `executemany` managed about 600 rows a second.
   A string with a lone surrogate, which DuckDB refuses, is stored with it written `\uXXXX`.
 - A store's database files are created under a temporary name and renamed, so a build killed while creating them leaves no file without its tables; an existing file without readable `store_meta` is refused with a message to delete it, and a `.wal` left beside a deleted database file is refused rather than replayed into the new one.
-- A trial built without images (steps only) is rebuilt by the first build that has them; its old rows are deleted first, in their own transaction, so a stop at any point leaves the trial whole or absent.
+- A trial built without images (steps only) is rebuilt by the first build that has them; once its deltas are made, its old rows are deleted in their own transaction, so a build that cannot read the images keeps them, and a stop at any point leaves the trial whole or absent.
 - Tests run offline on synthetic layers built to the observed format, including a differential test against an independent filesystem simulator; the check against real Docker is a dated script run by hand.
 
 ## Validation (2026-10-18)
@@ -255,6 +255,6 @@ A second review of the fixes (two lenses, each with a refuting verifier) reporte
 **Known limits.**
 zstd-compressed layers are refused; Docker's default is gzip.
 A layer with two members for one path (Docker writes none) can resolve a hard link through the wrong one when the start image is read filtered, and can leave a blob no row names.
-`start_image` names a start image only from `trajlab-resume.json` or `trajlab-preinstall.json`; a trial run without pre-install (its start image is its task image) needs the image passed to the provider by hand.
+`start_image` names a start image only from `trajlab-resume.json` or `trajlab-preinstall.json`; a trial run without pre-install (its start image is its task image) needs it passed as `trajlab store build --start-image`, which applies only to trials whose dir names none.
 `other` entries (FIFOs, devices) compare by kind, mode, and owner only, not device numbers.
 A path's bytes that are not UTF-8 are stored escaped (`\xNN`), so two paths differing only in how such bytes are spelled would collide; no such path is known in the corpus.

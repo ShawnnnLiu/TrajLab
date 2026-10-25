@@ -72,6 +72,7 @@ class FakeDocker:
     errors: dict[str, str] = field(default_factory=dict)  # subcommand -> stderr of a failure
     vanish: set[str] = field(default_factory=set)  # refs gone by the .RootFS.Layers inspect
     edit_manifest: Callable[[list[dict[str, Any]]], None] | None = None
+    after_save: Callable[[Path], None] | None = None  # e.g. cut the file short, as a full disk
     calls: list[list[str]] = field(default_factory=list)
 
     def __post_init__(self) -> None:
@@ -136,6 +137,8 @@ class FakeDocker:
                 info = tarfile.TarInfo(name)
                 info.size = len(data)
                 tar.addfile(info, io.BytesIO(data))
+        if self.after_save is not None:
+            self.after_save(path)
 
 
 BASE = [
@@ -450,6 +453,34 @@ def test_manifest_without_a_tag_raises(work_dir: Path) -> None:
     docker = FakeDocker([checkpoint_image(1)], edit_manifest=untag)
     with pytest.raises(DockerImagesError, match="does not list"):
         provide(docker, work_dir, 1)
+
+
+def test_manifest_of_other_than_images_raises(work_dir: Path) -> None:
+    def scramble(manifest: list[Any]) -> None:
+        manifest[0] = "not an image"
+
+    docker = FakeDocker([checkpoint_image(1)], edit_manifest=scramble)
+    with pytest.raises(DockerImagesError, match="is not a list of images"):
+        provide(docker, work_dir, 1)
+
+
+@pytest.mark.parametrize("where", ["empty", "in a layer", "in manifest.json"])
+def test_a_save_cut_short_raises_and_leaves_no_file(work_dir: Path, where: str) -> None:
+    # `tarfile` raises ReadError, which is neither ValueError nor OSError, for each of these.
+    def cut(path: Path) -> None:
+        with tarfile.open(path) as tar:
+            starts = {member.name: member.offset_data for member in tar.getmembers()}
+        keep = {
+            "empty": 0,
+            "in a layer": starts[TOPS[1].member] + 10,
+            "in manifest.json": starts["manifest.json"] + 10,
+        }[where]
+        os.truncate(path, keep)
+
+    docker = FakeDocker([checkpoint_image(1)], after_save=cut)
+    with pytest.raises(DockerImagesError, match="cannot read the save"):
+        provide(docker, work_dir, 1)
+    assert list(work_dir.iterdir()) == []
 
 
 def test_uncompressed_layers_are_returned_as_saved(work_dir: Path) -> None:

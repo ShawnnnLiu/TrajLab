@@ -1,16 +1,21 @@
 import json
+from collections.abc import Sequence
 from pathlib import Path
 
+import duckdb
 import pytest
 from typer.testing import CliRunner
 
 from tests.conftest import FIXTURE_TRIAL_NAME, assemble_job_dir, make_checkpoint, write_capture
+from tests.test_store_build import all_images, capture
 from trajlab.atif.postprocess import postprocess_trial
 from trajlab.capture.repair_launcher import Launcher
 from trajlab.checkpoint.watcher import hold_watcher_lock
 from trajlab.cli import app, identify_trial
-from trajlab.contracts import CorpusManifest
+from trajlab.contracts import PREINSTALL_RECORD_FILENAME, CheckpointRecord, CorpusManifest
 from trajlab.store import schema
+from trajlab.store.build import store_meta
+from trajlab.store.reconcile import ImageChain
 
 COMMANDS = {"run", "watch", "repair", "postprocess", "manifest", "validate", "store", "trace"}
 
@@ -149,6 +154,21 @@ def test_postprocess_rejects_empty_dir(tmp_path: Path) -> None:
 
     assert result.exit_code == 1
     assert "no trial dirs" in result.output
+
+
+def test_postprocess_reports_bad_paths_and_still_writes_the_good(
+    trial_copy: Path, tmp_path: Path
+) -> None:
+    missing = tmp_path / "missing"
+    (tmp_path / "empty").mkdir()
+    args = ["postprocess", str(missing), str(trial_copy), str(tmp_path / "empty")]
+
+    result = CliRunner().invoke(app, args)
+
+    assert result.exit_code == 1
+    assert f"trajlab postprocess: {missing}: not a directory" in result.output
+    assert f"trajlab postprocess: {tmp_path / 'empty'}: no trial dirs" in result.output
+    assert (trial_copy / "agent/trajectory.enriched.json").is_file()
 
 
 TRIAL_ENV_VARS = (
@@ -304,18 +324,6 @@ def test_store_build_takes_a_job_dir(job_dir: Path, tmp_path: Path) -> None:
     assert _trials_in(store) == 1
 
 
-def test_store_build_needs_a_start_image_for_deltas(trial_copy: Path, tmp_path: Path) -> None:
-    postprocess_trial(trial_copy)
-    store = tmp_path / "store"
-
-    result = CliRunner().invoke(app, ["store", "build", str(trial_copy), "--store", str(store)])
-
-    assert result.exit_code == 1
-    assert f"failed {trial_copy}: " in result.output
-    assert "--start-image" in result.output
-    assert not store.exists()
-
-
 def test_store_build_reports_an_unpostprocessed_trial(trial_copy: Path, tmp_path: Path) -> None:
     store = tmp_path / "store"
     args = ["store", "build", str(trial_copy), "--store", str(store), "--no-images"]
@@ -342,10 +350,169 @@ def test_store_build_reports_bad_paths(tmp_path: Path) -> None:
 
 def test_store_build_leaves_no_scratch_behind(trial_copy: Path, tmp_path: Path) -> None:
     postprocess_trial(trial_copy)
-    work = tmp_path / "work"
-    work.mkdir()
+    work = tmp_path / "work" / "scratch"  # made by the build
     args = ["store", "build", str(trial_copy), "--store", str(tmp_path / "store")]
     args += ["--no-images", "--work-dir", str(work)]
 
     assert CliRunner().invoke(app, args).exit_code == 0
     assert list(work.iterdir()) == []
+
+
+def test_store_build_reports_a_work_dir_it_cannot_make(trial_copy: Path, tmp_path: Path) -> None:
+    postprocess_trial(trial_copy)
+    (tmp_path / "file").write_text("")
+    args = ["store", "build", str(trial_copy), "--store", str(tmp_path / "store")]
+    args += ["--no-images", "--work-dir", str(tmp_path / "file" / "work")]
+
+    result = CliRunner().invoke(app, args)
+
+    assert result.exit_code == 1
+    assert "trajlab store build: cannot make scratch space: " in result.output
+    assert isinstance(result.exception, SystemExit)
+
+
+def test_store_build_reports_a_database_error_and_goes_on(
+    trial_copy: Path, job_dir: Path, tmp_path: Path
+) -> None:
+    postprocess_trial(trial_copy)
+    postprocess_trial(job_dir / FIXTURE_TRIAL_NAME)
+    store = tmp_path / "store"
+    schema.create_store(store, store_meta())
+    args = ["store", "build", str(trial_copy), str(job_dir), "--store", str(store), "--no-images"]
+
+    # An open connection under another configuration makes each write fail with a duckdb.Error,
+    # as a lock held by another process does; neither is a ValueError or an OSError.
+    with duckdb.connect(str(schema.record_path(store)), read_only=True):
+        result = CliRunner().invoke(app, args)
+
+    assert result.exit_code == 1
+    assert isinstance(result.exception, SystemExit), result.exception
+    for trial_dir in (trial_copy, job_dir / FIXTURE_TRIAL_NAME):
+        assert f"failed {trial_dir}: Connection Error: " in result.output
+    assert _trials_in(store) == 0
+
+
+# -- store build with images, from tests/test_store_build.py's in-memory layers -----------------
+
+
+@pytest.fixture
+def start_images(monkeypatch: pytest.MonkeyPatch) -> list[str]:
+    """Stands the in-memory images in for Docker's; lists the start image each provider got."""
+    given: list[str] = []
+
+    class Provider:
+        def __init__(self, work_dir: Path, *, start_image: str) -> None:
+            given.append(start_image)
+
+        def __enter__(self) -> "Provider":
+            return self
+
+        def __exit__(self, *exc_info: object) -> None:
+            pass
+
+        def chain(self, checkpoints: Sequence[CheckpointRecord]) -> ImageChain:
+            return all_images().chain(checkpoints)
+
+    monkeypatch.setattr("trajlab.cli.DockerImageProvider", Provider)
+    return given
+
+
+def write_preinstall_record(trial_dir: Path, image: str) -> None:
+    record = {
+        "task_image": "hello-world:task",
+        "task_image_id": "sha256:" + "1" * 64,
+        "task_content_key": "k",
+        "image": image,
+        "image_id": "sha256:" + "2" * 64,
+        "agent_name": "claude-code",
+        "agent_version": "2.1.278",
+        "agent_sha256": "3" * 64,
+        "harbor_version": "0.23.0",
+        "recipe_version": 2,
+        "cache_hit": True,
+        "recorded_at": "2026-10-02T00:00:00Z",
+    }
+    (trial_dir / PREINSTALL_RECORD_FILENAME).write_text(json.dumps(record))
+
+
+def test_store_build_reads_checkpoints_against_the_trials_start_image(
+    trial_copy: Path, tmp_path: Path, start_images: list[str]
+) -> None:
+    capture(trial_copy)
+    write_preinstall_record(trial_copy, "trajlab-preinstalled:abc")
+    store = tmp_path / "store"
+
+    # A trial's own record wins over --start-image, which is for trials without one.
+    result = CliRunner().invoke(
+        app, ["store", "build", str(trial_copy), "--store", str(store), "--start-image", "x:y"]
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "3 steps, 1 deltas, 2 checkpoints, chain complete" in result.output
+    assert start_images == ["trajlab-preinstalled:abc"]
+
+
+def test_store_build_skips_a_trial_built_with_start_image_without_it(
+    trial_copy: Path, tmp_path: Path, start_images: list[str]
+) -> None:
+    capture(trial_copy)  # no trajlab-preinstall.json
+    store = tmp_path / "store"
+    args = ["store", "build", str(trial_copy), "--store", str(store)]
+
+    first = CliRunner().invoke(app, [*args, "--start-image", "hello-world:task"])
+
+    assert first.exit_code == 0, first.output
+    assert "1 deltas, 2 checkpoints, chain complete" in first.output
+    assert start_images == ["hello-world:task"]
+
+    again = CliRunner().invoke(app, args)
+
+    assert again.exit_code == 0, again.output
+    assert again.output.startswith(f"skipped {trial_copy}: already in {store}")
+
+
+def test_store_build_needs_a_start_image_to_read_checkpoints(
+    trial_copy: Path, tmp_path: Path, start_images: list[str]
+) -> None:
+    capture(trial_copy)
+    store = tmp_path / "store"
+    args = ["store", "build", str(trial_copy), "--store", str(store)]
+    assert CliRunner().invoke(app, [*args, "--no-images"]).exit_code == 0
+
+    result = CliRunner().invoke(app, args)
+
+    assert result.exit_code == 1
+    assert result.output.startswith(
+        f"failed {trial_copy}: neither trajlab-preinstall.json nor trajlab-resume.json names its "
+        "start image; pass --start-image, or --no-images for steps only"
+    )
+    assert start_images == []
+    # The steps built without images are kept.
+    assert _trials_in(store) == 1
+
+
+def test_store_build_needs_no_start_image_without_checkpoints(
+    trial_copy: Path, tmp_path: Path, start_images: list[str]
+) -> None:
+    postprocess_trial(trial_copy)
+
+    result = CliRunner().invoke(
+        app, ["store", "build", str(trial_copy), "--store", str(tmp_path / "store")]
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "0 deltas, 0 checkpoints" in result.output
+    assert "images were not checked" not in result.output
+
+
+def test_store_build_refuses_a_start_image_without_images(trial_copy: Path, tmp_path: Path) -> None:
+    postprocess_trial(trial_copy)
+    store = tmp_path / "store"
+    args = ["store", "build", str(trial_copy), "--store", str(store), "--no-images"]
+
+    result = CliRunner().invoke(app, [*args, "--start-image", "hello-world:task"])
+
+    assert result.exit_code == 1
+    assert "trajlab store build: --start-image " in result.output
+    assert "pass one or the other" in result.output
+    assert not store.exists()

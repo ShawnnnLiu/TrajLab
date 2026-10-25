@@ -11,8 +11,9 @@ Writes go to `record.duckdb` (trials, steps, deltas) and `heldout.duckdb` (the t
 any earlier one; the record transaction is the commit point. A trial already in `trials` is
 skipped and nothing is written, so building a trial again is safe, including after a build
 that stopped between the two files; the exception is a trial built without images, which a
-build with images rebuilds (its old rows are deleted first, in their own transaction, so a stop
-at any point leaves the trial either whole or absent).
+build with images rebuilds (once its deltas are made, its old rows are deleted in their own
+transaction, so a failed read of the images keeps them, and a stop at any point leaves the
+trial either whole or absent).
 """
 
 import hashlib
@@ -317,14 +318,9 @@ def build_trial(
 
     create_store(store_dir, store_meta())
     stored = _stored(store_dir, result.id)
-    if stored is not None:
-        if stored.chain.images_checked or images is None:
-            logger.info("%s: trial %s is already in %s; skipped", trial_dir, result.id, store_dir)
-            return stored
-        logger.info("%s: rebuilding trial %s, built before without images", trial_dir, result.id)
-        with connect(record_path(store_dir), read_only=False) as con, _transaction(con):
-            for table in ("deltas", "steps", "trials"):
-                con.execute(f"DELETE FROM {table} WHERE trial_id = ?", [result.id])
+    if stored is not None and (stored.chain.images_checked or images is None):
+        logger.info("%s: trial %s is already in %s; skipped", trial_dir, result.id, store_dir)
+        return stored
 
     chain, deltas = _deltas(
         steps,
@@ -335,6 +331,14 @@ def build_trial(
         work_dir=work_dir,
     )
     report = chain_report(result.id, steps, chain)
+
+    if stored is not None:
+        # Only now that its deltas are made, so a rebuild that fails reading the images keeps
+        # the steps built before.
+        logger.info("%s: rebuilding trial %s, built before without images", trial_dir, result.id)
+        with connect(record_path(store_dir), read_only=False) as con, _transaction(con):
+            for table in ("deltas", "steps", "trials"):
+                con.execute(f"DELETE FROM {table} WHERE trial_id = ?", [result.id])
 
     with connect(heldout_path(store_dir), read_only=False) as con, _transaction(con):
         con.execute("DELETE FROM chains WHERE trial_id = ?", [result.id])

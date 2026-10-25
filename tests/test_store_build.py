@@ -37,6 +37,7 @@ from trajlab.contracts import (
 )
 from trajlab.store import build, schema
 from trajlab.store.build import BuildError, build_trial, chain_report, store_meta, trial_row
+from trajlab.store.docker_images import DockerImagesError
 from trajlab.store.exclusions import EXCLUDED_PATTERNS
 from trajlab.store.reconcile import (
     RECONCILE_METHOD,
@@ -729,3 +730,26 @@ def test_a_trial_built_without_images_is_rebuilt_with_them(
     assert build_trial(
         trial_copy, store, images=all_images(), work_dir=tmp_path / "w"
     ).skipped_existing
+
+
+def test_a_rebuild_that_cannot_read_the_images_keeps_the_steps(
+    trial_copy: Path, tmp_path: Path
+) -> None:
+    capture(trial_copy)
+    store = tmp_path / "store"
+    build_trial(trial_copy, store, images=None, work_dir=tmp_path / "w")
+
+    class Unreadable:
+        def chain(self, checkpoints: Sequence[CheckpointRecord]) -> ImageChain:
+            raise DockerImagesError("Cannot connect to the Docker daemon")
+
+    with pytest.raises(DockerImagesError):
+        build_trial(trial_copy, store, images=Unreadable(), work_dir=tmp_path / "w")
+    assert [count(store, table) for table in ("trials", "steps", "deltas", "chains")] == [
+        1,
+        3,
+        0,
+        1,
+    ]
+    rebuilt = build_trial(trial_copy, store, images=all_images(), work_dir=tmp_path / "w")
+    assert rebuilt.skipped_existing is False and rebuilt.chain.complete
