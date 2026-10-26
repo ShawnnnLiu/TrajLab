@@ -61,6 +61,7 @@ from trajlab.capture.trace import (
     find_jobs,
     full_transcript,
     job_summary,
+    read_changes,
     trial_dirs,
     trial_summary,
 )
@@ -72,7 +73,6 @@ from trajlab.contracts import (
     LABEL_PATTERNS,
     PROCESSES_FILENAME,
     TRAJLAB_DIRNAME,
-    CallChanges,
 )
 
 logger = logging.getLogger(__name__)
@@ -117,6 +117,16 @@ class _NotFound(Exception):
     pass
 
 
+@dataclass(frozen=True)
+class _Loaded:
+    """A trial as the site last read it: the state of the files read (`key`), the trace, and the
+    full recorded diffs by call id and path (the trace cuts long ones)."""
+
+    key: tuple[Any, ...]
+    trace: dict[str, Any]
+    diffs: dict[str, dict[str, str]]
+
+
 class TraceSite:
     """The site's routes as a plain function of a request, so tests need no sockets."""
 
@@ -133,8 +143,7 @@ class TraceSite:
         self.hosts = LOCAL_HOSTS | extra_hosts
         self.guide = guide
         self.snapshots = snapshots or SnapshotReader()
-        self._traces: OrderedDict[Path, tuple[tuple[Any, ...], dict[str, Any]]] = OrderedDict()
-        self._diffs: OrderedDict[Path, tuple[Any, dict[str, dict[str, str]]]] = OrderedDict()
+        self._loaded: OrderedDict[Path, _Loaded] = OrderedDict()
         self._lock = threading.Lock()
 
     def handle(
@@ -271,37 +280,11 @@ class TraceSite:
                 return _json(self._guide())
         raise _NotFound("no such API route")
 
-    def _diffs_of(self, trial: Path) -> dict[str, dict[str, str]]:
-        """The full recorded diffs of a trial, by call id and path (the trace cuts long ones)."""
-        source = trial / TRAJLAB_DIRNAME / CHANGES_FILENAME
-        key = (source.stat().st_mtime_ns, source.stat().st_size) if source.is_file() else None
-        with self._lock:
-            cached = self._diffs.get(trial)
-            if cached is not None and cached[0] == key:
-                return cached[1]
-        diffs: dict[str, dict[str, str]] = {}
-        if source.is_file():
-            for line in source.read_text().splitlines():
-                if not line.strip():
-                    continue
-                try:
-                    change = CallChanges.model_validate_json(line)
-                except ValidationError:
-                    continue
-                # The first line per call, as in `build_trace`.
-                diffs.setdefault(
-                    change.tool_call_id, {f.path: f.diff for f in change.files if f.diff}
-                )
-        with self._lock:
-            self._diffs[trial] = (key, diffs)
-            while len(self._diffs) > CACHED_TRACES:
-                self._diffs.popitem(last=False)
-        return diffs
-
     def _file(self, trial: Path, path: str, call: str) -> dict[str, Any]:
         """A changed path after a call: from the diffs when they rebuild it, else from the
         checkpoint image that holds the state after the call."""
-        trace = self._trace(trial)
+        loaded = self._load(trial)
+        trace = loaded.trace
         versions = trace["files"].get(path)
         if versions is None:
             raise _NotFound("no call in this trial changed that path")
@@ -312,9 +295,7 @@ class TraceSite:
         if index is None:
             raise _NotFound("no such call in this trial")
         diffs = {
-            call_id: by_path[path]
-            for call_id, by_path in self._diffs_of(trial).items()
-            if path in by_path
+            call_id: by_path[path] for call_id, by_path in loaded.diffs.items() if path in by_path
         }
         view = file_after(versions, diffs, index) | {"path": path, "call": call, "source": None}
         if view["text"] is not None and view["verified"]:
@@ -392,7 +373,11 @@ class TraceSite:
         }
 
     def _trace(self, trial: Path) -> dict[str, Any]:
-        """The trial's trace, rebuilt when any file it reads changes (a running trial grows)."""
+        return self._load(trial).trace
+
+    def _load(self, trial: Path) -> _Loaded:
+        """The trial's trace and diffs, read again when any file the trace reads changes (a
+        running trial grows). Both come from one parse of `changes.jsonl`."""
         paths = TrialPaths(trial)
         checkpoints = paths.agent_dir / CHECKPOINTS_DIRNAME
         sources = (
@@ -408,17 +393,22 @@ class TraceSite:
             (s.stat().st_mtime_ns, s.stat().st_size) if s.is_file() else None for s in sources
         )
         with self._lock:
-            cached = self._traces.get(trial)
-            if cached is not None and cached[0] == key:
-                self._traces.move_to_end(trial)
-                return cached[1]
-        trace = build_trace(trial)
+            cached = self._loaded.get(trial)
+            if cached is not None and cached.key == key:
+                self._loaded.move_to_end(trial)
+                return cached
+        changes = read_changes(trial)
+        diffs = {
+            call_id: {f.path: f.diff for f in change.files if f.diff}
+            for call_id, change in changes.items()
+        }
+        loaded = _Loaded(key, build_trace(trial, changes), diffs)
         with self._lock:
-            self._traces[trial] = (key, trace)
-            self._traces.move_to_end(trial)
-            while len(self._traces) > CACHED_TRACES:
-                self._traces.popitem(last=False)
-        return trace
+            self._loaded[trial] = loaded
+            self._loaded.move_to_end(trial)
+            while len(self._loaded) > CACHED_TRACES:
+                self._loaded.popitem(last=False)
+        return loaded
 
     def _context(self, job_name: str, trial_name: str) -> dict[str, Any]:
         """What an export row says about a trial and its steps, from the trace."""

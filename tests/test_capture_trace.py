@@ -37,12 +37,15 @@ from trajlab.contracts import (
     ProcessSnapshot,
 )
 
+# As in the off corpus's first snapshots: the keep-alive, Claude Code, and Docker's DNS.
 HARNESS = (
-    ProcessEntry(pid=1, ppid=0, cmd="sleep infinity"),
-    ProcessEntry(pid=40, ppid=1, cmd="node /usr/local/bin/claude --print"),
+    ProcessEntry(pid=1, ppid=0, cmd="sh -c sleep infinity"),
+    ProcessEntry(pid=7, ppid=1, cmd="sleep infinity"),
+    ProcessEntry(pid=40, ppid=0, cmd="claude --verbose --output-format=stream-json"),
 )
-HARNESS_PORT = ListeningPort(proto="tcp", address="127.0.0.1", port=35765)
+HARNESS_PORT = ListeningPort(proto="tcp", address="127.0.0.11", port=35765)
 SERVER = "python3 -m http.server 8000"
+SERVER_PORT = ListeningPort(proto="tcp", address="0.0.0.0", port=8000)
 
 
 def sha(text: str) -> str:
@@ -94,6 +97,54 @@ def snapshot(call_id: str, seq: int, extra: tuple = (), ports: tuple = ()) -> Pr
         capture_ms=70,
         captured_at=T0 + timedelta(seconds=seq),
     )
+
+
+def a_py_change(call_id: str, seq: int, before: str | None, after: str) -> CallChanges:
+    """A call that modified /app/a.py and read it, diffed against `before` (None: no file)."""
+    if before is None:
+        diff = f"--- /dev/null\n+++ b/app/a.py\n@@ -0,0 +1 @@\n+{after.strip()}"
+    else:
+        diff = f"--- a/app/a.py\n+++ b/app/a.py\n@@ -1 +1 @@\n-{before.strip()}\n+{after.strip()}"
+    file = FileChange(
+        path="/app/a.py",
+        op="modified",
+        kind="file",
+        size=len(after),
+        sha256=sha(after),
+        before_sha256=sha(before) if before is not None else None,
+        is_text=True,
+        diff=diff,
+    )
+    return CallChanges(
+        tool_call_id=call_id, call_seq=seq, files=(file,), files_total=1, capture_ms=50
+    )
+
+
+def unread_change(call_id: str, seq: int, op: str = "modified") -> CallChanges:
+    """A call that changed /app/a.py past the 20 files a call reads: no contents, no hash."""
+    file = FileChange(path="/app/a.py", op=op, kind="file", size=6, skipped="over_file_cap")
+    return CallChanges(
+        tool_call_id=call_id, call_seq=seq, files=(file,), files_total=21, capture_ms=40
+    )
+
+
+def removal(call_id: str, seq: int) -> CallChanges:
+    file = FileChange(path="/app/a.py", op="removed", kind="file", before_sha256=sha("x = 2\n"))
+    return CallChanges(
+        tool_call_id=call_id, call_seq=seq, files=(file,), files_total=1, capture_ms=40
+    )
+
+
+def rewrite_extras(trial: Path, changes: tuple = (), snapshots: tuple = ()) -> None:
+    """Replace the lines of the calls that `changes` and `snapshots` name."""
+    for name, model, new in (
+        (CHANGES_FILENAME, CallChanges, changes),
+        (PROCESSES_FILENAME, ProcessSnapshot, snapshots),
+    ):
+        path = trial / TRAJLAB_DIRNAME / name
+        by_id = {record.tool_call_id: record for record in new}
+        old = [model.model_validate_json(line) for line in path.read_text().splitlines()]
+        path.write_text("".join(by_id.get(r.tool_call_id, r).model_dump_json() + "\n" for r in old))
 
 
 def five_call_trial(trial: Path) -> None:
@@ -185,35 +236,19 @@ def five_call_trial(trial: Path) -> None:
         calls=calls,
     )
 
-    def change(call_id: str, seq: int, before: str, after: str) -> CallChanges:
-        diff = f"--- a/app/a.py\n+++ b/app/a.py\n@@ -1 +1 @@\n-{before.strip()}\n+{after.strip()}"
-        file = FileChange(
-            path="/app/a.py",
-            op="modified",
-            kind="file",
-            size=len(after),
-            sha256=sha(after),
-            before_sha256=sha(before),
-            is_text=True,
-            diff=diff,
-        )
-        return CallChanges(
-            tool_call_id=call_id, call_seq=seq, files=(file,), files_total=1, capture_ms=50
-        )
-
     server = (ProcessEntry(pid=90, ppid=40, cmd=SERVER),)
     restarted = (ProcessEntry(pid=95, ppid=40, cmd=SERVER),)
-    port = (ListeningPort(proto="tcp", address="0.0.0.0", port=8000),)
+    port = (SERVER_PORT,)
     write_extras(
         trial,
         [
             CallChanges(
                 tool_call_id="c1", call_seq=1, files=(), files_total=0, baseline=True, capture_ms=40
             ),
-            change("c2", 2, "x = 1\n", "x = 2\n"),
+            a_py_change("c2", 2, "x = 1\n", "x = 2\n"),
             CallChanges(tool_call_id="c3", call_seq=3, files=(), files_total=0, capture_ms=40),
             CallChanges(tool_call_id="c4", call_seq=4, files=(), files_total=0, capture_ms=40),
-            change("c5", 5, "x = 2\n", "x = 1\n"),
+            a_py_change("c5", 5, "x = 2\n", "x = 1\n"),
         ],
         [
             snapshot("c1", 1),
@@ -269,7 +304,7 @@ def test_trace_joins_records_diffs_and_processes_by_tool_call_id(trial_copy: Pat
     assert calls["c5"]["processes"]["stopped"] == [SERVER]
     assert calls["c5"]["processes"]["closed"] == [{"proto": "tcp", "port": 8000}]
     assert trace["capture"]["harness_ports"] == [35765]
-    assert all("claude" not in cmd for cmd in calls["c3"]["processes"]["running"])
+    assert calls["c3"]["processes"]["running"] == [SERVER]  # not Claude Code, not the keep-alive
     assert trace["capture"]["counts"] == {"baseline": 1, "changed": 2, "unchanged": 2}
     assert trace["capture"]["stops"] == 1
     # Which checkpoint holds the state after each call, and where the time went.
@@ -291,6 +326,87 @@ def test_a_call_recorded_twice_keeps_its_first_changes(trial_copy: Path) -> None
 
     calls = calls_by_id(build_trace(trial_copy))
     assert calls["c2"]["changes"]["files"][0]["diff"].endswith("-x = 1\n+x = 2")
+
+
+def test_a_port_the_first_call_opens_is_the_agents(trial_copy: Path) -> None:
+    # The first process snapshot is taken after the first hooked call, here one that started
+    # a server: only Docker's DNS port is the harness's.
+    five_call_trial(trial_copy)
+    server = (ProcessEntry(pid=90, ppid=40, cmd=SERVER),)
+    rewrite_extras(trial_copy, snapshots=(snapshot("c1", 1, server, (SERVER_PORT,)),))
+
+    trace = build_trace(trial_copy)
+
+    first = calls_by_id(trace)["c1"]["processes"]
+    assert first["started"] == [SERVER]
+    assert first["opened"] == first["listening"] == [{"proto": "tcp", "port": 8000}]
+    assert trace["capture"]["harness_ports"] == [35765]
+
+
+def test_ports_open_before_any_agent_process_ran_are_the_harnesss(trial_copy: Path) -> None:
+    # A service older than Claude Code (a lower pid), and no process of the agent's running.
+    five_call_trial(trial_copy)
+    service = (ProcessEntry(pid=20, ppid=1, cmd="redis-server *:6379"),)
+    port = (ListeningPort(proto="tcp", address="0.0.0.0", port=6379),)
+    rewrite_extras(trial_copy, snapshots=(snapshot("c1", 1, service, port),))
+
+    trace = build_trace(trial_copy)
+
+    assert trace["capture"]["harness_ports"] == [6379, 35765]
+    assert calls_by_id(trace)["c1"]["processes"]["opened"] == []
+
+
+@pytest.mark.parametrize(
+    ("replaced", "read_at"),
+    [
+        # c3 changed a.py without reading it; c5's diff starts from the version read at c2.
+        ((unread_change("c3", 3),), 2),
+        # c2 deleted a.py, c3 wrote it again unread; c5's diff starts from no file.
+        (
+            (
+                removal("c2", 2),
+                unread_change("c3", 3, op="added"),
+                a_py_change("c5", 5, None, "x = 1\n"),
+            ),
+            2,
+        ),
+    ],
+)
+def test_a_diff_from_before_an_unread_change_is_marked(
+    trial_copy: Path, replaced: tuple, read_at: int
+) -> None:
+    # The watcher did this before ADR-0015's fixes of 2026-10-22.
+    five_call_trial(trial_copy)
+    rewrite_extras(trial_copy, changes=replaced)
+
+    trace = build_trace(trial_copy)
+
+    mark = {"read_at": read_at, "unread_at": 3}
+    assert calls_by_id(trace)["c5"]["changes"]["files"][0]["stale_before"] == mark
+    assert [v["stale_before"] for v in trace["files"]["/app/a.py"]] == [None, None, mark]
+
+
+@pytest.mark.parametrize(
+    "replaced",
+    [
+        # The fixed watcher: c5's before-version is read from the last checkpoint's image.
+        (unread_change("c3", 3), a_py_change("c5", 5, "x = 3\n", "x = 1\n")),
+        # Never read before its unread change: the old watcher read the image as well.
+        (unread_change("c2", 2),),
+    ],
+)
+def test_other_diffs_after_an_unread_change_are_not_marked(
+    trial_copy: Path, replaced: tuple
+) -> None:
+    five_call_trial(trial_copy)
+    rewrite_extras(trial_copy, changes=replaced)
+
+    trace = build_trace(trial_copy)
+
+    assert [v["stale_before"] for v in trace["files"]["/app/a.py"]] == [None] * len(
+        trace["files"]["/app/a.py"]
+    )
+    assert "stale_before" not in calls_by_id(trace)["c5"]["changes"]["files"][0]
 
 
 def test_the_stop_comes_after_the_final_message(trial_copy: Path) -> None:

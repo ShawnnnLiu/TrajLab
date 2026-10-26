@@ -1,6 +1,6 @@
 // The Files tab: every path the trial changed, and each path's history across calls.
 
-import { api, enc, fmtBytes, h, icon, note, plural, put, shortHash, state, toolIcon, trialHref } from "./core.js";
+import { api, enc, fmtBytes, h, icon, note, plural, put, shortHash, STALE_PILL, staleNote, state, toolIcon, trialHref } from "./core.js";
 import { diffStats, diffView, fileView } from "./diff.js";
 
 const NOISY = /\/(site-packages|dist-packages|node_modules|__pycache__|\.cache|\.git|\.npm|\.cargo|\.venv|venv)\//;
@@ -129,10 +129,12 @@ function fileHistory(path) {
           v.size !== null && v.size !== undefined ? h("span", { class: "muted small" }, fmtBytes(v.size)) : null,
           v.before_sha256 || v.sha256 ? h("span", { class: "muted small mono" }, `${shortHash(v.before_sha256) || "new"} → ${shortHash(v.sha256) || (v.op === "removed" ? "gone" : "?")}`) : null,
           v.skipped ? h("span", { class: "pill warn" }, v.skipped.replace(/_/g, " ")) : null,
+          v.stale_before ? h("span", { class: "pill warn" }, STALE_PILL) : null,
           same ? h("span", { class: "hint inline" }, same) : null,
           h("span", { class: "spacer" }),
           v.op !== "removed" ? showWhole : null,
         ),
+        v.stale_before ? staleNote(v.stale_before) : null,
         entry && entry.diff ? diffView(entry.diff, { path, max: 600 }) : v.op === "removed" ? null : note(event && event.changes ? "No diff recorded." : "No diff recorded: paths only (no --extras)."),
         whole,
       );

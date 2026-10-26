@@ -232,8 +232,8 @@ def test_the_page_modules_are_served(site: TraceSite) -> None:
         assert get(site, bad).status == 404, bad
 
 
-def test_a_file_the_agent_created_is_rebuilt_from_its_diff(site: TraceSite, job_dir: Path) -> None:
-    trial = job_dir / FIXTURE_TRIAL_NAME
+def write_hello_diff(trial: Path) -> None:
+    """The fixture's one call, recorded as creating /app/hello.txt, with its diff."""
     write_capture(trial, checkpoints=[make_checkpoint(1)], calls=[make_call(1, change="changed")])
     content = b"Hello, world!"
     file = FileChange(
@@ -251,10 +251,35 @@ def test_a_file_the_agent_created_is_rebuilt_from_its_diff(site: TraceSite, job_
     (trial / TRAJLAB_DIRNAME).mkdir()
     (trial / TRAJLAB_DIRNAME / CHANGES_FILENAME).write_text(change.model_dump_json() + "\n")
 
+
+def test_a_file_the_agent_created_is_rebuilt_from_its_diff(site: TraceSite, job_dir: Path) -> None:
+    write_hello_diff(job_dir / FIXTURE_TRIAL_NAME)
+
     view = body(get(site, f"/api/file/{TRIAL_URL}?path=/app/hello.txt&call={FIXTURE_TOOL_CALL_ID}"))
 
     assert (view["source"], view["text"], view["verified"]) == ("diffs", "Hello, world!", True)
     assert view["changed_lines"] == [1]
+
+
+def test_the_trace_and_the_file_view_read_the_changes_once(
+    site: TraceSite, job_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    write_hello_diff(job_dir / FIXTURE_TRIAL_NAME)
+    reads = []
+    read_text = Path.read_text
+
+    def counting(self: Path, *args: Any, **kwargs: Any) -> str:
+        if self.name == CHANGES_FILENAME:
+            reads.append(self)
+        return read_text(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", counting)
+
+    assert get(site, f"/api/trace/{TRIAL_URL}").status == 200
+    view = body(get(site, f"/api/file/{TRIAL_URL}?path=/app/hello.txt&call={FIXTURE_TOOL_CALL_ID}"))
+
+    assert view["source"] == "diffs"
+    assert len(reads) == 1
 
 
 def test_otherwise_the_file_is_read_from_the_calls_checkpoint(
