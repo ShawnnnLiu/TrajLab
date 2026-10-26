@@ -2,7 +2,8 @@
 
 A store is a directory:
 
-    <store>/record.duckdb    trials, steps, deltas, store_meta: what an agent may read
+    <store>/record.duckdb    trials, steps, deltas, store_meta, and the derived views
+                             (trajlab.store.derive): what an agent may read
     <store>/heldout.duckdb   checks, faults, blame, chains, store_meta: never shown to an agent
     <store>/blobs/<sha256>   later versions of changed rows without a hunk (`blob_ref`)
 
@@ -12,7 +13,9 @@ locked: no `read_blob`, `glob`, `read_csv`, `ATTACH`, or `COPY` can reach `heldo
 `blobs/` (ADR-0014, item 2). A default DuckDB connection could read either.
 
 Every table's columns are, in order, the fields of its row model in `trajlab.contracts.store`; a
-test keeps them equal. A shape change bumps `SCHEMA_VERSION` and needs an ADR.
+test keeps them equal. A shape change bumps `SCHEMA_VERSION` and needs an ADR. The derived views
+are created with the tables and versioned apart from them (`StoreMeta.derived`): `replace_views`
+swaps a store's views for this code's without touching a row (ADR-0018).
 """
 
 import json
@@ -32,6 +35,7 @@ from trajlab.contracts import (
     SCHEMA_VERSION,
     StoreMeta,
 )
+from trajlab.store.derive import VIEWS
 
 RECORD_TABLES: dict[str, str] = {
     "trials": """
@@ -68,9 +72,6 @@ RECORD_TABLES: dict[str, str] = {
             t_end TIMESTAMPTZ,
             checkpoint_seq INTEGER,
             checkpoint_id VARCHAR,
-            is_loop BOOLEAN,
-            is_revert BOOLEAN,
-            files_touched INTEGER,
             PRIMARY KEY (trial_id, step_idx)
         )""",
     "deltas": """
@@ -164,14 +165,14 @@ def blobs_dir(store_dir: Path) -> Path:
     return store_dir / BLOBS_DIRNAME
 
 
-def _create(path: Path, tables: dict[str, str], meta: StoreMeta) -> None:
+def _create(path: Path, ddls: Sequence[str], meta: StoreMeta) -> None:
     """Create a database file whole or not at all: it is built under a temporary name and
-    renamed, so a build killed midway leaves no file without its tables and meta."""
+    renamed, so a build killed midway leaves no file without its tables, views, and meta."""
     tmp = path.with_name(f".{path.name}.tmp")
     for leftover in (tmp, tmp.with_name(tmp.name + ".wal")):
         leftover.unlink(missing_ok=True)
     with duckdb.connect(str(tmp)) as con:
-        for ddl in tables.values():
+        for ddl in ddls:
             con.execute(ddl)
         con.execute(META_TABLE)
         con.executemany(
@@ -181,12 +182,45 @@ def _create(path: Path, tables: dict[str, str], meta: StoreMeta) -> None:
     os.replace(tmp, path)
 
 
-def read_meta(con: duckdb.DuckDBPyConnection) -> StoreMeta:
-    """The store_meta of an open store file; `StoreError` if it has none that reads."""
+class SchemaVersionError(StoreError):
+    """A store file of a schema version this code does not read."""
+
+    def __init__(self, version: object, path: Path | None = None) -> None:
+        self.version = version
+        where = f"{path} has" if path is not None else "has"
+        upgrade = (
+            f"; `trajlab store derive {path.parent if path else '<store>'}` upgrades it"
+            if version in UPGRADABLE_VERSIONS
+            else ""
+        )
+        super().__init__(f"{where} schema {version}; this code reads {SCHEMA_VERSION}{upgrade}")
+
+
+# Schema versions `replace_views` brings up to this one in place, and what version 1 had that
+# version 2 does not: three `steps` columns for derived values, which no code ever filled.
+UPGRADABLE_VERSIONS = (1,)
+_V1_STEP_COLUMNS = ("is_loop", "is_revert", "files_touched")
+UPGRADED_FROM_1 = "schema 1"
+
+
+def _raw_meta(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
     try:
         rows = con.execute("SELECT key, value FROM store_meta").fetchall()
-        return StoreMeta.model_validate({key: json.loads(value) for key, value in rows})
-    except (duckdb.Error, ValidationError, json.JSONDecodeError) as error:
+        return {key: json.loads(value) for key, value in rows}
+    except (duckdb.Error, json.JSONDecodeError) as error:
+        raise StoreError(f"not a complete store: no readable store_meta ({error})") from error
+
+
+def read_meta(con: duckdb.DuckDBPyConnection) -> StoreMeta:
+    """The store_meta of an open store file; `SchemaVersionError` if it names another schema
+    version, `StoreError` if it has none that reads."""
+    values = _raw_meta(con)
+    version = values.get("schema_version")
+    if version is not None and version != SCHEMA_VERSION:
+        raise SchemaVersionError(version)
+    try:
+        return StoreMeta.model_validate(values)
+    except ValidationError as error:
         raise StoreError(f"not a complete store: no readable store_meta ({error})") from error
 
 
@@ -194,33 +228,121 @@ def create_store(store_dir: Path, meta: StoreMeta) -> None:
     """Create an empty store in `store_dir`, or check that the one there matches `meta`.
 
     Raises `StoreError` if an existing store was built under a different schema version,
-    exclusion list, text rule, or reconcile method: rows from both would not be comparable.
+    exclusion list, text rule, or reconcile method: rows from both would not be comparable. One
+    whose derived views differ is refused too, with the command that replaces them.
     """
     if meta.schema_version != SCHEMA_VERSION:
         raise StoreError(f"this code writes schema {SCHEMA_VERSION}, not {meta.schema_version}")
     store_dir.mkdir(parents=True, exist_ok=True)
     blobs_dir(store_dir).mkdir(exist_ok=True)
-    for path, tables in (
-        (record_path(store_dir), RECORD_TABLES),
-        (heldout_path(store_dir), HELDOUT_TABLES),
+    for path, ddls in (
+        (record_path(store_dir), [*RECORD_TABLES.values(), *(view.ddl() for view in VIEWS)]),
+        (heldout_path(store_dir), list(HELDOUT_TABLES.values())),
     ):
         wal = path.with_name(path.name + ".wal")
         if not path.exists():
             if wal.exists():
                 # DuckDB would replay it into the new file: old rows back, or a failed replay.
                 raise StoreError(f"{wal} is left from a deleted {path.name}; delete it too")
-            _create(path, tables, meta)
+            _create(path, ddls, meta)
             continue
         with duckdb.connect(str(path), read_only=True) as con:
-            try:
-                found = read_meta(con)
-            except StoreError as error:
-                raise StoreError(
-                    f"{path}: {error}; delete it (and {wal.name}, if there) to build the store "
-                    "again"
-                ) from error
+            found = _existing_meta(con, path)
         if found != meta:
+            if found.model_copy(update={"derived": meta.derived}) == meta:
+                raise StoreError(
+                    f"{path} has derived views {found.derived}, not {meta.derived}; "
+                    f"run `trajlab store derive {store_dir}` to replace them"
+                )
             raise StoreError(f"{path} was built under {found}, not {meta}")
+
+
+def _existing_meta(con: duckdb.DuckDBPyConnection, path: Path) -> StoreMeta:
+    try:
+        return read_meta(con)
+    except SchemaVersionError as error:
+        raise SchemaVersionError(error.version, path) from None
+    except StoreError as error:
+        wal = path.with_name(path.name + ".wal")
+        raise StoreError(
+            f"{path}: {error}; delete it (and {wal.name}, if there) to build the store again"
+        ) from error
+
+
+def replace_views(store_dir: Path, meta: StoreMeta) -> str:
+    """Replace the derived views of the store in `store_dir` with this code's and record their
+    id, `meta.derived`, in both files' `store_meta`; return the id they replace. Rows are not
+    touched, since every view is a function of them.
+
+    A store of schema version 1 is upgraded to this version first, and `schema 1` returned:
+    `steps` loses the three columns version 1 kept for derived values (ADR-0018), refused if
+    any row has a value in one, and `store_meta` gains `derived`.
+
+    Raises `StoreError` if a file is missing or was built under settings other than `meta`'s
+    (apart from the views and an upgradable version): only those can be brought up to date.
+    """
+    record, heldout = record_path(store_dir), heldout_path(store_dir)
+    old = [_replaceable(path, meta) for path in (record, heldout)][0]
+    with duckdb.connect(str(record)) as con:
+        con.begin()
+        try:
+            if old == UPGRADED_FROM_1:
+                _drop_v1_step_columns(con, record)
+            for (name,) in con.execute(
+                "SELECT view_name FROM duckdb_views() WHERE NOT internal AND NOT temporary"
+            ).fetchall():
+                con.execute(f'DROP VIEW "{name}"')
+            for view in VIEWS:
+                con.execute(view.ddl())
+            _write_versions(con, meta)
+        except BaseException:
+            con.rollback()
+            raise
+        con.commit()
+    with duckdb.connect(str(heldout)) as con:
+        _write_versions(con, meta)
+    return old
+
+
+def _replaceable(path: Path, meta: StoreMeta) -> str:
+    """The derived id of a store file `replace_views` can bring to `meta`, or `schema 1`."""
+    if not path.is_file():
+        raise StoreError(f"{path} does not exist")
+    with duckdb.connect(str(path), read_only=True) as con:
+        values = _raw_meta(con)
+        if values.get("schema_version") in UPGRADABLE_VERSIONS:
+            try:
+                found = StoreMeta.model_validate(
+                    {**values, "schema_version": SCHEMA_VERSION, "derived": meta.derived}
+                )
+            except ValidationError as error:
+                raise StoreError(f"{path}: no readable store_meta ({error})") from error
+            old = UPGRADED_FROM_1
+        else:
+            found = _existing_meta(con, path)
+            old = found.derived
+    if found.model_copy(update={"derived": meta.derived}) != meta:
+        raise StoreError(f"{path} was built under {found}, not {meta}")
+    return old
+
+
+def _drop_v1_step_columns(con: duckdb.DuckDBPyConnection, path: Path) -> None:
+    filled = " OR ".join(f"{column} IS NOT NULL" for column in _V1_STEP_COLUMNS)
+    (n,) = con.execute(f"SELECT count(*) FROM steps WHERE {filled}").fetchone()  # type: ignore[misc]
+    if n:
+        raise StoreError(f"{path}: {n} steps rows have a value in {list(_V1_STEP_COLUMNS)}")
+    for column in _V1_STEP_COLUMNS:
+        con.execute(f"ALTER TABLE steps DROP COLUMN {column}")
+
+
+def _write_versions(con: duckdb.DuckDBPyConnection, meta: StoreMeta) -> None:
+    con.executemany(
+        "INSERT OR REPLACE INTO store_meta VALUES (?, ?)",
+        [
+            ("schema_version", json.dumps(meta.schema_version)),
+            ("derived", json.dumps(meta.derived)),
+        ],
+    )
 
 
 def connect(path: Path, *, read_only: bool) -> duckdb.DuckDBPyConnection:
@@ -232,7 +354,12 @@ def connect(path: Path, *, read_only: bool) -> duckdb.DuckDBPyConnection:
     if not path.is_file():
         raise StoreError(f"{path} does not exist")
     con = duckdb.connect(str(path), read_only=read_only)
-    _check(con, path)
+    try:
+        con.execute("SET TimeZone = 'UTC'")
+        _read_checked(con, path)
+    except BaseException:
+        con.close()
+        raise
     return con
 
 
@@ -264,27 +391,18 @@ def connect_agent(store_dir: Path) -> duckdb.DuckDBPyConnection:
             con.execute("SET lock_configuration = true")
         elif zone != "UTC":
             raise StoreError(f"{path} is open in this process with time zone {zone}, not UTC")
-        version = read_meta(con).schema_version
+        _read_checked(con, path)
     except BaseException:
         con.close()
         raise
-    if version != SCHEMA_VERSION:
-        con.close()
-        raise StoreError(f"{path} has schema {version}; this code reads {SCHEMA_VERSION}")
     return con
 
 
-def _check(con: duckdb.DuckDBPyConnection, path: Path) -> None:
-    """Set the session's time zone to UTC and check the schema version; close on failure."""
+def _read_checked(con: duckdb.DuckDBPyConnection, path: Path) -> StoreMeta:
     try:
-        con.execute("SET TimeZone = 'UTC'")
-        version = read_meta(con).schema_version
-    except BaseException:
-        con.close()
-        raise
-    if version != SCHEMA_VERSION:
-        con.close()
-        raise StoreError(f"{path} has schema {version}; this code reads {SCHEMA_VERSION}")
+        return read_meta(con)
+    except SchemaVersionError as error:
+        raise SchemaVersionError(error.version, path) from None
 
 
 def insert_rows(con: duckdb.DuckDBPyConnection, table: str, rows: Sequence[BaseModel]) -> None:

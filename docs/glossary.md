@@ -110,7 +110,7 @@ One trial is one task executed by one attempt.
 
 - **store** - the Exp 2 store (ADR-0014): a directory holding `record.duckdb`, `heldout.duckdb`, and `blobs/`.
   Not: "database" for the `record-files` export, which is files.
-- **record of prior attempts** - what a record arm gives the repair agent: the store's agent-visible tables (`trials`, `steps`, `deltas`, and `store_meta`), through the query tool (`record-engine`) or as exported files (`record-files`).
+- **record of prior attempts** - what a record arm gives the repair agent: the store's agent-visible tables (`trials`, `steps`, `deltas`, and `store_meta`) and derived views, through the query tool (`record-engine`) or as exported files (`record-files`).
   Always qualify it ("record of prior attempts", "record arm"); unqualified, "record" names a capture record (checkpoint record, call record, stop record, compaction record).
 - **held-out tables** - `checks`, `faults`, `blame`, and `chains` in `heldout.duckdb`; never opened by an agent connection or exported to an agent.
 - **step row** - one row of `steps`: a tool call, an ATIF step without tool calls, a compaction step, or a stop record (ADR-0014, item 4).
@@ -123,6 +123,10 @@ One trial is one task executed by one attempt.
 - **view** - the filesystem at a checkpoint: the start image with that checkpoint's top layer applied by the OCI rules (whiteouts, opaque directories, non-directory members replacing subtrees).
 - **delta** - the delta rows of one checkpoint: the paths whose kind, mode, owner, or content differ between the previous checkpoint's view (the start image, for the first) and this one's; keyed to the step row that owns the checkpoint.
   Not: the detector's `changed_paths` in a call record, which compare change times and are capped.
+- **derived view** - one of the SQL views over a store's tables in `record.duckdb` (`step_flags`, `delta_flags`, `path_versions`, `trial_summary`), each a function of one trial's rows, versioned by `store_meta`'s `derived` (ADR-0018).
+  Not: "derived column"; schema version 1's `is_loop`, `is_revert`, and `files_touched` columns were dropped in version 2.
+- **bundle** - the `record-files` export of a store: one `<relation>.jsonl` per relation an agent's connection can read, each delta row's hunk again as a `.diff` file, and a README holding the schema text (ADR-0018).
+- **schema text** - `trajlab.store.describe.describe`: every agent-readable relation with each column's type and description; the bundle's README, and what the `record-engine` prompt is to carry.
 - **checkpoint chain** - a trial's checkpoints in `seq` order; complete when every hooked call that ran has a call record and every checkpoint image was read (ADR-0014, item 8).
 - **retry** - one more attempt at a failed task in Exp 2, started after the harness verifier scored the previous attempt; tests the agent runs inside an attempt are not retries.
 - **retry chain** - a failure's attempts under one Exp 2 arm, in order: attempt 0 (the corpus first attempt), then retries 1 to N, each naming the one before in `parent_trial_id`.

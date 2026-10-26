@@ -3,7 +3,7 @@
 The store has two DuckDB files (`trajlab.store.schema` holds their DDL):
 
 - `record.duckdb`, the record of prior attempts that an agent may read: `trials`, `steps`,
-  `deltas`, and `store_meta`.
+  `deltas`, and `store_meta`, and the derived views over them (`trajlab.store.derive`).
 - `heldout.duckdb`, never opened by an agent connection or exported to an agent: `checks`,
   `faults`, and `blame` (ground truth, for scoring), and `chains` (capture completeness).
 
@@ -17,7 +17,7 @@ from uuid import UUID
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
 # Bump with an ADR whenever any table below or in trajlab.store.schema changes shape.
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 RECORD_DB_FILENAME = "record.duckdb"
 HELDOUT_DB_FILENAME = "heldout.duckdb"
 # Content-addressed later versions of changed rows without a hunk (a file's bytes, text or
@@ -51,8 +51,8 @@ class TrialRow(_Row):
     harness_version: str | None = Field(default=None, description="e.g. `2.1.278`.")
     reward: float | None = Field(default=None, description="The verifier's reward; null if none.")
     tokens_in: int | None = Field(default=None, ge=0, description="Input tokens, cache included.")
-    tokens_out: int | None = Field(default=None, ge=0)
-    cost_usd: float | None = Field(default=None, ge=0)
+    tokens_out: int | None = Field(default=None, ge=0, description="Output tokens.")
+    cost_usd: float | None = Field(default=None, ge=0, description="The agent's reported cost.")
     wall_ms: int | None = Field(default=None, ge=0, description="Agent execution wall time.")
 
     @model_validator(mode="after")
@@ -68,17 +68,18 @@ class StepRow(_Row):
     An ATIF step with k tool calls gives k rows, in call order; its message and reasoning sit on
     the first of them only. The first user step is not a row: it is `trials.prompt`. Checkpoint
     system steps are not rows either: their state is `checkpoint_seq` and their changes are the
-    `deltas` of the step that owns them.
+    `deltas` of the step that owns them. What rules say about a step is in the derived views
+    (`trajlab.store.derive`, ADR-0018), not here.
     """
 
-    trial_id: UUID
+    trial_id: UUID = Field(description="The trial (trials.trial_id).")
     step_idx: int = Field(ge=1, description="Order within the trial, from 1.")
     atif_step_id: int | None = Field(
         default=None,
         ge=1,
         description="step_id in Harbor's trajectory.json; null for a stop or compaction row.",
     )
-    source: StepSource
+    source: StepSource = Field(description="Who wrote the step: `user`, `agent`, or `system`.")
     tool_call_id: str | None = Field(
         default=None,
         description="Claude Code's tool_use_id; the stop request id for a stop row (ADR-0011).",
@@ -110,10 +111,6 @@ class StepRow(_Row):
         "it ran, until a call's record names a checkpoint again).",
     )
     checkpoint_id: str | None = Field(default=None, description="That checkpoint's image id.")
-    # Derived columns (ADR-0014; trajlab.store.derive, build-order step 3). Null until derived.
-    is_loop: bool | None = None
-    is_revert: bool | None = None
-    files_touched: int | None = Field(default=None, ge=0)
 
     @model_validator(mode="after")
     def _consistent(self) -> Self:
@@ -132,15 +129,17 @@ class DeltaRow(_Row):
     content. Content is a file's bytes or a symlink's target.
     """
 
-    trial_id: UUID
-    step_idx: int = Field(ge=1)
+    trial_id: UUID = Field(description="The trial (trials.trial_id).")
+    step_idx: int = Field(ge=1, description="The step whose checkpoint holds the change.")
     path: str = Field(
         pattern=r"^/",
         description="Absolute path in the container; a byte that is not UTF-8 is written \\xNN.",
     )
-    op: DeltaOp
-    kind_before: EntryKind | None = None
-    kind_after: EntryKind | None = None
+    op: DeltaOp = Field(description="`add`, `delete`, or `modify`.")
+    kind_before: EntryKind | None = Field(
+        default=None, description="`file`, `dir`, `symlink`, or `other`; null if absent before."
+    )
+    kind_after: EntryKind | None = Field(default=None, description="The same, after.")
     is_text: bool | None = Field(
         default=None,
         description="Every file or symlink version of the row is text under the store's text "
@@ -158,14 +157,22 @@ class DeltaRow(_Row):
         "target), when the content changed and the row has no hunk because a version is not "
         "text.",
     )
-    sha256_before: str | None = Field(default=None, pattern=SHA256)
-    sha256_after: str | None = Field(default=None, pattern=SHA256)
-    bytes_before: int | None = Field(default=None, ge=0)
-    bytes_after: int | None = Field(default=None, ge=0)
+    sha256_before: str | None = Field(
+        default=None, pattern=SHA256, description="The earlier content's sha256."
+    )
+    sha256_after: str | None = Field(
+        default=None, pattern=SHA256, description="The later content's sha256."
+    )
+    bytes_before: int | None = Field(default=None, ge=0, description="The earlier size.")
+    bytes_after: int | None = Field(default=None, ge=0, description="The later size.")
     mode_before: str | None = Field(default=None, pattern=r"^[0-7]{4}$", description="e.g. 0644.")
-    mode_after: str | None = Field(default=None, pattern=r"^[0-7]{4}$")
+    mode_after: str | None = Field(
+        default=None, pattern=r"^[0-7]{4}$", description="The same, after."
+    )
     owner_before: str | None = Field(default=None, pattern=r"^\d+:\d+$", description="uid:gid.")
-    owner_after: str | None = Field(default=None, pattern=r"^\d+:\d+$")
+    owner_after: str | None = Field(
+        default=None, pattern=r"^\d+:\d+$", description="The same, after."
+    )
 
     @model_validator(mode="after")
     def _consistent(self) -> Self:
@@ -193,6 +200,10 @@ class StoreMeta(_Row):
     )
     text_rule: str = Field(min_length=1, description="When a file version counts as text.")
     reconcile_method: str = Field(min_length=1, description="How deltas were computed.")
+    derived: str = Field(
+        min_length=1,
+        description="The derived views' version and SQL hash (trajlab.store.derive.derived_id).",
+    )
 
 
 # -- held out: heldout.duckdb ------------------------------------------------------------------
@@ -279,12 +290,10 @@ class ChainReport(_Row):
 
 
 class DerivedSpec(_Row):
-    """A derived column: its interface is the column, its implementation a registered,
-    versioned function (ADR-0014; trajlab.store.derive). A second implementation of the same
-    name, e.g. an LLM one, changes `implementation`, never the schema."""
+    """A column of a derived view: its interface is the view's column, its implementation the
+    view's SQL, versioned as a whole by `StoreMeta.derived` (ADR-0018; trajlab.store.derive). A
+    second implementation of the same column changes the view, never the tables."""
 
+    view: str = Field(pattern=r"^[a-z_]+$")
     name: str = Field(pattern=r"^[a-z_]+$")
-    table: Literal["steps"]
-    sql_type: Literal["BOOLEAN", "INTEGER"]
-    implementation: str = Field(min_length=1, description="e.g. `deterministic-v1`.")
     description: str = Field(min_length=1)
