@@ -80,8 +80,9 @@ def _hunks(con: duckdb.DuckDBPyConnection) -> list[tuple[UUID, int, str, str]]:
 def export(store_dir: Path, out_dir: Path) -> ExportResult:
     """Write the store's record to `out_dir`, which must not exist, and verify it.
 
-    Raises `ExportError` if `out_dir` exists, a delta path cannot be a file name, or the written
-    bundle does not read back as the store; `StoreError` if the store cannot be opened.
+    Raises `ExportError` if `out_dir` exists, a delta path cannot be a file name (or two would
+    be the same file there), or the written bundle does not read back as the store;
+    `StoreError` if the store cannot be opened.
     """
     if out_dir.exists():
         raise ExportError(f"{out_dir} exists; export writes a new directory")
@@ -93,14 +94,16 @@ def export(store_dir: Path, out_dir: Path) -> ExportResult:
             rows: dict[str, int] = {}
             for name in relations():
                 target = tmp / f"{name}.jsonl"
-                con.execute(
+                written = con.execute(
                     f"COPY (SELECT * FROM {name} ORDER BY ALL) TO {_literal(target)} (FORMAT json)"
-                )
-                counted = con.execute(f"SELECT count(*) FROM {name}").fetchone()
-                rows[name] = counted[0] if counted else 0
+                ).fetchone()
+                rows[name] = written[0] if written else 0
             hunks = _hunks(con)
-            for trial_id, step_idx, path, hunk in hunks:
-                target = hunk_file(tmp, trial_id, step_idx, path)
+            targets = [
+                hunk_file(tmp, trial_id, step_idx, path) for trial_id, step_idx, path, _ in hunks
+            ]
+            _check_distinct(tmp, targets, [path for _, _, path, _ in hunks])
+            for (_, _, path, hunk), target in zip(hunks, targets, strict=True):
                 try:
                     target.parent.mkdir(parents=True, exist_ok=True)
                     target.write_bytes(hunk.encode("utf-8"))
@@ -114,6 +117,29 @@ def export(store_dir: Path, out_dir: Path) -> ExportResult:
         shutil.rmtree(tmp, ignore_errors=True)
         raise
     return ExportResult(out_dir=out_dir, rows=rows, hunk_files=len(hunks))
+
+
+def _check_distinct(root: Path, targets: list[Path], paths: list[str]) -> None:
+    """Refuse hunk files that would be one file, or a file and a directory, under `root`: paths
+    differing only in case on a case-insensitive file system, or a path `x` beside `x.diff/y`."""
+    probe = root / "case-probe"
+    probe.touch()
+    folded = (root / "CASE-PROBE").exists()
+    probe.unlink()
+
+    def key(target: Path) -> str:
+        relative = target.relative_to(root).as_posix()
+        return relative.casefold() if folded else relative
+
+    seen: dict[str, str] = {}
+    for target, path in zip(targets, paths, strict=True):
+        if (other := seen.setdefault(key(target), path)) != path:
+            raise ExportError(f"{other} and {path} would be one hunk file here")
+    for target, path in zip(targets, paths, strict=True):
+        for parent in target.relative_to(root).parents:
+            name = parent.as_posix().casefold() if folded else parent.as_posix()
+            if name in seen:
+                raise ExportError(f"{seen[name]} and {path} would be a file and a directory here")
 
 
 def verify(store_dir: Path, out_dir: Path) -> list[str]:

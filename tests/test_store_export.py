@@ -90,6 +90,33 @@ def test_a_failed_export_leaves_nothing(tmp_path: Path) -> None:
     assert sorted(path.name for path in tmp_path.iterdir()) == ["store"]
 
 
+def test_a_path_that_is_both_a_file_and_a_dir_of_hunk_files_is_refused(tmp_path: Path) -> None:
+    store = make_store(
+        tmp_path,
+        [make_call_row(1)],
+        [change(1, "/a/b", hunk="+x\n"), change(1, "/a/b.diff/c", hunk="+y\n")],
+    )
+    with pytest.raises(ExportError, match="would be a file and a directory here"):
+        export(store, tmp_path / "bundle")
+    assert not (tmp_path / "bundle").exists()
+
+
+def test_paths_differing_in_case_are_refused_only_where_case_folds(tmp_path: Path) -> None:
+    store = make_store(
+        tmp_path,
+        [make_call_row(1)],
+        [change(1, "/app/Makefile", hunk="+x\n"), change(1, "/app/makefile", hunk="+y\n")],
+    )
+    (tmp_path / "probe").touch()
+    folds = (tmp_path / "PROBE").exists()
+    if folds:
+        with pytest.raises(ExportError, match="would be one hunk file here"):
+            export(store, tmp_path / "bundle")
+    else:
+        export(store, tmp_path / "bundle")
+        assert verify(store, tmp_path / "bundle") == []
+
+
 def test_scripts_hunks_land_under_their_paths(tmp_path: Path) -> None:
     store = make_store(tmp_path, [make_call_row(1)], [script(1, "/w/a b/plan.py", ["x = 1"])])
     out = tmp_path / "bundle"

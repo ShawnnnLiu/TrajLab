@@ -35,7 +35,7 @@ from trajlab.contracts import (
     SCHEMA_VERSION,
     StoreMeta,
 )
-from trajlab.store.derive import VIEWS
+from trajlab.store.derive import VIEWS, derived_id
 
 RECORD_TABLES: dict[str, str] = {
     "trials": """
@@ -280,13 +280,16 @@ def replace_views(store_dir: Path, meta: StoreMeta) -> str:
 
     Raises `StoreError` if a file is missing or was built under settings other than `meta`'s
     (apart from the views and an upgradable version): only those can be brought up to date.
+    A store left between the two files' updates (record done, heldout not) is finished, and the
+    heldout file's old id returned.
     """
     record, heldout = record_path(store_dir), heldout_path(store_dir)
-    old = [_replaceable(path, meta) for path in (record, heldout)][0]
+    record_old = _replaceable(record, meta)
+    heldout_old = _replaceable(heldout, meta)
     with duckdb.connect(str(record)) as con:
         con.begin()
         try:
-            if old == UPGRADED_FROM_1:
+            if record_old == UPGRADED_FROM_1:
                 _drop_v1_step_columns(con, record)
             for (name,) in con.execute(
                 "SELECT view_name FROM duckdb_views() WHERE NOT internal AND NOT temporary"
@@ -301,7 +304,7 @@ def replace_views(store_dir: Path, meta: StoreMeta) -> str:
         con.commit()
     with duckdb.connect(str(heldout)) as con:
         _write_versions(con, meta)
-    return old
+    return record_old if record_old != meta.derived else heldout_old
 
 
 def _replaceable(path: Path, meta: StoreMeta) -> str:
@@ -346,7 +349,9 @@ def _write_versions(con: duckdb.DuckDBPyConnection, meta: StoreMeta) -> None:
 
 
 def connect(path: Path, *, read_only: bool) -> duckdb.DuckDBPyConnection:
-    """Open one of a store's database files; it must exist and carry this SCHEMA_VERSION.
+    """Open one of a store's database files; it must exist and carry this SCHEMA_VERSION and
+    this code's derived views, so no reader sees rows computed by other rules than the ones it
+    describes.
 
     The session's time zone is UTC, so TIMESTAMPTZ values read back (and print) in UTC whatever
     the host's zone is. DuckDB needs `pytz` to return them to Python.
@@ -400,9 +405,15 @@ def connect_agent(store_dir: Path) -> duckdb.DuckDBPyConnection:
 
 def _read_checked(con: duckdb.DuckDBPyConnection, path: Path) -> StoreMeta:
     try:
-        return read_meta(con)
+        meta = read_meta(con)
     except SchemaVersionError as error:
         raise SchemaVersionError(error.version, path) from None
+    if meta.derived != derived_id():
+        raise StoreError(
+            f"{path} has derived views {meta.derived}, not {derived_id()}; "
+            f"run `trajlab store derive {path.parent}` to replace them"
+        )
+    return meta
 
 
 def insert_rows(con: duckdb.DuckDBPyConnection, table: str, rows: Sequence[BaseModel]) -> None:

@@ -34,26 +34,41 @@ CACHE_PATH = r"/__pycache__/|\.pyc$|/\.pytest_cache/"
 # A program the agent wrote to run, by its extension.
 SCRIPT_PATH = r"\.(?:py|sh|bash|js|mjs|ts|rb|pl|r|jl)$"
 # An absolute path in the task instruction. Its last character is not a period, so a path that
-# ends a sentence ("... to /app/plan.json.") is still the path.
+# ends a sentence ("... to /app/plan.json.") is still the path; a trailing slash is dropped, and a
+# match starting `//` (the rest of a URL) is not a path.
 PROMPT_PATH = r"/[A-Za-z0-9_./-]*[A-Za-z0-9_/-]"
 # A tool result that shows a failure: a non-zero exit (Claude Code's `Exit code N`, Harbor's
 # `[exit_code] N`), a Python traceback, a failing test line, or an `...Error:` line.
 ERROR_MARKER = (
     r"(?m)^Exit code -?[1-9][0-9]*|^\[exit_code\] -?[1-9][0-9]*"
     r"|Traceback \(most recent call last\)"
-    r"|^FAILED\b|^FAIL:|\b[0-9]+ failed\b|test result: FAILED"
+    r"|^FAILED\b|^FAIL:|\b[1-9][0-9]* failed\b|test result: FAILED"
     r"|^[A-Za-z]*Error:"
 )
-# A Bash command that runs tests, and a message that claims success: the same patterns as the
-# trace site's success-claim hint (trajlab.capture.trace, ADR-0015).
+# A Bash command that runs tests: a test runner in command position (at the start, or after a
+# shell separator, `then`, or `do`; past variable assignments, `timeout N`, `time`, `env`, and a
+# launcher such as `python -m` or `uv run`). The trace site's hint (trajlab.capture.trace,
+# ADR-0015) matches the same runners anywhere in the command, so `pip install pytest` and
+# `cat pytest.ini` count there and not here.
 TEST_COMMAND = (
-    r"\b(?:pytest|unittest|tox|nox|ctest|jest|vitest|mocha)\b"
-    r"|\b(?:npm|yarn|pnpm)(?: run)? test\b|\b(?:cargo|go) test\b"
-    r"|\bmake(?: -C \S+)? (?:test|check)\b|\btest\.sh\b|\brun_tests\b"
+    r"(?:^|[;&|(\n]|\bthen\b|\bdo\b)\s*"
+    r"(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)*"
+    r"(?:(?:timeout\s+\S+|time|env|sudo)\s+)*"
+    r"(?:(?:python3?|uv\s+run|poetry\s+run|pipenv\s+run|npx|bunx)\s+(?:-m\s+)?)?"
+    r"(?:pytest|py\.test|unittest|tox|nox|ctest|jest|vitest|mocha"
+    r"|(?:npm|yarn|pnpm|bun)(?:\s+run)?\s+test|(?:cargo|go)\s+test"
+    r"|make(?:\s+-C\s+\S+)?\s+(?:test|check)"
+    r"|(?:(?:ba)?sh\s+)?\S*(?:test\.sh|run_tests))\b"
 )
+# A message that claims success: the trace site's success-claim pattern (a test keeps the two
+# equal), unless the message also says something failed or was not done.
 SUCCESS_CLAIM = (
     r"(?i)\b(?:all (?:\d+ )?tests?|tests? (?:now )?(?:pass|passes|passed|passing)|verified"
     r"|works?|working|succeeded|successfully|fixed|done|complete[ds]?)\b"
+)
+NOT_DONE = (
+    r"(?i)\b(?:not|cannot|could ?n.t|could not|did ?n.t|was ?n.t|is ?n.t|unable"
+    r"|fail(?:ed|s|ing|ure)?|incomplete|unfinished|unresolved|unfortunately)\b"
 )
 # A call that ran this long and changed nothing waited on something else.
 IDLE_SECONDS = 120
@@ -67,9 +82,17 @@ def _literal(text: str) -> str:
     return "'" + text.replace("'", "''") + "'"
 
 
-CACHE, SCRIPT, PROMPT, ERROR, TEST, SUCCESS = (
+CACHE, SCRIPT, PROMPT, ERROR, TEST, SUCCESS, NOT_DONE_SQL = (
     _literal(pattern)
-    for pattern in (CACHE_PATH, SCRIPT_PATH, PROMPT_PATH, ERROR_MARKER, TEST_COMMAND, SUCCESS_CLAIM)
+    for pattern in (
+        CACHE_PATH,
+        SCRIPT_PATH,
+        PROMPT_PATH,
+        ERROR_MARKER,
+        TEST_COMMAND,
+        SUCCESS_CLAIM,
+        NOT_DONE,
+    )
 )
 
 # Scripts the agent added, each with its distinct non-blank lines as first written (the `+`
@@ -141,7 +164,9 @@ STEP_FLAGS = f"""
 
 DELTA_FLAGS = f"""
     WITH named AS (
-        SELECT trial_id, list_distinct(regexp_extract_all(prompt, {PROMPT})) AS paths
+        SELECT trial_id, list_distinct(list_transform(
+                   list_filter(regexp_extract_all(prompt, {PROMPT}), p -> NOT starts_with(p, '//')),
+                   p -> rtrim(p, '/'))) AS paths
         FROM trials
     ),
     {_SCRIPTS}
@@ -152,10 +177,11 @@ DELTA_FLAGS = f"""
         regexp_matches(d.path, {CACHE}) AS is_cache,
         coalesce(list_contains(n.paths, d.path), false) AS names_prompt_path,
         row_number() OVER (PARTITION BY d.trial_id, d.path ORDER BY d.step_idx) AS version,
-        d.sha256_after IS NOT NULL AND EXISTS (
+        d.sha256_after IS NOT NULL AND d.sha256_before IS DISTINCT FROM d.sha256_after AND EXISTS (
             SELECT 1 FROM deltas e
             WHERE e.trial_id = d.trial_id AND e.path = d.path AND e.step_idx < d.step_idx
               AND e.sha256_before = d.sha256_after
+              AND e.sha256_after IS DISTINCT FROM e.sha256_before
         ) AS is_revert,
         a.path IS NOT NULL AS is_script_add,
         v.variant_of
@@ -224,7 +250,10 @@ TRIAL_SUMMARY = f"""
         coalesce(p.scripts_added, 0) AS scripts_added,
         coalesce(p.script_variants, 0) AS script_variants,
         coalesce(p.prompt_path_versions, 0) AS prompt_path_versions,
-        coalesce(regexp_matches(f.message, {SUCCESS}), false) AND (
+        coalesce(
+            regexp_matches(f.message, {SUCCESS}) AND NOT regexp_matches(f.message, {NOT_DONE_SQL}),
+            false
+        ) AND (
             c.last_test_step IS NULL
             OR c.last_test_step < coalesce(c.last_mutating_step, 0)
             OR c.last_test_failed
@@ -295,7 +324,8 @@ VIEWS: tuple[View, ...] = (
             ("version", "This row's position among the attempt's delta rows of the path, from 1."),
             (
                 "is_revert",
-                "The later version's content is what an earlier delta row of the path replaced.",
+                "The row changes the content back to what an earlier delta row of the path "
+                "replaced.",
             ),
             ("is_script_add", "The path is a script (by extension) that this row adds."),
             (
@@ -342,8 +372,9 @@ VIEWS: tuple[View, ...] = (
             ("prompt_path_versions", "Delta rows with names_prompt_path."),
             (
                 "unverified_completion",
-                "The attempt's last message claims success, and no test command ran at or after "
-                "its last mutating step, or the last test command has an error marker.",
+                "The attempt's last message claims success and says nothing failed or was not "
+                "done, and no test command ran at or after its last mutating step, or the last "
+                "test command has an error marker.",
             ),
         ),
         TRIAL_SUMMARY,

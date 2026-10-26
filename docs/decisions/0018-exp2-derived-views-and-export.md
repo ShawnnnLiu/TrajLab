@@ -28,7 +28,7 @@ A rule changed after that must therefore apply to an existing store without its 
 
 2. **Schema version 2 drops `steps.is_loop`, `steps.is_revert`, and `steps.files_touched`.**
    `files_touched` is `step_flags.files_touched`, the spec's definition (delta rows of the step).
-   `is_revert` is `delta_flags.is_revert`, the spec's definition per delta row: the later content is what an earlier row of the path replaced.
+   `is_revert` is `delta_flags.is_revert`, the spec's definition per delta row: the row changes the content back to what an earlier content change of the path replaced (a mode or owner change alone is no revert).
    `is_loop` is not implemented; the same-approach family that ADR-0016 has fill it is there under its own names (`delta_flags.variant_of`, `step_flags.is_idle_wait`, `trial_summary.scripts_added`), so no column carries a name its definition no longer fits.
    `StoreMeta` gains `derived`.
 
@@ -36,11 +36,13 @@ A rule changed after that must therefore apply to an existing store without its 
    The patterns and thresholds are constants of `trajlab.store.derive`, each named in the view's column descriptions.
    - A *cache file* is under `__pycache__/` or `.pytest_cache/`, or ends in `.pyc`.
    - A step is *mutating* when it is a tool call (not a message, not a stop record) with a delta row outside cache files.
-   - An *error marker* is `is_error`, or an output with a non-zero exit (`Exit code N`, `[exit_code] N`), a Python traceback, a failing test line (`FAILED`, `FAIL:`, `N failed`, `test result: FAILED`), or a line starting `...Error:`.
+   - An *error marker* is `is_error`, or an output with a non-zero exit (`Exit code N`, `[exit_code] N`), a Python traceback, a failing test line (`FAILED`, `FAIL:`, `N failed` with N above 0, `test result: FAILED`), or a line starting `...Error:`.
    - A *tail probe* is a tool call that is not mutating, after the trial's last mutating step (every tool call, when none mutates).
    - An *idle wait* is a tool call that is not mutating and ran over 120 s (`t_end - t_start`).
-   - A *test command* is a Bash call whose command matches the trace site's test-runner pattern; a *success claim* is a message matching its success pattern.
-   - `names_prompt_path` is true when the path equals an absolute path in `trials.prompt` (its last character not a period); a path under a named directory does not count.
+   - A *test command* is a Bash call with a test runner in command position: at the start, or after a shell separator, `then`, or `do`, past variable assignments, `timeout N`, `time`, `env`, and a launcher (`python -m`, `uv run`, `npx`, ...).
+     The trace site's hint matches the same runners anywhere in a command; here `pip install pytest` and `cat pytest.ini` are not test runs.
+   - A *success claim* is a message matching the trace site's success pattern (a test keeps the two equal) and none of a fixed list of failure words (`not`, `couldn't`, `unable`, `failed`, `incomplete`, `unfortunately`, ...).
+   - `names_prompt_path` is true when the path equals an absolute path in `trials.prompt`, its last character not a period and a trailing slash dropped; a match starting `//` (the rest of a URL) is not a path, and a path under a named directory does not count.
    - `version` numbers a path's delta rows in step order.
    - A *script add* is an `add` row of a path ending in `.py`, `.sh`, `.bash`, `.js`, `.mjs`, `.ts`, `.rb`, `.pl`, `.r`, or `.jl`, outside cache files.
    - `variant_of` names, for a script add with at least 5 distinct non-blank lines, the script added at an earlier step whose first-written lines include at least half of them, the one sharing the most (the earliest on a tie).
@@ -49,8 +51,9 @@ A rule changed after that must therefore apply to an existing store without its 
 
 4. **The views are versioned apart from the tables.**
    `StoreMeta.derived` is `DERIVE_VERSION` plus the sha256 of the views' SQL, so a change to any pattern changes it.
-   `create_store` refuses a store whose `derived` differs, naming the command that fixes it.
+   `create_store`, `connect`, and `connect_agent` refuse a store whose `derived` differs, naming the command that fixes it, so no reader or export sees rows computed by rules other than the ones the code describes.
    `trajlab store derive <store>` replaces the views in place, in one transaction, and records the new id in both files' `store_meta`; rows are untouched, so it needs no images.
+   A store left between the two files' updates is finished by running it again.
    It also upgrades a store of schema version 1 in place: `steps` loses the three columns, which no code ever filled (refused if any row has a value in one), and `store_meta` gains `derived`.
    Every other reader refuses a schema-1 store with an error naming that command.
    The preregistration records the id.
@@ -60,6 +63,7 @@ A rule changed after that must therefore apply to an existing store without its 
    Each delta row's hunk is also written to `deltas/<trial_id>/<step_idx>/<path>.diff`, so the record can be grepped as files.
    Blob contents are not in the bundle, because `connect_agent` cannot read `blobs/` either; both arms see `blob_ref` only.
    The bundle is written beside `<out>`, verified, and only then renamed into place, so `<out>` either holds a verified bundle or does not exist.
+   Two hunks that would be one file there (paths differing only in case, on a case-insensitive file system such as a Mac's), or a file and a directory (`/a/b` beside `/a/b.diff/c`), are refused with both paths named.
    `--verify` checks an existing bundle: the file set, every row's keys, each relation's rows as a multiset, the README, and every hunk file.
 
 6. **One schema text for both record arms.**
@@ -80,7 +84,7 @@ A rule changed after that must therefore apply to an existing store without its 
 
 ## Validation (2026-10-26)
 
-- `make test`: 1015 passed, 2 skipped.
+- `make test`: 1036 passed, 2 skipped.
   `tests/test_store_derive.py` checks each rule on hand-made rows; `tests/test_store_export.py` exports the fixture trial's store and reads it back exactly, and checks that `--verify` catches an edited, dropped, or extra row, an extra key, missing and extra files, an edited README, and edited, missing, and extra hunk files.
 - The production-planning example (`corpus/jobs/exp2-example-v2`, 5 trials), rebuilt under schema 2 on the Mac from its Docker images:
 
@@ -88,20 +92,21 @@ A rule changed after that must therefore apply to an existing store without its 
       uv run trajlab store export <store> <bundle>
 
   117 steps and 236 deltas, as in the schema-1 store; every chain complete; 11 to 14 s per trial.
-  The export took 0.9 s: 3.4 MB, 196 hunk files, verified.
+  The export took under a second: 3.4 MB, 196 hunk files, verified.
 - The same trials' schema-1 store, built by the previous code (`corpus/stores/exp2-example-v2`), upgraded in place with `trajlab store derive`: every relation, views included, equals the freshly built schema-2 store's row for row.
 
 | Trial | Reward | Tool calls | Mutating | First error | Tail probes | Idle waits | Scripts | Variants | Deliverable versions | Unverified completion |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `5hnrmLq` | 1 | 17 | 14 | 4 | 0 | 0 | 8 | 1 | 9 | yes |
-| `H2AcDwK` | 0 | 19 | 8 | 4 | 0 | 1 | 1 | 0 | 16 | yes |
-| `PckZuoA` | 0 | 21 | 19 | 4 | 0 | 0 | 5 | 1 | 9 | yes |
-| `kugWvNv` | 0 | 32 | 23 | 4 | 0 | 1 | 11 | 6 | 10 | yes |
-| `qNsiDSN` | 0 | 18 | 15 | 4 | 0 | 0 | 6 | 0 | 23 | yes |
+| `5hnrmLq` | 1 | 17 | 14 | 4 | 0 | 0 | 8 | 1 | 9 | no |
+| `H2AcDwK` | 0 | 19 | 8 | 4 | 0 | 1 | 1 | 0 | 16 | no |
+| `PckZuoA` | 0 | 21 | 19 | 4 | 0 | 0 | 5 | 1 | 9 | no |
+| `kugWvNv` | 0 | 32 | 23 | 4 | 0 | 1 | 11 | 6 | 10 | no |
+| `qNsiDSN` | 0 | 18 | 15 | 4 | 0 | 0 | 6 | 0 | 23 | no |
 
 - Deliverable versions (`prompt_path_versions`) and idle waits equal the example runs' table.
 - `variant_of` marks `kugWvNv`'s thrashing: `p2.py` to `p6.py` as variants of `plan.py` (then of `p2.py`), and `ls.py` of `rnd.py`; the pass has one (`optB.py` of `opt.py`), and so does `PckZuoA` (`plan2.py` of `plan.py`).
-- No trial has a tail probe: the task's gateway appends to `/app/output/audit.log` on every call, so every call there is mutating.
+- No trial has a tail probe: every trial's last call goes through the task's database gateway, which writes `/app/output/audit.log`, so the last call is a mutating one.
 - The first error is step 4 in every trial, a failed query while exploring the data (a traceback in four, a non-zero exit in `qNsiDSN`); this is why the first error is not the decisive step (ADR-0016's `t_err`).
-- `unverified_completion` is true for all five, the pass included, because no attempt ran a recognized test runner.
-  On a task without one the flag says nothing; before the preregistration it is either narrowed (for example to tasks whose instruction names a test command) or reported with that caveat.
+- `unverified_completion` is false for all five, and that is the right reading of these messages: no attempt ran a test runner, but every final message states what it did not do or could not reach (`H2AcDwK`: "not the 10 you required"; `PckZuoA`: "It does not meet your ... at least 10"; the pass `5hnrmLq`: "I didn't run a separate check on the written data").
+  Before the failure-word list, the flag was true for all five; the list is what separates a disclosed shortfall from a claim of success.
+- The success pattern also matches "work" in "work orders", a word of this task; the flag's agreement with hand labels is measured on the ADR-0016 blind subset before the preregistration fixes it.

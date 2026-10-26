@@ -27,7 +27,7 @@ from trajlab.contracts import (
     TrialRow,
 )
 from trajlab.store import exclusions, schema
-from trajlab.store.derive import VIEWS
+from trajlab.store.derive import VIEWS, derived_id
 
 TABLE_MODELS: dict[str, type[BaseModel]] = {
     "trials": TrialRow,
@@ -43,7 +43,7 @@ META = StoreMeta(
     exclusions=(r"/logs", r"/tmp/claude-\d+"),
     text_rule="utf-8 without NUL",
     reconcile_method="test",
-    derived="1+test",
+    derived=derived_id(),
 )
 TIMESTAMPTZ = "TIMESTAMP WITH TIME ZONE"
 EPOCH = datetime(1970, 1, 1, tzinfo=UTC)

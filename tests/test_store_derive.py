@@ -1,5 +1,6 @@
 """The derived views (ADR-0018) on hand-made rows: each rule, and how the views are versioned."""
 
+import re
 from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -9,10 +10,11 @@ from uuid import UUID
 import duckdb
 import pytest
 
+from trajlab.capture import trace
 from trajlab.contracts import DeltaRow, StepRow, TrialRow
 from trajlab.store import derive, schema
 from trajlab.store.build import store_meta
-from trajlab.store.derive import IDLE_SECONDS, VARIANT_MIN_LINES, VIEWS
+from trajlab.store.derive import IDLE_SECONDS, SUCCESS_CLAIM, VARIANT_MIN_LINES, VIEWS
 
 TRIAL = UUID("e1eee115-a864-4c21-896b-5b60c8741d97")
 OTHER = UUID("0b5e1d0a-0000-4000-8000-00000000c0de")
@@ -234,6 +236,7 @@ def test_a_call_without_an_end_is_not_an_idle_wait(tmp_path: Path) -> None:
         ("FAILED tests/test_x.py::test_y - assert 1 == 2", False, True),
         ("==== 3 failed, 9 passed in 0.5s ====", False, True),
         ("test result: FAILED. 1 passed; 1 failed", False, True),
+        ("test result: ok. 3 passed; 0 failed; 0 ignored", False, False),
         ("ModuleNotFoundError: No module named 'scipy'", False, True),
         ("all 12 checks passed", False, False),
         ("the word Error: appears mid-line", False, False),
@@ -259,7 +262,12 @@ def test_first_error_step(tmp_path: Path) -> None:
         ("make -C build check", True),
         ("bash run_tests.sh", True),
         ("python check.py", False),
-        ("cat pytest.ini", True),  # a mention counts: the pattern is the trace site's
+        ("FOO=1 timeout 600 uv run pytest tests", True),
+        ("if [ -d t ]; then pytest; fi", True),
+        ("cd t; ./run_tests.sh", True),
+        ("pip install pytest", False),  # a mention is not a run
+        ("cat pytest.ini", False),
+        ("grep -r pytest .", False),
     ],
 )
 def test_test_commands(tmp_path: Path, command: str, expected: bool) -> None:
@@ -305,6 +313,15 @@ def test_versions_and_reverts_of_a_path(tmp_path: Path) -> None:
     }
 
 
+def test_a_mode_change_alone_is_no_revert(tmp_path: Path) -> None:
+    store = make_store(
+        tmp_path,
+        [call(1), call(2)],
+        [change(1, "/app/run.sh", before=5, after=5), change(2, "/app/run.sh", before=5, after=5)],
+    )
+    assert set(delta_flags(store, "is_revert").values()) == {False}
+
+
 def test_a_deleted_file_written_again_is_a_revert(tmp_path: Path) -> None:
     store = make_store(
         tmp_path,
@@ -312,6 +329,21 @@ def test_a_deleted_file_written_again_is_a_revert(tmp_path: Path) -> None:
         [change(1, "/app/x", before=5, after=None), change(2, "/app/x", before=None, after=5)],
     )
     assert delta_flags(store, "is_revert") == {(1, "/app/x"): False, (2, "/app/x"): True}
+
+
+def test_a_directory_named_with_a_slash_and_urls(tmp_path: Path) -> None:
+    prompt = "See https://example.com/app/out and write into /app/out/ only."
+    store = make_store(
+        tmp_path,
+        [call(1)],
+        [change(1, "/app/out"), change(1, "/app/out/x"), change(1, "/example.com/app/out")],
+        [trial(prompt=prompt)],
+    )
+    assert delta_flags(store, "names_prompt_path") == {
+        (1, "/app/out"): True,
+        (1, "/app/out/x"): False,
+        (1, "/example.com/app/out"): False,
+    }
 
 
 def test_paths_the_instruction_names(tmp_path: Path) -> None:
@@ -479,6 +511,17 @@ def test_unverified_completion(tmp_path: Path, steps: list[StepRow], expected: b
     assert summary(store, "unverified_completion") is expected
 
 
+def test_a_claim_that_also_says_something_failed_is_no_claim(tmp_path: Path) -> None:
+    for text in ["I could not get it to work.", "The plan is written, but the MES load failed."]:
+        store = make_store(tmp_path / text[:5], [call(1), message(2, text)], [change(1, "/x")])
+        assert summary(store, "unverified_completion") is False, text
+
+
+def test_the_success_pattern_is_the_trace_sites() -> None:
+    assert SUCCESS_CLAIM == f"(?i){trace._SUCCESS_CLAIM.pattern}"
+    assert trace._SUCCESS_CLAIM.flags & re.IGNORECASE
+
+
 def test_the_final_message_is_the_last_one(tmp_path: Path) -> None:
     store = make_store(tmp_path, [message(1, DONE), call(2), message(3, "Gave up.")])
     assert summary(store, "unverified_completion") is False
@@ -572,6 +615,26 @@ def test_replace_views_refuses_a_store_built_under_other_settings(tmp_path: Path
     schema.create_store(store, store_meta().model_copy(update={"text_rule": "ascii only"}))
     with pytest.raises(schema.StoreError, match="was built under"):
         schema.replace_views(store, store_meta())
+
+
+def test_a_store_with_stale_views_is_not_read(tmp_path: Path) -> None:
+    store = make_store(tmp_path, [call(1)])
+    with schema.connect(schema.record_path(store), read_only=False) as con:
+        con.execute("UPDATE store_meta SET value = '\"0+old\"' WHERE key = 'derived'")
+    for refused in (
+        lambda: schema.connect(schema.record_path(store), read_only=True),
+        lambda: schema.connect_agent(store),
+    ):
+        with pytest.raises(schema.StoreError, match="run `trajlab store derive"):
+            refused()
+
+
+def test_replace_views_finishes_a_store_left_half_done(tmp_path: Path) -> None:
+    store = make_store(tmp_path, [call(1)])
+    with duckdb.connect(str(schema.heldout_path(store))) as con:
+        con.execute("UPDATE store_meta SET value = '\"0+old\"' WHERE key = 'derived'")
+    assert schema.replace_views(store, store_meta()) == "0+old"
+    assert schema.replace_views(store, store_meta()) == store_meta().derived
 
 
 def test_replace_views_refuses_a_missing_store(tmp_path: Path) -> None:
