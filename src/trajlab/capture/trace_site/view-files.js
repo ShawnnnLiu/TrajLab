@@ -134,7 +134,7 @@ function fileHistory(path) {
           h("span", { class: "spacer" }),
           v.op !== "removed" ? showWhole : null,
         ),
-        v.stale_before ? staleNote(v.stale_before) : null,
+        v.stale_before ? staleNote(v.stale_before, !!(entry && entry.diff)) : null,
         entry && entry.diff ? diffView(entry.diff, { path, max: 600 }) : v.op === "removed" ? null : note(event && event.changes ? "No diff recorded." : "No diff recorded: paths only (no --extras)."),
         whole,
       );

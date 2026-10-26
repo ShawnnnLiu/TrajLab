@@ -350,7 +350,7 @@ function fileChangeView(f, open) {
     f.skipped ? h("span", { class: "pill warn" }, SKIPPED_TEXT[f.skipped] || f.skipped) : null,
     f.stale_before ? h("span", { class: "pill warn" }, STALE_PILL) : null,
   );
-  const stale = f.stale_before ? staleNote(f.stale_before) : null;
+  const stale = f.stale_before ? staleNote(f.stale_before, !!f.diff) : null;
   if (!f.diff) return h("div", { class: "file-card" }, head, stale);
   const details = h("details", { class: "diff-box" }, h("summary", null, "diff"), diffView(f.diff, { path: f.path }));
   if (open) details.open = true;

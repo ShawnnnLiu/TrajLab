@@ -110,7 +110,9 @@ These change what a trial records; the first corpus under them gets a new `corpu
     `trajlab trace` marks such a diff (2026-10-26): one whose before-hash is the hash of the version read before the unread change.
     A file never read before its unread change is not marked, because the old watcher read its before-version from the checkpoint image as well.
     `scripts/2026-10-26_stale_before_check.py` lists the marked diffs of a job and counts the calls recorded twice.
-    On the 10 `off` trials copied to a laptop, it found neither; the other 30 are on the server, not yet checked.
+    On all 40 `off` trials (2026-10-26) it found no call recorded twice, and 19 marked files, all in the 5 `layout-config-recreation` trials.
+    18 of them are binary (17 PNGs in `/tmp` and a `.pyc`), which have no diff, only an older before-hash.
+    One is text: `/app/output/generated_components/pill.svg` at call #58 of `layout-config-recreation__Pfy8KHc`, whose diff can include call #54's changes.
 - **Contracts:**
   - The new models (`ProcessSnapshot`, `CallChanges`, `FileChange`; later `FlagRecord`) are in a new `contracts/patterns.py`.
   - `CallRecord` is unchanged, so this ADR does not edit `contracts/checkpoint.py`, which ADR-0014 also edits.
