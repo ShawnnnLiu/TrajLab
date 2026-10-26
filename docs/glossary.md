@@ -137,7 +137,7 @@ One trial is one task executed by one attempt.
 - **query tool** - the `record-engine` arm's command in the container, `/logs/agent/bin/query "SELECT ..."`: it writes `<id>.sql` to `/logs/agent/queries/` and waits for `<id>.result` (rows as JSON lines, then a count line) or `<id>.err` from the server.
   It is a command the agent calls, never a hook; its calls are ordinary Bash steps in the trajectory.
   Not: "query engine"; the design spec's `query(sql)` tool is this.
-- **server / serve** - `trajlab store serve <store> <job dir>`, the host process started per `record-engine` attempt before its `harbor run`: it puts the query tool into each trial dir under the job dir and answers its requests from the store, each query in its own child process.
+- **server / serve** - `trajlab store serve <store> <job dir>`, the host process started per `record-engine` attempt before its `harbor run`: it puts the query tool into each trial dir under the job dir and answers its requests from the store, each query in its own child process, one at a time per trial and trials in parallel.
   Separate from the watcher; the two run side by side on different file patterns.
 - **query log** - `agent/query_log.jsonl`: one `QueryLogEntry` per request, written by the host only, refusals and errors included; every `record-engine` attempt has one, empty when it never queried.
 - **refusal** - the statement check turning a query down before anything runs (not one SELECT or WITH statement, or a denied function); its message starts with `refused: `.

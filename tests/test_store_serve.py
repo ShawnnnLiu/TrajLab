@@ -254,6 +254,114 @@ def test_requests_are_answered_oldest_first_one_at_a_time(server: Server, job_di
     assert all(entry.error is None for entry in entries)
 
 
+def test_a_symlinked_request_is_not_read(server: Server, job_dir: Path, tmp_path: Path) -> None:
+    # A request that is not a regular file could make the host read any file it can reach and
+    # echo its first words back in a parser error.
+    agent_dir = job_dir / TRIAL_NAME / "agent"
+    wait_for(lambda: (agent_dir / QUERY_TOOL_RELPATH).is_file())
+    secret = tmp_path / "secret.txt"
+    secret.write_text("hunter2 and more\n")
+    (agent_dir / QUERIES_DIRNAME / "q_link.sql").symlink_to(secret)
+    result = run_tool(agent_dir, "SELECT 1 AS a")  # the server is still answering
+    assert (result.returncode, result.stdout) == (0, '{"a":1}\n-- 1 row\n')
+    assert not (agent_dir / QUERIES_DIRNAME / "q_link.err").exists()
+    assert not (agent_dir / QUERIES_DIRNAME / "q_link.result").exists()
+    assert [entry.query_id for entry in log_entries(agent_dir)] != ["q_link"]
+    assert "hunter2" not in (agent_dir / QUERY_LOG_FILENAME).read_text()
+
+
+def test_a_request_the_host_cannot_answer_does_not_stop_the_server(
+    server: Server, job_dir: Path
+) -> None:
+    agent_dir = job_dir / TRIAL_NAME / "agent"
+    wait_for(lambda: (agent_dir / QUERY_TOOL_RELPATH).is_file())
+    requests = agent_dir / QUERIES_DIRNAME
+    (requests / "q_blocked.result.tmp").mkdir()  # the answer cannot be written there
+    (requests / "q_blocked.sql").write_text("SELECT 1")
+    wait_for(lambda: "q_blocked" in {p.name.split(".")[0] for p in requests.iterdir()})
+    result = run_tool(agent_dir, "SELECT 2 AS b")
+    assert (result.returncode, result.stdout) == (0, '{"b":2}\n-- 1 row\n')
+    assert not (requests / "q_blocked.result").exists()
+    time.sleep(0.3)  # a few more passes: the blocked request is not run again
+    assert [entry.rows for entry in log_entries(agent_dir)] == [1]
+
+
+def test_a_requests_dir_the_container_made_is_served_as_it_is(
+    store: Path, job_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # On Linux the host cannot chmod a dir another user made; the command made it writable.
+    agent_dir = job_dir / TRIAL_NAME / "agent"
+    (agent_dir / QUERIES_DIRNAME).mkdir()
+    (agent_dir / QUERIES_DIRNAME / "q_early.sql").write_text("SELECT 3 AS c")
+
+    def refuse(self: Path, mode: int) -> None:
+        if self.name == QUERIES_DIRNAME:
+            raise PermissionError(1, "Operation not permitted")
+        original(self, mode)
+
+    original = Path.chmod
+    monkeypatch.setattr(Path, "chmod", refuse)
+    server = Server(store, job_dir, **FAST)
+    server.pass_once()
+    assert (agent_dir / QUERIES_DIRNAME / "q_early.result").read_text() == '{"c":3}\n-- 1 row\n'
+    assert (agent_dir / QUERY_TOOL_RELPATH).is_file()
+
+
+def test_a_trial_that_cannot_be_set_up_is_retried_and_warned_once(
+    store: Path, job_dir: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    from trajlab.store import serve as serve_module
+
+    failures = [OSError("disk full"), OSError("disk full")]
+    original = serve_module.setup_agent_dir
+
+    def flaky(agent_dir: Path) -> None:
+        if failures:
+            raise failures.pop()
+        original(agent_dir)
+
+    monkeypatch.setattr(serve_module, "setup_agent_dir", flaky)
+    server = Server(store, job_dir, **FAST)
+    with caplog.at_level("WARNING"):
+        server.pass_once()
+        server.pass_once()
+        server.pass_once()
+    assert [r.message for r in caplog.records if "cannot set up" in r.message] == [
+        f"cannot set up {job_dir / TRIAL_NAME / 'agent'}: disk full"
+    ]
+    assert job_dir / TRIAL_NAME in server.known
+
+
+def test_trials_are_served_in_parallel_and_each_in_order(store: Path, job_dir: Path) -> None:
+    slow_dir = job_dir / "task__slow001" / "agent"
+    slow_dir.mkdir(parents=True)
+    server = Server(store, job_dir, poll_s=0.02, timeout_s=4.0, workers=2)
+    stop = threading.Event()
+    thread = threading.Thread(target=server.run, args=(stop,))
+    thread.start()
+    try:
+        fast_dir = job_dir / TRIAL_NAME / "agent"
+        wait_for(lambda: (fast_dir / QUERY_TOOL_RELPATH).is_file())
+        wait_for(lambda: (slow_dir / QUERY_TOOL_RELPATH).is_file())
+        slow = threading.Thread(
+            target=run_tool,
+            args=(slow_dir, "SELECT count(*) FROM range(100000000000) r(i) WHERE i % 7 = 3"),
+        )
+        slow.start()
+        wait_for(lambda: any(slow_dir.joinpath(QUERIES_DIRNAME).glob("*.sql")))
+        start = time.monotonic()
+        result = run_tool(fast_dir, "SELECT 4 AS d")  # not behind the other trial's query
+        assert (result.returncode, result.stdout) == (0, '{"d":4}\n-- 1 row\n')
+        assert time.monotonic() - start < 3
+        slow.join()
+        [entry] = log_entries(slow_dir)
+        assert entry.error == "stopped after 4 s; narrow the query"
+    finally:
+        stop.set()
+        thread.join(timeout=30)
+    assert server.answered == 2
+
+
 def test_the_server_refuses_a_store_that_does_not_answer(job_dir: Path, tmp_path: Path) -> None:
     with pytest.raises(ServeError, match="does not exist"):
         Server(tmp_path / "none", job_dir, **FAST).run(threading.Event())

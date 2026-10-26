@@ -193,6 +193,44 @@ def test_run_keeps_the_querys_order_and_caps_the_rows(store: Path) -> None:
     assert render(none, 200) == "-- 0 rows\n"
 
 
+def test_run_keeps_the_whole_row_when_a_column_is_named_like_the_alias(store: Path) -> None:
+    # `to_json(q)` would be the column `q`, not the row, if the row's alias were `q`.
+    assert run_query(store, "SELECT 1 AS q, 2 AS b", **FAST).rows == ['{"q":1,"b":2}']
+    assert run_query(store, "SELECT 1 AS q, 2 AS q1, 3 AS q2", **FAST).rows == [
+        '{"q":1,"q1":2,"q2":3}'
+    ]
+
+
+def test_run_reads_only_the_childs_answer(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    # Whatever a child prints on stderr (a warning, a traceback) is not part of its answer.
+    monkeypatch.setattr(query, "CHILD_MODULE", "tests.fake_query_child")
+    monkeypatch.setenv("FAKE_QUERY_CHILD", "refuse")
+    refused = run_query(tmp_path, "SELECT 1", **FAST)
+    assert (refused.error, refused.refused) == ("refused: fake", True)
+    monkeypatch.setenv("FAKE_QUERY_CHILD", "rows")
+    assert run_query(tmp_path, "SELECT 1", **FAST).rows == ['{"a":1}']
+    monkeypatch.setenv("FAKE_QUERY_CHILD", "garbage")
+    assert "no readable answer" in (run_query(tmp_path, "SELECT 1", **FAST).error or "")
+    monkeypatch.setenv("FAKE_QUERY_CHILD", "die")
+    died = run_query(tmp_path, "SELECT 1", **FAST)
+    assert died.error == "query process exited 3: RuntimeError: the child died"
+
+
+def test_the_child_answers_on_stdout_with_exit_0(
+    store: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    import io
+
+    from trajlab.store import query_child
+
+    monkeypatch.setattr("sys.stdin", io.StringIO("DELETE FROM steps"))
+    assert query_child.main([str(store), "--cap", "5"]) == 0
+    assert json.loads(capsys.readouterr().out) == {"error": f"{REFUSED}only a SELECT or WITH query"}
+    monkeypatch.setattr("sys.stdin", io.StringIO("SELECT count(*) AS n FROM steps"))
+    assert query_child.main([str(store), "--cap", "5"]) == 0
+    assert json.loads(capsys.readouterr().out) == {"rows": ['{"n":5}'], "truncated": False}
+
+
 def test_run_takes_a_trailing_semicolon_and_comment(store: Path) -> None:
     assert run_query(store, "SELECT count(*) AS n FROM steps; -- all\n", **FAST).rows == ['{"n":5}']
 

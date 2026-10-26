@@ -13,11 +13,12 @@ other version so the list is re-read.
 
 `run_query` executes the statement in a child process (`trajlab.store.query_child`): the child opens
 the store with `connect_agent`, under the memory and thread limits given, checks and runs the
-statement, and writes the rows as JSON lines in DuckDB's own encoding (the same `to_json` the
-`record-files` export writes, so both record arms see values spelled alike). The parent never
-opens the store: a child that hangs is killed at the timeout, a child that breaks its instance
-dies alone, and nothing it does outlives it. Fetching stops at the cap plus one row, so a wide
-query costs the cap, not the table.
+statement, and answers with one JSON object on stdout holding either the rows, as JSON text in
+DuckDB's own encoding (the same `to_json` the `record-files` export writes, so both record arms
+see values spelled alike), or the error's message; its stderr is never part of an answer, so a
+warning printed there changes nothing. The parent never opens the store: a child that hangs is
+killed at the timeout, a child that breaks its instance dies alone, and nothing it does outlives
+it. Fetching stops at the cap plus one row, so a wide query costs the cap, not the table.
 """
 
 import json
@@ -130,9 +131,20 @@ def execute(
         relation = con.sql(sql)
         if relation is None:  # a statement with no result; the check refuses those
             raise StatementRefused("only a SELECT or WITH query")
-        rows = relation.set_alias("q").project("to_json(q)").fetchmany(cap + 1)
+        # `to_json(<alias>)` is the row as a struct, unless a column has the alias's name: then
+        # it is that column. So the alias is one the result has no column of.
+        alias = _row_alias(relation.columns)
+        rows = relation.set_alias(alias).project(f"to_json({alias})").fetchmany(cap + 1)
     texts = [row[0] for row in rows[:cap]]
     return texts, len(rows) > cap
+
+
+def _row_alias(columns: list[str]) -> str:
+    alias, n = "q", 0
+    while alias in columns:
+        n += 1
+        alias = f"q{n}"
+    return alias
 
 
 @dataclass(frozen=True)
@@ -160,9 +172,9 @@ def run_query(
 ) -> Outcome:
     """Run one query in a disposable child process; never raises for anything the query did.
 
-    The child is killed at `timeout_s` and the outcome says so; a child that exits with any
-    error, including a refusal, gives an outcome whose `error` is its message; a child that
-    dies otherwise gives one naming its exit status.
+    The child is killed at `timeout_s` and the outcome says so; a refusal or an error the child
+    reports gives an outcome whose `error` is its message; a child that dies instead gives one
+    naming its exit status and the last line it wrote to stderr.
     """
     command = [
         sys.executable,
@@ -183,15 +195,15 @@ def run_query(
         latency = _ms(start)
         return Outcome(None, False, f"stopped after {timeout_s:g} s; narrow the query", latency)
     latency = _ms(start)
-    stderr = completed.stderr.decode("utf-8", "replace").strip()
-    if completed.returncode == 1 and stderr:
-        return Outcome(None, False, stderr, latency)
     if completed.returncode != 0:
+        stderr = completed.stderr.decode("utf-8", "replace").strip()
         tail = stderr.splitlines()[-1] if stderr else "no message"
         return Outcome(None, False, f"query process exited {completed.returncode}: {tail}", latency)
     try:
         answer = json.loads(completed.stdout.decode("utf-8"))
-        rows = list(answer["rows"])
+        if "error" in answer:
+            return Outcome(None, False, str(answer["error"]), latency)
+        rows = [str(row) for row in answer["rows"]]
         truncated = bool(answer["truncated"])
     except (ValueError, KeyError, TypeError) as error:
         return Outcome(None, False, f"query process gave no readable answer: {error}", latency)

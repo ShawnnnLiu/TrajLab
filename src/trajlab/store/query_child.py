@@ -2,9 +2,11 @@
 
     python -m trajlab.store.query_child <store> --cap N [--memory-limit SIZE] [--threads N]
 
-The statement comes on stdin. On success the answer is one JSON object on stdout,
-`{"rows": [<row JSON text>, ...], "truncated": bool}`, and the exit status is 0. A refusal or a
-database error is its message on stderr with exit status 1; the parent reads nothing else.
+The statement comes on stdin. The answer is one JSON object on stdout with exit status 0:
+`{"rows": [<row JSON text>, ...], "truncated": bool}`, or `{"error": <message>}` for a refusal
+or a database error. Nothing on stderr is part of the answer, so a warning printed there (by
+Python, DuckDB, or a dependency) cannot get into a result or in front of a refusal's prefix;
+any other exit status means the child died, and the parent reports that.
 """
 
 import argparse
@@ -29,12 +31,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             args.store, sql, cap=args.cap, memory_limit=args.memory_limit, threads=args.threads
         )
     except StatementRefused as error:
-        sys.stderr.write(f"{REFUSED}{error}\n")
-        return 1
+        answer: dict[str, object] = {"error": f"{REFUSED}{error}"}
     except Exception as error:  # DuckDB's and the store's errors alike: the message is the answer
-        sys.stderr.write((str(error).strip() or type(error).__name__) + "\n")
-        return 1
-    json.dump({"rows": rows, "truncated": truncated}, sys.stdout)
+        answer = {"error": str(error).strip() or type(error).__name__}
+    else:
+        answer = {"rows": rows, "truncated": truncated}
+    json.dump(answer, sys.stdout)
     sys.stdout.write("\n")
     return 0
 

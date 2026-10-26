@@ -113,7 +113,7 @@ from trajlab.store.query import (
     run_query,
 )
 from trajlab.store.schema import UPGRADED_FROM_1, replace_views
-from trajlab.store.serve import DEFAULT_POLL_S, ServeError, Server
+from trajlab.store.serve import DEFAULT_POLL_S, DEFAULT_WORKERS, ServeError, Server
 
 app = typer.Typer(help="Capture Claude Code trajectories on Harbor with environment checkpoints.")
 store_app = typer.Typer(help="The Exp 2 store: steps joined to filesystem deltas (ADR-0014).")
@@ -660,6 +660,9 @@ def store_serve(
     memory_limit: MemoryLimitOption = DEFAULT_MEMORY_LIMIT,
     threads: ThreadsOption = DEFAULT_THREADS,
     poll: Annotated[float, typer.Option(min=0.01, help="Seconds between passes.")] = DEFAULT_POLL_S,
+    workers: Annotated[
+        int, typer.Option(min=1, help="Queries at once, over trials; one at a time per trial.")
+    ] = DEFAULT_WORKERS,
 ) -> None:
     """Answer the query tool in every trial under JOB_DIR from the store, until Ctrl-C
     (ADR-0019). Start it before `harbor run`; it puts `bin/query` into each trial's agent dir."""
@@ -674,6 +677,7 @@ def store_serve(
         memory_limit=memory_limit,
         threads=threads,
         poll_s=poll,
+        workers=workers,
     )
     try:
         server.run(stop)

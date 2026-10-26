@@ -37,7 +37,9 @@ What was read and probed for this ADR, all on 2026-10-26 against the pinned Duck
 2. **A separate host process serves it: `trajlab store serve STORE JOB_DIR`, one per `record-engine` attempt, started before that attempt's `harbor run`.**
    Not the watcher: `store/` may not import `checkpoint/` (CLAUDE.md constraints 3 and 6), changing the watcher is a capture change (constraint 5), and a 10 s query inside it would delay an ack the agent is waiting on.
    The server takes the job dir rather than the trial dir because Harbor names the trial dir with a random suffix when the trial starts; it sees the new trial dir on its next pass (0.1 s) and, since Harbor makes `agent/` before the container starts, the tool is in place before the agent can run.
-   In each trial's `agent/` it writes `bin/query` (mode 755, written whole and renamed), makes `queries/` (mode 777, since the container's user is not the host's), and creates `query_log.jsonl` empty, so every `record-engine` attempt has a query log even when it never queried (spec §9).
+   In each trial's `agent/` it writes `bin/query` (mode 755, written whole and renamed), makes `queries/` (mode 777, since the container's user is not the host's; a dir the command made first is left as it is, since the command makes it world-writable and on Linux the host could not change it), and creates `query_log.jsonl` empty, so every `record-engine` attempt has a query log even when it never queried (spec §9).
+   It reads and writes regular files only, never through a symlink, so a request file pointing elsewhere is ignored rather than read; a request the host cannot answer (an answer path it cannot write) is logged and left, not retried, so no request can stop the server.
+   Requests are answered one at a time per trial, oldest first, and trials in parallel up to `--workers` (default 4), so one trial's slow query never queues another trial's.
    A SessionStart hook that writes the script from the settings file, the way the hook script is delivered inline, was considered and not chosen: the server must exist anyway, writing one file is the smaller mechanism, and it keeps a second settings file and that event's behavior under `--print` out of the experiment.
    A retry captured with the checkpoint hook runs the watcher and the server side by side on different file patterns.
 
@@ -53,7 +55,7 @@ What was read and probed for this ADR, all on 2026-10-26 against the pinned Duck
 
 5. **Every query runs in a disposable child process under a timeout, a memory limit, and a thread limit; the server never opens the store.**
    `trajlab.store.query.run_query` starts `python -m trajlab.store.query_child STORE --cap N --memory-limit SIZE --threads N` with the SQL on stdin.
-   The child opens the store with `connect_agent`, which now takes `memory_limit` (default `512MB`) and `threads` (default 2) into the instance's configuration before locking it, checks and runs the statement, and answers with one JSON object on stdout.
+   The child opens the store with `connect_agent`, which now takes `memory_limit` (default `512MB`) and `threads` (default 2) into the instance's configuration before locking it, checks and runs the statement, and answers with one JSON object on stdout: the rows and whether the cap cut them, or the error's message; its stderr is never part of an answer, so a warning printed there by Python or a dependency cannot get into a result or in front of a refusal's prefix, and any exit status but 0 means the child died.
    The host kills the child at the timeout (default 10 s) and answers `stopped after 10 s; narrow the query`.
    The child is the only process that opens DuckDB in the serve path, so what runs past the lock can at worst break the child, which dies alone and whose state never outlives the query.
 
@@ -66,6 +68,7 @@ What was read and probed for this ADR, all on 2026-10-26 against the pinned Duck
 
 7. **`QueryLogEntry` is written by the host only, to the trial's `agent/query_log.jsonl`.**
    Its fields are `query_id` (the request's id), `trial_name` (the attempt: a running trial has no trial id, ADR-0006, and `trials.trial_name` matches it once the attempt is built into a store), `received_at`, `sql` as written, `rows` (null on error), `truncated`, `latency_ms` (from the host seeing the request to its answer, the child's start included), and `error`.
+   `latency_ms` is the host's service time; what the agent waited, the two polls and any queue behind the trial's earlier request included, is the Bash step's own duration in `steps` (`t_end - t_start`).
    One entry per request, refusals and errors included.
    A request is answered once: a `.sql` beside a `.result` or `.err` is never run again, also after a server restart, and requests found unanswered at startup are answered then.
 
@@ -85,11 +88,12 @@ What was read and probed for this ADR, all on 2026-10-26 against the pinned Duck
   Step 5 records the cap, timeout, memory limit, and thread count in the Exp 2 manifest (spec §4.1).
 - `connect_agent` gains two keyword arguments; the agent-visible store is unchanged, so `SCHEMA_VERSION` stays 2.
 - The agent's queries are Bash steps of the attempt's trajectory, so arm 3's query log and arm 2's file-read log (spec §4.3) are derivable from ATIF alike, and the host's log holds the exact SQL and outcome of each.
-- Each query costs one Python process (0.13 s warm) and up to 0.2 s of file polling; the latency numbers are in Validation.
+- Each query costs one Python process (0.13 s warm) and up to 0.2 s of file polling; the latency numbers in Validation are host service times, and the agent's wait is the Bash step's duration.
+- A server runs up to `--workers` child processes at once, each under the memory limit, so a box's memory bounds the workers it can afford; the retry loop runs one server per attempt with one trial under it, where the workers never matter.
 - The lexical rule refuses `DESCRIBE`, `SHOW`, and `FROM`-first queries that are read-only; the prompt carries the schema, so the agent needs none of them, and a refusal costs one tool call.
   Relaxing it is an amendment here.
 - The cap and the timeout are per query; a budget of queries per attempt, if wanted, is step 5's.
-- Tests: `tests/test_store_query.py` (the check on 45 statement forms, the answer's encoding against the export's, order and cap, the timeout, the limits, the unreachable files, stale views, a missing store, the log entry) and `tests/test_store_serve.py` (the command under `/bin/sh` against a server on a temp job dir: answers, refusals, stdin, giving up without a host, startup replay, a trial dir appearing later, the command under SIGTERM).
+- Tests: `tests/test_store_query.py` (the check on 45 statement forms, the answer's encoding against the export's, order and cap, a column named like the row alias, the child's answer read apart from its stderr, the timeout, the limits, the unreachable files, stale views, a missing store, the log entry) and `tests/test_store_serve.py` (the command under `/bin/sh` against a server on a temp job dir: answers, refusals, stdin, giving up without a host, startup replay, a trial dir appearing later, a symlinked request, an answer the host cannot write, a requests dir the container made, two trials in parallel, the command under SIGTERM).
   Docker checks are the dated script below.
 - Glossary: query tool, query log, serve, refusal.
 
