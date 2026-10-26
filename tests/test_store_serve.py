@@ -292,4 +292,4 @@ def test_the_serve_command_runs_until_a_signal(store: Path, job_dir: Path) -> No
         process.send_signal(signal.SIGTERM)
         _, stderr = process.communicate(timeout=30)
     assert process.returncode == 0, stderr
-    assert "stopped after 1 queries" in stderr
+    assert "stopped; 1 queries answered" in stderr

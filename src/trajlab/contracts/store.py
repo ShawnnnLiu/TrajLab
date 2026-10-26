@@ -237,7 +237,9 @@ class QueryLogEntry(_Row):
         default=False, description="The rows returned are the cap, and the query had more."
     )
     latency_ms: int = Field(
-        ge=0, description="From the request to its answer, the query process's start included."
+        ge=0,
+        description="From the host seeing the request to its answer, the query process's start "
+        "included.",
     )
     error: str | None = Field(
         default=None,

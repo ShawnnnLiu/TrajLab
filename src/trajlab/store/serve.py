@@ -160,7 +160,7 @@ class Server:
         while not stop.is_set():
             self.pass_once()
             stop.wait(self.poll_s)
-        logger.info("stopped after %d queries", self.answered)
+        logger.info("stopped; %d queries answered", self.answered)
 
     def pass_once(self) -> None:
         for trial_dir in trial_dirs(self.job_dir):

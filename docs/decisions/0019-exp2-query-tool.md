@@ -65,7 +65,7 @@ What was read and probed for this ADR, all on 2026-10-26 against the pinned Duck
    A refusal's message starts with `refused: ` in the log and on the agent's stderr, so the log tells a refusal from a database error.
 
 7. **`QueryLogEntry` is written by the host only, to the trial's `agent/query_log.jsonl`.**
-   Its fields are `query_id` (the request's id), `trial_name` (the attempt: a running trial has no trial id, ADR-0006, and `trials.trial_name` matches it once the attempt is built into a store), `received_at`, `sql` as written, `rows` (null on error), `truncated`, `latency_ms` (from the request to its answer, the child's start included), and `error`.
+   Its fields are `query_id` (the request's id), `trial_name` (the attempt: a running trial has no trial id, ADR-0006, and `trials.trial_name` matches it once the attempt is built into a store), `received_at`, `sql` as written, `rows` (null on error), `truncated`, `latency_ms` (from the host seeing the request to its answer, the child's start included), and `error`.
    One entry per request, refusals and errors included.
    A request is answered once: a `.sql` beside a `.result` or `.err` is never run again, also after a server restart, and requests found unanswered at startup are answered then.
 
@@ -122,3 +122,11 @@ What was read and probed for this ADR, all on 2026-10-26 against the pinned Duck
 
   The child's start is nearly all of it: the store is 7 MB and every query here runs in a few ms once open.
   The same script runs on the `tb40-sonnet-v3` store with that one argument.
+- Part 2 of the check script (`--harbor`): one hello-world trial through Harbor 0.23.0 on the Mac with the stock Claude Code install (2.1.278, Claude Sonnet 5.5), the agent `RepairClaudeCode` with a note asking for one query before the task, and the server started on the job dir before `harbor run`, as the retry loop will do:
+
+      uv run python scripts/2026-10-26_query_tool_docker_check.py --harbor --env-file .env --jobs-dir <scratch>/jobs --job query-tool-check-v1
+
+  The trial finished in 112 s with reward 1, no exception, and 2 tool calls at $0.03.
+  Its first tool call (ATIF step 2) was `/logs/agent/bin/query "SELECT count(*) AS n FROM steps"`, whose observation holds `{"n":2} -- 1 row`.
+  The query log has that one entry: rows 1, not truncated, 259 ms, no error; `queries/` holds its `.sql` and `.result`; the agent then wrote the file the task asks for.
+  The trial dir is not in git (scratch space on the Mac).

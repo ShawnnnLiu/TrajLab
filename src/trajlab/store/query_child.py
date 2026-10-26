@@ -29,10 +29,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             args.store, sql, cap=args.cap, memory_limit=args.memory_limit, threads=args.threads
         )
     except StatementRefused as error:
-        print(f"{REFUSED}{error}", file=sys.stderr)
+        sys.stderr.write(f"{REFUSED}{error}\n")
         return 1
     except Exception as error:  # DuckDB's and the store's errors alike: the message is the answer
-        print(str(error).strip() or type(error).__name__, file=sys.stderr)
+        sys.stderr.write((str(error).strip() or type(error).__name__) + "\n")
         return 1
     json.dump({"rows": rows, "truncated": truncated}, sys.stdout)
     sys.stdout.write("\n")
