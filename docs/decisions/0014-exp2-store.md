@@ -259,3 +259,10 @@ A layer with two members for one path (Docker writes none) can resolve a hard li
 `start_image` names a start image only from `trajlab-resume.json` or `trajlab-preinstall.json`; a trial run without pre-install (its start image is its task image) needs it passed as `trajlab store build --start-image`, which applies only to trials whose dir names none.
 `other` entries (FIFOs, devices) compare by kind, mode, and owner only, not device numbers.
 A path's bytes that are not UTF-8 are stored escaped (`\xNN`), so two paths differing only in how such bytes are spelled would collide; no such path is known in the corpus.
+
+## Amendment (2026-10-26): derived values are views (ADR-0018)
+
+§9 is superseded: store schema version 2 drops `steps.is_loop`, `steps.is_revert`, and `steps.files_touched`, and the derived record is SQL views in `record.duckdb` (`step_flags`, `delta_flags`, `path_versions`, `trial_summary`), versioned by `store_meta`'s new `derived` key.
+Open question 1 is decided there: `is_loop` is not implemented, and nothing is recomputed or appended on ingest, since a view covers every row at once.
+Open question 4 is decided there too: the `record-files` bundle holds every relation `connect_agent` can read, derived views included.
+A schema-1 store is upgraded in place by `trajlab store derive`, without its images.

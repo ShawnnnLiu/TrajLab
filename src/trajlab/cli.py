@@ -100,8 +100,11 @@ from trajlab.groundtruth.show import brief, calls
 from trajlab.groundtruth.summary import markdown as summary_markdown
 from trajlab.groundtruth.summary import write_review_sheet
 from trajlab.groundtruth.traits import traits
-from trajlab.store.build import BuildError, BuildResult, build_trial, start_image
+from trajlab.store.build import BuildError, BuildResult, build_trial, start_image, store_meta
 from trajlab.store.docker_images import DockerImageProvider
+from trajlab.store.export import export as export_bundle
+from trajlab.store.export import verify as verify_bundle
+from trajlab.store.schema import UPGRADED_FROM_1, replace_views
 
 app = typer.Typer(help="Capture Claude Code trajectories on Harbor with environment checkpoints.")
 store_app = typer.Typer(help="The Exp 2 store: steps joined to filesystem deltas (ADR-0014).")
@@ -540,6 +543,59 @@ def store_build(
         shutil.rmtree(scratch, ignore_errors=True)
     if failed:
         raise typer.Exit(code=1)
+
+
+StoreArgument = Annotated[
+    Path, typer.Argument(help="Store dir: record.duckdb, heldout.duckdb, blobs/.")
+]
+
+
+@store_app.command("derive")
+def store_derive(store_dir: StoreArgument) -> None:
+    """Replace the store's derived views with this code's, upgrading a schema-1 store first
+    (ADR-0018); rows are untouched."""
+    meta = store_meta()
+    try:
+        old = replace_views(store_dir, meta)
+    except (ValueError, duckdb.Error) as error:
+        typer.echo(f"trajlab store derive: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    if old == meta.derived:
+        typer.echo(f"{store_dir}: derived views {meta.derived}, already current")
+    elif old == UPGRADED_FROM_1:
+        typer.echo(
+            f"{store_dir}: upgraded from schema 1 to {meta.schema_version}, "
+            f"derived views {meta.derived}"
+        )
+    else:
+        typer.echo(f"{store_dir}: derived views {old} replaced by {meta.derived}")
+
+
+@store_app.command("export")
+def store_export(
+    store_dir: StoreArgument,
+    out_dir: Annotated[Path, typer.Argument(help="The bundle dir; must not exist.")],
+    verify_only: Annotated[
+        bool,
+        typer.Option("--verify", help="Check an existing bundle against the store; write none."),
+    ] = False,
+) -> None:
+    """Export the store's record as the record-files bundle (ADR-0018), and verify it."""
+    try:
+        if verify_only:
+            problems = verify_bundle(store_dir, out_dir)
+            for problem in problems:
+                typer.echo(f"trajlab store export: {problem}", err=True)
+            if problems:
+                raise typer.Exit(code=1)
+            typer.echo(f"{out_dir}: matches {store_dir}")
+            return
+        result = export_bundle(store_dir, out_dir)
+    except (ValueError, OSError, duckdb.Error) as error:
+        typer.echo(f"trajlab store export: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    rows = ", ".join(f"{name} {n}" for name, n in result.rows.items())
+    typer.echo(f"wrote {out_dir}: {rows}; {result.hunk_files} hunk files; verified")
 
 
 def _build_one(

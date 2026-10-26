@@ -48,6 +48,7 @@ from trajlab.contracts import (
     StoreMeta,
     TrialRow,
 )
+from trajlab.store.derive import derived_id
 from trajlab.store.exclusions import EXCLUDED_PATTERNS
 from trajlab.store.reconcile import RECONCILE_METHOD, TEXT_RULE, ImageChain, reconcile
 from trajlab.store.schema import (
@@ -111,6 +112,7 @@ def store_meta() -> StoreMeta:
         exclusions=EXCLUDED_PATTERNS,
         text_rule=TEXT_RULE,
         reconcile_method=RECONCILE_METHOD,
+        derived=derived_id(),
     )
 
 

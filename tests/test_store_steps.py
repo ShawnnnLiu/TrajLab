@@ -118,7 +118,6 @@ def test_fixture_rows(trial_copy: Path) -> None:
     assert steps.hooked_calls == steps.answered_calls == (FIXTURE_TOOL_CALL_ID,)
     assert steps.timed_out_calls == steps.unanswered_calls == ()
     assert [call.tool_call_id for call in steps.stop_calls] == [STOP_ID]
-    assert all(r.is_loop is r.is_revert is r.files_touched is None for r in steps.rows)
 
 
 def test_stock_fixture_has_no_checkpoints(trial_copy: Path) -> None:

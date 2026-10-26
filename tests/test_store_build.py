@@ -37,6 +37,7 @@ from trajlab.contracts import (
 )
 from trajlab.store import build, schema
 from trajlab.store.build import BuildError, build_trial, chain_report, store_meta, trial_row
+from trajlab.store.derive import VIEWS, derived_id
 from trajlab.store.docker_images import DockerImagesError
 from trajlab.store.exclusions import EXCLUDED_PATTERNS
 from trajlab.store.reconcile import (
@@ -514,7 +515,7 @@ def test_the_two_files_hold_separate_tables(trial_copy: Path, tmp_path: Path) ->
 
     assert record.isdisjoint({"checks", "faults", "blame", "chains"})
     assert heldout.isdisjoint({"trials", "steps", "deltas"})
-    assert record == {"trials", "steps", "deltas", "store_meta"}
+    assert record == {"trials", "steps", "deltas", "store_meta", *(v.name for v in VIEWS)}
 
 
 # -- parts -------------------------------------------------------------------------------------
@@ -526,6 +527,7 @@ def test_store_meta() -> None:
         exclusions=EXCLUDED_PATTERNS,
         text_rule=TEXT_RULE,
         reconcile_method=RECONCILE_METHOD,
+        derived=derived_id(),
     )
 
 

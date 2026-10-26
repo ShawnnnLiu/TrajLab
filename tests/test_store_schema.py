@@ -27,6 +27,7 @@ from trajlab.contracts import (
     TrialRow,
 )
 from trajlab.store import exclusions, schema
+from trajlab.store.derive import VIEWS, derived_id
 
 TABLE_MODELS: dict[str, type[BaseModel]] = {
     "trials": TrialRow,
@@ -42,6 +43,7 @@ META = StoreMeta(
     exclusions=(r"/logs", r"/tmp/claude-\d+"),
     text_rule="utf-8 without NUL",
     reconcile_method="test",
+    derived=derived_id(),
 )
 TIMESTAMPTZ = "TIMESTAMP WITH TIME ZONE"
 EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
@@ -88,9 +90,6 @@ FULL_ROWS: dict[str, BaseModel] = {
         t_end=datetime(2026, 9, 22, 6, 19, 18, 300000, tzinfo=KOLKATA),
         checkpoint_seq=1,
         checkpoint_id=f"sha256:{1:064x}",
-        is_loop=True,
-        is_revert=False,
-        files_touched=2,
     ),
     "deltas": DeltaRow(
         trial_id=TRIAL_ID,
@@ -251,7 +250,7 @@ def test_each_file_holds_only_its_tables(tmp_path: Path) -> None:
             found[path.name] = {row[0] for row in con.execute("SHOW TABLES").fetchall()}
 
     assert found == {
-        "record.duckdb": {"trials", "steps", "deltas", "store_meta"},
+        "record.duckdb": {"trials", "steps", "deltas", "store_meta", *(v.name for v in VIEWS)},
         "heldout.duckdb": {"checks", "faults", "blame", "chains", "store_meta"},
     }
     assert schema.blobs_dir(tmp_path).is_dir()
@@ -270,7 +269,9 @@ def test_create_store_is_idempotent(tmp_path: Path) -> None:
     for path in (schema.record_path(tmp_path), schema.heldout_path(tmp_path)):
         with schema.connect(path, read_only=True) as con:
             assert schema.read_meta(con) == META
-            assert con.execute("SELECT count(*) FROM store_meta").fetchone() == (4,)
+            assert con.execute("SELECT count(*) FROM store_meta").fetchone() == (
+                len(StoreMeta.model_fields),
+            )
     with schema.connect(schema.record_path(tmp_path), read_only=True) as con:
         assert con.execute("SELECT count(*) FROM trials").fetchone() == (1,)
 
@@ -565,7 +566,9 @@ def test_sizes_and_counts_are_64_bit(tmp_path: Path) -> None:
         found = {
             (table, name)
             for table, name, kind in con.execute(
-                "SELECT table_name, column_name, data_type FROM information_schema.columns"
+                "SELECT table_name, column_name, data_type FROM information_schema.columns "
+                "JOIN information_schema.tables USING (table_name) "
+                "WHERE table_type = 'BASE TABLE'"
             ).fetchall()
             if kind == "BIGINT"
         }
