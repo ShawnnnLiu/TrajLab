@@ -212,6 +212,48 @@ class StoreMeta(_Row):
 BlameRole = Literal["blamed", "related", "alternative"]
 
 
+# The query tool's files under a trial's `agent/` dir, the bind mount (ADR-0019): the command the
+# agent runs, the directory the host answers its requests in, and the host's log of every query.
+QUERY_TOOL_RELPATH = "bin/query"
+QUERIES_DIRNAME = "queries"
+QUERY_LOG_FILENAME = "query_log.jsonl"
+QUERY_ID = r"^[A-Za-z0-9_-]+$"
+
+
+class QueryLogEntry(_Row):
+    """One query a record-engine attempt made (ADR-0019), written by the host to the trial's
+    `agent/query_log.jsonl`, errors and refusals included; never written from the container."""
+
+    query_id: str = Field(pattern=QUERY_ID, description="The request's id: `<id>.sql`.")
+    trial_name: str = Field(
+        min_length=1, description="The attempt the query was made in: its trial dir name."
+    )
+    received_at: AwareDatetime = Field(description="When the host saw the request.")
+    sql: str = Field(description="The statement as written.")
+    rows: int | None = Field(
+        default=None, ge=0, description="Rows returned; null when the query failed or was refused."
+    )
+    truncated: bool = Field(
+        default=False, description="The rows returned are the cap, and the query had more."
+    )
+    latency_ms: int = Field(
+        ge=0, description="From the request to its answer, the query process's start included."
+    )
+    error: str | None = Field(
+        default=None,
+        description="Why there are no rows: `refused: ...` for a statement the check turned "
+        "down, otherwise the database's or the host's message.",
+    )
+
+    @model_validator(mode="after")
+    def _rows_or_error(self) -> Self:
+        if (self.rows is None) != (self.error is not None):
+            raise ValueError("rows is null exactly when error is set")
+        if self.truncated and self.rows is None:
+            raise ValueError("a truncated answer has rows")
+        return self
+
+
 class CheckRow(_Row):
     """One verifier check of a trial and its outcome. Held out from every agent (ADR-0014)."""
 
