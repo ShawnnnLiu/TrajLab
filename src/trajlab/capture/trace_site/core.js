@@ -299,3 +299,16 @@ export function section(title, ...content) {
 }
 
 export const note = (text) => h("p", { class: "note" }, text);
+
+// A diff that may be against an older version of its file (`stale_before` in trace.py). Shown
+// always, unlike the hints: it is about the record, not about the agent.
+const callName = (n) => (n === null || n === undefined ? "the stop" : `#${n}`);
+export const STALE_PILL = "may be against an older version";
+export function staleNote(stale, hasDiff = true) {
+  const unread = callName(stale.unread_at);
+  const read = callName(stale.read_at);
+  const what = hasDiff
+    ? `this diff starts from the file after ${read} and can show ${unread}'s changes as this call's`
+    : `its "before" hash is of the file after ${read}, not of the one ${unread} left`;
+  return h("p", { class: "stale-note" }, `May be against an older version: ${unread} changed this file without reading it, so ${what} (a watcher fault, fixed on 2026-10-22). Replay's File view shows the real file.`);
+}

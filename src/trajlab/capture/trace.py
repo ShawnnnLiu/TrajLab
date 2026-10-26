@@ -17,6 +17,13 @@ Sources, all read-only:
 changed a path a message names, and, for a success claim, the last test-like command before it.
 They resemble the detector's rules, so the site hides them unless asked (ADR-0015 §8: labels
 are made blind).
+
+A diff that may be against an older version of its file is marked `stale_before`, which the
+site always shows. Before ADR-0015's fixes of 2026-10-22, a file that a call changed without
+reading it (a call reads at most 20) kept the version read at an earlier call, and the file's
+next diff started from that version. The mark needs that version's hash to be the diff's
+before-hash. A before-version read from a checkpoint image, as the fixed watcher reads it, has
+that hash only if the unread change left the contents as they were.
 """
 
 import json
@@ -48,6 +55,7 @@ from trajlab.contracts import (
     CallRecord,
     CheckpointPolicy,
     CheckpointRecord,
+    ProcessEntry,
     ProcessSnapshot,
 )
 
@@ -96,8 +104,14 @@ _SUCCESS_CLAIM = re.compile(
 )
 # Processes of the harness, not the agent's: Claude Code and Harbor's launcher (whose command
 # lines name claude), the checkpoint hook (whose script names itself) and its wait loop, and
-# the container's keep-alive.
-_HARNESS_PROCESS = re.compile(r"claude|trajlab hook|^sleep (?:0\.2|1|infinity)$")
+# the container's keep-alive (pid 1 is `sh -c sleep infinity`).
+_HARNESS_PROCESS = re.compile(r"claude|trajlab hook|^(?:sh -c )?sleep (?:0\.2|1|infinity)$")
+# Claude Code's own process. Each trial's container has its own pid namespace, where pids
+# rise, so a process with a higher pid started after Claude Code did.
+_CLAUDE_CODE = re.compile(r"(?:^|[\s/])claude(?:\s|$)")
+# Docker's embedded DNS server listens on this address, on a port of its own choosing, in every
+# container on a user-defined network, such as each Compose project's.
+DOCKER_DNS_ADDRESS = "127.0.0.11"
 
 Offset = Callable[[datetime | str | None], float | None]
 
@@ -459,6 +473,34 @@ def _process_delta(
     }
 
 
+def _agent_processes(snapshot: ProcessSnapshot) -> list[ProcessEntry]:
+    """A snapshot's processes that the agent started: not the harness's, and newer than Claude
+    Code (all that are not the harness's, if no Claude Code process is found)."""
+    launched = min((p.pid for p in snapshot.processes if _CLAUDE_CODE.search(p.cmd)), default=0)
+    return [
+        p for p in snapshot.processes if p.pid > launched and not _HARNESS_PROCESS.search(p.cmd)
+    ]
+
+
+def _harness_ports(first: ProcessSnapshot) -> set[int]:
+    """The harness's ports, from the trial's first process snapshot. That snapshot is taken
+    after the first hooked call, so the ports listening then are all the harness's only if no
+    process of the agent's was running, which could have opened one; otherwise only Docker's
+    DNS port is."""
+    if _agent_processes(first):
+        return {p.port for p in first.listening if p.address == DOCKER_DNS_ADDRESS}
+    return {p.port for p in first.listening}
+
+
+def _diffed_from(entry: dict[str, Any], version: str | None) -> bool:
+    """Whether a changed file's diff and before-hash start from the version with this sha256
+    (None: from no file, as after a removal)."""
+    if entry["op"] != "modified" or entry.get("kind", "file") != "file":
+        return False
+    before = entry.get("before_sha256")
+    return before == version and (before is not None or bool(entry.get("diff")))
+
+
 def _known_names(events: list[dict[str, Any]]) -> set[str]:
     """The file names the trial's calls touch or name: their path arguments, the paths in Bash
     commands, and every changed path."""
@@ -567,8 +609,8 @@ def _add_capture_facts(
     timed_out: set[str],
     captured: bool,
 ) -> set[int]:
-    """Number the calls and give each call and stop the watcher's facts; returns the harness
-    ports (those listening at the trial's first process snapshot)."""
+    """Number the calls and give each call and stop the watcher's facts; returns the harness's
+    ports (`_harness_ports`)."""
     number = 0
     previous: ProcessSnapshot | None = None
     harness_ports: set[int] | None = None
@@ -610,7 +652,7 @@ def _add_capture_facts(
         event["processes"] = None
         if snapshot is not None:
             if harness_ports is None:
-                harness_ports = {p.port for p in snapshot.listening}
+                harness_ports = _harness_ports(snapshot)
             event["processes"] = _process_delta(previous, snapshot, harness_ports)
             previous = snapshot
         event["hints"] = {}
@@ -619,11 +661,17 @@ def _add_capture_facts(
 
 def _add_call_hints(events: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, list[int]]]:
     """Each file's versions with reverts, and repeated commands; returns the file histories
-    and, per path, the calls that changed it."""
+    and, per path, the calls that changed it. A version whose diff may be against an older
+    version of the file gets `stale_before`, on its call's entry too (see the module's
+    docstring)."""
     files: dict[str, list[dict[str, Any]]] = {}
     changed: dict[str, list[int]] = {}
     keys: dict[str, list[int]] = {}
     changing_calls: list[int] = []
+    # Per path: the call (None for a stop) and sha256 of its last version whose contents were
+    # read, None after a removal; and the first call after that to change it without reading.
+    read: dict[str, tuple[int | None, str | None]] = {}
+    unread: dict[str, int | None] = {}
     for index, event in enumerate(events):
         if event["kind"] not in ("call", "stop"):
             continue
@@ -635,16 +683,26 @@ def _add_call_hints(events: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[
         )
         reverts = []
         for entry in entries:
-            versions = files.setdefault(entry["path"], [])
+            path = entry["path"]
+            versions = files.setdefault(path, [])
             new_hash = entry.get("sha256")
             if new_hash and versions:
                 original = versions[0].get("before_sha256")
                 last = versions[-1].get("sha256")
                 earlier = [v for v in versions[:-1] if v.get("sha256") == new_hash]
                 if original and new_hash == original and last != original:
-                    reverts.append({"path": entry["path"], "to": "original"})
+                    reverts.append({"path": path, "to": "original"})
                 elif earlier and last != new_hash:
-                    reverts.append({"path": entry["path"], "to": earlier[-1]["call"]})
+                    reverts.append({"path": path, "to": earlier[-1]["call"]})
+            stale = None
+            if path in unread and _diffed_from(entry, read[path][1]):
+                stale = {"read_at": read[path][0], "unread_at": unread[path]}
+                entry["stale_before"] = stale
+            if new_hash or entry["op"] == "removed":
+                read[path] = (label, new_hash)
+                unread.pop(path, None)
+            elif path in read:
+                unread.setdefault(path, label)
             versions.append(
                 {
                     "call": label,
@@ -657,10 +715,11 @@ def _add_call_hints(events: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[
                     "size": entry.get("size"),
                     "skipped": entry.get("skipped"),
                     "has_diff": bool(entry.get("diff")),
+                    "stale_before": stale,
                 }
             )
             if label is not None:
-                changed.setdefault(entry["path"], []).append(label)
+                changed.setdefault(path, []).append(label)
         if reverts:
             event["hints"]["reverts"] = reverts
         if event["kind"] == "call":
@@ -831,18 +890,26 @@ def full_transcript(trial_dir: Path, numbers: dict[str, int] | None = None) -> s
     return "\n".join(lines) + "\n"
 
 
-def build_trace(trial_dir: Path) -> dict[str, Any]:
-    """Everything the site shows for one trial."""
+def read_changes(trial_dir: Path) -> dict[str, CallChanges]:
+    """A trial's `CallChanges` by `tool_call_id`, in call order. The first line per call: before
+    ADR-0015's fixes of 2026-10-22, a call retried after a failed snapshot got a second, empty
+    one."""
+    changes: dict[str, CallChanges] = {}
+    for change in _read_jsonl(trial_dir / TRAJLAB_DIRNAME / CHANGES_FILENAME, CallChanges):
+        changes.setdefault(change.tool_call_id, change)
+    return changes
+
+
+def build_trace(trial_dir: Path, changes: dict[str, CallChanges] | None = None) -> dict[str, Any]:
+    """Everything the site shows for one trial. `changes` is `read_changes(trial_dir)`, for a
+    caller that needs them too; without it they are read here."""
     paths = TrialPaths(trial_dir)
     checkpoints_dir = paths.agent_dir / CHECKPOINTS_DIRNAME
     extras_dir = trial_dir / TRAJLAB_DIRNAME
     calls = _read_jsonl(checkpoints_dir / CALLS_FILENAME, CallRecord)
     checkpoints = _read_jsonl(checkpoints_dir / CHECKPOINT_RECORDS_FILENAME, CheckpointRecord)
-    # The first line per call: before ADR-0015's fixes of 2026-10-22, a call retried after a
-    # failed snapshot got a second, empty one.
-    changes: dict[str, CallChanges] = {}
-    for change in _read_jsonl(extras_dir / CHANGES_FILENAME, CallChanges):
-        changes.setdefault(change.tool_call_id, change)
+    if changes is None:
+        changes = read_changes(trial_dir)
     snapshots: dict[str, ProcessSnapshot] = {}
     for snapshot in _read_jsonl(extras_dir / PROCESSES_FILENAME, ProcessSnapshot):
         snapshots.setdefault(snapshot.tool_call_id, snapshot)

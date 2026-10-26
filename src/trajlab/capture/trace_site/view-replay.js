@@ -4,7 +4,7 @@
 // processes and open ports.
 
 import {
-  $, api, enc, fmtTime, h, icon, isLabelable, note, put, state, storageGet, storageSet, toolIcon, trialHref,
+  $, api, enc, fmtTime, h, icon, isLabelable, note, put, staleNote, state, storageGet, storageSet, toolIcon, trialHref,
 } from "./core.js";
 import { highlight } from "./code.js";
 import { diffStats, diffView, fileView } from "./diff.js";
@@ -365,7 +365,7 @@ function renderEditor() {
     if (last.op === "removed") put(ui.editor, header(`${by}: deleted`, jump), note("Deleted."));
     else if (entry && entry.diff) {
       const stats = diffStats(entry.diff);
-      put(ui.editor, header(by, [h("span", { class: "diffstat" }, h("span", { class: "add" }, `+${stats.add}`), h("span", { class: "del" }, `−${stats.del}`)), jump]), diffView(entry.diff, { path, max: 2000 }));
+      put(ui.editor, header(by, [h("span", { class: "diffstat" }, h("span", { class: "add" }, `+${stats.add}`), h("span", { class: "del" }, `−${stats.del}`)), jump]), entry.stale_before ? staleNote(entry.stale_before) : null, diffView(entry.diff, { path, max: 2000 }));
     } else put(ui.editor, header(by, jump), note(entry && entry.skipped ? `No diff recorded (${entry.skipped}).` : event.changes ? "No diff recorded for this file." : "No diff recorded: this trial was captured without --extras (paths only)."), h("p", null, h("button", { class: "btn small", onclick: () => {
       r.mode = "file";
       renderEditor();

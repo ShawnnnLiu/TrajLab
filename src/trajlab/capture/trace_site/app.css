@@ -197,6 +197,7 @@ p { margin: 6px 0; }
 .spacer { flex: 1; }
 .pad { padding: 10px 14px; }
 .note { color: var(--muted); font-size: 13px; margin: 6px 0; }
+.stale-note { color: var(--text-2); font-size: 13px; margin: 6px 0; padding: 6px 10px; background: var(--warn-soft); border: 1px solid var(--warn-line); border-radius: var(--radius-sm); }
 .icon { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -3px; }
 kbd { font-size: 11px; padding: 0 5px; border: 1px solid var(--border-strong); border-bottom-width: 2px; border-radius: 5px; color: var(--muted); background: var(--surface); }
 ::selection { background: var(--accent-line); }

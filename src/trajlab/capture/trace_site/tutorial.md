@@ -78,6 +78,8 @@ In a diff, the words that changed inside a line are marked:
 diff
 ```
 
+A file marked **may be against an older version** comes from a watcher fault fixed on 2026-10-22, so expect it only in older trials, such as the `off` run. An earlier call changed the file without reading it, and this diff starts from the version before that call, so it can show that call's changes as this one's. To see what the file really held, use **File** in Replay.
+
 The point is to compare the two columns. "I fixed `parse.py`" on the left with no change to `parse.py` on the right, or "all tests pass" after a test run that exited with 1, is what the patterns describe.
 
 The status words you will see:

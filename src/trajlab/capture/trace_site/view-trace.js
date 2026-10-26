@@ -3,7 +3,7 @@
 
 import {
   $, enc, fmtBytes, fmtMs, fmtSeconds, fmtTime, fmtTokens, fmtUsd, h, icon, isLabelable, note, ordinal,
-  patternTitle, plural, put, section, shortHash, state, toolIcon, trialHref, widthOf,
+  patternTitle, plural, put, section, shortHash, STALE_PILL, staleNote, state, toolIcon, trialHref, widthOf,
 } from "./core.js";
 import { highlight } from "./code.js";
 import { diffStats, diffView, editView, fileView } from "./diff.js";
@@ -348,11 +348,13 @@ function fileChangeView(f, open) {
     stats ? h("span", { class: "diffstat" }, h("span", { class: "add" }, `+${stats.add}`), h("span", { class: "del" }, `−${stats.del}`)) : null,
     meta.length ? h("span", { class: "muted small" }, meta.join(" · ")) : null,
     f.skipped ? h("span", { class: "pill warn" }, SKIPPED_TEXT[f.skipped] || f.skipped) : null,
+    f.stale_before ? h("span", { class: "pill warn" }, STALE_PILL) : null,
   );
-  if (!f.diff) return h("div", { class: "file-card" }, head);
+  const stale = f.stale_before ? staleNote(f.stale_before, !!f.diff) : null;
+  if (!f.diff) return h("div", { class: "file-card" }, head, stale);
   const details = h("details", { class: "diff-box" }, h("summary", null, "diff"), diffView(f.diff, { path: f.path }));
   if (open) details.open = true;
-  return h("div", { class: "file-card" }, head, details);
+  return h("div", { class: "file-card" }, head, stale, details);
 }
 
 function changesView(e) {
