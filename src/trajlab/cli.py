@@ -112,7 +112,7 @@ from trajlab.store.query import (
     render,
     run_query,
 )
-from trajlab.store.schema import UPGRADED_FROM_1, replace_views
+from trajlab.store.schema import replace_views
 from trajlab.store.serve import DEFAULT_POLL_S, DEFAULT_WORKERS, ServeError, Server
 
 app = typer.Typer(help="Capture Claude Code trajectories on Harbor with environment checkpoints.")
@@ -571,11 +571,6 @@ def store_derive(store_dir: StoreArgument) -> None:
         raise typer.Exit(code=1) from error
     if old == meta.derived:
         typer.echo(f"{store_dir}: derived views {meta.derived}, already current")
-    elif old == UPGRADED_FROM_1:
-        typer.echo(
-            f"{store_dir}: upgraded from schema 1 to {meta.schema_version}, "
-            f"derived views {meta.derived}"
-        )
     else:
         typer.echo(f"{store_dir}: derived views {old} replaced by {meta.derived}")
 

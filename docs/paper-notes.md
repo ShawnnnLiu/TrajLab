@@ -126,7 +126,9 @@ Threats specific to this use: their scaffolds, benchmark version, and step defin
 - **Filesystem only.** Process and memory state are not captured (ADR-0004). A call that only starts a server, as the agent did with `nohup` in kv-store-grpc, counts as unchanged.
 - **Background writes.** Files written by background processes between hooked calls are attributed to the next measured call.
   Measured 2026-10-26 on the 40-trial `tb40-detector-off-v1` corpus (Amina Isayeva): 104 claimed writes landed 1 to 18 hooked calls after the claim, none lost (ADR-0020, Context).
-  ADR-0020 re-attributes them from the file's mtime in the layer and keeps the landing step as what the checkpoint proves; report the attribution counts and the agreement with the 104 hand cases.
+  On `tb40-sonnet-v3` (2026-10-27) 15 of 69 trials, 11 of them failures, ran a job past a call's return; lags reach 37 calls.
+  ADR-0020 re-attributes from the file's mtime in the layer and keeps the landing step as what the checkpoint proves: exact in the other 54 trials, right for a job that writes its result and exits, and `contested` for a file a job keeps writing while the agent polls it, which timestamps cannot settle (ADR-0021 proposes recording the writing process).
+  Report the attribution counts, the contested share, the agreement with the 104 hand cases, and the strict and windowed localization scores.
 - **Clock.** A root agent that rewinds the system clock could evade change-time comparison; we know of no case, but it is possible.
 - **Harness exclusions.** Excluding Claude Code's own paths assumes the agent's task-relevant work never lives there; the agent did read `/tmp/claude-0/.../tasks/*.output` (background-task output) in one trial. Report the sensitivity analysis.
 - **`__pycache__`.** Running Python writes bytecode caches, even under `/usr/local/lib`; they count as changes. State this, and consider reporting change counts with and without them.

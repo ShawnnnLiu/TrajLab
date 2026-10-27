@@ -22,6 +22,7 @@ from trajlab.contracts import (
     CheckRow,
     DeltaRow,
     FaultRow,
+    JobNoticeRow,
     StepRow,
     StoreMeta,
     TrialRow,
@@ -33,6 +34,7 @@ TABLE_MODELS: dict[str, type[BaseModel]] = {
     "trials": TrialRow,
     "steps": StepRow,
     "deltas": DeltaRow,
+    "job_notices": JobNoticeRow,
     "checks": CheckRow,
     "faults": FaultRow,
     "blame": BlameRow,
@@ -80,9 +82,9 @@ FULL_ROWS: dict[str, BaseModel] = {
         atif_step_id=2,
         source="agent",
         tool_call_id="toolu_01TKn2WsYzAzVaTXotNFqp2Z",
-        tool="Write",
-        args_json='{"content": "Hello, world!", "file_path": "/app/hello.txt"}',
-        output="File created successfully at: /app/héllo.txt",
+        tool="Bash",
+        args_json='{"command": "cat > /app/hello.txt <<\'EOF\'\\nHello, world!\\nEOF"}',
+        output="(no output)",
         is_error=False,
         message="I'll create the file now.",
         reasoning="The file does not exist yet.",
@@ -90,6 +92,8 @@ FULL_ROWS: dict[str, BaseModel] = {
         t_end=datetime(2026, 9, 22, 6, 19, 18, 300000, tzinfo=KOLKATA),
         checkpoint_seq=1,
         checkpoint_id=f"sha256:{1:064x}",
+        checkpoint_at=datetime(2026, 9, 22, 6, 19, 21, 900000, tzinfo=KOLKATA),
+        command_shell="cat > /app/hello.txt <<heredoc>",
     ),
     "deltas": DeltaRow(
         trial_id=TRIAL_ID,
@@ -108,6 +112,15 @@ FULL_ROWS: dict[str, BaseModel] = {
         mode_after="0755",
         owner_before="0:0",
         owner_after="1000:1000",
+        mtime_before=datetime(2026, 9, 21, 20, 49, 0, tzinfo=NEW_YORK),
+        mtime_after=datetime(2026, 9, 22, 6, 19, 18, tzinfo=KOLKATA),
+    ),
+    "job_notices": JobNoticeRow(
+        trial_id=TRIAL_ID,
+        task_id="b4cnj2dq1",
+        tool_call_id="toolu_01TKn2WsYzAzVaTXotNFqp2Z",
+        status="completed",
+        noticed_at=datetime(2026, 9, 22, 6, 24, 18, 84000, tzinfo=KOLKATA),
     ),
     "checks": CheckRow(
         trial_id=TRIAL_ID, check_id="pytest:test_hello_file", passed=False, fault_id="f1"
@@ -156,6 +169,13 @@ SPARSE_ROWS: dict[str, BaseModel] = {
     "steps": StepRow(trial_id=TRIAL_ID, step_idx=1, source="system"),
     "deltas": DeltaRow(
         trial_id=TRIAL_ID, step_idx=1, path="/opt/x", op="delete", kind_before="dir"
+    ),
+    "job_notices": JobNoticeRow(
+        trial_id=TRIAL_ID,
+        task_id="b1",
+        tool_call_id="toolu_c",
+        status="failed",
+        noticed_at=EPOCH,
     ),
     "checks": CheckRow(trial_id=TRIAL_ID, check_id="pytest:x", passed=None),
     "faults": FaultRow(trial_id=TRIAL_ID, fault_id="f2", kind="omission", method="replay"),
@@ -222,7 +242,7 @@ def sql_types(annotation: Any) -> set[str]:
 
 
 def test_every_table_has_a_row_model() -> None:
-    assert set(schema.RECORD_TABLES) == {"trials", "steps", "deltas"}
+    assert set(schema.RECORD_TABLES) == {"trials", "steps", "deltas", "job_notices"}
     assert set(schema.HELDOUT_TABLES) == {"checks", "faults", "blame", "chains"}
     assert {*schema.RECORD_TABLES, *schema.HELDOUT_TABLES} == set(TABLE_MODELS)
 
@@ -250,7 +270,14 @@ def test_each_file_holds_only_its_tables(tmp_path: Path) -> None:
             found[path.name] = {row[0] for row in con.execute("SHOW TABLES").fetchall()}
 
     assert found == {
-        "record.duckdb": {"trials", "steps", "deltas", "store_meta", *(v.name for v in VIEWS)},
+        "record.duckdb": {
+            "trials",
+            "steps",
+            "deltas",
+            "job_notices",
+            "store_meta",
+            *(v.name for v in VIEWS),
+        },
         "heldout.duckdb": {"checks", "faults", "blame", "chains", "store_meta"},
     }
     assert schema.blobs_dir(tmp_path).is_dir()
@@ -471,15 +498,26 @@ def test_trial_row_parent_iff_retry(attempt_idx: int, parent: UUID | None, valid
 def test_step_row_checkpoint_seq_and_id_go_together(change: dict[str, Any]) -> None:
     with pytest.raises(ValidationError, match="set together"):
         StepRow(**_with("steps", **change))
-    StepRow(**_with("steps", checkpoint_seq=None, checkpoint_id=None))
+    StepRow(**_with("steps", checkpoint_seq=None, checkpoint_id=None, checkpoint_at=None))
+
+
+def test_step_row_checkpoint_at_belongs_to_a_checkpoint() -> None:
+    with pytest.raises(ValidationError, match="checkpoint_at belongs to a checkpoint_seq"):
+        StepRow(**_with("steps", checkpoint_seq=None, checkpoint_id=None))
 
 
 @pytest.mark.parametrize("field", ["args_json", "output"])
 def test_step_row_without_a_tool_has_no_call_fields(field: str) -> None:
-    fields = _with("steps", tool=None, args_json=None, output=None)
+    fields = _with("steps", tool=None, args_json=None, output=None, command_shell=None)
     StepRow(**fields)
     with pytest.raises(ValidationError, match="without a tool"):
         StepRow(**fields | {field: "x"})
+
+
+def test_step_row_command_shell_is_a_bash_calls() -> None:
+    StepRow(**_with("steps", tool="Bash"))
+    with pytest.raises(ValidationError, match="only a Bash call"):
+        StepRow(**_with("steps", tool="Write"))
 
 
 @pytest.mark.parametrize(
@@ -498,11 +536,24 @@ def test_delta_row_op_matches_kinds(
     op: str, kind_before: str | None, kind_after: str | None, valid: bool
 ) -> None:
     fields = _with("deltas", op=op, kind_before=kind_before, kind_after=kind_after, hunk=None)
+    if kind_before is None:
+        fields["mtime_before"] = None
+    if kind_after is None:
+        fields["mtime_after"] = None
     if valid:
         DeltaRow(**fields)
     else:
         with pytest.raises(ValidationError, match=f"op {op}"):
             DeltaRow(**fields)
+
+
+@pytest.mark.parametrize("side", ["before", "after"])
+def test_delta_row_mtime_belongs_to_a_version_that_exists(side: str) -> None:
+    op, kind = ("add", "kind_before") if side == "before" else ("delete", "kind_after")
+    fields = _with("deltas", op=op, hunk=None, **{kind: None, f"mtime_{side}": None})
+    DeltaRow(**fields)
+    with pytest.raises(ValidationError, match="an mtime belongs to a version that exists"):
+        DeltaRow(**fields | {f"mtime_{side}": EPOCH})
 
 
 @pytest.mark.parametrize("is_text", [False, None])
@@ -521,7 +572,13 @@ def test_delta_row_blob_ref_only_for_a_non_text_later_version() -> None:
     with pytest.raises(ValidationError, match="blob_ref"):
         DeltaRow(
             **_with(
-                "deltas", op="delete", kind_after=None, is_text=False, sha256_after=None, **blob
+                "deltas",
+                op="delete",
+                kind_after=None,
+                is_text=False,
+                sha256_after=None,
+                mtime_after=None,
+                **blob,
             )
         )
 

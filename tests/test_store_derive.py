@@ -1,5 +1,6 @@
 """The derived views (ADR-0018) on hand-made rows: each rule, and how the views are versioned."""
 
+import json
 import re
 from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
@@ -11,10 +12,11 @@ import duckdb
 import pytest
 
 from trajlab.capture import trace
-from trajlab.contracts import DeltaRow, StepRow, TrialRow
+from trajlab.contracts import DeltaRow, JobNoticeRow, StepRow, TrialRow
 from trajlab.store import derive, schema
 from trajlab.store.build import store_meta
 from trajlab.store.derive import IDLE_SECONDS, SUCCESS_CLAIM, VARIANT_MIN_LINES, VIEWS
+from trajlab.store.steps import shell_text
 
 TRIAL = UUID("e1eee115-a864-4c21-896b-5b60c8741d97")
 OTHER = UUID("0b5e1d0a-0000-4000-8000-00000000c0de")
@@ -52,12 +54,13 @@ def call(
         source="agent",
         tool_call_id=f"toolu_{idx}",
         tool=tool,
-        args_json=f'{{"command": "{command}"}}',
+        args_json=json.dumps({"command": command}),
         output=output,
         is_error=is_error,
         message=message,
         t_start=t_start,
         t_end=t_start + timedelta(seconds=seconds),
+        command_shell=shell_text(command) if tool == "Bash" else None,
     )
 
 
@@ -82,6 +85,7 @@ def change(
     before: int | None = 1,
     after: int | None = 2,
     hunk: str | None = None,
+    mtime: datetime | None = None,
     trial_id: UUID = TRIAL,
 ) -> DeltaRow:
     op = "add" if before is None else "delete" if after is None else "modify"
@@ -96,6 +100,7 @@ def change(
         hunk=hunk,
         sha256_before=None if before is None else sha(before),
         sha256_after=None if after is None else sha(after),
+        mtime_after=None if after is None else mtime,
     )
 
 
@@ -111,6 +116,7 @@ def make_store(
     steps: Sequence[StepRow],
     deltas: Sequence[DeltaRow] = (),
     trials: Sequence[TrialRow] = (),
+    notices: Sequence[JobNoticeRow] = (),
 ) -> Path:
     store = tmp_path / "store"
     schema.create_store(store, store_meta())
@@ -118,6 +124,7 @@ def make_store(
         schema.insert_rows(con, "trials", list(trials) or [trial()])
         schema.insert_rows(con, "steps", steps)
         schema.insert_rows(con, "deltas", deltas)
+        schema.insert_rows(con, "job_notices", notices)
     return store
 
 
@@ -651,65 +658,299 @@ def test_replace_views_is_all_or_nothing(tmp_path: Path, monkeypatch: pytest.Mon
     assert summary(store, "tool_calls") == 1  # the old views are still there
 
 
-# -- upgrading a schema-1 store ------------------------------------------------------------------
+# -- a store of another schema version ---------------------------------------------------------
 
 
-def as_schema_1(store: Path) -> None:
-    """Turn a store into what schema-1 code built: the three step columns, no views, no
-    `derived`."""
-    with duckdb.connect(str(schema.record_path(store))) as con:
-        for column, sql_type in [
-            ("is_loop", "BOOLEAN"),
-            ("is_revert", "BOOLEAN"),
-            ("files_touched", "INTEGER"),
-        ]:
-            con.execute(f"ALTER TABLE steps ADD COLUMN {column} {sql_type}")
-        for view in reversed(VIEWS):
-            con.execute(f"DROP VIEW {view.name}")
+def as_schema(store: Path, version: int) -> None:
+    """Mark a store as built by code of another schema version."""
     for path in (schema.record_path(store), schema.heldout_path(store)):
         with duckdb.connect(str(path)) as con:
-            con.execute("UPDATE store_meta SET value = '1' WHERE key = 'schema_version'")
-            con.execute("DELETE FROM store_meta WHERE key = 'derived'")
+            con.execute("UPDATE store_meta SET value = ? WHERE key = 'schema_version'", [version])
 
 
-def test_a_schema_1_store_is_refused_with_the_command_that_upgrades_it(tmp_path: Path) -> None:
-    store = make_store(tmp_path, [call(1)])
-    as_schema_1(store)
+def test_a_store_of_another_schema_version_is_refused_and_told_to_rebuild(
+    tmp_path: Path,
+) -> None:
+    """Since schema 3 the rows carry values an older store lacks (ADR-0020): no in-place
+    upgrade, by `trajlab store derive` or anything else."""
+    store = make_store(tmp_path, [call(1)], [change(1, "/app/x")])
+    as_schema(store, 2)
     for refused in (
         lambda: schema.connect(schema.record_path(store), read_only=True),
         lambda: schema.connect_agent(store),
         lambda: schema.create_store(store, store_meta()),
+        lambda: schema.replace_views(store, store_meta()),
     ):
-        with pytest.raises(schema.SchemaVersionError, match=f"`trajlab store derive {store}`"):
+        with pytest.raises(schema.SchemaVersionError, match="schema 2.*build it again"):
             refused()
-
-
-def test_replace_views_upgrades_a_schema_1_store(tmp_path: Path) -> None:
-    store = make_store(tmp_path, [call(1), call(2)], [change(1, "/app/x")])
-    with schema.connect(schema.record_path(store), read_only=True) as con:
-        steps_before = con.execute("SELECT * FROM steps ORDER BY ALL").fetchall()
-        columns = con.execute("DESCRIBE steps").fetchall()
-    as_schema_1(store)
-
-    assert schema.replace_views(store, store_meta()) == "schema 1"
-
-    schema.create_store(store, store_meta())  # accepted as this code's
-    with schema.connect(schema.record_path(store), read_only=True) as con:
-        assert con.execute("DESCRIBE steps").fetchall() == columns
-        assert con.execute("SELECT * FROM steps ORDER BY ALL").fetchall() == steps_before
-    with schema.connect(schema.heldout_path(store), read_only=True) as con:
-        assert schema.read_meta(con) == store_meta()
-    assert summary(store, "mutating_calls") == 1
-
-
-def test_a_schema_1_store_with_a_derived_value_is_not_upgraded(tmp_path: Path) -> None:
-    store = make_store(tmp_path, [call(1)])
-    as_schema_1(store)
-    with duckdb.connect(str(schema.record_path(store))) as con:
-        con.execute("UPDATE steps SET files_touched = 3")
-    with pytest.raises(schema.StoreError, match="1 steps rows have a value"):
-        schema.replace_views(store, store_meta())
     with duckdb.connect(str(schema.record_path(store)), read_only=True) as con:
         assert con.execute(
             "SELECT value FROM store_meta WHERE key = 'schema_version'"
-        ).fetchone() == ("1",)
+        ).fetchone() == ("2",)
+
+
+# -- step_jobs and delta_attribution (ADR-0020) -------------------------------------------------
+
+TASK = "b4cnj2dq1"
+BACKGROUNDED_OUTPUT = (
+    "Command did not complete within its 120s timeout and was moved to the background "
+    f"(ID: {TASK}). Output is being written to: /tmp/claude-0/-app/x/tasks/{TASK}.output. "
+    "You will be notified when it completes."
+)
+
+
+def at(minutes: float, seconds: float = 0) -> datetime:
+    return START + timedelta(minutes=minutes, seconds=seconds)
+
+
+def notice(
+    step: StepRow, minutes: float, status: str = "completed", task: str = TASK
+) -> JobNoticeRow:
+    assert step.tool_call_id is not None
+    return JobNoticeRow(
+        trial_id=step.trial_id,
+        task_id=task,
+        tool_call_id=step.tool_call_id,
+        status=status,
+        noticed_at=at(minutes),
+    )
+
+
+def jobs(store: Path, column: str, trial_id: UUID = TRIAL) -> dict[int, Any]:
+    return dict(
+        rows(
+            store,
+            f"SELECT step_idx, {column} FROM step_jobs WHERE trial_id = ? ORDER BY 1",
+            [trial_id],
+        )
+    )
+
+
+def attributions(
+    store: Path, trial_id: UUID = TRIAL
+) -> dict[tuple[int, str], tuple[str, int | None, int, bool]]:
+    """(landing step, path) -> (attribution, launched_by_step, causal_step, is_late)."""
+    found = rows(
+        store,
+        "SELECT step_idx, path, attribution, launched_by_step, causal_step, is_late "
+        "FROM delta_attribution WHERE trial_id = ? ORDER BY 1, 2",
+        [trial_id],
+    )
+    return {(k, path): (a, launched, causal, late) for k, path, a, launched, causal, late in found}
+
+
+def test_a_backgrounded_call_and_its_job_window(tmp_path: Path) -> None:
+    first = call(1, "python train.py", output=BACKGROUNDED_OUTPUT, seconds=120)
+    store = make_store(
+        tmp_path, [first, call(2, "ls"), call(3, "ls")], notices=[notice(first, 2.5)]
+    )
+    assert jobs(store, "backgrounded") == {1: True, 2: False, 3: False}
+    assert jobs(store, "task_id") == {1: TASK, 2: None, 3: None}
+    assert jobs(store, "job_status") == {1: "completed", 2: None, 3: None}
+    assert jobs(store, "job_end") == {1: at(2.5), 2: None, 3: None}
+    assert jobs(store, "background_done_step") == {1: 3, 2: None, 3: None}
+
+
+def test_a_job_without_a_notice_runs_to_the_attempts_last_instant(tmp_path: Path) -> None:
+    first = call(1, "python train.py", output=BACKGROUNDED_OUTPUT, seconds=120)
+    last = call(5, "ls", seconds=7)  # after the backgrounded call's own t_end (its move)
+    store = make_store(tmp_path, [first, last, message(6, "Waiting."), stop(7)])
+    assert jobs(store, "job_end") == {1: last.t_end, 5: None}
+    assert jobs(store, "background_done_step") == {1: None, 5: None}
+    assert jobs(store, "job_status") == {1: None, 5: None}
+
+
+@pytest.mark.parametrize(
+    ("command", "expected"),
+    [
+        ("nohup python x.py > x.log 2>&1 &", True),
+        ("(python x.py > x.log 2>&1 &); sleep 60", True),
+        ("python a.py L & python a.py R & wait", True),
+        ("setsid python x.py", True),
+        ("make && make test", False),
+        ("python x.py 2>&1 | tail -3", False),
+        ("python x.py &> /dev/null", False),
+        ("cat > f.py <<'EOF'\nimport os\nif a & b: pass\nEOF\npython f.py", False),
+        ("python -c 'import os; print(1 & 2)'", False),
+        ('bash -c "nohup sleep 1"', False),
+        ("ls", False),
+    ],
+)
+def test_hand_launched_jobs(tmp_path: Path, command: str, expected: bool) -> None:
+    store = make_store(tmp_path, [call(1, command)])
+    assert jobs(store, "launches_job") == {1: expected}
+
+
+def test_a_stop_record_is_no_job(tmp_path: Path) -> None:
+    store = make_store(tmp_path, [call(1, "ls"), stop(2)])
+    assert list(jobs(store, "backgrounded")) == [1]
+
+
+def test_a_write_in_the_landing_window_with_no_job_open_is_foreground(tmp_path: Path) -> None:
+    store = make_store(
+        tmp_path,
+        [call(1, "touch /app/x", seconds=2), call(2, "ls")],
+        [change(1, "/app/x", before=None, mtime=at(1, 1))],
+    )
+    assert attributions(store) == {(1, "/app/x"): ("foreground", 1, 1, False)}
+
+
+def test_a_late_write_of_a_backgrounded_job_goes_to_the_launching_call(tmp_path: Path) -> None:
+    first = call(1, "python run.py > /app/out.json", output=BACKGROUNDED_OUTPUT, seconds=120)
+    store = make_store(
+        tmp_path,
+        [first, call(2, "ls"), call(3, "ls"), call(4, "ls")],
+        [
+            change(3, "/app/out.json", before=None, mtime=at(2, 30)),  # between calls 2 and 3
+            change(4, "/app/other", before=None, mtime=at(4, 0.5)),  # inside call 4's window
+        ],
+        notices=[notice(first, 4.5)],
+    )
+    assert attributions(store) == {
+        (3, "/app/out.json"): ("background", 1, 1, True),
+        # The job was still open and the landing call could have written it too.
+        (4, "/app/other"): ("contested", None, 4, False),
+    }
+
+
+def test_a_write_after_the_jobs_end_is_not_its(tmp_path: Path) -> None:
+    first = call(1, "python run.py > /app/out.json", output=BACKGROUNDED_OUTPUT, seconds=120)
+    store = make_store(
+        tmp_path,
+        [first, call(2, "ls"), call(3, "ls")],
+        [change(3, "/app/out.json", before=None, mtime=at(2, 30))],
+        notices=[notice(first, 2.25)],
+    )
+    assert attributions(store) == {(3, "/app/out.json"): ("unknown", None, 3, False)}
+
+
+def test_a_job_redirecting_into_the_file_beats_a_landing_call_that_does_not_write(
+    tmp_path: Path,
+) -> None:
+    """The XK8w3KT case: `nohup ... > log_$s.txt &` at one call, `sleep; tail log_1[1-8].txt`
+    at the next, and the log's time inside the tail call's window."""
+    store = make_store(
+        tmp_path,
+        [
+            call(
+                1, "cd /tmp/w && for s in 11 12; do nohup python c.py $s > log_$s.txt 2>&1 & done"
+            ),
+            call(2, "sleep 115; tail -qn1 /tmp/w/log_1[1-2].txt", seconds=116),
+            call(3, "sleep 115; tail -qn1 /tmp/w/log_11.txt", seconds=116),
+        ],
+        [
+            change(2, "/tmp/w/log_11.txt", mtime=at(2, 110)),
+            change(3, "/tmp/w/log_11.txt", before=2, after=3, mtime=at(3, 110)),
+        ],
+    )
+    assert attributions(store) == {
+        # `log_$s.txt` redirects into `log_11.txt` once `$s` stands for anything, and the
+        # landing call writes nothing and names no file: the open job is the writer.
+        (2, "/tmp/w/log_11.txt"): ("background_untracked", 1, 1, True),
+        # A landing call that names the file literally could be the writer (it is not, but
+        # the text cannot say so): contested, and the landing step is the causal step.
+        (3, "/tmp/w/log_11.txt"): ("contested", None, 3, False),
+    }
+
+
+def test_the_latest_open_job_wins_unless_an_earlier_one_names_the_file(tmp_path: Path) -> None:
+    store = make_store(
+        tmp_path,
+        [
+            call(1, "nohup python a.py > /app/a.log 2>&1 &"),
+            call(2, "nohup python b.py > /app/b.log 2>&1 &"),
+            call(3, "sleep 30", seconds=30),
+            call(4, "ls"),
+        ],
+        [
+            change(4, "/app/a.log", mtime=at(3, 45)),
+            change(4, "/app/c.log", before=None, mtime=at(3, 45)),
+        ],
+    )
+    assert attributions(store) == {
+        (4, "/app/a.log"): ("background_untracked", 1, 1, True),  # names it, over the latest
+        (4, "/app/c.log"): ("background_untracked", 2, 2, True),  # the latest open job
+    }
+
+
+def test_background_by_path_names_the_overridden_latest_backgrounded_job(tmp_path: Path) -> None:
+    other = BACKGROUNDED_OUTPUT.replace(TASK, "bzzzzzzzz")
+    store = make_store(
+        tmp_path,
+        [
+            call(1, "python a.py > /app/a.log", output=BACKGROUNDED_OUTPUT, seconds=120),
+            call(2, "python b.py > /app/b.log", output=other, seconds=120),
+            call(3, "ls"),
+        ],
+        [
+            change(3, "/app/a.log", mtime=at(2, 30)),
+            change(3, "/app/c.log", before=None, mtime=at(2, 30)),
+        ],
+    )
+    assert attributions(store) == {
+        (3, "/app/a.log"): ("background_by_path", 1, 1, True),
+        (3, "/app/c.log"): ("background", 2, 2, True),
+    }
+
+
+def test_a_time_before_the_attempt_began_is_untrusted(tmp_path: Path) -> None:
+    store = make_store(
+        tmp_path,
+        [call(1, "tar xf a.tar", seconds=2), call(2, "nohup x &"), call(3, "tar xf b.tar")],
+        [
+            change(1, "/app/old", before=None, mtime=at(-60)),
+            change(3, "/app/older", before=None, mtime=at(-60)),
+        ],
+    )
+    assert attributions(store) == {
+        (1, "/app/old"): ("untrusted_mtime", 1, 1, False),  # no job could have written it
+        (3, "/app/older"): ("untrusted_mtime", None, 3, False),  # a job was open: unknown writer
+    }
+
+
+def test_a_delete_and_a_write_outside_every_window_are_unknown(tmp_path: Path) -> None:
+    store = make_store(
+        tmp_path,
+        [call(1, "rm /app/gone"), call(2, "ls")],
+        [
+            change(1, "/app/gone", after=None),
+            change(2, "/app/x", mtime=at(1, 30)),  # between the two calls, no job open
+        ],
+    )
+    assert attributions(store) == {
+        (1, "/app/gone"): ("unknown", None, 1, False),
+        (2, "/app/x"): ("unknown", None, 2, False),
+    }
+
+
+def test_the_landing_window_runs_to_the_checkpoint(tmp_path: Path) -> None:
+    done = call(1, "python w.py", seconds=10)
+    with_checkpoint = done.model_copy(
+        update={
+            "checkpoint_seq": 1,
+            "checkpoint_id": sha(1),
+            "checkpoint_at": done.t_end + timedelta(seconds=4),
+        }
+    )
+    late_write = [change(1, "/app/x", mtime=done.t_end + timedelta(seconds=2))]
+    assert attributions(make_store(tmp_path / "a", [done], late_write)) == {
+        (1, "/app/x"): ("unknown", None, 1, False)
+    }
+    assert attributions(make_store(tmp_path / "b", [with_checkpoint], late_write)) == {
+        (1, "/app/x"): ("foreground", 1, 1, False)
+    }
+
+
+def test_a_jobs_window_is_its_own_trials(tmp_path: Path) -> None:
+    first = call(1, "python run.py", output=BACKGROUNDED_OUTPUT, seconds=120)
+    store = make_store(
+        tmp_path,
+        [first, call(2, "ls"), call(1, "ls", trial_id=OTHER), call(2, "ls", trial_id=OTHER)],
+        [
+            change(2, "/app/x", mtime=at(1, 30)),
+            change(2, "/app/x", mtime=at(1, 30), trial_id=OTHER),
+        ],
+        trials=[trial(), trial(OTHER)],
+    )
+    assert attributions(store) == {(2, "/app/x"): ("background", 1, 1, True)}
+    assert attributions(store, OTHER) == {(2, "/app/x"): ("unknown", None, 2, False)}

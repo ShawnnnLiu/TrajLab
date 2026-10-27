@@ -14,9 +14,9 @@ table for a note instead. Read-only: the store is opened read-only by every chil
     uv run python scripts/2026-10-26_query_latency.py <store> [--repeat 20] [--cap 200]
         [--markdown]
 
-The store must be a schema-2 store (`trajlab store derive` upgrades one). The 2026-10-26 numbers
-are from a copy of corpus/stores/exp2-example-v2 (production-planning, 5 trials); run it on the
-tb40-sonnet-v3 store with that one argument once it is built.
+The store must be of the current schema (3 since ADR-0020; an older one is built again). The
+2026-10-26 numbers are from a copy of corpus/stores/exp2-example-v2 (production-planning, 5
+trials, then schema 2); run it on the tb40-sonnet-v3 store with that one argument once it is built.
 """
 
 import argparse

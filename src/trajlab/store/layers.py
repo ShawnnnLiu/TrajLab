@@ -61,7 +61,8 @@ def ancestors(path: str) -> Iterator[str]:
 
 @dataclass(frozen=True, slots=True)
 class Entry:
-    """One path's state in a layer. Times are not kept: they are never compared."""
+    """One path's state in a layer. The modification time is kept but never compared: it says
+    when the write happened, not whether anything changed (ADR-0020)."""
 
     kind: EntryKind
     mode: int  # permission bits: tar mode & 0o7777
@@ -70,6 +71,7 @@ class Entry:
     size: int | None = None  # file: content bytes; symlink: UTF-8 bytes of its target
     sha256: str | None = None  # file: of its content; symlink: of its target (UTF-8)
     link_target: str | None = None  # symlink only
+    mtime: float | None = None  # the tar entry's mtime, seconds since the epoch
 
     @property
     def state(self) -> tuple[str, int, int, int, str | None]:
@@ -79,7 +81,9 @@ class Entry:
 
 def file_entry(info: tarfile.TarInfo, sha256: str) -> Entry:
     """The entry of a regular file member whose content has this sha256."""
-    return Entry("file", info.mode & 0o7777, info.uid, info.gid, info.size, sha256)
+    return Entry(
+        "file", info.mode & 0o7777, info.uid, info.gid, info.size, sha256, mtime=info.mtime
+    )
 
 
 def symlink_bytes(target: str) -> bytes:
@@ -368,7 +372,7 @@ def _entry(path: str, info: tarfile.TarInfo, tar: tarfile.TarFile, on_file: File
     if info.isreg():
         return file_entry(info, on_file(path, info, _content(tar, info)))
     if info.isdir():
-        return Entry("dir", mode, info.uid, info.gid)
+        return Entry("dir", mode, info.uid, info.gid, mtime=info.mtime)
     if info.issym():
         target = symlink_bytes(info.linkname)
         return Entry(
@@ -379,5 +383,6 @@ def _entry(path: str, info: tarfile.TarInfo, tar: tarfile.TarFile, on_file: File
             size=len(target),
             sha256=hashlib.sha256(target).hexdigest(),
             link_target=info.linkname,
+            mtime=info.mtime,
         )
-    return Entry("other", mode, info.uid, info.gid)
+    return Entry("other", mode, info.uid, info.gid, mtime=info.mtime)

@@ -17,7 +17,7 @@ from uuid import UUID
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
 # Bump with an ADR whenever any table below or in trajlab.store.schema changes shape.
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 RECORD_DB_FILENAME = "record.duckdb"
 HELDOUT_DB_FILENAME = "heldout.duckdb"
 # Content-addressed later versions of changed rows without a hunk (a file's bytes, text or
@@ -111,13 +111,28 @@ class StepRow(_Row):
         "it ran, until a call's record names a checkpoint again).",
     )
     checkpoint_id: str | None = Field(default=None, description="That checkpoint's image id.")
+    checkpoint_at: AwareDatetime | None = Field(
+        default=None,
+        description="When that checkpoint's image was committed; a change the row's own call "
+        "made can carry a time up to here, past t_end (ADR-0020).",
+    )
+    command_shell: str | None = Field(
+        default=None,
+        description="For a Bash call, its command with heredoc bodies and inline `-c` programs "
+        "cut out (`<<heredoc>`, `<code>`): the shell's own text, where a job launch (`&`, "
+        "`nohup`) is read from; null for other tools.",
+    )
 
     @model_validator(mode="after")
     def _consistent(self) -> Self:
         if (self.checkpoint_seq is None) != (self.checkpoint_id is None):
             raise ValueError("checkpoint_seq and checkpoint_id are set together")
+        if (self.checkpoint_seq is None) and (self.checkpoint_at is not None):
+            raise ValueError("checkpoint_at belongs to a checkpoint_seq")
         if self.tool is None and (self.args_json is not None or self.output is not None):
             raise ValueError("a row without a tool has no args_json or output")
+        if self.command_shell is not None and self.tool != "Bash":
+            raise ValueError("only a Bash call has a command_shell")
         return self
 
 
@@ -173,10 +188,25 @@ class DeltaRow(_Row):
     owner_after: str | None = Field(
         default=None, pattern=r"^\d+:\d+$", description="The same, after."
     )
+    mtime_before: AwareDatetime | None = Field(
+        default=None,
+        description="The earlier version's modification time, from its layer's tar entry "
+        "(whole seconds); null if absent before.",
+    )
+    mtime_after: AwareDatetime | None = Field(
+        default=None,
+        description="The later version's modification time: when the write happened, as the "
+        "file system recorded it (whole seconds); null if absent after. Not the step's time: "
+        "a process an earlier call left running may have written it (ADR-0020).",
+    )
 
     @model_validator(mode="after")
     def _consistent(self) -> Self:
         before, after = self.kind_before is not None, self.kind_after is not None
+        if (self.mtime_before is not None and not before) or (
+            self.mtime_after is not None and not after
+        ):
+            raise ValueError("an mtime belongs to a version that exists")
         expected = {"add": (False, True), "delete": (True, False), "modify": (True, True)}
         if (before, after) != expected[self.op]:
             raise ValueError(
@@ -188,6 +218,25 @@ class DeltaRow(_Row):
         if self.blob_ref is not None and (self.is_text is not False or self.kind_after is None):
             raise ValueError("a blob_ref is the later version of a row that is not text")
         return self
+
+
+class JobNoticeRow(_Row):
+    """Claude Code's notice that a command it had moved to the background finished (ADR-0020).
+
+    Claude Code 2.1.278 queues the notice as a `queue-operation` event in the native session
+    JSONL (`trajlab.atif.jobs`); no user step carries it. The call it belongs to is the `steps`
+    row with this `tool_call_id`; its job ran from that row's `t_start` to `noticed_at`.
+    """
+
+    trial_id: UUID = Field(description="The trial (trials.trial_id).")
+    task_id: str = Field(min_length=1, description="Claude Code's background task id.")
+    tool_call_id: str = Field(
+        min_length=1, description="The backgrounded call: steps.tool_call_id."
+    )
+    status: str = Field(min_length=1, description="`completed` or `failed`, as Claude Code said.")
+    noticed_at: AwareDatetime = Field(
+        description="When Claude Code queued the notice: the job's end, within its polling."
+    )
 
 
 class StoreMeta(_Row):

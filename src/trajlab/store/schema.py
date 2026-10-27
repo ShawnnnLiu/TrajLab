@@ -72,6 +72,8 @@ RECORD_TABLES: dict[str, str] = {
             t_end TIMESTAMPTZ,
             checkpoint_seq INTEGER,
             checkpoint_id VARCHAR,
+            checkpoint_at TIMESTAMPTZ,
+            command_shell VARCHAR,
             PRIMARY KEY (trial_id, step_idx)
         )""",
     "deltas": """
@@ -93,7 +95,18 @@ RECORD_TABLES: dict[str, str] = {
             mode_after VARCHAR,
             owner_before VARCHAR,
             owner_after VARCHAR,
+            mtime_before TIMESTAMPTZ,
+            mtime_after TIMESTAMPTZ,
             PRIMARY KEY (trial_id, step_idx, path)
+        )""",
+    "job_notices": """
+        CREATE TABLE job_notices (
+            trial_id UUID NOT NULL,
+            task_id VARCHAR NOT NULL,
+            tool_call_id VARCHAR NOT NULL,
+            status VARCHAR NOT NULL,
+            noticed_at TIMESTAMPTZ NOT NULL,
+            PRIMARY KEY (trial_id, task_id)
         )""",
 }
 
@@ -188,19 +201,11 @@ class SchemaVersionError(StoreError):
     def __init__(self, version: object, path: Path | None = None) -> None:
         self.version = version
         where = f"{path} has" if path is not None else "has"
-        upgrade = (
-            f"; `trajlab store derive {path.parent if path else '<store>'}` upgrades it"
-            if version in UPGRADABLE_VERSIONS
-            else ""
+        super().__init__(
+            f"{where} schema {version}; this code reads {SCHEMA_VERSION}, and no store of "
+            "another version is upgraded in place: build it again from the trial dirs and "
+            "their images (ADR-0020)"
         )
-        super().__init__(f"{where} schema {version}; this code reads {SCHEMA_VERSION}{upgrade}")
-
-
-# Schema versions `replace_views` brings up to this one in place, and what version 1 had that
-# version 2 does not: three `steps` columns for derived values, which no code ever filled.
-UPGRADABLE_VERSIONS = (1,)
-_V1_STEP_COLUMNS = ("is_loop", "is_revert", "files_touched")
-UPGRADED_FROM_1 = "schema 1"
 
 
 def _raw_meta(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
@@ -274,14 +279,12 @@ def replace_views(store_dir: Path, meta: StoreMeta) -> str:
     id, `meta.derived`, in both files' `store_meta`; return the id they replace. Rows are not
     touched, since every view is a function of them.
 
-    A store of schema version 1 is upgraded to this version first, and `schema 1` returned:
-    `steps` loses the three columns version 1 kept for derived values (ADR-0018), refused if
-    any row has a value in one, and `store_meta` gains `derived`.
-
     Raises `StoreError` if a file is missing or was built under settings other than `meta`'s
-    (apart from the views and an upgradable version): only those can be brought up to date.
-    A store left between the two files' updates (record done, heldout not) is finished, and the
-    heldout file's old id returned.
+    (apart from the views): only those can be brought up to date. A store of another schema
+    version is refused with `SchemaVersionError`: since version 3 the rows themselves carry
+    values an older store lacks (ADR-0020), so it is built again, not upgraded. A store left
+    between the two files' updates (record done, heldout not) is finished, and the heldout
+    file's old id returned.
     """
     record, heldout = record_path(store_dir), heldout_path(store_dir)
     record_old = _replaceable(record, meta)
@@ -289,8 +292,6 @@ def replace_views(store_dir: Path, meta: StoreMeta) -> str:
     with duckdb.connect(str(record)) as con:
         con.begin()
         try:
-            if record_old == UPGRADED_FROM_1:
-                _drop_v1_step_columns(con, record)
             for (name,) in con.execute(
                 "SELECT view_name FROM duckdb_views() WHERE NOT internal AND NOT temporary"
             ).fetchall():
@@ -308,34 +309,14 @@ def replace_views(store_dir: Path, meta: StoreMeta) -> str:
 
 
 def _replaceable(path: Path, meta: StoreMeta) -> str:
-    """The derived id of a store file `replace_views` can bring to `meta`, or `schema 1`."""
+    """The derived id of a store file `replace_views` can bring to `meta`."""
     if not path.is_file():
         raise StoreError(f"{path} does not exist")
     with duckdb.connect(str(path), read_only=True) as con:
-        values = _raw_meta(con)
-        if values.get("schema_version") in UPGRADABLE_VERSIONS:
-            try:
-                found = StoreMeta.model_validate(
-                    {**values, "schema_version": SCHEMA_VERSION, "derived": meta.derived}
-                )
-            except ValidationError as error:
-                raise StoreError(f"{path}: no readable store_meta ({error})") from error
-            old = UPGRADED_FROM_1
-        else:
-            found = _existing_meta(con, path)
-            old = found.derived
+        found = _existing_meta(con, path)
     if found.model_copy(update={"derived": meta.derived}) != meta:
         raise StoreError(f"{path} was built under {found}, not {meta}")
-    return old
-
-
-def _drop_v1_step_columns(con: duckdb.DuckDBPyConnection, path: Path) -> None:
-    filled = " OR ".join(f"{column} IS NOT NULL" for column in _V1_STEP_COLUMNS)
-    (n,) = con.execute(f"SELECT count(*) FROM steps WHERE {filled}").fetchone()  # type: ignore[misc]
-    if n:
-        raise StoreError(f"{path}: {n} steps rows have a value in {list(_V1_STEP_COLUMNS)}")
-    for column in _V1_STEP_COLUMNS:
-        con.execute(f"ALTER TABLE steps DROP COLUMN {column}")
+    return found.derived
 
 
 def _write_versions(con: duckdb.DuckDBPyConnection, meta: StoreMeta) -> None:

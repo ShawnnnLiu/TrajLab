@@ -8,7 +8,7 @@ import pytest
 from typer.testing import CliRunner
 
 from tests.test_store_build import HUNK, TRIAL_ID, all_images, capture
-from tests.test_store_derive import as_schema_1, change, make_store, script
+from tests.test_store_derive import as_schema, change, make_store, script
 from tests.test_store_derive import call as make_call_row
 from trajlab.cli import app
 from trajlab.store import schema
@@ -222,12 +222,13 @@ def test_store_derive(store: Path) -> None:
     assert result.output.endswith("already current\n")
 
 
-def test_store_derive_upgrades_a_schema_1_store(tmp_path: Path) -> None:
+def test_store_derive_refuses_a_store_of_another_schema_version(tmp_path: Path) -> None:
     store = make_store(tmp_path, [make_call_row(1)])
-    as_schema_1(store)
+    as_schema(store, 2)
     result = CliRunner().invoke(app, ["store", "derive", str(store)])
-    assert result.exit_code == 0, result.output
-    assert result.output.startswith(f"{store}: upgraded from schema 1 to 2, derived views ")
+    assert result.exit_code == 1
+    assert "has schema 2; this code reads 3" in result.output
+    assert "build it again" in result.output
 
 
 def test_store_derive_reports_a_missing_store(tmp_path: Path) -> None:

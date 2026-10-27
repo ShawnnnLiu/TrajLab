@@ -154,9 +154,14 @@ One trial is one task executed by one attempt.
 - **late delta** - a delta whose causal step is earlier than its landing step.
 - **backgrounded call** - a Bash step that Claude Code moved to the background; its `output` is a task id and its `t_end` is the moment of the move, not the job's end.
   Not: a job the agent launched by hand with `&` or `nohup`, which is a hand-launched job (`background_untracked`).
-- **job window** - from a backgrounded call's `t_start` to the `t_start` of the step where Claude Code reported the job finished (`background_done_step`), or to the stop record when it never did.
+- **job notice** - Claude Code's record that a backgrounded call's job finished: a `queue-operation` `enqueue` event in the session JSONL, a `job_notices` row in the store; its time is the job's end.
+- **job window** - from a backgrounded call's `t_start` to its job notice's time, or to the attempt's last recorded instant when no notice came (`step_jobs.job_end`).
+- **shell text** - `steps.command_shell`: a Bash command with heredoc bodies and inline `-c` programs cut out, so an `&` or `nohup` in it is the shell's own job launch.
+- **launcher** - a backgrounded or hand-launched call whose job was open when a file was written (`delta_attribution.launcher_step`): the one that redirects into the file, else names it, else the latest.
 - **write time** - a file's mtime inside the checkpoint image, `deltas.mtime_after`; the only recorded time of the write itself.
-- **attribution** - the value `delta_attribution` gives a delta row: `foreground`, `background`, `background_by_path`, `background_untracked`, `ambiguous`, `untrusted_mtime`, or `unknown`; only the first four set `launched_by_step`.
+- **landing window** - from the landing call's `t_start` to its checkpoint's commit (`steps.checkpoint_at`), where the call's own writes carry their times.
+- **attribution** - the value `delta_attribution` gives a delta row: `foreground`, `background`, `background_by_path`, `background_untracked`, `contested`, `untrusted_mtime`, or `unknown`; `launched_by_step` is set for the first four, and for `untrusted_mtime` when no job was open.
+- **contested** - a write inside the landing window while a launcher's job was open: either could have written it; the causal step is the landing step and `launcher_step` the alternative.
 
 ## Detector capture and labels (ADR-0015)
 

@@ -6,6 +6,7 @@ import re
 import tarfile
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
+from datetime import UTC, datetime
 from itertools import pairwise
 from pathlib import Path
 from uuid import UUID
@@ -210,7 +211,25 @@ def test_an_added_text_file(tmp_path: Path) -> None:
         bytes_after=3,
         mode_after="0644",
         owner_after="0:0",
+        mtime_after=datetime(1970, 1, 1, 0, 0, 1, tzinfo=UTC),  # the member's mtime, 1
     )
+
+
+def test_a_row_carries_the_write_times_of_both_versions(tmp_path: Path) -> None:
+    """ADR-0020: the tar entries' mtimes, as aware UTC instants; never compared."""
+    base = [alpine()]
+    tops = {
+        1: top(d("etc", mtime=50), f("etc/shells", "/bin/sh\n", mtime=1_790_000_000)),
+        2: top(d("etc", mtime=51), f("etc/shells", "/bin/sh\n/bin/zsh\n", mtime=1_790_000_777)),
+    }
+    result = run(tmp_path, base, tops)
+    first, second = rows_of(result, 1)["/etc/shells"], rows_of(result, 2)["/etc/shells"]
+    assert first.mtime_before == datetime(1970, 1, 1, 0, 0, 1, tzinfo=UTC)  # alpine()'s member
+    assert first.mtime_after == datetime.fromtimestamp(1_790_000_000, tz=UTC)
+    assert second.mtime_before == first.mtime_after
+    assert second.mtime_after == datetime.fromtimestamp(1_790_000_777, tz=UTC)
+    # A copy-up that only moves the time is still no change (no row for /etc).
+    assert "/etc" not in rows_of(result, 2)
 
 
 def test_a_modified_base_file_diffs_against_the_base(tmp_path: Path) -> None:

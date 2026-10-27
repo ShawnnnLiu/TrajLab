@@ -89,6 +89,7 @@ def test_fixture_rows(trial_copy: Path) -> None:
             t_end=make_call(1).requested_at,
             checkpoint_seq=1,
             checkpoint_id=image(1),
+            checkpoint_at=make_checkpoint(1).captured_at,
         ),
         StepRow(
             trial_id=TRIAL_ID,
@@ -99,6 +100,7 @@ def test_fixture_rows(trial_copy: Path) -> None:
             t_start=datetime(2026, 9, 22, 0, 49, 18, 565000, tzinfo=UTC),
             checkpoint_seq=1,
             checkpoint_id=image(1),
+            checkpoint_at=make_checkpoint(1).captured_at,
         ),
         StepRow(
             trial_id=TRIAL_ID,
@@ -110,6 +112,7 @@ def test_fixture_rows(trial_copy: Path) -> None:
             t_end=make_call(2).requested_at,
             checkpoint_seq=2,
             checkpoint_id=image(2),
+            checkpoint_at=make_checkpoint(2).captured_at,
         ),
     )
     assert steps.owner_step == {FIXTURE_TOOL_CALL_ID: 1, STOP_ID: 3}
@@ -400,6 +403,7 @@ def test_compaction_and_later_user_steps_are_rows() -> None:
         t_start=T0 + timedelta(seconds=2.5),
         checkpoint_seq=1,
         checkpoint_id=image(1),
+        checkpoint_at=make_checkpoint(1).captured_at,
     )
     assert (user.source, user.atif_step_id, user.message, user.tool) == ("user", 3, summary, None)
     assert (user.checkpoint_seq, final.checkpoint_seq) == (1, 1)
@@ -736,3 +740,51 @@ def test_a_deferred_call_already_covered_keeps_the_state() -> None:
         ("toolu_c1", 1),
         (None, 1),
     ]
+
+
+# -- the shell's own text and the checkpoint time (ADR-0020) -----------------------------------
+
+
+@pytest.mark.parametrize(
+    ("command", "expected"),
+    [
+        (
+            "cat > f.py <<'EOF'\nimport os\nif a & b: pass\nEOF\npython f.py &",
+            "cat > f.py <<heredoc>\npython f.py &",
+        ),
+        ("cat <<-EOF > out\n\tnohup x &\nEOF", "cat <<heredoc>"),
+        ("python -c 'import os; print(1 & 2)' && ls", "python -c <code> && ls"),
+        ('bash -c "nohup sleep 1 &"; wait', "bash -c <code>; wait"),
+        ("cat <<EOF\nunterminated", "cat <<EOF\nunterminated"),
+        ("ls -la", "ls -la"),
+    ],
+)
+def test_shell_text(command: str, expected: str) -> None:
+    from trajlab.store.steps import shell_text
+
+    assert shell_text(command) == expected
+
+
+def test_bash_rows_carry_their_shell_text_and_rows_their_checkpoint_time() -> None:
+    heredoc = "cat > /app/f.py <<'EOF'\nimport os\nEOF\nnohup python /app/f.py > /app/log &"
+    traj = trajectory(
+        agent(
+            1,
+            calls=[
+                call("toolu_b1", "Bash", command=heredoc),
+                call("toolu_w1", "Write", file_path="/a", content="a"),
+            ],
+        ),
+        agent(4, "Done."),
+    )
+    steps = rows_of(
+        traj,
+        checkpoints=[make_checkpoint(1, "toolu_b1"), make_checkpoint(2, "toolu_w1")],
+        calls=[make_call(1, "toolu_b1"), make_call(2, "toolu_w1")],
+    )
+    bash, write, final = steps.rows
+    assert bash.command_shell == "cat > /app/f.py <<heredoc>\nnohup python /app/f.py > /app/log &"
+    assert write.command_shell is None
+    assert (bash.checkpoint_seq, bash.checkpoint_at) == (1, make_checkpoint(1).captured_at)
+    assert (write.checkpoint_seq, write.checkpoint_at) == (2, make_checkpoint(2).captured_at)
+    assert (final.checkpoint_seq, final.checkpoint_at) == (2, make_checkpoint(2).captured_at)
