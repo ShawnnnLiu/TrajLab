@@ -122,3 +122,84 @@ Run on the capture server on 2026-10-27 with the recorder of commit `02da609`, b
 5. **The 19 contested rows of `pretrain-shard-corruption__XK8w3KT`** cannot be checked: that trial ran without the recorder. The new trial's contested rows are reported in item 4's results and across `tb40-sonnet-v4` instead.
 
 `tb40-sonnet-v4` was started before item 4 finished, on the owner's call (2026-10-27): the recorder only observes, and a mapping fault found later is fixed by rebuilding the store from the trials' `writes.jsonl`.
+
+## Amendment (2026-10-27): `tb40-sonnet-v4`: the record against ADR-0020's rule
+
+### The run
+
+`tb40-sonnet-v4` is the Exp 2 first-attempt corpus captured again with the recorder: `configs/harbor/tb40-sonnet-v4.json` is `tb40-sonnet-v3`'s config with the job name changed (23 tasks, 3 attempts, 6 concurrent, `--storage /srv/trajlab/jobs`).
+The first launch (05:24 UTC) was stopped when the recorder's reader thread died on a process whose `/proc` session id was -1 (fixed in `fd8af06`); its job dir is kept in `/srv/trajlab/aside/tb40-sonnet-v4-recorder-crash-2026-10-27`, and the corpus was launched again at 05:56 UTC from `fd8af06`.
+
+The run stopped at 09:12 UTC with 67 of 69 trials finished.
+The host's 968 GB root filesystem filled at 08:56 with checkpoint layers: the containerd snapshotter keeps each image twice (blobs and unpacked snapshots, about 1.85 times the records' `bytes`), and `docker commit` stores a call's whole upper directory again at every checkpoint, so `pretrain-shard-corruption__tgAfUZG`, with a pip cache under `/root/.cache/pip`, committed 238 GB in 42 checkpoints.
+Commits failed from 08:56 and the recorder died on `ENOSPC` at 09:06.
+The 67 had finished by 08:29 and are untouched; `layout-config-recreation__GFoCenW` and `pretrain-shard-corruption__tgAfUZG` are unfinished, to be rerun with `harbor jobs resume` (which reruns a trial with no result) once there is disk, with the watcher and the recorder running.
+Harbor has not exited 0, so `corpus/manifests/tb40-sonnet-v4.json` is not written yet.
+
+The 67 finished trials: 13 passed, no exception, every chain complete; 1,656 hook requests and 1,656 acks, 957 checkpoints.
+The recorder ran from the relaunch to 09:06 as one process with no queue overflow; it wrote 2,827,219 event lines for the 67, and dropped 211,704 events whose directory handle no longer resolved (a directory removed before its events were read).
+The store was built with `trajlab store build` on tmpfs (`/dev/shm/trajlab/stores/tb40-sonnet-v4.b`, linked from `corpus/stores/tb40-sonnet-v4`) for want of disk, from commit `781a743` (the carrying directory, below); it does not survive a reboot and is rebuilt from the trial dirs.
+
+### Rows by attribution
+
+From `scripts/2026-10-27_adr0020_attribution_report.py corpus/stores/tb40-sonnet-v4 --markdown` (log `/srv/trajlab/logs/attribution-tb40-sonnet-v4-2026-10-27b.md`); cache rows are `__pycache__`, `.pyc`, and `.pytest_cache` paths.
+
+| Attribution | Rows | Of them cache |
+|---|---|---|
+| `recorded` | 196,675 | 53,679 |
+| `multi_writer` | 4 | 0 |
+| `foreground` | 79 | 1 |
+| `background`, `background_by_path`, `background_untracked` | 0 | 0 |
+| `contested` | 6 | 0 |
+| `untrusted_mtime` | 3 | 0 |
+| `unknown` | 176 | 9 |
+| total | 196,943 | 53,689 |
+
+- The record settles 196,679 rows (99.87%). The 4 `multi_writer` rows are Chromium's `/tmp/.org.chromium.Chromium.*` files in `layout-config-recreation__kb38wvM`, each created by a browser an earlier call started and closed by a process the landing call started.
+- 6 rows stay `contested`, all written by a short-lived process (`cat >> opt.py <<'E'` and the like) that had exited before the recorder read its `/proc` entry, so no call can be named; ADR-0020's 533 other contested rows are settled.
+- Mapping of the 196,813 write rows (per delta row and writer): `command` 192,697, `session` 2,135, `start_time` 1,849, `tool_window` 2 (the corpus has 2 Write calls and no Edit; Sonnet wrote files with Bash), no call 130.
+- 14 trials ran a job past a call's return (9 of them failures). By the record, 3,663 rows in 9 of them landed 1 to 9 calls after the call whose process wrote them (lag 1: 1,200; 2: 1,293; 3: 804; 4: 263; 5: 62; 6 to 9: 41).
+
+### The rule against the record
+
+ADR-0020's answer (`rule_attribution`, `rule_causal_step`) on the 196,675 `recorded` rows: the same call on 193,089 (98.2%), or 139,411 of 142,996 (97.5%) without cache rows.
+The 3,586 disagreements are in 9 trials; 3,370 are in `layout-config-recreation__kb38wvM` (failed) and 177 in `pretrain-shard-corruption__R4QX4a7` (failed).
+
+| Rule said | Recorded rows | Rule agrees | Cache rows (agree) |
+|---|---|---|---|
+| `foreground` | 191,007 | 189,257 (99.1%) | 53,676 (53,675) |
+| `untrusted_mtime` | 2,936 | 2,936 (100%) | 0 |
+| `unknown` | 2,066 | 434 (21.0%) | 3 (3) |
+| `contested` | 533 | 373 (70.0%) | 0 |
+| `background_untracked` | 127 | 83 (65.4%) | 0 |
+| `background` | 6 | 6 (100%) | 0 |
+
+- **`foreground`'s misses are the evidence condition's** (ADR-0020's amendment, `bfc6043`): all 1,750 lie inside the landing window with an open launcher that names nothing, and the record gives every one to the launcher.
+  Over all 42,099 such rows the condition is right on 40,349 (95.8%).
+  1,710 of the misses are `kb38wvM`, whose `nohup python3 fit.py ... &` jobs, polled by later calls, wrote output files under generated names that no command spells; 36 are `R4QX4a7`, 3 `sound-change-cascade__Z4Xc8Tg`, 1 `vba-userform-port__PFng8aw`.
+- **`unknown` is deletes, and in `kb38wvM` an earlier call's.** 2,063 of the 2,066 are deletes; outside `kb38wvM` the record gives all 384 to the landing call, as the rule's fallback does. In `kb38wvM` 1,632 deletes (1,558 of them under Chromium's profile and Playwright's artifact directories in `/tmp`) were made by processes an earlier call started and that outlived it, the browsers of its `fit.py` jobs (mapped by `session` 1,220, `start_time` 317, `command` 95).
+- **`contested`** settled by the record: the landing call 373, the launcher 120, another call 40.
+- **`background_untracked`** is right on 83 of 127. Of the other 44, 32 are `R4QX4a7`, where the rule took the latest of several `nohup` launchers (step 79 or 81) and the writer was an earlier one (76, 77, or 79): the multi-job misfire ADR-0020's amendment describes; 12 are `kb38wvM`, where the rule took an earlier launcher and the writer was step 174's job.
+- **Late rows.** The rule calls 133 rows late, 121 of them late by the record too and 89 to the same call; the record finds 3,663.
+  Most of the rest are the two misses above: a job's write inside the landing window with no name to tie it (1,750) and a job's delete, which has no time (1,632).
+
+### The carrying directory (`781a743`)
+
+The first build of this store (from `6a87a09`) left 8,851 rows (4.5%) with no event of their own in their checkpoint interval, from two causes:
+
+- a directory built under another name and renamed into place: `uv pip install` in `gsea-proteomics__mqM8Mpm` unpacks each wheel into its cache under a temporary name (3,829 rows), and `pip install --target` in three `vf2-speedup-networkx` trials builds `networkx` in a temporary directory (1,250 rows each). The recorder sees one `moved_to` on the directory and nothing under it.
+- a recursive delete whose children's events went with their directory (the unresolved handles above): Chromium removing its profiles in `kb38wvM`.
+
+The store now gives such a row the events of its nearest directory above it that was renamed into place (an added or modified path) or removed (a deleted path) in the same interval, and keeps that directory in `writes.via_dir` (glossary: carrying directory). This is still schema 4, which was never released.
+On the rebuild 8,597 rows are recorded that way: the 7,579 adds, which ADR-0020's rule had as `foreground` and the record gives to the same call; and 1,018 deletes: 1,004 in `kb38wvM`, all under Chromium's profile and Playwright's artifact directories, which the rule had as `unknown` and the record gives to the earlier call whose browser removed them; 4 elsewhere, the landing call's, as the rule has them; and 10 by a process tied to no call, which stay `unknown`.
+Before the fix the agreement was 185,506 of 188,088 recorded rows (98.6%); it falls to 98.2% because the 1,004 newly recorded rows the rule has wrong are all `kb38wvM` deletes.
+
+### What the record still misses on this corpus
+
+264 rows (0.13%) keep ADR-0020's answer:
+
+- **149 with no event in their checkpoint interval**, 148 of them in `kb38wvM`.
+  136 have their own or their carrying directory's event in the 5 s before the previous checkpoint's commit returned, 103 within 50 ms of it: the interval opens at the previous record's `captured_at`, when `docker commit` returned, but the layer was taken earlier, while the container was paused, and a write after the unpause lands in the next layer with a time before its interval (Chromium's profile removed as `fit.py` exits, 6 ms before the commit returned).
+  Opening the interval of a path with no events of its own at the previous checkpoint's `requested_at` would cover these; not done: 149 rows, under 0.1% of the corpus.
+- **115 whose events have no call**: 79 the rule calls `foreground`, 27 `unknown`, 6 `contested`, 3 `untrusted_mtime`.
+  The first 112 were written only by processes gone before the recorder read them (a `cat` writing a heredoc, a `mkdir`), the last case "What it still misses" names; the 3 are Claude Code's own lock file, `/tmp/.local/state/claude/locks/2.1.278.lock`, in the first step of each `risk-scorer-replay` attempt, written by Claude Code outside any write tool.

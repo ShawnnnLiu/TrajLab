@@ -189,3 +189,9 @@ A file that a background process keeps writing while a read-only call runs canno
 - The landing call's own naming test (whether it names the file, which blocks the promotion to `background`) is still a substring test.
 
 The ADR-0021 recorder, capturing `tb40-sonnet-v4` since 2026-10-27 05:56 UTC, decides these rows by the writer's identity; the agreement between this rule and the record is measured there.
+
+Measured (ADR-0021, amendment "`tb40-sonnet-v4`: the record against this rule"): on the 196,675 rows of the 67 finished trials that the record gives to one call, this rule names the same call on 193,089 (98.2%).
+`foreground` is right on 99.1%, and the evidence condition on 40,349 of the 42,099 rows inside a landing window with a launcher (95.8%); 1,710 of its 1,750 misses are polled `nohup` jobs of `layout-config-recreation__kb38wvM` writing files whose names no command spells.
+`unknown` (deletes) is the landing call on 434 of 2,066; the other 1,632 are the same trial's Chromium profiles removed by an earlier call's job.
+Of 533 `contested` rows the record settles, 373 are the landing call's, 120 the launcher's, and 40 another call's.
+By the record 3,663 rows in 9 trials are late; this rule calls 133 late, 89 of them to the record's call.

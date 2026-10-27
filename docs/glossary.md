@@ -174,6 +174,8 @@ One trial is one task executed by one attempt.
 - **tool shell** - the shell Claude Code runs one Bash call in, `bash -c '<setup> && eval <command> [< /dev/null] && pwd -P >| /tmp/claude-<id>-cwd'`, in a session of its own; its command text names the call.
 - **write record** - a trial's write events and the store's `writes` rows built from them; always qualified ("write record"), since unqualified "record" names a capture record.
 - **writer step** - the step whose call started the process that wrote a path (`writes.writer_step`), found by the tool shell's command, the session id, or the start time (`writes.mapped_by`).
+- **carrying directory** - for a delta row's path with no write events of its own in its checkpoint interval, the nearest directory above it that was renamed into place (an added or modified path) or removed (a deleted path) in that interval (`writes.via_dir`); its events stand for the path's.
+  Covers a directory built under another name and renamed (`pip install --target`, uv's cache) and a recursive delete whose children's events were lost with their directory.
 - **`recorded` / `multi_writer`** - the attributions the write record gives: the processes of exactly one call, or of several, wrote the path in the delta row's checkpoint interval; they come before ADR-0020's cases, which still decide rows the write record does not settle.
 
 ## Detector capture and labels (ADR-0015)
