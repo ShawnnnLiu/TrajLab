@@ -4,6 +4,7 @@ against a fake /proc, and the recorder's handling of events, with no fanotify an
 import json
 import os
 import re
+import threading
 import time
 from collections.abc import Sequence
 from datetime import UTC, datetime
@@ -463,3 +464,68 @@ def test_each_bash_calls_shell_is_recorded_when_it_sources_its_snapshot(
     (trial / "result.json").write_text("{}")
     rec.discover()
     assert marks[-1] == (snapshots, True)
+
+
+def test_a_session_proc_cannot_name_is_recorded_as_none(jobs: Path, tmp_path: Path) -> None:
+    """A live trial had a writer whose /proc stat gave session -1; the line is still written."""
+    proc = FakeProc(tmp_path / "proc")
+    container(proc)
+    proc.add(1600, ["git", "gc"], ppid=SHELL, sid=-1, start=50, cpid=16)
+    containers = Containers()
+    containers.started = True
+    rec = recorder(jobs, tmp_path / "proc", containers)
+    rec.discover()
+    now = datetime.now(UTC).timestamp()
+    rec.handle(iter([raw(FAN_CLOSE_WRITE, 1600, f"{UPPER}/app/.git", "index")]), now, Paths())  # type: ignore[arg-type]
+    rec.flush_all()
+    (line,) = lines(jobs)
+    assert (line.path, line.sid, line.cpid) == ("/app/.git/index", None, 16)
+
+
+def test_one_event_that_fails_does_not_stop_the_others(
+    jobs: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    proc = FakeProc(tmp_path / "proc")
+    container(proc)
+    containers = Containers()
+    containers.started = True
+    rec = recorder(jobs, tmp_path / "proc", containers)
+    rec.discover()
+    reading = rec.processes.reading
+
+    def flaky(pid: int):  # type: ignore[no-untyped-def]
+        if pid == SHELL:
+            raise ValueError("odd process")
+        return reading(pid)
+
+    monkeypatch.setattr(rec.processes, "reading", flaky)
+    now = datetime.now(UTC).timestamp()
+    rec.handle(
+        iter(
+            [
+                raw(FAN_CLOSE_WRITE, SHELL, f"{UPPER}/app", "a"),
+                raw(FAN_CLOSE_WRITE, CHILD, f"{UPPER}/app", "b"),
+            ]
+        ),
+        now,
+        Paths(),  # type: ignore[arg-type]
+    )
+    rec.flush_all()
+    assert [line.path for line in lines(jobs)] == ["/app/b"]
+    assert rec.stats["failed"] == 1
+
+
+def test_a_reader_that_fails_stops_the_recorder(jobs: Path, tmp_path: Path) -> None:
+    FakeProc(tmp_path / "proc")
+    rec = recorder(jobs, tmp_path / "proc", Containers())
+
+    class Broken:
+        fd = os.open(os.devnull, os.O_RDONLY)
+
+        def read(self) -> bytes:
+            raise OSError("read failed")
+
+    stop = threading.Event()
+    with pytest.raises(OSError, match="read failed"):
+        rec._read_loop(Broken(), stop)  # type: ignore[arg-type]
+    assert stop.is_set() and rec.reader_failed

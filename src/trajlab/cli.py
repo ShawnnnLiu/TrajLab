@@ -470,7 +470,7 @@ def record_writes(
     except RecorderLockedError as error:
         typer.echo(f"trajlab record-writes: {error}", err=True)
         raise typer.Exit(code=1) from error
-    except OSError as error:
+    except (OSError, RuntimeError) as error:
         typer.echo(f"trajlab record-writes: {error}", err=True)
         raise typer.Exit(code=1) from error
 

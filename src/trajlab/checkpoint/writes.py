@@ -415,7 +415,8 @@ def event_line(at: datetime, op: WriteOp, path: str, is_dir: bool, reading: _Rea
         comm=None if process is None else process.stat.comm,
         cmd=None if process is None else " ".join(process.argv)[:MAX_CMD_CHARS],
         started_at=None if process is None else process.started_at,
-        sid=None if process is None else process.stat.sid,
+        # /proc can say -1 for a process whose session it cannot name (seen on a live trial).
+        sid=None if process is None or process.stat.sid < 0 else process.stat.sid,
         ancestry=tuple(
             ProcessRef(pid=p.pid, cpid=p.cpid, started_at=p.started_at, comm=p.stat.comm)
             for p in reading.ancestry
@@ -503,6 +504,7 @@ class Recorder:
         self.stats: Counter[str] = Counter()
         # Marks (or unmarks) a directory for opens of its files; set by `run`.
         self.mark_directory: Callable[[Path, bool], None] | None = None
+        self.reader_failed = False
 
     # Trials ------------------------------------------------------------------------------
 
@@ -635,37 +637,49 @@ class Recorder:
         return namespace
 
     def handle(self, events: Iterator[RawEvent], now: float, paths: DirectoryPaths) -> None:
-        """Record a batch of events read at `now` (epoch seconds). Holds the trials' lock."""
+        """Record a batch of events read at `now` (epoch seconds). Holds the trials' lock.
+
+        An event that cannot be recorded is counted and logged, never raised: one odd process
+        must not stop the recording of every trial.
+        """
         with self._lock:
             for event in events:
                 self.stats["seen"] += 1
-                if event.mask & FAN_Q_OVERFLOW:
-                    self.stats["overflow"] += 1
-                    logger.error("fanotify queue overflow: events were lost")
-                    continue
-                if event.pid == self._own_pid or not event.handle:
-                    continue
-                if self._pid_namespace(event.pid) == self._host_pidns:
-                    continue
-                directory = paths.resolve(event.handle)
-                if directory is None:
-                    self.stats["unresolved"] += 1
-                    continue
-                path = directory + b"/" + event.name if event.name not in (b"", b".") else directory
-                if event.mask & FAN_OPEN:
-                    self._shell_start(event, path, now)
-                    continue
-                if event.mask & FAN_ONDIR and event.mask & (FAN_MOVED_TO | FAN_DELETE):
-                    paths.forget()
-                trial = self._match(path)
-                if trial is None:
-                    if path.startswith(self._snapshots_prefix):
-                        reading = self.processes.reading(event.pid)
-                        self._held.append(_Held(now, event, path, reading))
-                        self.stats["held"] += 1
-                        self._wake.set()
-                    continue
-                self._record(trial, now, event, path, self.processes.reading(event.pid))
+                try:
+                    self._handle_one(event, now, paths)
+                except Exception:
+                    self.stats["failed"] += 1
+                    if self.stats["failed"] <= 3:
+                        logger.exception("event of pid %d not recorded", event.pid)
+
+    def _handle_one(self, event: RawEvent, now: float, paths: DirectoryPaths) -> None:
+        if event.mask & FAN_Q_OVERFLOW:
+            self.stats["overflow"] += 1
+            logger.error("fanotify queue overflow: events were lost")
+            return
+        if event.pid == self._own_pid or not event.handle:
+            return
+        if self._pid_namespace(event.pid) == self._host_pidns:
+            return
+        directory = paths.resolve(event.handle)
+        if directory is None:
+            self.stats["unresolved"] += 1
+            return
+        path = directory + b"/" + event.name if event.name not in (b"", b".") else directory
+        if event.mask & FAN_OPEN:
+            self._shell_start(event, path, now)
+            return
+        if event.mask & FAN_ONDIR and event.mask & (FAN_MOVED_TO | FAN_DELETE):
+            paths.forget()
+        trial = self._match(path)
+        if trial is None:
+            if path.startswith(self._snapshots_prefix):
+                reading = self.processes.reading(event.pid)
+                self._held.append(_Held(now, event, path, reading))
+                self.stats["held"] += 1
+                self._wake.set()
+            return
+        self._record(trial, now, event, path, self.processes.reading(event.pid))
 
     def _shell_start(self, event: RawEvent, path: bytes, now: float) -> None:
         """A Bash call's shell sourcing its snapshot: one `open` line, with the shell."""
@@ -742,6 +756,18 @@ class Recorder:
     # Running ------------------------------------------------------------------------------
 
     def _read_loop(self, group: Fanotify, stop: threading.Event) -> None:
+        """Read until `stop`; if reading itself fails, stop the recorder rather than let it
+        run on recording nothing."""
+        try:
+            self._read_until(group, stop)
+        except BaseException:
+            logger.exception("the fanotify reader failed; stopping the recorder")
+            self.reader_failed = True
+            stop.set()
+            self._wake.set()
+            raise
+
+    def _read_until(self, group: Fanotify, stop: threading.Event) -> None:
         paths = DirectoryPaths(group)
         poller = select.poll()
         poller.register(group.fd, select.POLLIN)
@@ -781,6 +807,8 @@ class Recorder:
                 self._wake.wait(self.discover_interval)
                 self._wake.clear()
             reader.join()
+            if self.reader_failed:
+                raise RuntimeError("the fanotify reader failed; see the log above")
         finally:
             with self._lock:
                 for trial in self._trials.values():
@@ -794,7 +822,7 @@ class Recorder:
         stats, self.stats = self.stats, Counter()
         logger.info(
             "%.0f s: %d events seen (%.0f/s), %d lines written, %d held, %d unresolved, "
-            "%d overflows; %d trials; cpu %.1f s total",
+            "%d overflows, %d not recorded; %d trials; cpu %.1f s total",
             seconds,
             stats["seen"],
             stats["seen"] / seconds,
@@ -802,6 +830,7 @@ class Recorder:
             stats["held"],
             stats["unresolved"],
             stats["overflow"],
+            stats["failed"],
             len(self._trials),
             usage.ru_utime + usage.ru_stime,
         )
