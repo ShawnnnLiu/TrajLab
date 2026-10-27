@@ -11,7 +11,10 @@ of host processes are dropped by pid namespace before any path is resolved.
 At each event the recorder reads the writer's `/proc` entry at once, since a short-lived process
 is soon gone: its container pid (`NSpid`), command line, session id, start time, and its parents
 up to the container's root. It appends one `WriteEvent` per event to the trial's
-`agent/trajlab/writes.jsonl` (a `modify` at most once per process and path per second). Which
+`agent/trajlab/writes.jsonl` (a `modify` at most once per process and path per second). Each
+Bash call's shell first sources its shell snapshot from `/logs/agent/sessions/shell-snapshots/`,
+which is on the host's filesystem, so an inode mark on that directory (`FAN_OPEN`) gives one
+`open` line per call with the shell read at its start, whether or not it writes. Which
 call a process belongs to is decided in the store (`trajlab.store.writes`): Claude Code 2.1.278
 runs a Bash call as `bash -c '<setup> && eval <command, shell-quoted> [< /dev/null] && pwd -P >|
 /tmp/claude-<id>-cwd'` in a session of its own (`detached: true`), so the call's shell carries
@@ -48,6 +51,7 @@ from trajlab.checkpoint.fanotify import (
     FAN_MODIFY,
     FAN_MOVED_TO,
     FAN_ONDIR,
+    FAN_OPEN,
     FAN_Q_OVERFLOW,
     DirectoryPaths,
     Fanotify,
@@ -69,6 +73,10 @@ from trajlab.contracts import (
 logger = logging.getLogger(__name__)
 
 LOCK_FILENAME = ".trajlab-recorder.lock"
+# Where Claude Code keeps the shell snapshot every Bash call sources first, under agent/; the
+# agent dir is /logs/agent in the container.
+SHELL_SNAPSHOTS = ("sessions", "shell-snapshots")
+AGENT_MOUNT = b"/logs/agent"
 # Where the containerd overlayfs snapshotter keeps its snapshots: the filesystem marked.
 DEFAULT_SNAPSHOTS = Path("/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs")
 MASK = FAN_CREATE | FAN_DELETE | FAN_MOVED_TO | FAN_CLOSE_WRITE | FAN_MODIFY | FAN_ONDIR
@@ -364,7 +372,11 @@ class Processes:
         process = self._read(pid)
         if process is None:
             last = self._cache.get(pid)
-            shell = None if last is None else self._shells.get((pid, last.stat.start_ticks))
+            shell = (
+                None
+                if last is None
+                else self._shells.get((pid, last.stat.start_ticks)) or last.own_shell
+            )
             return _Reading(pid, last, (), shell, False, gone=True)
         ancestry: list[_Process] = []
         parent = process.stat.ppid
@@ -435,6 +447,8 @@ class _Trial:
     upper: bytes
     pidns: str
     out: BinaryIO
+    agent: bytes  # the agent dir on the host, which the container sees as /logs/agent
+    shells_marked: Path | None = None  # the shell-snapshot dir, once marked
     pending: list[bytes] = field(default_factory=list)
     pending_bytes: int = 0
     ops: Counter[str] = field(default_factory=Counter)
@@ -487,6 +501,8 @@ class Recorder:
         self._snapshots_prefix = os.fsencode(snapshots) + b"/"
         self._failures: dict[Path, str] = {}
         self.stats: Counter[str] = Counter()
+        # Marks (or unmarks) a directory for opens of its files; set by `run`.
+        self.mark_directory: Callable[[Path, bool], None] | None = None
 
     # Trials ------------------------------------------------------------------------------
 
@@ -529,6 +545,9 @@ class Recorder:
                 trial.init_pid,
                 os.fsdecode(trial.upper),
             )
+        for trial in list(self._trials.values()):
+            if trial.shells_marked is None:
+                self._mark_shells(trial)
         ended = [
             trial
             for trial_dir, trial in list(self._trials.items())
@@ -539,6 +558,11 @@ class Recorder:
                 self._trials.pop(trial.trial_dir, None)
                 self._flush(trial)
             trial.out.close()
+            if trial.shells_marked is not None and self.mark_directory is not None:
+                try:
+                    self.mark_directory(trial.shells_marked, True)
+                except OSError:
+                    pass  # the directory is gone with its mark
             logger.info(
                 "stopped recording %s: %d event lines (%s), %d with the writer gone",
                 trial.name,
@@ -546,6 +570,17 @@ class Recorder:
                 ", ".join(f"{op} {n}" for op, n in sorted(trial.ops.items())),
                 trial.gone,
             )
+
+    def _mark_shells(self, trial: _Trial) -> None:
+        """Watch opens in the trial's shell-snapshot dir once Claude Code has made it."""
+        directory = TrialPaths(trial.trial_dir).agent_dir.joinpath(*SHELL_SNAPSHOTS)
+        if self.mark_directory is None or not directory.is_dir():
+            return
+        try:
+            self.mark_directory(directory, False)
+        except OSError as error:
+            logger.warning("%s: no mark on %s: %s", trial.name, directory, error)
+        trial.shells_marked = directory
 
     def _open(self, trial_dir: Path) -> _Trial:
         identity = self.identify(trial_dir)
@@ -572,14 +607,14 @@ class Recorder:
             upper=upper.rstrip(b"/"),
             pidns=pidns,
             out=out,
+            agent=os.fsencode(TrialPaths(trial_dir).agent_dir.resolve()),
         )
 
-    def _match(self, path: bytes) -> _Trial | None:
+    def _match(self, path: bytes, *, agent: bool = False) -> _Trial | None:
+        """The trial whose upper directory (or agent dir) holds `path`."""
         for trial in self._trials.values():
-            if path.startswith(trial.upper) and path[len(trial.upper) : len(trial.upper) + 1] in (
-                b"/",
-                b"",
-            ):
+            root = trial.agent if agent else trial.upper
+            if path.startswith(root) and path[len(root) : len(root) + 1] in (b"/", b""):
                 return trial
         return None
 
@@ -617,6 +652,9 @@ class Recorder:
                     self.stats["unresolved"] += 1
                     continue
                 path = directory + b"/" + event.name if event.name not in (b"", b".") else directory
+                if event.mask & FAN_OPEN:
+                    self._shell_start(event, path, now)
+                    continue
                 if event.mask & FAN_ONDIR and event.mask & (FAN_MOVED_TO | FAN_DELETE):
                     paths.forget()
                 trial = self._match(path)
@@ -629,13 +667,34 @@ class Recorder:
                     continue
                 self._record(trial, now, event, path, self.processes.reading(event.pid))
 
+    def _shell_start(self, event: RawEvent, path: bytes, now: float) -> None:
+        """A Bash call's shell sourcing its snapshot: one `open` line, with the shell."""
+        trial = self._match(path, agent=True)
+        if trial is None:
+            return
+        reading = self.processes.reading(event.pid)
+        if reading.process is None or reading.process.own_shell is None:
+            return  # Claude Code writing the snapshot, or another reader
+        self._record(trial, now, event, path, reading, ops=((FAN_OPEN, "open"),))
+
     def _record(
-        self, trial: _Trial, now: float, event: RawEvent, path: bytes, reading: _Reading
+        self,
+        trial: _Trial,
+        now: float,
+        event: RawEvent,
+        path: bytes,
+        reading: _Reading,
+        ops: tuple[tuple[int, WriteOp], ...] = OPS,
     ) -> None:
-        container_path = (path[len(trial.upper) :] or b"/").decode("utf-8", "backslashreplace")
+        if path.startswith(trial.agent):
+            container_path = (AGENT_MOUNT + path[len(trial.agent) :]).decode(
+                "utf-8", "backslashreplace"
+            )
+        else:
+            container_path = (path[len(trial.upper) :] or b"/").decode("utf-8", "backslashreplace")
         at = datetime.fromtimestamp(now, UTC)
         second = int(now)
-        for bit, op in OPS:
+        for bit, op in ops:
             if not event.mask & bit:
                 continue
             if op == "modify":
@@ -699,6 +758,9 @@ class Recorder:
     def run(self, stop: threading.Event) -> None:
         """Record until `stop` is set."""
         group = Fanotify()
+        self.mark_directory = lambda path, remove: group.mark_directory(
+            str(path), FAN_OPEN, remove=remove
+        )
         try:
             group.mark_filesystem(str(self.snapshots), MASK)
             logger.info(

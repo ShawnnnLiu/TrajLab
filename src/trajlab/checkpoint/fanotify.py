@@ -27,15 +27,18 @@ FAN_REPORT_NAME = 0x00000800
 FAN_REPORT_DFID_NAME = FAN_REPORT_DIR_FID | FAN_REPORT_NAME
 
 FAN_MARK_ADD = 0x00000001
+FAN_MARK_REMOVE = 0x00000002
 FAN_MARK_FILESYSTEM = 0x00000100
 
 FAN_MODIFY = 0x00000002
 FAN_CLOSE_WRITE = 0x00000008
+FAN_OPEN = 0x00000020
 FAN_MOVED_FROM = 0x00000040
 FAN_MOVED_TO = 0x00000080
 FAN_CREATE = 0x00000100
 FAN_DELETE = 0x00000200
 FAN_Q_OVERFLOW = 0x00004000
+FAN_EVENT_ON_CHILD = 0x08000000
 FAN_ONDIR = 0x40000000
 
 FAN_EVENT_INFO_TYPE_FID = 1
@@ -148,6 +151,16 @@ class Fanotify:
             f"fanotify_mark {path}",
         )
         self._mount_fds.append(os.open(path, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC))
+
+    def mark_directory(self, path: str, mask: int, *, remove: bool = False) -> None:
+        """Report (or stop reporting) `mask` events on `path` and the files in it."""
+        flags = FAN_MARK_REMOVE if remove else FAN_MARK_ADD
+        _check(
+            self._libc.fanotify_mark(
+                self.fd, flags, mask | FAN_EVENT_ON_CHILD, AT_FDCWD, os.fsencode(path)
+            ),
+            f"fanotify_mark {path}",
+        )
 
     def read(self) -> bytes:
         """The queued events, or b"" when none are queued."""

@@ -3,8 +3,10 @@
 `trajlab record-writes` runs as root on the host beside the watcher and appends one `WriteEvent`
 per event to `agent/trajlab/writes.jsonl` in the trial dir: a create, delete, rename into
 place, close after writing, or write (at most one `modify` per process and path per second) in
-the container's upper directory, with the process that made it. Which call a process belongs to
-is not decided here: the store maps it from `shell`, `sid`, and the start times
+the container's upper directory, with the process that made it; and one `open` per Bash call,
+when its shell reads its shell snapshot (`/logs/agent/sessions/shell-snapshots/`) as it starts,
+so every call's shell is known while it runs, whether or not it writes. Which call a process
+belongs to is not decided here: the store maps it from `shell`, `sid`, and the start times
 (`trajlab.store.writes`), against the trial's steps.
 
 Times are aware UTC on the host clock, which the container shares on Linux. Pids are host pids
@@ -23,7 +25,7 @@ MAX_CMD_CHARS = 500
 # The start of a Bash call's command kept for reading; matching uses the whole text's sha256.
 MAX_COMMAND_CHARS = 200
 
-WriteOp = Literal["create", "modify", "close_write", "delete", "moved_to"]
+WriteOp = Literal["create", "modify", "close_write", "delete", "moved_to", "open"]
 
 
 class _Model(BaseModel):

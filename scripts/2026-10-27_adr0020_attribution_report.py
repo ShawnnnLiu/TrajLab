@@ -1,11 +1,14 @@
-"""Report ADR-0020's attribution over a schema-3 store: what the rule decided, per trial.
+"""Report delta attribution over a store: what ADR-0020's rule and ADR-0021's write record
+decided, per trial.
 
 Reads `delta_attribution`, `step_jobs`, and `steps` through the agent connection (read-only, no
 other file reachable) and prints, per trial with a job and in total: the rows by attribution,
 the late deltas and their lags in calls, the contested rows with the landing call's command and
-the launcher's, and the backgrounded calls with their job windows. The numbers for ADR-0020's
-amendment of 2026-10-27 come from this script on the schema-3 rebuild of
-corpus/stores/tb40-sonnet-v3.
+the launcher's, and the backgrounded calls with their job windows. On a store whose trials carry
+the write record (schema 4, ADR-0021) it also prints how the rule's answer compares with the
+record's on every row the record settles. The numbers for ADR-0020's amendment of 2026-10-27
+come from this script on the schema-3 rebuild of corpus/stores/tb40-sonnet-v3 (with the code of
+that date), and ADR-0021's from the schema-4 store of tb40-sonnet-v4.
 
     uv run python scripts/2026-10-27_adr0020_attribution_report.py <store> [--all-trials]
         [--contested N] [--markdown]
@@ -19,6 +22,8 @@ from pathlib import Path
 from trajlab.store.schema import connect_agent
 
 ATTRIBUTIONS = (
+    "recorded",
+    "multi_writer",
     "foreground",
     "background",
     "background_by_path",
@@ -130,6 +135,61 @@ def main() -> None:
         "late deltas: "
         + json.dumps({str(lag): n for lag, n in sorted(lags.items())}, separators=(",", ":"))
     )
+    with connect_agent(args.store) as con:
+        agreement(con, args.markdown)
+
+
+def agreement(con, markdown: bool) -> None:  # type: ignore[no-untyped-def]
+    """The rule against the write record, on the rows the record settles (ADR-0021)."""
+    rows = con.execute(
+        f"""
+        SELECT rule_attribution,
+               count(*) FILTER (WHERE attribution = 'recorded') AS recorded,
+               count(*) FILTER (WHERE attribution = 'recorded'
+                                AND rule_causal_step = causal_step) AS agree,
+               count(*) FILTER (WHERE attribution = 'recorded'
+                                AND rule_causal_step = causal_step
+                                AND regexp_matches(path, '{CACHE}')) AS agree_cache,
+               count(*) FILTER (WHERE attribution = 'recorded'
+                                AND regexp_matches(path, '{CACHE}')) AS recorded_cache,
+               count(*) FILTER (WHERE attribution = 'multi_writer') AS multi
+        FROM delta_attribution GROUP BY 1 ORDER BY 2 DESC
+        """
+    ).fetchall()
+    if not any(recorded or multi for _, recorded, _, _, _, multi in rows):
+        return
+    print("\n=== the rule against the write record (rows the record settles) ===")
+    if markdown:
+        print("| Rule said | Recorded rows | Rule agrees | Cache rows (agree) | Multi-writer |")
+        print("|---|---|---|---|---|")
+    for rule, recorded, agree, agree_cache, recorded_cache, multi in rows:
+        share = f"{agree / recorded:.1%}" if recorded else "-"
+        if markdown:
+            print(
+                f"| `{rule}` | {recorded:,} | {agree:,} ({share}) | "
+                f"{recorded_cache:,} ({agree_cache:,}) | {multi:,} |"
+            )
+        else:
+            print(
+                f"  {rule:22s} recorded {recorded:7d}, agree {agree:7d} ({share}); "
+                f"cache {recorded_cache} ({agree_cache}); multi_writer {multi}"
+            )
+    contested = con.execute(
+        """
+        SELECT CASE WHEN causal_step = step_idx THEN 'the landing call'
+                    WHEN causal_step = launcher_step THEN 'the launcher'
+                    ELSE 'another call' END AS who,
+               count(*)
+        FROM delta_attribution
+        WHERE rule_attribution = 'contested' AND attribution = 'recorded'
+        GROUP BY 1 ORDER BY 2 DESC
+        """
+    ).fetchall()
+    if contested:
+        print(
+            "  contested by the rule, settled by the record: "
+            + ", ".join(f"{who} {n}" for who, n in contested)
+        )
 
 
 def _short(text: str | None, width: int = 90) -> str:

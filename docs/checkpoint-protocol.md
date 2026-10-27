@@ -1,6 +1,6 @@
 # Checkpoint protocol: hook ↔ watcher ↔ backend
 
-Status: spec for build-order step 6, amended by ADR-0006 to match the implementation, by ADR-0007 for checkpoints every N calls, and by ADR-0010 for checkpoints only on calls that changed the filesystem.
+Status: spec for build-order step 6, amended by ADR-0006 to match the implementation, by ADR-0007 for checkpoints every N calls, by ADR-0010 for checkpoints only on calls that changed the filesystem, and by ADR-0021 for the write recorder beside the watcher.
 Governs `src/trajlab/checkpoint/` and `configs/claude-code/settings.hooks.json`.
 Changes here require an ADR.
 
@@ -50,6 +50,20 @@ With `trajlab watch --extras` (ADR-0015), the watcher also writes, under `<trial
 Each call gets at most one line in each file, even when it is retried.
 All of a call's extras share a 30 s budget, so they never cost the call its checkpoint.
 `changes.jsonl` needs a filesystem listing, so it is written only under `--gate change` or `audit`.
+
+## Write recorder (ADR-0021)
+
+A second host process, `trajlab record-writes <jobs-dir>`, records which process wrote each file in a running trial's container.
+It does not talk to the hook or the watcher and never delays a call: fanotify events are queued by the kernel and read after the write.
+
+- **Requirements**: Linux 5.9 or later; root (`CAP_SYS_ADMIN` for a filesystem mark and an unlimited queue, `CAP_DAC_READ_SEARCH` to resolve file handles); the containerd image store with the overlayfs snapshotter, whose snapshots (`/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs` by default, `--snapshots`) sit on a host filesystem that supports file handles (ext4 on the capture server). Not on a Mac: Docker Desktop's VM has no such filesystem in reach.
+- **Start and stop**: started by hand before `trajlab run`, in its own tmux session, as `sudo PYTHONDONTWRITEBYTECODE=1 .venv/bin/trajlab record-writes corpus/jobs` (the venv's script, not `uv run`, so no root-owned files land in the venv or uv's cache); one per jobs dir, held by `flock` on `<jobs-dir>/.trajlab-recorder.lock`; `trajlab run` warns when none holds it. Stop it with Ctrl-C after the job ends.
+- **Which trials**: every second it lists trial dirs with `config.json` and no `result.json`, finds each one's main container as the watcher does (compose project label), and reads the container init's `/proc/<pid>/mountinfo` for the root overlay's upper directory. A trial is let go when its `result.json` appears or its init process is gone. Events under the snapshots of a container not yet known wait 15 s for the next pass.
+- **Which events**: one mark on the whole filesystem (`FAN_MARK_FILESYSTEM`; the overlay mounts are not in the host's mount namespace) for `FAN_CREATE`, `FAN_DELETE`, `FAN_MOVED_TO`, `FAN_CLOSE_WRITE`, and `FAN_MODIFY` (once per process and path per second), directories included. Events of host processes are dropped by pid namespace first; a container event's path is its directory handle resolved through `open_by_handle_at`, and is kept when it lies under a trial's upper directory.
+  Once Claude Code has made the trial's `agent/sessions/shell-snapshots/`, an inode mark on it (`FAN_OPEN`) catches each Bash call's shell sourcing its snapshot, the first thing every call does: one `open` line per call, with the shell read while its command runs, whether or not the call writes anything.
+- **What it reads**: at each kept event, at once, the writer's `/proc/<pid>/stat`, `status` (`NSpid`), and `cmdline`, and its parents' up to the container's root; the outermost Bash tool shell among them carries the call's command text.
+- **What it writes**: `<trial>/agent/trajlab/writes.jsonl`, one `WriteEvent` per line, appended about every 0.5 s; the directory and file are given to the owner of `agent/`. It sits in the bind mount, so the agent can read it at `/logs/agent/trajlab/`; nothing under `/logs` is a delta. The recorder's log (events read per minute, lines written, CPU time) goes to its terminal; tee it to `/srv/trajlab/logs/`.
+- **What it misses**: writes before the container is found (the harness's setup) or after the stop checkpoint (the verifier's, which no delta row covers); a write whose directory is gone before its handle is resolved; attribute-only changes (`chmod`, `touch` of a file already in the upper directory), which are not subscribed. Which call a process belongs to is decided in the store (`trajlab.store.writes`), not here.
 
 ## Sequence
 
@@ -110,6 +124,7 @@ captured_at     ISO 8601     when docker commit returned
 A job config enables checkpointing by setting `agents[0].kwargs.config` to `configs/claude-code/settings.hooks.json`.
 `trajlab run` refuses such a config unless a watcher holds the lock on the config's `jobs_dir`.
 Start the watcher first: `uv run trajlab watch corpus/jobs --every 1 --gate change`.
+On the Linux capture server, start the write recorder beside it (ADR-0021, above); the corpus manifest records `writes_recorded`, true when every trial has its `writes.jsonl`.
 The watcher writes its policy into each trial's `policy.json`, and the corpus manifest records it as `checkpoint_every` and `checkpoint_gate`.
 `--gate audit` checkpoints every call while still recording the detector's verdict; `scripts/2026-09-30_audit_detector.py` then checks the verdicts against the checkpoints' contents.
 

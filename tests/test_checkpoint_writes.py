@@ -18,6 +18,7 @@ from trajlab.checkpoint.fanotify import (
     FAN_MODIFY,
     FAN_MOVED_TO,
     FAN_ONDIR,
+    FAN_OPEN,
     FAN_Q_OVERFLOW,
     RawEvent,
 )
@@ -410,3 +411,55 @@ def test_one_recorder_per_jobs_dir(tmp_path: Path) -> None:
             pass
     assert not recorder_running(tmp_path)
     assert json.loads((tmp_path / ".trajlab-recorder.lock").read_text()) == os.getpid()
+
+
+def test_a_shell_first_read_as_a_parent_keeps_its_command_once_gone(tmp_path: Path) -> None:
+    proc = FakeProc(tmp_path)
+    container(proc)
+    processes = Processes(tmp_path)
+    processes.reading(CHILD)  # reads the shell as a parent only
+    proc.remove(SHELL)
+    gone = processes.reading(SHELL)  # its last write: the cwd file, as it exits
+    assert gone.gone and gone.shell is not None and gone.shell.pid == SHELL
+
+
+def test_each_bash_calls_shell_is_recorded_when_it_sources_its_snapshot(
+    jobs: Path, tmp_path: Path
+) -> None:
+    proc = FakeProc(tmp_path / "proc")
+    container(proc)
+    containers = Containers()
+    containers.started = True
+    rec = recorder(jobs, tmp_path / "proc", containers)
+    marks: list[tuple[Path, bool]] = []
+    rec.mark_directory = lambda path, remove: marks.append((path, remove))
+    trial = jobs / "job" / "task__abc"
+    rec.discover()
+    assert marks == []  # Claude Code has not made the directory yet
+    snapshots = trial / "agent" / "sessions" / "shell-snapshots"
+    snapshots.mkdir(parents=True)
+    rec.discover()
+    assert marks == [(snapshots, False)]
+    directory = str(snapshots.resolve())
+    name = "snapshot-bash-17-x.sh"
+    rec.handle(
+        iter(
+            [
+                raw(FAN_OPEN, SHELL, directory, name),  # the call's shell sources it
+                raw(FAN_OPEN, CLAUDE, directory, name),  # Claude Code itself: not a call
+            ]
+        ),
+        datetime.now(UTC).timestamp(),
+        Paths(),  # type: ignore[arg-type]
+    )
+    rec.flush_all()
+    (started,) = lines(jobs)
+    assert (started.op, started.path, started.pid) == (
+        "open",
+        f"/logs/agent/sessions/shell-snapshots/{name}",
+        SHELL,
+    )
+    assert started.shell is not None and started.shell.pid == SHELL
+    (trial / "result.json").write_text("{}")
+    rec.discover()
+    assert marks[-1] == (snapshots, True)

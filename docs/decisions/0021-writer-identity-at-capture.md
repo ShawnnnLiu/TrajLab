@@ -1,6 +1,6 @@
 # ADR-0021: Record which process wrote each file, at capture time
 
-Status: proposed (2026-10-27).
+Status: accepted (2026-10-27), as built in the second amendment below; proposed the same day.
 
 ## Context
 
@@ -75,3 +75,45 @@ docker exec <cid> sh -c 'echo hi > /tmp/probe.txt; (sh -c "sleep 1; echo bg > /t
 - `fatrace` prints the process's current name and host pid; the recorder reads `NSpid`, `cmdline`, session id, and start time itself, at the event, before the process is gone (several short-lived pids were gone by the time this probe looked them up).
 
 Still to check (item 5): the event rate and cost on a build-heavy call, the `eval '<command>'` form on every call of a trial, and the 19 contested rows of `pretrain-shard-corruption__XK8w3KT`.
+
+## Amendment (2026-10-27): accepted, as built, and the acceptance checks
+
+### Decision, as built
+
+Items 0, 4, and 6 stand. Items 1 to 3 are what landed on branch `sl/adr-0021-write-recorder`; item 5's checks are below.
+
+1. **The recorder** is `trajlab record-writes <jobs-dir>` (`trajlab.checkpoint.writes`, over a ctypes fanotify binding, `trajlab.checkpoint.fanotify`; `fatrace` stayed the manual cross-check).
+   It is started by hand as root in its own tmux session beside the watcher, not by the watcher: `sudo PYTHONDONTWRITEBYTECODE=1 .venv/bin/trajlab record-writes corpus/jobs`, one per jobs dir by `flock` on `.trajlab-recorder.lock`; `trajlab run` warns when none holds it, and the corpus manifest gains `writes_recorded`.
+   One group in FID mode with directory and name records (`FAN_REPORT_DFID_NAME`), so creates, deletes, and renames into place carry their names and no event holds a file descriptor; one `FAN_MARK_FILESYSTEM` mark on the filesystem of the containerd snapshots (the first amendment) for `FAN_CREATE`, `FAN_DELETE`, `FAN_MOVED_TO`, `FAN_CLOSE_WRITE`, and `FAN_MODIFY`, directories included, with an unlimited queue.
+   Host processes' events are dropped by pid namespace before any path is resolved; a container event's directory handle is resolved with `open_by_handle_at` and kept when it lies under a running trial's upper directory, read from its init's `mountinfo`; `FAN_MODIFY` is kept once per process and path per second.
+   Each kept event is one `WriteEvent` line (`trajlab.contracts.writes`) in `agent/trajlab/writes.jsonl`: the container path, the op, the host time, and the writer as read from `/proc` at once (host and container pid, command line, session id, start time, its parents up to the container's root, whether Claude Code is among them, and the outermost Bash tool shell among them).
+   Each Bash call's shell first sources its shell snapshot from `/logs/agent/sessions/shell-snapshots/`, which is on the host's filesystem; an inode mark on that directory (`FAN_OPEN`) gives one `open` line per call with the shell read while it runs, so a call whose shell exits before any of its writes is read (a `find`, a `nohup ... &`) still names its shell.
+2. **A process is mapped to its call in the store, not by the recorder** (`trajlab.store.writes`), since the tie-break needs the call's window, known only after the call.
+   Claude Code 2.1.278's form, read from its binary (`buildExecCommand`): the parts `source <snapshot> 2>/dev/null || true`, `shopt -u extglob ...`, an `unalias` guard, `eval <command, shell-quoted>[ < /dev/null]`, and `pwd -P >| /tmp/claude-<id>-cwd`, joined by ` && ` and run as `bash -c [-l] <that>` with `detached: true`, so every call's shell leads a session of its own; the quoting is `'...'` with `'"'"'` for a quote, and a redirect to `nul` is rewritten to `/dev/null` unless the command has `<`, `$`, or a backquote.
+   The recorder parses the eval'd word back and records its sha256; the store matches it against each Bash step's `command` (and its `nul` rewrite).
+   The rule, first match wins: `command` (a tool shell among the process and its parents; two steps with one command are told apart by the shell's start time); `session` (no shell above it any more, but its session id is a tool shell's pid seen at another event: `nohup` and `&` keep the session); `start_time` (not Claude Code: the one Bash step whose window holds the start of the process's oldest ancestor below the container's init; a `setsid` child); `tool_window` (Claude Code's own process, which writes a Write or Edit call's file to a temporary name and renames it into place, during exactly one write-tool step); otherwise no call.
+3. **Store schema 4 and derived views 3.** `writes` holds, per delta row and writer step, the events on the row's path in its checkpoint interval (after the previous checkpoint's commit, up to this one's; the container is paused while `docker commit` runs), with `mapped_by`, `events`, `ops`, and the first and last times; a row whose writer belongs to no call has a null `writer_step`.
+   `delta_attribution` gains `recorded` and `multi_writer` before ADR-0020's cases, and three columns: `writer_steps`, and the rule's own answer, `rule_attribution` and `rule_causal_step`, kept on every row so the two can be compared.
+   A `multi_writer` row's causal step is its landing step, with the writers listed.
+
+The open questions are answered: the verifier's writes are recorded (the recorder lets a trial go only when `result.json` appears or its container is gone) and join no delta row, since none lies after the stop checkpoint, so they are excluded at the store; `writes.jsonl` is in the bind mount and readable by the agent at `/logs/agent/trajlab/`, which the store never diffs.
+
+What it still misses: attribute-only changes (`chmod`, a `touch` of a file already in the upper directory; `FAN_ATTRIB` is not subscribed), which fall to ADR-0020's rule unless the path was also written; a write whose directory is gone before its handle is resolved; and a writer that exited before the recorder read it and was never read before, which has no session or start time to map by.
+
+### Acceptance checks
+
+Run on the capture server on 2026-10-27 with the recorder of commit `02da609`, by `scripts/2026-10-27_adr0021_acceptance.py` and `scripts/2026-10-27_adr0021_recorder_cost.py`; logs in `/srv/trajlab/logs/` (`accept-*`, `adr0021-recorder-cost-2026-10-27.log`, `record-2026-10-27.log`).
+
+1. **Hello-world end to end** (`hello-world-writes-v1`, trial `hello-world__niQAdPG`, reward 1, 2 m 37 s): 3,076 event lines (create 1,364, close_write 776, modify 711, moved_to 186, delete 39), 26 of them with the writer already gone.
+   Claude Code's Write call wrote `/app/hello.txt.tmp.57.<hex>` and renamed it to `/app/hello.txt`, all from the `claude` process; the trial's one delta row is `recorded` to the Write step by `tool_window`, and ADR-0020's rule (`foreground`) agrees.
+   3,031 of the events are the verifier's (`uv`, `python`, `apt-get`) after the stop checkpoint and join no delta row.
+2. **Event rate and cost on a build-heavy command** (the `interleaved-vigenere` derived image; copies of `/usr/lib` and `/usr/local/lib`, byte-compiled, 20,000 small files written, all removed: 27,894 files; three runs each, alternating): median wall time 6.1 s without the recorder and 6.2 s with it (+2.5%, at the timing's 0.1 s resolution); 65,056 events read (10,486/s), 89,714 lines written, no queue overflow; the recorder's CPU 3.0 s, about half of one core while the command ran.
+   Host-wide, while Harbor's pre-install builder installed Claude Code into a derived image, the recorder read 2,100 to 6,100 events/s (held and then dropped, since the builder is no trial) at 0.26 to 0.65 of a core.
+   The writer waits on nothing: events are queued by the kernel and read after the write.
+3. **The `eval '<command>'` form and the sessions**, on the first 12 Bash calls of the pretrain trial below while it ran: 11 calls' shells were read with exactly the call's command (sha256 equal); the 12th, `cd /; find / -xdev ...`, wrote only its cwd file and had exited when that event was read, so its shell was never seen.
+   That gap is why the recorder also marks the shell-snapshot directory (item 1 above, added after this check, commit after `02da609`): each shell is read when it sources its snapshot, before its command runs.
+   Every one of 52 events by a tool shell had its session id equal to its pid, and every one of 380 events by a process under a tool shell had the shell's pid as its session id: `detached: true` holds, and the session rule has what it needs.
+4. **One `pretrain-shard-corruption` trial** (`pretrain-writes-v1`, trial `pretrain-shard-corruption__oGVk8dH`, same agent settings as `tb40-sonnet-v3`; run with `--allow-dirty`, since the uncommitted changes were docs and scripts): recorded by `02da609` until the recorder was restarted on the shell-snapshot mark at about 05:25 UTC, a gap of a few seconds, then by the new code. Results are recorded below when the trial ends.
+5. **The 19 contested rows of `pretrain-shard-corruption__XK8w3KT`** cannot be checked: that trial ran without the recorder. The new trial's contested rows are reported in item 4's results and across `tb40-sonnet-v4` instead.
+
+`tb40-sonnet-v4` was started before item 4 finished, on the owner's call (2026-10-27): the recorder only observes, and a mapping fault found later is fixed by rebuilding the store from the trials' `writes.jsonl`.
