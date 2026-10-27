@@ -143,6 +143,8 @@ Candidates seen so far, for that later pass:
 - Step flags: `idle_wait` (over 120 s with no delta); `variant_of` (a `.py` added whose line set mostly overlaps an earlier script's, which needs the hunks, or the cheaper `scripts_added` per trial).
 - Views rather than columns: `versions` per path with the step list, and `last_version` (the final hunk of each path), since those are the two queries this analysis started from.
 
+ADR-0016 (2026-10-25) structures step 3's rule set on these candidates and on Table III of arXiv 2607.09510 (post-lock-in behaviors), keeps root cause out of it, and fixes the retry prompt, N = 3, and the chain store's membership.
+
 ### What the example settles for the retry loop
 
 - A chain's store for this failure is one trial: `PckZuoA` is the cleanest case (the fault is only in content), `kugWvNv` the richest.

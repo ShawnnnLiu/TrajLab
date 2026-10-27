@@ -132,6 +132,32 @@ One trial is one task executed by one attempt.
 - **retry chain** - a failure's attempts under one Exp 2 arm, in order: attempt 0 (the corpus first attempt), then retries 1 to N, each naming the one before in `parent_trial_id`.
   Not to be confused with a checkpoint chain.
 
+## Retry loop and failure timeline (ADR-0016)
+
+- **retry prompt** - the instruction a retry's agent receives: the note (the count of prior attempts and the word FAILED), the arm's evidence sentence, the four protocol steps, and the task instruction.
+  Not: "repair note", which is Exp 1's one-line note (`REPAIR_NOTE`).
+- **evidence sentence** - the one arm-specific sentence of the retry prompt: empty in `control`, the mount in `record-files`, the query command and schema in `record-engine`.
+- **root failure** - attempt 0 of a retry chain, the failed first attempt the chain retries.
+- **sibling failure** - another failed first attempt of the same task; never in a chain's store (ADR-0016, item 3).
+- **decisive step / `t_err` / `err_step`** - the step row of ADR-0013's decisive call, the earliest-introduced blamed call among a failed trial's confirmed faults; absent when no fault blames a call.
+  Not: "first error", which may be a transient error the agent recovered from.
+- **lock-in step / `t_lock` / `lock_step`** - the last step after the decisive step whose delta touches a blamed file of the fault, or the decisive step itself; after it the agent never revisits the fault.
+- **first-signal step / `t_obs` / `obs_step`** - the first tool-call step at or after the decisive step whose output shows an error marker (the proxy), or the step a labeler marks as the first observable sign of the fault (`first_signal_step`).
+- **recovery window / signal lag** - steps from the decisive step to the lock-in step, and from the decisive step to the first-signal step.
+  The terms and their definitions follow arXiv 2607.09510; the operationalizations are ours.
+  The `t_` names are the paper's notation, used in prose; the columns of `heldout.duckdb`'s `timeline` table are `err_step`, `lock_step`, and `obs_step`, each a `step_idx`, because `t_start` and `t_end` in `steps` are wall-clock times.
+
+## Background jobs and delta attribution (ADR-0020)
+
+- **landing step** - the step whose checkpoint first contains a delta; `deltas.step_idx`. What the checkpoint proves.
+- **causal step** - the step that made the change: `launched_by_step` when ADR-0020 attributes one, else the landing step. What the derived views and the timeline use.
+- **late delta** - a delta whose causal step is earlier than its landing step.
+- **backgrounded call** - a Bash step that Claude Code moved to the background; its `output` is a task id and its `t_end` is the moment of the move, not the job's end.
+  Not: a job the agent launched by hand with `&` or `nohup`, which is a hand-launched job (`background_untracked`).
+- **job window** - from a backgrounded call's `t_start` to the `t_start` of the step where Claude Code reported the job finished (`background_done_step`), or to the stop record when it never did.
+- **write time** - a file's mtime inside the checkpoint image, `deltas.mtime_after`; the only recorded time of the write itself.
+- **attribution** - the value `delta_attribution` gives a delta row: `foreground`, `background`, `background_by_path`, `background_untracked`, `ambiguous`, `untrusted_mtime`, or `unknown`; only the first four set `launched_by_step`.
+
 ## Detector capture and labels (ADR-0015)
 
 - **call input** - `<tool_use_id>.call.json` beside the `.req`: the hook's whole stdin (the call's input, its output, and its ids), written on every hooked call.

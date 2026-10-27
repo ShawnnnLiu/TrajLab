@@ -21,6 +21,7 @@ Claude Code 2.1.278 fires `Stop` when the agent's turn ends and `StopFailure` wh
 
 - Every trial ends with a record of its final state: either a stop checkpoint or a stop record that names the checkpoint holding it.
 - Writes that land after the last hooked call are attributed to the stop, not to the next call (there is none) and not lost.
+- Writes that land between hooked calls are attributed to the next hooked call; ADR-0020 measures the lag (1 to 18 calls in the 40-trial corpus) and re-attributes them from the layer's mtime, without a capture change.
 - The final checkpoint is the state at the end of the agent's turn, before Harbor runs the verifier; the verifier's own effects are outside capture.
 - The stop request id is not an ATIF `tool_call_id`; build-order step 7 places stop checkpoints after the last agent step, keyed by `trigger`.
 - A capture change: corpora that use it need a new `corpus_id`.
