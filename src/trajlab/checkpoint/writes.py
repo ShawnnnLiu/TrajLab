@@ -14,7 +14,11 @@ up to the container's root. It appends one `WriteEvent` per event to the trial's
 `agent/trajlab/writes.jsonl` (a `modify` at most once per process and path per second). Each
 Bash call's shell first sources its shell snapshot from `/logs/agent/sessions/shell-snapshots/`,
 which is on the host's filesystem, so an inode mark on that directory (`FAN_OPEN`) gives one
-`open` line per call with the shell read at its start, whether or not it writes. Which
+`open` line per call with the shell read at its start, whether or not it writes. The mark goes
+with the directory's inode, and Claude Code 2.1.278 may replace the directory: its housekeeping,
+5 s after it starts, removes the one Harbor made if no snapshot is in it yet, and the first Bash
+call makes it again. So the directory is marked again when it is made (its create event reaches
+the filesystem mark) and whenever a discovery pass finds a different inode there. Which
 call a process belongs to is decided in the store (`trajlab.store.writes`): Claude Code 2.1.278
 runs a Bash call as `bash -c '<setup> && eval <command, shell-quoted> [< /dev/null] && pwd -P >|
 /tmp/claude-<id>-cwd'` in a session of its own (`detached: true`), so the call's shell carries
@@ -40,6 +44,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
+from stat import S_ISDIR
 from typing import BinaryIO, Protocol
 
 from harbor.models.trial.paths import TrialPaths
@@ -449,7 +454,8 @@ class _Trial:
     pidns: str
     out: BinaryIO
     agent: bytes  # the agent dir on the host, which the container sees as /logs/agent
-    shells_marked: Path | None = None  # the shell-snapshot dir, once marked
+    shells: Path  # the shell-snapshot dir on the host
+    shells_marked: tuple[int, int] | None = None  # its device and inode when last marked
     pending: list[bytes] = field(default_factory=list)
     pending_bytes: int = 0
     ops: Counter[str] = field(default_factory=Counter)
@@ -547,8 +553,8 @@ class Recorder:
                 trial.init_pid,
                 os.fsdecode(trial.upper),
             )
-        for trial in list(self._trials.values()):
-            if trial.shells_marked is None:
+        with self._lock:
+            for trial in self._trials.values():
                 self._mark_shells(trial)
         ended = [
             trial
@@ -562,7 +568,7 @@ class Recorder:
             trial.out.close()
             if trial.shells_marked is not None and self.mark_directory is not None:
                 try:
-                    self.mark_directory(trial.shells_marked, True)
+                    self.mark_directory(trial.shells, True)
                 except OSError:
                     pass  # the directory is gone with its mark
             logger.info(
@@ -573,16 +579,31 @@ class Recorder:
                 trial.gone,
             )
 
-    def _mark_shells(self, trial: _Trial) -> None:
-        """Watch opens in the trial's shell-snapshot dir once Claude Code has made it."""
-        directory = TrialPaths(trial.trial_dir).agent_dir.joinpath(*SHELL_SNAPSHOTS)
-        if self.mark_directory is None or not directory.is_dir():
+    def _mark_shells(self, trial: _Trial, *, made: bool = False) -> None:
+        """Watch opens in the trial's shell-snapshot dir: once it exists, and again whenever the
+        directory there is a new one, since a mark goes with its inode. `made`: an event says it
+        was just made, so mark it even if its inode number is the one marked before (reused).
+        The inode is read before marking: if the directory is replaced in between, the next
+        pass marks the new one again, which does no harm."""
+        if self.mark_directory is None:
             return
         try:
-            self.mark_directory(directory, False)
+            info = trial.shells.stat()
+        except OSError:
+            return  # not made yet, or removed and not yet made again
+        identity = (info.st_dev, info.st_ino)
+        if not S_ISDIR(info.st_mode) or (identity == trial.shells_marked and not made):
+            return
+        try:
+            self.mark_directory(trial.shells, False)
         except OSError as error:
-            logger.warning("%s: no mark on %s: %s", trial.name, directory, error)
-        trial.shells_marked = directory
+            logger.warning("%s: no mark on %s: %s", trial.name, trial.shells, error)
+        else:
+            if trial.shells_marked is not None:
+                logger.info(
+                    "%s: marked %s again: the directory is a new one", trial.name, trial.shells
+                )
+        trial.shells_marked = identity
 
     def _open(self, trial_dir: Path) -> _Trial:
         identity = self.identify(trial_dir)
@@ -600,6 +621,7 @@ class Recorder:
         out = path.open("ab")
         for made in (path.parent, path):
             os.chown(made, uid, gid)
+        agent = TrialPaths(trial_dir).agent_dir.resolve()
         return _Trial(
             trial_dir=trial_dir,
             name=identity.trial_name,
@@ -609,7 +631,8 @@ class Recorder:
             upper=upper.rstrip(b"/"),
             pidns=pidns,
             out=out,
-            agent=os.fsencode(TrialPaths(trial_dir).agent_dir.resolve()),
+            agent=os.fsencode(agent),
+            shells=agent.joinpath(*SHELL_SNAPSHOTS),
         )
 
     def _match(self, path: bytes, *, agent: bool = False) -> _Trial | None:
@@ -678,8 +701,18 @@ class Recorder:
                 self._held.append(_Held(now, event, path, reading))
                 self.stats["held"] += 1
                 self._wake.set()
+            elif event.mask & FAN_ONDIR and event.mask & (FAN_CREATE | FAN_MOVED_TO):
+                self._shells_made(path)
             return
         self._record(trial, now, event, path, self.processes.reading(event.pid))
+
+    def _shells_made(self, path: bytes) -> None:
+        """A directory made outside every container's upper directory: if it is a trial's
+        shell-snapshot dir, mark it now. The Bash call that made it sources its snapshot there
+        about 20 ms later (16 to 60 ms on tb40-sonnet-v4), well inside a discovery pass."""
+        for trial in self._trials.values():
+            if path == os.fsencode(trial.shells):
+                self._mark_shells(trial, made=True)
 
     def _shell_start(self, event: RawEvent, path: bytes, now: float) -> None:
         """A Bash call's shell sourcing its snapshot: one `open` line, with the shell."""

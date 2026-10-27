@@ -466,6 +466,70 @@ def test_each_bash_calls_shell_is_recorded_when_it_sources_its_snapshot(
     assert marks[-1] == (snapshots, True)
 
 
+def test_a_shell_snapshot_dir_made_again_is_marked_again_when_made(
+    jobs: Path, tmp_path: Path
+) -> None:
+    """tb40-sonnet-v4: Harbor makes the directory, the recorder marks it, Claude Code's
+    housekeeping removes it while it is empty, and the first Bash call makes it again; the
+    mark went with the first directory, and 13 of 67 trials had no `open` line."""
+    proc = FakeProc(tmp_path / "proc")
+    container(proc)
+    containers = Containers()
+    containers.started = True
+    rec = recorder(jobs, tmp_path / "proc", containers)
+    marks: list[tuple[Path, bool]] = []
+    rec.mark_directory = lambda path, remove: marks.append((path, remove))
+    sessions = jobs / "job" / "task__abc" / "agent" / "sessions"
+    snapshots = sessions / "shell-snapshots"
+    snapshots.mkdir(parents=True)  # Harbor's setup
+    rec.discover()
+    rec.discover()
+    assert marks == [(snapshots, False)]  # once per directory
+    snapshots.rmdir()  # Claude Code's housekeeping, 5 s after it starts
+    rec.discover()
+    assert marks == [(snapshots, False)]
+    snapshots.mkdir()  # the first Bash call; its inode number may be the old one's
+    name = "snapshot-bash-17-x.sh"
+    rec.handle(
+        iter(
+            [
+                raw(FAN_CREATE | FAN_ONDIR, CLAUDE, str(sessions), "projects2"),  # another dir
+                raw(FAN_CREATE | FAN_ONDIR, CLAUDE, str(sessions), "shell-snapshots"),
+                raw(FAN_OPEN, SHELL, str(snapshots), name),  # read once the mark is placed
+            ]
+        ),
+        datetime.now(UTC).timestamp(),
+        Paths(),  # type: ignore[arg-type]
+    )
+    assert marks == [(snapshots, False), (snapshots, False)]
+    rec.discover()
+    assert len(marks) == 2  # the pass finds the directory the event marked
+    rec.flush_all()
+    (started,) = lines(jobs)
+    assert (started.op, started.path) == ("open", f"/logs/agent/sessions/shell-snapshots/{name}")
+
+
+def test_a_shell_snapshot_dir_replaced_unseen_is_marked_again_by_the_next_pass(
+    jobs: Path, tmp_path: Path
+) -> None:
+    proc = FakeProc(tmp_path / "proc")
+    container(proc)
+    containers = Containers()
+    containers.started = True
+    rec = recorder(jobs, tmp_path / "proc", containers)
+    marks: list[tuple[Path, bool]] = []
+    rec.mark_directory = lambda path, remove: marks.append((path, remove))
+    snapshots = jobs / "job" / "task__abc" / "agent" / "sessions" / "shell-snapshots"
+    snapshots.mkdir(parents=True)
+    rec.discover()
+    replacement = snapshots.with_name("shell-snapshots.new")  # made while the old one exists,
+    replacement.mkdir()  # so its inode is another
+    snapshots.rmdir()
+    replacement.rename(snapshots)
+    rec.discover()
+    assert marks == [(snapshots, False), (snapshots, False)]
+
+
 def test_a_session_proc_cannot_name_is_recorded_as_none(jobs: Path, tmp_path: Path) -> None:
     """A live trial had a writer whose /proc stat gave session -1; the line is still written."""
     proc = FakeProc(tmp_path / "proc")
