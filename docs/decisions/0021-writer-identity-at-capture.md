@@ -52,3 +52,26 @@ Process snapshots (`--extras`, ADR-0015) list what runs at each hooked call, not
 - `contracts/` gains the write event model; `store/` gains the `writes` ingest and the two attribution cases; `SCHEMA_VERSION` 4.
 - The paper's "Background writes" threat becomes two numbers: the share of rows attributed by record, and the agreement of ADR-0020's rule with the record on the corpus that has both.
 - Open: whether a write by the verifier's own processes (after the stop) needs excluding at the recorder or only at the store; whether `agent/trajlab/writes.jsonl` is visible to the agent through the bind mount and must be excluded like the hook's files (`/logs` is already an excluded path).
+
+## Amendment (2026-10-27): the first prototype check passes
+
+Run on the Linux capture server (Docker CE 29.9.2, containerd image store, overlayfs snapshotter, kernel 7.0.0-1014-aws), with `fatrace` (an `fanotify` client that marks every mounted filesystem and prints the writer's pid) as root, a throwaway `alpine` container, and a filter on the container's overlay upper directory, read from its init process's `/proc/<pid>/mountinfo` (`upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/<n>/fs`):
+
+```
+sudo timeout 15 fatrace -t -f WC+ | grep -F "$upperdir"
+docker exec <cid> sh -c 'echo hi > /tmp/probe.txt; (sh -c "sleep 1; echo bg > /tmp/bg.txt; sleep 20" &); sleep 3'
+```
+
+```
+04:26:21.722019 sh(2046553):    +   .../snapshots/3115/fs/tmp
+04:26:21.722019 sh(2046553):    CWO .../snapshots/3115/fs/tmp/probe.txt
+04:26:22.723723 sh(2046560):    +   .../snapshots/3115/fs/tmp
+04:26:22.723723 sleep(2046560): CWO .../snapshots/3115/fs/tmp/bg.txt
+```
+
+- A write made inside the container through overlayfs reaches the host's `fanotify` mark with the container process's host pid and the upper directory's path; the container path is the event path with the upper directory removed.
+- The backgrounded child (`sh -c "sleep 1; echo bg ..." &`, pid 2046560, container pid 14 by `NSpid`) is reported as the writer of `bg.txt` after its parent shell had exited and it had been reparented to the container's init: the case ADR-0020 calls `background_untracked` is recorded with its process.
+- The mount itself is not visible in the host's root mount namespace (a mark on `/run/containerd/.../rootfs` saw nothing), so the recorder marks the host filesystem that holds the snapshots (`FAN_MARK_FILESYSTEM`) and filters by the upper directory, which `mountinfo` of the container's init names.
+- `fatrace` prints the process's current name and host pid; the recorder reads `NSpid`, `cmdline`, session id, and start time itself, at the event, before the process is gone (several short-lived pids were gone by the time this probe looked them up).
+
+Still to check (item 5): the event rate and cost on a build-heavy call, the `eval '<command>'` form on every call of a trial, and the 19 contested rows of `pretrain-shard-corruption__XK8w3KT`.
