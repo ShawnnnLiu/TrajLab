@@ -161,7 +161,7 @@ One trial is one task executed by one attempt.
 - **write time** - a file's mtime inside the checkpoint image, `deltas.mtime_after`; the only recorded time of the write itself.
 - **landing window** - from the landing call's `t_start` to its checkpoint's commit (`steps.checkpoint_at`), where the call's own writes carry their times.
 - **attribution** - the value `delta_attribution` gives a delta row: `recorded` or `multi_writer` from the write record (ADR-0021), else `foreground`, `background`, `background_by_path`, `background_untracked`, `contested`, `untrusted_mtime`, or `unknown`; `launched_by_step` is set for `recorded` and the next four, and for `untrusted_mtime` when no job was open.
-- **contested** - a write inside the landing window while a launcher's job was open: either could have written it; the causal step is the landing step and `launcher_step` the alternative.
+- **contested** - a write inside the landing window while a launcher's job that names the file (a redirect into it, its basename, or its directory) was open: either could have written it; the causal step is the landing step and `launcher_step` the alternative.
 
 ## Write record (ADR-0021)
 

@@ -145,14 +145,15 @@ A detail the replay also settled: layer mtimes are whole seconds, and a commit l
 Items 1 to 3 are replaced by what landed on `main` with this amendment; items 0, 4 to 7 stand, with item 4's consumer change deferred as noted.
 
 1. **Schema version 3.** `deltas` gains `mtime_before` and `mtime_after` (aware UTC, whole seconds, from the tar entries; `Entry.mtime` in `trajlab.store.layers`, never compared). `steps` gains `checkpoint_at`, when the image named by `checkpoint_seq` was committed, and `command_shell`, a Bash command with heredoc bodies and inline `-c` programs cut out (`trajlab.store.steps.shell_text`), since an `&` inside either is the program's, not a launch, and RE2 cannot strip them. A new agent-readable table `job_notices` (`trial_id`, `task_id`, `tool_call_id`, `status`, `noticed_at`) holds the completion notices, read from the session JSONL by `trajlab.atif.jobs` at build time. No store of another version is upgraded in place: the values are in the rows, so a schema-1 or schema-2 store is built again from its trial dirs and images, and the schema-1 upgrade path of ADR-0018 is removed.
-2. **`step_jobs`.** Per tool call: `backgrounded` and `task_id` from the output pattern; `job_status`, `job_end` (the notice's time, else the attempt's last recorded instant), and `background_done_step` (the first step that began after `job_end`, kept as information) from `job_notices`; `launches_job` from `command_shell` matching an `&` separator, `nohup`, `setsid`, or `disown`.
+2. **`step_jobs`.** Per tool call: `backgrounded` and `task_id` from the output pattern; `job_status`, `job_end` (the notice's time, else the attempt's last recorded instant), and `background_done_step` (the first step that began after `job_end`, kept as information) from `job_notices`; `launches_job` from `command_shell` matching an `&` separator (not `&&`, a redirect `>&` or `&>`, `|&`, or an escaped `\&` as in a sed replacement), `nohup`, `setsid`, or `disown`.
 3. **`delta_attribution`**, one ordered rule, `DERIVE_VERSION` 2. For a row landing at step k with write time m = `mtime_after` (null for a delete):
    - the landing window is [k.`t_start`, k.`checkpoint_at`] (else `t_end`), so the commit gap no longer drops a call's own write;
    - the candidate launchers are the earlier calls whose job was open at m: a backgrounded call whose window [`t_start`, `job_end`] holds m, or a hand-launched job started before m, which has no end on record;
-   - among candidates the best is the one whose command redirects into the file (a target's basename after shell expansion, `$s` and `${s}` standing for any text, so `> log_$s.txt` redirects into `log_11.txt`), else one that names the file, else the latest launched; `launcher_step` names it;
-   - `foreground`: m in the landing window and no candidate;
+   - among candidates the best is the one whose command redirects into the file (a target's basename after shell expansion, `$s` and `${s}` standing for any text, so `> log_$s.txt` redirects into `log_11.txt`), else one that names the file's basename, else one that names its directory (the immediate parent, literal, at least two deep: `/tmp/w`, not `/app`), else the latest launched; `launcher_step` names it;
+   - inside the landing window only a candidate with such evidence counts at all: a hand-launched job has no end on record, and without this condition one server started with `&` contested every later write of its attempt (on the first rebuild, 21,344 of 22,564 contested rows had a launcher that never named the file);
+   - `foreground`: m in the landing window and no candidate with evidence;
    - `background`, `background_by_path`, `background_untracked`: a candidate, and either m is outside the landing window, or the best launcher redirects into the file and the landing call writes nothing it names (no write tool, no `>` in its shell text, no mention of the file); `by_path` when the naming tie-break overrode the latest launcher, `untracked` for a hand-launched job;
-   - `contested`: a candidate and m inside the landing window, otherwise; `launched_by_step` is null, `causal_step` the landing step, and `launcher_step` the alternative, for the windowed score;
+   - `contested`: a candidate with evidence and m inside the landing window, otherwise; `launched_by_step` is null, `causal_step` the landing step, and `launcher_step` the alternative, for the windowed score;
    - `untrusted_mtime`: no candidate and m before the attempt's first step; `launched_by_step` is k when no job was launched before k, else null;
    - `unknown`: anything else, a delete included (its time is the parent directory's, which the store does not keep).
    `ambiguous` is gone: the ordering decides between launchers. `is_late` is `launched_by_step` < `step_idx`; `causal_step` is `coalesce(launched_by_step, step_idx)`.
@@ -164,4 +165,25 @@ The open questions of this ADR are answered: the basename, with shell variables 
 
 A file that a background process keeps writing while a read-only call runs cannot be separated from a write by that call with timestamps and command text: the rule says `contested` when the landing call names the file, and `background` only when the job redirects into it. The exact signal is the identity of the writing process, recorded at capture time; ADR-0021 proposes it.
 
-Validation of the rule as implemented, on the schema-3 rebuild of the corpus store, is recorded below when `scripts/2026-10-27_adr0020_attribution_report.py` has run on it.
+### Validation of the rule as implemented
+
+`corpus/stores/tb40-sonnet-v3` was rebuilt under schema 3 (69 trials, every chain complete, 91 minutes), and `scripts/2026-10-27_adr0020_attribution_report.py` run on it with the views of commit `bfc6043` (the evidence condition) applied at schema 3, since the tree had moved to schema 4 by then: the same SQL on the `c5ec864` code, derived id `2+924dd3f41ce8`. Over its 193,353 delta rows:
+
+| Attribution | Rows | Cache rows |
+|---|---|---|
+| `foreground` | 130,415 | 55,247 |
+| `background` | 6 | 0 |
+| `background_by_path` | 0 | 0 |
+| `background_untracked` | 271 | 0 |
+| `contested` | 1,242 | 0 |
+| `untrusted_mtime` | 4,401 | 0 |
+| `unknown` | 1,761 | 10 |
+
+- The 54 trials without a job have only `foreground` rows, 212 `unknown` (every one a delete), and 2 `untrusted_mtime`: no contested or late row, as the rule requires.
+- 277 late deltas in 10 trials, with lags of 1 (198 rows) to 131 calls. The 20 rows of `pretrain-shard-corruption__XK8w3KT` steps 98, 100, and 102 named in the Context are all `background_untracked` of step 97: the redirect `> log_$s.txt` is the evidence, and the polling calls name no file.
+- `untrusted_mtime` is `npm install` and `pip install` extracting archives with their own times (1,465 rows in each `vba-userform-port` attempt).
+- `unknown` is deletes: 1,764 of the 1,771 rows have no write time; only 7 are writes inside an earlier call's window that landed later.
+- Before the evidence condition (the rule of `3992b6a`) the same store had 22,564 contested rows; 21,344 had a launcher that never named the file, 4,847 to 5,063 of them in each `vba-userform-port` attempt from one `uvicorn ... &` at its step 20.
+- Of the 1,242 contested rows that remain, 528 have a basename of one or two characters (`0`, `5`, `js`, the pip and Chromium caches), which `names`, a substring test, finds inside any longer word of a launcher's command. Matching the basename as a whole token is the next refinement, with its own derived id. The rest are the honest residue: a job's progress file polled by `sleep; tail` (`/tmp/run1.log` in `XK8w3KT`, `/tmp/s3.out` in `layout-config-recreation__VUc3qgg`), scan outputs written while the next scan was launched, and the pretrain `torchelastic` scratch written while a relaunch command ran.
+
+The ADR-0021 recorder, capturing `tb40-sonnet-v4` since 2026-10-27 05:56 UTC, decides these rows by the writer's identity; the agreement between this rule and the record is measured there.
