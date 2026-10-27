@@ -392,6 +392,38 @@ def test_store_build_reports_a_database_error_and_goes_on(
     assert _trials_in(store) == 0
 
 
+# -- store query ----------------------------------------------------------------------------
+
+
+def test_store_query_prints_rows_and_a_count(trial_copy: Path, tmp_path: Path) -> None:
+    postprocess_trial(trial_copy)
+    store = tmp_path / "store"
+    assert (
+        CliRunner()
+        .invoke(app, ["store", "build", str(trial_copy), "--store", str(store), "--no-images"])
+        .exit_code
+        == 0
+    )
+    args = ["store", "query", str(store), "SELECT step_idx, tool FROM steps ORDER BY step_idx"]
+    result = CliRunner().invoke(app, [*args, "--timeout", "30"])
+    assert result.exit_code == 0, result.output
+    assert result.output == '{"step_idx":1,"tool":"Write"}\n{"step_idx":2,"tool":null}\n-- 2 rows\n'
+    cut = CliRunner().invoke(app, [*args, "--cap", "1", "--timeout", "30"])
+    assert cut.output.endswith("-- 1 rows shown; the query has more. Add a LIMIT, or narrow it.\n")
+    refused = CliRunner().invoke(app, ["store", "query", str(store), "DROP TABLE steps"])
+    assert refused.exit_code == 1
+    assert refused.output == "trajlab store query: refused: only a SELECT or WITH query\n"
+
+
+def test_store_serve_refuses_a_missing_store(tmp_path: Path) -> None:
+    (tmp_path / "job").mkdir()
+    result = CliRunner().invoke(
+        app, ["store", "serve", str(tmp_path / "none"), str(tmp_path / "job")]
+    )
+    assert result.exit_code == 1
+    assert "trajlab store serve: " in result.output and "does not exist" in result.output
+
+
 # -- store build with images, from tests/test_store_build.py's in-memory layers -----------------
 
 

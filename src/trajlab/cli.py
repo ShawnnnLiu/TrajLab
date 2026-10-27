@@ -104,7 +104,16 @@ from trajlab.store.build import BuildError, BuildResult, build_trial, start_imag
 from trajlab.store.docker_images import DockerImageProvider
 from trajlab.store.export import export as export_bundle
 from trajlab.store.export import verify as verify_bundle
+from trajlab.store.query import (
+    DEFAULT_MEMORY_LIMIT,
+    DEFAULT_ROW_CAP,
+    DEFAULT_THREADS,
+    DEFAULT_TIMEOUT_S,
+    render,
+    run_query,
+)
 from trajlab.store.schema import UPGRADED_FROM_1, replace_views
+from trajlab.store.serve import DEFAULT_POLL_S, DEFAULT_WORKERS, ServeError, Server
 
 app = typer.Typer(help="Capture Claude Code trajectories on Harbor with environment checkpoints.")
 store_app = typer.Typer(help="The Exp 2 store: steps joined to filesystem deltas (ADR-0014).")
@@ -596,6 +605,85 @@ def store_export(
         raise typer.Exit(code=1) from error
     rows = ", ".join(f"{name} {n}" for name, n in result.rows.items())
     typer.echo(f"wrote {out_dir}: {rows}; {result.hunk_files} hunk files; verified")
+
+
+CapOption = Annotated[
+    int, typer.Option("--cap", min=1, help="Rows an answer holds at most; more is said, not sent.")
+]
+TimeoutOption = Annotated[
+    float, typer.Option("--timeout", min=0.1, help="Seconds a query may run before it is killed.")
+]
+MemoryLimitOption = Annotated[
+    str, typer.Option("--memory-limit", help="DuckDB memory limit of the query process.")
+]
+ThreadsOption = Annotated[
+    int, typer.Option("--threads", min=1, help="DuckDB threads of the query process.")
+]
+
+
+@store_app.command("query")
+def store_query(
+    store_dir: StoreArgument,
+    sql: Annotated[str, typer.Argument(help="One SELECT or WITH statement.")],
+    cap: CapOption = DEFAULT_ROW_CAP,
+    timeout: TimeoutOption = DEFAULT_TIMEOUT_S,
+    memory_limit: MemoryLimitOption = DEFAULT_MEMORY_LIMIT,
+    threads: ThreadsOption = DEFAULT_THREADS,
+) -> None:
+    """Run one query as a record-engine attempt's agent would (ADR-0019): the rows as JSON
+    lines and a count line on stdout; a refusal or error on stderr with exit 1."""
+    outcome = run_query(
+        store_dir, sql, cap=cap, timeout_s=timeout, memory_limit=memory_limit, threads=threads
+    )
+    if outcome.error is not None:
+        typer.echo(f"trajlab store query: {outcome.error}", err=True)
+        raise typer.Exit(code=1)
+    typer.echo(render(outcome, cap), nl=False)
+    n = len(outcome.rows or [])
+    logging.getLogger(__name__).info(
+        "%d row%s%s in %d ms",
+        n,
+        "" if n == 1 else "s",
+        " (cut)" if outcome.truncated else "",
+        outcome.latency_ms,
+    )
+
+
+@store_app.command("serve")
+def store_serve(
+    store_dir: StoreArgument,
+    job_dir: Annotated[
+        Path, typer.Argument(help="The job dir whose trials get the query tool; may be empty.")
+    ],
+    cap: CapOption = DEFAULT_ROW_CAP,
+    timeout: TimeoutOption = DEFAULT_TIMEOUT_S,
+    memory_limit: MemoryLimitOption = DEFAULT_MEMORY_LIMIT,
+    threads: ThreadsOption = DEFAULT_THREADS,
+    poll: Annotated[float, typer.Option(min=0.01, help="Seconds between passes.")] = DEFAULT_POLL_S,
+    workers: Annotated[
+        int, typer.Option(min=1, help="Queries at once, over trials; one at a time per trial.")
+    ] = DEFAULT_WORKERS,
+) -> None:
+    """Answer the query tool in every trial under JOB_DIR from the store, until Ctrl-C
+    (ADR-0019). Start it before `harbor run`; it puts `bin/query` into each trial's agent dir."""
+    stop = threading.Event()
+    for signum in (signal.SIGINT, signal.SIGTERM):
+        signal.signal(signum, lambda *_: stop.set())
+    server = Server(
+        store_dir,
+        job_dir,
+        cap=cap,
+        timeout_s=timeout,
+        memory_limit=memory_limit,
+        threads=threads,
+        poll_s=poll,
+        workers=workers,
+    )
+    try:
+        server.run(stop)
+    except ServeError as error:
+        typer.echo(f"trajlab store serve: {error}", err=True)
+        raise typer.Exit(code=1) from error
 
 
 def _build_one(
