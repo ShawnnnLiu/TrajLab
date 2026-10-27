@@ -167,23 +167,25 @@ A file that a background process keeps writing while a read-only call runs canno
 
 ### Validation of the rule as implemented
 
-`corpus/stores/tb40-sonnet-v3` was rebuilt under schema 3 (69 trials, every chain complete, 91 minutes), and `scripts/2026-10-27_adr0020_attribution_report.py` run on it with the views of commit `bfc6043` (the evidence condition) applied at schema 3, since the tree had moved to schema 4 by then: the same SQL on the `c5ec864` code, derived id `2+924dd3f41ce8`. Over its 193,353 delta rows:
+`corpus/stores/tb40-sonnet-v3` was rebuilt under schema 3 (69 trials, every chain complete, 91 minutes), and `scripts/2026-10-27_adr0020_attribution_report.py` run on it with the views of commit `e2d41c2` (the evidence condition, and names matched as whole words) applied at schema 3, since the tree had moved to schema 4 by then: the same SQL on the `c5ec864` code, derived id `2+b27fcbe6c7e7`. Over its 193,353 delta rows:
 
 | Attribution | Rows | Cache rows |
 |---|---|---|
-| `foreground` | 130,415 | 55,247 |
+| `foreground` | 130,920 | 55,247 |
 | `background` | 6 | 0 |
 | `background_by_path` | 0 | 0 |
 | `background_untracked` | 271 | 0 |
-| `contested` | 1,242 | 0 |
+| `contested` | 737 | 0 |
 | `untrusted_mtime` | 4,401 | 0 |
 | `unknown` | 1,761 | 10 |
 
 - The 54 trials without a job have only `foreground` rows, 212 `unknown` (every one a delete), and 2 `untrusted_mtime`: no contested or late row, as the rule requires.
-- 277 late deltas in 10 trials, with lags of 1 (198 rows) to 131 calls. The 20 rows of `pretrain-shard-corruption__XK8w3KT` steps 98, 100, and 102 named in the Context are all `background_untracked` of step 97: the redirect `> log_$s.txt` is the evidence, and the polling calls name no file.
+- 277 late deltas in 10 trials, with lags of 1 to 131 calls. The 20 rows of `pretrain-shard-corruption__XK8w3KT` steps 98, 100, and 102 named in the Context are all `background_untracked` of step 97: the redirect `> log_$s.txt` is the evidence, and the polling calls name no file.
 - `untrusted_mtime` is `npm install` and `pip install` extracting archives with their own times (1,465 rows in each `vba-userform-port` attempt).
 - `unknown` is deletes: 1,764 of the 1,771 rows have no write time; only 7 are writes inside an earlier call's window that landed later.
 - Before the evidence condition (the rule of `3992b6a`) the same store had 22,564 contested rows; 21,344 had a launcher that never named the file, 4,847 to 5,063 of them in each `vba-userform-port` attempt from one `uvicorn ... &` at its step 20.
-- Of the 1,242 contested rows that remain, 528 have a basename of one or two characters (`0`, `5`, `js`, the pip and Chromium caches), which `names`, a substring test, finds inside any longer word of a launcher's command. Matching the basename as a whole word of the launcher's command (the start, whitespace, a quote, `/`, or `=` before it; the end, whitespace, a quote, `;`, `)`, or `|` after it), and the directory the same way, was folded into derived views 3 on 2026-10-27, before any store was built under them; its effect is measured on `tb40-sonnet-v4`, not on this store. The rest are the honest residue: a job's progress file polled by `sleep; tail` (`/tmp/run1.log` in `XK8w3KT`, `/tmp/s3.out` in `layout-config-recreation__VUc3qgg`), scan outputs written while the next scan was launched, and the pretrain `torchelastic` scratch written while a relaunch command ran.
+- With the evidence condition alone (`bfc6043`, derived id `2+924dd3f41ce8`), 1,242 rows stayed contested, 528 of them with a basename of one or two characters (`0`, `5`, `js`: the pip and Chromium caches) that `names`, then a substring test, found inside longer words of a launcher's command. Matching names as whole words (`e2d41c2`: the start, whitespace, a quote, `/`, or `=` before; the end, whitespace, a quote, `;`, `)`, or `|` after; a directory the same way) leaves 737, 129 of them with such a short basename.
+- The 737 by trial: `layout-config-recreation__dzr9cbd` 412, `vba-userform-port__eAHoE94` 100, `pretrain-shard-corruption__2pVLuf4` 66, `layout-config-recreation2__HrTjTjc` 35, `pretrain-shard-corruption__q34Z4ZX` 32, `vba-userform-port__pwd9oMt` 31, `vba-userform-port__K3NYT7L` 29, `layout-config-recreation__VUc3qgg` 12, `vf2-speedup-networkx__o7q8pfd` 8, `sound-change-cascade__AjkhsMS` 7, `pretrain-shard-corruption__XK8w3KT` 5. They are the honest residue: a job's progress file polled by `sleep; tail` (`/tmp/run1.log` in `XK8w3KT`, `/tmp/s3.out` in `VUc3qgg`), scan outputs written while the next scan was launched, and the pretrain `torchelastic` scratch written while a relaunch command ran.
+- The landing call's own naming test (whether it names the file, which blocks the promotion to `background`) is still a substring test.
 
 The ADR-0021 recorder, capturing `tb40-sonnet-v4` since 2026-10-27 05:56 UTC, decides these rows by the writer's identity; the agreement between this rule and the record is measured there.
