@@ -138,6 +138,10 @@ Harbor has not exited 0, so `corpus/manifests/tb40-sonnet-v4.json` is not writte
 
 The 67 finished trials: 13 passed, no exception, every chain complete; 1,656 hook requests and 1,656 acks, 957 checkpoints.
 The recorder ran from the relaunch to 09:06 as one process with no queue overflow; it wrote 2,827,219 event lines for the 67, and dropped 211,704 events whose directory handle no longer resolved (a directory removed before its events were read).
+`scripts/2026-10-27_adr0021_acceptance.py` over the 67 (log `/srv/trajlab/logs/acceptance-tb40-sonnet-v4-2026-10-27b.txt`): create 848,428, close_write 743,660, modify 685,901, delete 450,657, moved_to 97,174, and open 1,399 lines; 155,643 events (5.5%) found their writer gone.
+2,162,784 of the events (76%) are `layout-config-recreation__kb38wvM`'s, nearly all from the headless Chromium its jobs ran, which is why `start_time` ties 1,377,116 events (all but 236 of them in that trial) against `command`'s 1,371,359 and `session`'s 68,886; no call for 6,214 by Claude Code outside a write tool, 2,089 by writers gone and never read, and 1,547 others.
+The `eval` check: 1,564 of 1,587 Bash calls have an event by a shell running exactly their command; none of the 23 without one was backgrounded.
+20 of those 23 are in the 13 trials that have no `open` line at all, though their shells sourced a snapshot (their command lines name it) and the recorder logged no failed mark; in the other 54 trials the mark gave 1,399 lines for 1,402 calls, and the 3 calls it missed are the other 3 never seen. Why the mark saw nothing in those 13 is not yet known, and is to be found before the next capture with the recorder.
 The store was built with `trajlab store build` on tmpfs (`/dev/shm/trajlab/stores/tb40-sonnet-v4.b`, linked from `corpus/stores/tb40-sonnet-v4`) for want of disk, from commit `781a743` (the carrying directory, below); it does not survive a reboot and is rebuilt from the trial dirs.
 
 ### Rows by attribution
