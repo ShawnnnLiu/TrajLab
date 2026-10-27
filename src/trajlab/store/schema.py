@@ -368,7 +368,9 @@ def connect(path: Path, *, read_only: bool) -> duckdb.DuckDBPyConnection:
     return con
 
 
-def connect_agent(store_dir: Path) -> duckdb.DuckDBPyConnection:
+def connect_agent(
+    store_dir: Path, *, memory_limit: str | None = None, threads: int | None = None
+) -> duckdb.DuckDBPyConnection:
     """`record.duckdb` as an agent's queries must see it: read-only, with no access to any other
     file (DuckDB's `enable_external_access` off: no `read_blob`, `glob`, `read_csv`, `ATTACH`,
     `COPY`, or extension install), its time zone UTC, and its configuration locked so no query
@@ -378,14 +380,24 @@ def connect_agent(store_dir: Path) -> duckdb.DuckDBPyConnection:
     Connections to one store in one process share a DuckDB instance: the first sets the time
     zone globally and locks it, and later ones find both already done. One gap the lock leaves:
     `enable_logging()` still runs, and logging to a file it cannot write makes every later
-    query on the instance fail and closing it abort the process. No file is read, but the step-4
-    query runner must therefore run each agent query in a disposable child process and refuse
-    statements that name the logging functions (ADR-0014, open question 2).
+    query on the instance fail and closing it abort the process. No file is read, but the
+    query runner therefore runs each agent query in a disposable child process and refuses
+    statements that name the logging functions (`trajlab.store.query`, ADR-0019).
+
+    `memory_limit` (a DuckDB size such as `512MB`) and `threads` bound that process's instance.
+    They are part of the instance's configuration, which every connection to one file in a
+    process must share, so pass them only where the store is opened once, as the runner's
+    child does.
     """
     path = record_path(store_dir)
     if not path.is_file():
         raise StoreError(f"{path} does not exist")
-    con = duckdb.connect(str(path), read_only=True, config={"enable_external_access": False})
+    config: dict[str, Any] = {"enable_external_access": False}
+    if memory_limit is not None:
+        config["memory_limit"] = memory_limit
+    if threads is not None:
+        config["threads"] = threads
+    con = duckdb.connect(str(path), read_only=True, config=config)
     try:
         zone, locked = con.execute(
             "SELECT current_setting('TimeZone'), current_setting('lock_configuration')"
