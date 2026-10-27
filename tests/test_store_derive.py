@@ -1000,6 +1000,36 @@ def test_a_launcher_naming_the_file_or_its_directory_still_contests(tmp_path: Pa
     }
 
 
+def test_a_name_counts_only_as_a_whole_word_of_the_launchers_command(tmp_path: Path) -> None:
+    """528 contested rows of the v3 rebuild had a one- or two-character basename (pip's and
+    Chromium's cache dirs) that a substring test found inside longer words of the command."""
+    store = make_store(
+        tmp_path,
+        [
+            call(1, "nohup node server.js --epochs 10 > /tmp/s.log 2>&1 &"),
+            call(2, "tail -f '/tmp/w/out.log' | head -3; cat x", seconds=10),
+            call(3, "pip install torch", seconds=20),
+        ],
+        [
+            change(3, "/root/.cache/pip/http-v2/a/0", before=None, mtime=at(3, 5)),
+            change(3, "/root/.cache/chromium/Code Cache/js", before=None, mtime=at(3, 5)),
+        ],
+    )
+    assert attributions(store) == {
+        (3, "/root/.cache/chromium/Code Cache/js"): ("foreground", 3, 3, False),
+        (3, "/root/.cache/pip/http-v2/a/0"): ("foreground", 3, 3, False),
+    }
+    quoted = make_store(
+        tmp_path / "quoted",
+        [
+            call(1, "cd /tmp/w && nohup python run.py 'out.log' &"),
+            call(2, "sleep 30; ls", seconds=31),
+        ],
+        [change(2, "/tmp/w/out.log", mtime=at(2, 20))],
+    )
+    assert attributions(quoted) == {(2, "/tmp/w/out.log"): ("contested", None, 2, False)}
+
+
 # -- the record of writing processes (ADR-0021) ------------------------------------------------
 
 

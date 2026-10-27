@@ -124,6 +124,22 @@ CACHE, SCRIPT, PROMPT, ERROR, TEST, SUCCESS, NOT_DONE_SQL, BACKGROUNDED_SQL, LAU
 WRITE_TOOLS_SQL = ", ".join(_literal(tool) for tool in WRITE_TOOLS)
 
 
+# A name stands whole in a command when nothing that could continue a word touches it: before
+# it the start, whitespace, a quote, `/`, or `=`; after it the end, whitespace, a quote, `;`,
+# `)`, or `|`. So `0` is not named by `--epochs 10`, nor `js` by `server.js`. A directory is
+# named the same way, except that it starts a path (not after `/`) and a `/` may follow it.
+NAME_BEFORE = r"(^|[\s\"'/=])"
+NAME_AFTER = r"($|[\s\"';)|])"
+DIR_BEFORE = r"(^|[\s\"'=])"
+DIR_AFTER = r"($|[\s\"';)|/])"
+
+
+def _names_whole(text: str, name: str, before: str = NAME_BEFORE, after: str = NAME_AFTER) -> str:
+    """SQL: whether `name` stands whole in `text` (its regex metacharacters escaped)."""
+    escaped = f"regexp_replace({name}, {_literal(REGEX_METACHAR)}, '" + "\\\\\\1" + "', 'g')"
+    return f"regexp_matches({text}, {_literal(before)} || {escaped} || {_literal(after)})"
+
+
 def _redirects_into(command: str, base: str) -> str:
     """SQL: whether a redirect target of `command` has `base` as its basename after expansion.
 
@@ -359,8 +375,8 @@ STEP_JOBS = f"""
 #   - the candidate launchers are the earlier calls whose job was open at m: a backgrounded
 #     call whose window holds m, or a hand-launched job started before m (no end is known);
 #   - the best launcher is the one that redirects into the file (a shell variable in the
-#     target standing for anything), else names its basename, else names its directory (one
-#     at least two deep, so `/tmp/w` but not `/app`), else the latest;
+#     target standing for anything), else names its basename as a whole word, else names its
+#     directory (one at least two deep, so `/tmp/w` but not `/app`), else the latest;
 #   - inside the landing window only a launcher with such evidence counts: a job with no end
 #     on record (a server started with `&`) would otherwise contest every later write;
 #   - foreground: m in the landing window and no launcher with evidence;
@@ -380,7 +396,8 @@ STEP_JOBS = f"""
 DELTA_ATTRIBUTION = f"""
     WITH jobs AS (
         SELECT j.trial_id, j.step_idx, s.t_start AS launched_at, j.backgrounded, j.job_end,
-               coalesce(s.args_json, '') AS command
+               coalesce(s.args_json, '') AS command,
+               coalesce(json_extract_string(s.args_json, '$.command'), '') AS text
         FROM step_jobs j
         JOIN steps s ON s.trial_id = j.trial_id AND s.step_idx = j.step_idx
         WHERE j.backgrounded OR j.launches_job
@@ -420,8 +437,9 @@ DELTA_ATTRIBUTION = f"""
             l.path,
             j.step_idx AS launcher,
             j.backgrounded,
-            position(l.base IN j.command) > 0 AS names,
-            l.parent_depth >= 2 AND position(l.parent IN j.command) > 0 AS names_dir,
+            {_names_whole("j.text", "l.base")} AS names,
+            l.parent_depth >= 2
+                AND {_names_whole("j.text", "l.parent", DIR_BEFORE, DIR_AFTER)} AS names_dir,
             {_redirects_into("j.command", "l.base")} AS redirects
         FROM landing l
         JOIN jobs j ON j.trial_id = l.trial_id AND j.step_idx < l.step_idx
