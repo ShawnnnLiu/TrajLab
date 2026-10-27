@@ -89,8 +89,9 @@ VARIANT_MIN_LINES = 5
 # foreground timeout, or when the model asked for it; group 1 is the task id.
 BACKGROUNDED = r"(?:moved to the background \(ID: |running in background with ID: )([a-z0-9]+)"
 # A job launched by hand, in the shell's own text (steps.command_shell): `&` as a separator
-# (not `&&`, not the redirects `>&` and `&>`, not `|&`), or nohup, setsid, disown.
-JOB_LAUNCH = r"(^|[^&>|])&([^&>]|$)|\bnohup\b|\bsetsid\b|\bdisown\b"
+# (not `&&`, not the redirects `>&` and `&>`, not `|&`, not an escaped `\&` as in a sed
+# replacement), or nohup, setsid, disown.
+JOB_LAUNCH = r"(^|[^&>|\\])&([^&>]|$)|\bnohup\b|\bsetsid\b|\bdisown\b"
 # A redirect target in a command: `> name`, `>> dir/name` (`2>&1` is none), and, in its
 # basename, what the shell expands: `$s` and `${s}` stand for any text. So `> log_$s.txt`
 # redirects into `log_11.txt`.
@@ -358,8 +359,11 @@ STEP_JOBS = f"""
 #   - the candidate launchers are the earlier calls whose job was open at m: a backgrounded
 #     call whose window holds m, or a hand-launched job started before m (no end is known);
 #   - the best launcher is the one that redirects into the file (a shell variable in the
-#     target standing for anything), else names it, else the latest;
-#   - foreground: m in the landing window and no launcher;
+#     target standing for anything), else names its basename, else names its directory (one
+#     at least two deep, so `/tmp/w` but not `/app`), else the latest;
+#   - inside the landing window only a launcher with such evidence counts: a job with no end
+#     on record (a server started with `&`) would otherwise contest every later write;
+#   - foreground: m in the landing window and no launcher with evidence;
 #   - background / background_by_path / background_untracked: a launcher, and either m is
 #     outside the landing window or the launcher redirects into the file and the landing call
 #     writes nothing it names (by_path: the naming tie-break overrode the latest launcher;
@@ -391,6 +395,10 @@ DELTA_ATTRIBUTION = f"""
             d.path,
             CASE WHEN d.op = 'delete' THEN NULL ELSE d.mtime_after END AS write_at,
             regexp_extract(d.path, '[^/]+$') AS base,
+            regexp_extract(d.path, '^(.*)/[^/]*$', 1) AS parent,
+            length(regexp_extract(d.path, '^(.*)/[^/]*$', 1))
+                - length(replace(regexp_extract(d.path, '^(.*)/[^/]*$', 1), '/', ''))
+                AS parent_depth,
             s.t_start AS k_start,
             coalesce(s.checkpoint_at, s.t_end, s.t_start) AS k_end,
             s.tool IN ({WRITE_TOOLS_SQL})
@@ -413,6 +421,7 @@ DELTA_ATTRIBUTION = f"""
             j.step_idx AS launcher,
             j.backgrounded,
             position(l.base IN j.command) > 0 AS names,
+            l.parent_depth >= 2 AND position(l.parent IN j.command) > 0 AS names_dir,
             {_redirects_into("j.command", "l.base")} AS redirects
         FROM landing l
         JOIN jobs j ON j.trial_id = l.trial_id AND j.step_idx < l.step_idx
@@ -425,7 +434,7 @@ DELTA_ATTRIBUTION = f"""
             c.*,
             row_number() OVER (
                 PARTITION BY c.trial_id, c.step_idx, c.path
-                ORDER BY c.redirects DESC, c.names DESC, c.launcher DESC
+                ORDER BY c.redirects DESC, c.names DESC, c.names_dir DESC, c.launcher DESC
             ) AS rank,
             max(c.launcher) OVER (PARTITION BY c.trial_id, c.step_idx, c.path) AS latest
         FROM candidates c
@@ -442,6 +451,7 @@ DELTA_ATTRIBUTION = f"""
             r.launcher,
             r.backgrounded,
             r.redirects,
+            r.redirects OR r.names OR r.names_dir AS evidence,
             r.latest,
             l.k_writes,
             l.trial_start,
@@ -455,7 +465,8 @@ DELTA_ATTRIBUTION = f"""
             j.*,
             CASE
                 WHEN j.write_at IS NULL THEN 'unknown'
-                WHEN j.launcher IS NULL AND j.in_landing_window THEN 'foreground'
+                WHEN j.in_landing_window AND (j.launcher IS NULL OR NOT j.evidence)
+                    THEN 'foreground'
                 WHEN j.launcher IS NOT NULL
                      AND (NOT j.in_landing_window OR (j.redirects AND NOT j.k_writes)) THEN
                     CASE
@@ -693,7 +704,8 @@ VIEWS: tuple[View, ...] = (
             (
                 "launcher_step",
                 "The earlier call whose job was open at the write time and best fits the path: "
-                "one that redirects into the file, else names it, else the latest; null if none.",
+                "one that redirects into the file, else names it, else names its directory (two "
+                "or more deep), else the latest; null if none.",
             ),
             (
                 "attribution",
@@ -702,8 +714,8 @@ VIEWS: tuple[View, ...] = (
                 "writer_steps), else by times: `foreground` (the landing call wrote it), "
                 "`background` (the launcher's job did; `background_by_path` when a job naming "
                 "the file overrode a later one, `background_untracked` for a hand-launched job), "
-                "`contested` (the landing call or the launcher's job), `untrusted_mtime` (a time "
-                "before the attempt began), or `unknown`.",
+                "`contested` (the landing call or a launcher's job that names the file or its "
+                "directory), `untrusted_mtime` (a time before the attempt began), or `unknown`.",
             ),
             (
                 "launched_by_step",
