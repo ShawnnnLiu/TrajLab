@@ -119,7 +119,8 @@ RECORD_TABLES: dict[str, str] = {
             events INTEGER NOT NULL,
             ops VARCHAR[] NOT NULL,
             first_at TIMESTAMPTZ NOT NULL,
-            last_at TIMESTAMPTZ NOT NULL
+            last_at TIMESTAMPTZ NOT NULL,
+            via_dir VARCHAR
         )""",
 }
 

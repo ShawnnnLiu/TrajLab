@@ -4,7 +4,11 @@
 the writing process as it was read at the event. Here each event's process is tied to the step
 whose call started it, by one ordered rule, and the events on a delta row's path inside that
 row's checkpoint interval (after the previous checkpoint's commit, up to this one's) are counted
-per writer step.
+per writer step. A path with no events of its own there takes those of the nearest directory
+above it renamed into place (an added or modified path) or removed (a deleted one) in the
+interval, kept in `via_dir`: a directory built under another name and renamed (`pip install
+--target`, uv's cache) is one `moved_to` on the directory, and a recursive delete loses the
+events of children whose directory is gone before the recorder resolves it.
 
 The rule, first match wins:
 
@@ -35,7 +39,7 @@ from collections import defaultdict
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from uuid import UUID
 
 from harbor.models.trial.paths import TrialPaths
@@ -58,6 +62,9 @@ logger = logging.getLogger(__name__)
 # Claude Code logged the request, t_end when the hook saw it finish, and /proc start times have
 # a clock tick's resolution.
 SLACK = timedelta(seconds=1)
+# The event on a directory above a path with none of its own that stands for the path's: a
+# directory renamed into place brings what it holds; a removed one took what it held.
+CARRIER_OP = {"add": "moved_to", "modify": "moved_to", "delete": "delete"}
 WRITE_TOOLS = ("Write", "Edit", "MultiEdit", "NotebookEdit")
 # A group of events whose processes were tied to one step in several ways says the surest.
 _SUREST: tuple[WriterMapping, ...] = ("command", "session", "tool_window", "start_time")
@@ -217,20 +224,31 @@ def write_rows(
     cache: dict[int, Writer | None] = {}
     rows: list[WriteRow] = []
     for delta in deltas:
-        found = by_path.get(delta.path)
         step = owner.get(delta.step_idx)
-        if not found or step is None or step.checkpoint_seq is None:
+        if step is None or step.checkpoint_seq is None or step.checkpoint_at is None:
             continue
-        end = step.checkpoint_at
         start = at_seq.get(step.checkpoint_seq - 1)
-        if end is None:
+        end = step.checkpoint_at
+        via_dir = None
+        indices = _between(by_path.get(delta.path), start, end)
+        if not indices:
+            carrier = CARRIER_OP[delta.op]
+            for parent in PurePosixPath(delta.path).parents:
+                if str(parent) == "/":
+                    break
+                indices = [
+                    index
+                    for index in _between(by_path.get(str(parent)), start, end)
+                    if events[index].op == carrier and events[index].is_dir
+                ]
+                if indices:
+                    via_dir = str(parent)
+                    break
+        if not indices:
             continue
-        times = [at for at, _ in found]
-        low = 0 if start is None else bisect_right(times, start)
-        high = bisect_right(times, end)
         groups: dict[int | None, list[WriteEvent]] = defaultdict(list)
         mapped: dict[int | None, WriterMapping | None] = {}
-        for _, index in found[low:high]:
+        for index in indices:
             if index not in cache:
                 cache[index] = writers.writer(events[index])
             writer = cache[index]
@@ -252,6 +270,18 @@ def write_rows(
                     ops=tuple(sorted({e.op for e in group})),
                     first_at=group[0].at,
                     last_at=group[-1].at,
+                    via_dir=via_dir,
                 )
             )
     return tuple(rows)
+
+
+def _between(
+    found: list[tuple[datetime, int]] | None, start: datetime | None, end: datetime
+) -> list[int]:
+    """The indices of the events in `found` (sorted by time) after `start` and up to `end`."""
+    if not found:
+        return []
+    times = [at for at, _ in found]
+    low = 0 if start is None else bisect_right(times, start)
+    return [index for _, index in found[low : bisect_right(times, end)]]

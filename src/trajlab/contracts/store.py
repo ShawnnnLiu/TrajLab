@@ -254,7 +254,11 @@ class WriteRow(_Row):
     path after the previous checkpoint's commit and up to this one's, grouped by the call that
     started the writing process. A row whose writer belongs to no call (Claude Code itself
     outside a write tool, the harness, a program of the task image) has a null `writer_step`.
-    A trial captured without the recorder has no rows.
+    A path with no events of its own in the interval takes those of the nearest directory above
+    it that was renamed into place (for an added or modified path) or removed (for a deleted
+    one) in the interval, named in `via_dir`: `pip install --target` and uv build a directory
+    under another name and rename it, and a recursive delete removes children whose directory
+    is gone before the recorder can name it. A trial captured without the recorder has no rows.
     """
 
     trial_id: UUID = Field(description="The trial (trials.trial_id).")
@@ -280,6 +284,13 @@ class WriteRow(_Row):
     )
     first_at: AwareDatetime = Field(description="The first event's time.")
     last_at: AwareDatetime = Field(description="The last event's time.")
+    via_dir: str | None = Field(
+        default=None,
+        pattern=r"^/",
+        description="The directory above the path whose events these are, when the path had "
+        "none of its own: renamed into place (`moved_to`) for an added or modified path, "
+        "removed (`delete`) for a deleted one; null when the events are on the path itself.",
+    )
 
     @model_validator(mode="after")
     def _consistent(self) -> Self:

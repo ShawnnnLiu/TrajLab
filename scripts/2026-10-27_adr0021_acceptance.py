@@ -10,7 +10,8 @@ For each trial dir (built into the store given), prints:
   background;
 - how events were tied to calls (`trajlab.store.writes.Writers`) and why the rest were not;
 - from the store: delta rows by attribution, and the agreement between ADR-0020's rule and the
-  record on rows the record settles (`recorded`).
+  record on rows the record settles (`recorded`);
+- after the last trial, the totals over all of them.
 
     uv run python scripts/2026-10-27_adr0021_acceptance.py --store <store> <trial dir>...
 """
@@ -31,12 +32,16 @@ def main() -> None:
     parser.add_argument("--store", type=Path, required=True)
     parser.add_argument("trials", type=Path, nargs="+")
     args = parser.parse_args()
+    totals: dict[str, Counter[str]] = {}
     with connect_agent(args.store) as con:
         for trial_dir in args.trials:
-            report(con, trial_dir)
+            report(con, trial_dir, totals)
+    print(f"\n=== totals over {len(args.trials)} trials")
+    for name, counter in totals.items():
+        print(f"  {name}: " + ", ".join(f"{k} {n}" for k, n in counter.most_common()))
 
 
-def report(con, trial_dir: Path) -> None:  # type: ignore[no-untyped-def]
+def report(con, trial_dir: Path, totals: dict[str, Counter[str]]) -> None:  # type: ignore[no-untyped-def]
     from trajlab.contracts import StepRow
 
     result = TrialResult.model_validate_json((trial_dir / "result.json").read_text())
@@ -51,10 +56,14 @@ def report(con, trial_dir: Path) -> None:  # type: ignore[no-untyped-def]
     events = read_write_events(trial_dir)
     reward = result.verifier_result.rewards if result.verifier_result else None
     print(f"\n=== {trial_dir.name} (reward {reward}): {len(steps)} steps, {len(events)} events")
+    total = totals.setdefault
+    total("trials", Counter())["with events" if events else "without events"] += 1
     if not events:
         return
     ops = Counter(e.op for e in events)
     gone = sum(e.gone for e in events)
+    total("ops", Counter()).update(ops)
+    total("writer gone", Counter()).update({"gone": gone, "read": len(events) - gone})
     print("  ops: " + ", ".join(f"{op} {n}" for op, n in sorted(ops.items())))
     print(f"  writer gone at the event: {gone} ({gone / len(events):.1%})")
     per_second = Counter(int(e.at.timestamp()) for e in events)
@@ -75,8 +84,11 @@ def report(con, trial_dir: Path) -> None:  # type: ignore[no-untyped-def]
             seconds = max((step.t_end - step.t_start).total_seconds(), 1.0)
             rates.append((n / seconds, n, seconds, step.step_idx, command))
     print(f"  eval check: {len(bash) - len(missing)} of {len(bash)} Bash calls seen by command")
+    eval_check = total("Bash calls", Counter())
+    eval_check["seen by command"] += len(bash) - len(missing)
     for step_idx, background, moved, command in missing:
         flags = ("run_in_background " if background else "") + ("moved " if moved else "")
+        eval_check["no shell: " + (flags.strip() or "foreground")] += 1
         print(f"    no shell for step {step_idx} {flags}| {command[:90]!r}")
     for rate, n, seconds, step_idx, command in sorted(rates, reverse=True)[:3]:
         print(
@@ -97,6 +109,7 @@ def report(con, trial_dir: Path) -> None:  # type: ignore[no-untyped-def]
         else:
             mapped["none: other"] += 1
     print("  events by mapping: " + ", ".join(f"{k} {n}" for k, n in mapped.most_common()))
+    total("events by mapping", Counter()).update(mapped)
 
     rows = con.execute(
         "SELECT attribution, count(*) FROM delta_attribution WHERE trial_id = ? "
@@ -104,6 +117,7 @@ def report(con, trial_dir: Path) -> None:  # type: ignore[no-untyped-def]
         [trial_id],
     ).fetchall()
     print("  delta rows: " + ", ".join(f"{a} {n}" for a, n in rows))
+    total("delta rows", Counter()).update(dict(rows))
     agreement = con.execute(
         """
         SELECT rule_attribution, rule_causal_step = causal_step AS agree, count(*)
@@ -114,6 +128,7 @@ def report(con, trial_dir: Path) -> None:  # type: ignore[no-untyped-def]
     ).fetchall()
     for rule, agree, n in agreement:
         print(f"    recorded, rule said {rule}: {'agrees' if agree else 'DISAGREES'} on {n}")
+        total("recorded rows, rule", Counter())[f"{rule} {'agrees' if agree else 'disagrees'}"] += n
 
 
 if __name__ == "__main__":

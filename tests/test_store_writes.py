@@ -46,11 +46,13 @@ def write(
     started: datetime | None = None,
     ancestry: tuple[ProcessRef, ...] = (),
     agent: bool = False,
+    is_dir: bool = False,
 ) -> WriteEvent:
     return WriteEvent(
         at=when,
         op=op,  # type: ignore[arg-type]
         path=path,
+        is_dir=is_dir,
         pid=pid,
         cpid=pid - 1000,
         comm="python",
@@ -204,6 +206,54 @@ def test_a_group_says_its_surest_mapping() -> None:
     ]
     (row,) = write_rows(TRIAL, steps, [change(2, "/app/log_1.txt")], events)
     assert (row.writer_step, row.mapped_by, row.events) == (1, "command", 2)
+
+
+def test_a_directory_renamed_into_place_stands_for_what_it_holds() -> None:
+    install = "pip install --target /tmp/nxref networkx"
+    steps = [checkpointed(call(1, install, seconds=3), 1)]
+    sh = shell(install, 1200, at(1, 0.1))
+    events = [
+        write("/tmp/pip-target-x/networkx/a.py", at(1, 1), op="close_write", sh=sh),
+        write("/tmp/nxref", at(1, 0.5), op="create", sh=sh, is_dir=True),
+        write("/tmp/nxref/networkx", at(1, 2), op="moved_to", sh=sh, is_dir=True),
+    ]
+    deltas = [
+        change(1, "/tmp/nxref/networkx/utils/a.py", before=None),
+        change(1, "/tmp/nxref/networkx", before=None),
+    ]
+    rows = write_rows(TRIAL, steps, deltas, events)
+    assert [(r.path, r.writer_step, r.ops, r.via_dir) for r in rows] == [
+        # The nearest directory renamed into place, not its parent's create.
+        ("/tmp/nxref/networkx/utils/a.py", 1, ("moved_to",), "/tmp/nxref/networkx"),
+        # The directory's own event is its own.
+        ("/tmp/nxref/networkx", 1, ("moved_to",), None),
+    ]
+
+
+def test_a_removed_directory_stands_for_the_children_it_took() -> None:
+    steps = [
+        checkpointed(call(1, "python render.py", seconds=3), 1),
+        checkpointed(call(2, "sleep 60", seconds=61), 2),
+    ]
+    sh = shell("python render.py", 1200, at(1, 0.1))
+    events = [
+        write("/tmp/profile-a", at(2, 5), op="delete", sh=sh, is_dir=True),
+        write("/tmp/profile-a/Default/kept", at(2, 4), op="delete", sh=sh),
+        write("/tmp/profile-b", at(2, 5), op="moved_to", sh=sh, is_dir=True),
+        write("/tmp/profile-c", at(1, 2), op="delete", sh=sh, is_dir=True),  # not this interval
+    ]
+    deltas = [
+        change(2, "/tmp/profile-a/Default/lost", after=None),
+        change(2, "/tmp/profile-a/Default/kept", after=None),
+        change(2, "/tmp/profile-b/x", after=None),  # a rename is no delete
+        change(2, "/tmp/profile-c/x", after=None),
+        change(2, "/tmp/profile-a/Default/new", before=None),  # a delete brings nothing
+    ]
+    rows = write_rows(TRIAL, steps, deltas, events)
+    assert [(r.path, r.writer_step, r.via_dir) for r in rows] == [
+        ("/tmp/profile-a/Default/lost", 1, "/tmp/profile-a"),
+        ("/tmp/profile-a/Default/kept", 1, None),
+    ]
 
 
 def test_no_record_no_rows(tmp_path: Path) -> None:
