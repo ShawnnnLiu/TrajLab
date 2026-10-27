@@ -26,7 +26,8 @@ Multi-step tasks nest `agent/ verifier/ artifacts/` under `steps/<name>/`. We us
 
 In-container contract: `/logs/agent`, `/logs/verifier`, `/logs/artifacts` are mounted; `/tests` and `/solution` are copied. **Anything we write under `/logs/agent` from inside the container lands in `agent/` on the host for free.** This is the channel for the hook.
 
-**The trial dir exists before the container does [0.23.0]** (checked 2026-10-26): `Trial.__init__` calls `TrialPaths.mkdir()`, which creates `agent/`, `verifier/`, and `artifacts/`; the environment starts later, in `Trial.run`. So a host process that writes into `agent/` as soon as the trial dir appears has its file in the container from the container's first moment; the Exp 2 query tool's server relies on this (ADR-0019).
+**The trial dir exists before the container does [0.23.0]** (checked 2026-10-26): `Trial.__init__` calls `TrialPaths.mkdir()`, which creates `agent/`, `verifier/`, and `artifacts/`; the environment starts later, in `Trial.run`.
+So a host process that writes into `agent/` as soon as the trial dir appears has its file in the container from the container's first moment; the Exp 2 query tool's server relies on this (ADR-0019).
 
 ## Claude Code integration (`harbor/agents/installed/claude_code.py`)
 
