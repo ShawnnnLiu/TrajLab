@@ -141,7 +141,7 @@ The recorder ran from the relaunch to 09:06 as one process with no queue overflo
 `scripts/2026-10-27_adr0021_acceptance.py` over the 67 (log `/srv/trajlab/logs/acceptance-tb40-sonnet-v4-2026-10-27b.txt`): create 848,428, close_write 743,660, modify 685,901, delete 450,657, moved_to 97,174, and open 1,399 lines; 155,643 events (5.5%) found their writer gone.
 2,162,784 of the events (76%) are `layout-config-recreation__kb38wvM`'s, nearly all from the headless Chromium its jobs ran, which is why `start_time` ties 1,377,116 events (all but 236 of them in that trial) against `command`'s 1,371,359 and `session`'s 68,886; no call for 6,214 by Claude Code outside a write tool, 2,089 by writers gone and never read, and 1,547 others.
 The `eval` check: 1,564 of 1,587 Bash calls have an event by a shell running exactly their command; none of the 23 without one was backgrounded.
-20 of those 23 are in the 13 trials that have no `open` line at all, though their shells sourced a snapshot (their command lines name it) and the recorder logged no failed mark; in the other 54 trials the mark gave 1,399 lines for 1,402 calls, and the 3 calls it missed are the other 3 never seen. Why the mark saw nothing in those 13 is not yet known, and is to be found before the next capture with the recorder.
+20 of those 23 are in the 13 trials that have no `open` line at all, though their shells sourced a snapshot (their command lines name it) and the recorder logged no failed mark; in the other 54 trials the mark gave 1,399 lines for 1,402 calls, and the 3 calls it missed are the other 3 never seen. In those 13 the mark was on a directory Claude Code had since removed and made again; the 3 are shells that exited before the recorder read them. Both are set out, with the fix to the first, in "Why 13 trials have no `open` line" below.
 The store was built with `trajlab store build` on tmpfs (`/dev/shm/trajlab/stores/tb40-sonnet-v4.b`, linked from `corpus/stores/tb40-sonnet-v4`) for want of disk, from commit `781a743` (the carrying directory, below); it does not survive a reboot and is rebuilt from the trial dirs.
 
 ### Rows by attribution
@@ -207,3 +207,37 @@ Before the fix the agreement was 185,506 of 188,088 recorded rows (98.6%); it fa
   Opening the interval of a path with no events of its own at the previous checkpoint's `requested_at` would cover these; not done: 149 rows, under 0.1% of the corpus.
 - **115 whose events have no call**: 79 the rule calls `foreground`, 27 `unknown`, 6 `contested`, 3 `untrusted_mtime`.
   The first 112 were written only by processes gone before the recorder read them (a `cat` writing a heredoc, a `mkdir`), the last case "What it still misses" names; the 3 are Claude Code's own lock file, `/tmp/.local/state/claude/locks/2.1.278.lock`, in the first step of each `risk-scorer-replay` attempt, written by Claude Code outside any write tool.
+
+### Why 13 trials have no `open` line
+
+Found from the trial dirs and the Claude Code 2.1.278 binary (read from a derived image's unpacked layer under `/var/lib/containerd`); the one-off queries were not committed.
+
+**Cause.** Harbor's setup command (`ClaudeCode.run`) makes `agent/sessions/shell-snapshots/` together with `debug/`, `projects/-app/`, `statsig/`, `todos/`, and `skills/` in one `mkdir -p`, and the recorder marks it on its next pass.
+Claude Code writes its shell snapshot only when the first Bash call runs.
+Five seconds after it starts (`startBackgroundHousekeeping`, `STALE_CLEANUP_CATCHUP_DELAY_MS = 5000`), with no fresh `.last-cleanup` in a new config dir, it runs a retention sweep whose shell-snapshot step deletes stale `*.sh` files and then `rmdir`s the directory, ignoring the error (`C(<config>/shell-snapshots, ".sh")`, whose third parameter, "remove the directory if empty", defaults to true).
+So when the first Bash call comes after the sweep, the empty directory Harbor made is removed, and the first Bash call makes a new one.
+A fanotify inode mark goes with its inode, and `_mark_shells` marked a trial's directory once and never again, so every `open` of such a trial went unseen; nothing failed, so nothing was logged.
+Claude Code 2.1.310 passes `false` there and keeps the directory; the pin is 2.1.278 (ADR-0009).
+
+**Evidence.**
+- In all 13, the present `shell-snapshots/` was born 5.7 to 20.2 s after `agent/sessions/`, and 0.2 to 14.6 s after the sweep wrote `.last-cleanup`; in all 54 others it was born in the same millisecond as `agent/sessions/`, by Harbor's `mkdir -p`. `debug/`, `projects/`, and `skills/` keep Harbor's inodes in all 67; `statsig/` and `todos/`, which nothing writes, are gone from all 67.
+- The split is exact. The snapshot's name carries the millisecond it was made, which follows the first Bash step's timestamp in all 67. In the 54 it was made 2.1 to 5.1 s after Harbor's `mkdir`, before the sweep finished (5.5 to 14.0 s); in the 13, 5.7 to 20.2 s after it, after the sweep finished (5.50 to 5.59 s).
+- The mark was on Harbor's directory. Once a trial is recorded, every pass marks the directory if it exists; a mark on the new directory would have given `open` lines, and a failed one would have logged `no mark on`. So the one mark was placed in the 5.5 s Harbor's directory stood (the container was up 0.24 to 0.29 s before Harbor's `mkdir`).
+- So the clustering by task is the agent's time to its first Bash call on that task, not the image: in two of its three attempts `freecad-platform-drawing` read files for 7 to 9 s before its first Bash call, and `vf2-speedup-networkx` (three of three) and `cad-model` (two of three) made their first tool call 5.6 to 11.6 s in.
+
+**The 3 other calls** (one each in `foodstuff-beta-activity__9XLzFHA`, `cargo-flight-dispatch__J8Ce4cR`, and `vpp-loss-divergence__BSVz6CH`: a `sed`, a short `python` heredoc, a `grep`) have another cause. The mark was in place, but each call's shell had exited before the recorder read its `open` event, and had never been read before, so there was no command line and `_shell_start` dropped the event.
+Every event of those shells and their children has `gone` set and no `comm`; Claude Code's own events at the same instants were read alive.
+Not fixed: a shell can be read only while it lives, and holding it until read (`FAN_OPEN_PERM`) would make the agent wait on the recorder, which this recorder never does.
+
+**The fix** (`66ac39f`): the recorder marks the directory again as soon as it reads the directory's create event. Claude Code makes it in `agent/sessions/`, on the snapshots' filesystem (as the `open` lines already require), so the filesystem mark reports it. On this corpus the first shell's `open` was read 16 to 60 ms after the time in the snapshot's name (about 20 ms in most trials), and in the 13 that time is the new directory's birth to the millisecond; a recorder that is not behind reads the create event within a few milliseconds.
+Every discovery pass also marks the directory again when its device and inode differ from those last marked, for a create event that was missed.
+`tests/test_checkpoint_writes.py` replays the v4 sequence.
+If the recorder is more than about 20 ms behind when the directory is made, the first Bash call's `open` is still missed, and its shell is known only from its writes, as before.
+
+**What it changes in a trial's record.** Only `open` lines: a trial whose first Bash call comes after Claude Code's sweep now has one per call, where the recorder of `fd8af06` wrote none.
+Write events, the `WriteEvent` schema, and the store are unchanged; the recorder's log gains a line `<trial>: marked <dir> again: the directory is a new one`.
+The 67 finished trials of `tb40-sonnet-v4` were recorded by `fd8af06`'s recorder (its code is the same at `aeecd44`).
+If `layout-config-recreation__GFoCenW` and `pretrain-shard-corruption__tgAfUZG` are resumed with the recorder of `66ac39f` or later, `tb40-sonnet-v4` mixes two recorder versions: those 2 can have `open` lines where the 67 could have had none.
+The corpus manifest would not show it (one `repo_sha`, taken when the manifest is written, and `writes_recorded` only says each trial has a write record), so this amendment is where it is recorded.
+Resuming them with `fd8af06`'s recorder keeps the corpus on one version.
+The next corpus captured with the recorder gets a new `corpus_id`.
