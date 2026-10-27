@@ -3,7 +3,7 @@
 What the Dec 4 paper can claim about how trajectories and checkpoints are captured, the evidence for each claim, and what is still missing.
 Every number here points at the ADR, script, or corpus manifest it comes from, so a sentence in the paper can be traced to data.
 Terms follow `docs/glossary.md`.
-Last updated 2026-10-02 (overnight repair pilot); add to it as evidence changes, and do not delete superseded entries, mark them.
+Last updated 2026-10-26 (ADR-0020, late deltas from background jobs); add to it as evidence changes, and do not delete superseded entries, mark them.
 
 ## Claims and their evidence
 
@@ -103,10 +103,30 @@ Last updated 2026-10-02 (overnight repair pilot); add to it as evidence changes,
 - Every number in the paper should cite a `corpus_id`; manifests in `corpus/manifests/` record the repo commit that produced them.
 - Exp 2 example runs on the development Mac (`docs/experiments/exp2/2026-10-19_example-runs.md`, corpora `exp2-example-v1` and `-v2`): 10 TB 4.0 trials under amd64 emulation, every hook request acked, every chain complete with its final stop state; the store built from the checkpoint images in 9.5 to 15 s per trial on a 2 GB start image, 9.6 MB per five trials.
 
+## Exp 2: what the paper takes from arXiv 2607.09510 (ADR-0016, 2026-10-25)
+
+"Failure as a Process: An Anatomy of CLI Coding Agent Trajectories" (Zhao, Li, Li, Zhao, Barr, Sarro, Ye; arXiv 2607.09510, July 2026): 1,794 hand-annotated Terminal-Bench 2.0 trajectories from Terminus2, OpenHands, and MiniSWE under seven models, 1,184 failures, no state capture, no Claude Code.
+Four things are taken from it, and one is deliberately not.
+
+- **The rule set's provenance and base rates (Table III).** Step 3's behavior flags are one family per post-lock-in behavior: tail probes (checks that cannot change the outcome, 28% of failures), the same-approach family (15%, 29% of wasted steps), churn per path (repairing the wrong problem, 24%, 39% of wasted steps), and unverified completion from ADR-0015 (fabricated success, 26% of failures, onset at lock-in).
+  Cite the table as the source of the rule set in the preregistration, and use its base rates to say what a 56-failure sample should contain (about 8 repeating, 8 fabricating, 13 repairing the wrong problem, 16 running futile checks, 10 giving up).
+- **The per-failure timeline.** `t_err`, `t_lock`, `t_obs` (ADR-0016, item 4; `docs/glossary.md`).
+  Ours are mechanical where theirs are hand labels: `t_err` is the verifier-confirmed decisive call of ADR-0013, `t_lock` a query over deltas and blame, `t_obs` a versioned proxy with a measured agreement against hand labels.
+  Their reference values: `t_err` median step 7, recovery window median 1 step, `t_obs` about 10 steps after `t_err`, 28% of failures never surface.
+  The `t_err` to `t_obs` gap is the number that says how much of a failure is invisible in token space; on `tb40-sonnet-v2`, 195 of 202 failing checks never passed at any checkpoint and there were 0 regressions, so our recovery window is usually zero.
+- **The bound on root-cause detection.** Their Sonnet 4.6 prefix monitor flags locked-in runs at 82% precision with zero median lead time and 28.8% real-time recall at best (18.2% without the task's requirements).
+  This is why the store has no root-cause column and the paper claims none; the one Table II category the store reaches is specification neglect, through the views over paths named in the instruction, and Finding 4 is the evidence that the specification is what makes failures detectable.
+- **Motivation for state over tokens.** Fig. 5 (a `cd` that fails silently, no output for 17 steps, every later write in the wrong directory) and the epistemic share (57.9% overall, 80% for Claude under Terminus2) support the premise that the consequence of an action is in the environment, not the text, and predict that Claude Code failures look like `PckZuoA` in the example runs: well formed, wrong in content.
+- **Not taken: the paper's advice to agents.** "Validate assumptions", "cap recovery effort", and "verify claimed success" are not in the retry prompt (ADR-0016, item 1); each would be a treatment applied to every arm.
+
+Threats specific to this use: their scaffolds, benchmark version, and step definition (one reasoning plus one action) differ from ours (Claude Code, TB 4.0, one tool call per step row), so their numbers are reference points, not a baseline; their dataset link returned 404 on 2026-10-25, so their codebook could not be reused.
+
 ## Threats to validity
 
 - **Filesystem only.** Process and memory state are not captured (ADR-0004). A call that only starts a server, as the agent did with `nohup` in kv-store-grpc, counts as unchanged.
 - **Background writes.** Files written by background processes between hooked calls are attributed to the next measured call.
+  Measured 2026-10-26 on the 40-trial `tb40-detector-off-v1` corpus (Amina Isayeva): 104 claimed writes landed 1 to 18 hooked calls after the claim, none lost (ADR-0020, Context).
+  ADR-0020 re-attributes them from the file's mtime in the layer and keeps the landing step as what the checkpoint proves; report the attribution counts and the agreement with the 104 hand cases.
 - **Clock.** A root agent that rewinds the system clock could evade change-time comparison; we know of no case, but it is possible.
 - **Harness exclusions.** Excluding Claude Code's own paths assumes the agent's task-relevant work never lives there; the agent did read `/tmp/claude-0/.../tasks/*.output` (background-task output) in one trial. Report the sensitivity analysis.
 - **`__pycache__`.** Running Python writes bytecode caches, even under `/usr/local/lib`; they count as changes. State this, and consider reporting change counts with and without them.
