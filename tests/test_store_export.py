@@ -224,10 +224,10 @@ def test_store_derive(store: Path) -> None:
 
 def test_store_derive_refuses_a_store_of_another_schema_version(tmp_path: Path) -> None:
     store = make_store(tmp_path, [make_call_row(1)])
-    as_schema(store, 2)
+    as_schema(store, 3)
     result = CliRunner().invoke(app, ["store", "derive", str(store)])
     assert result.exit_code == 1
-    assert "has schema 2; this code reads 3" in result.output
+    assert "has schema 3; this code reads 4" in result.output
     assert "build it again" in result.output
 
 

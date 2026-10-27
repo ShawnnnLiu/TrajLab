@@ -4,13 +4,15 @@ A trial is built from its dir: `result.json` gives the `trials` row, the enriche
 (`trajlab postprocess` writes it; this module never runs postprocess) gives the `steps` rows and
 the checkpoint records, and the checkpoint images, read through an `ImageProvider`, give the
 `deltas` rows (`trajlab.store.reconcile`). With no provider, the steps are built and the chain is
-reported incomplete because its images were not checked.
+reported incomplete because its images were not checked. The session log gives the `job_notices`
+rows (`trajlab.atif.jobs`), and the write recorder's log, when the trial has one, the `writes`
+rows over the deltas (`trajlab.store.writes`, ADR-0021).
 
-Writes go to `record.duckdb` (trials, steps, deltas) and `heldout.duckdb` (the trial's
-`ChainReport` in `chains`), each in one transaction. The chain row is written first and replaces
-any earlier one; the record transaction is the commit point. A trial already in `trials` is
-skipped and nothing is written, so building a trial again is safe, including after a build
-that stopped between the two files; the exception is a trial built without images, which a
+Writes go to `record.duckdb` (trials, steps, deltas, job_notices, writes) and `heldout.duckdb`
+(the trial's `ChainReport` in `chains`), each in one transaction. The chain row is written first
+and replaces any earlier one; the record transaction is the commit point. A trial already in
+`trials` is skipped and nothing is written, so building a trial again is safe, including after a
+build that stopped between the two files; the exception is a trial built without images, which a
 build with images rebuilds (once its deltas are made, its old rows are deleted in their own
 transaction, so a failed read of the images keeps them, and a stop at any point leaves the
 trial either whole or absent).
@@ -49,6 +51,7 @@ from trajlab.contracts import (
     StepRow,
     StoreMeta,
     TrialRow,
+    WriteRow,
 )
 from trajlab.store.derive import derived_id
 from trajlab.store.exclusions import EXCLUDED_PATTERNS
@@ -62,6 +65,7 @@ from trajlab.store.schema import (
     record_path,
 )
 from trajlab.store.steps import TrialSteps, build_steps
+from trajlab.store.writes import read_write_events, write_rows
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +93,7 @@ class BuildResult:
     chain: ChainReport
     skipped_existing: bool
     job_notices: tuple[JobNoticeRow, ...] = ()
+    writes: tuple[WriteRow, ...] = ()
 
 
 def start_image(trial_dir: Path) -> str | None:
@@ -237,6 +242,9 @@ def _stored(store_dir: Path, trial_id: UUID) -> BuildResult | None:
         steps = _select(con, "steps", StepRow, trial_id, "step_idx")
         deltas = _select(con, "deltas", DeltaRow, trial_id, "step_idx, path")
         notices = _select(con, "job_notices", JobNoticeRow, trial_id, "noticed_at, task_id")
+        writes = _select(
+            con, "writes", WriteRow, trial_id, "step_idx, path, writer_step NULLS LAST"
+        )
     with connect(heldout_path(store_dir), read_only=True) as con:
         chains = _select(con, "chains", ChainReport, trial_id, "trial_id")
     if len(chains) != 1:
@@ -248,6 +256,7 @@ def _stored(store_dir: Path, trial_id: UUID) -> BuildResult | None:
         chain=chains[0],
         skipped_existing=True,
         job_notices=notices,
+        writes=writes,
     )
 
 
@@ -353,13 +362,14 @@ def build_trial(
         work_dir=work_dir,
     )
     report = chain_report(result.id, steps, chain)
+    writes = write_rows(result.id, steps.rows, deltas, read_write_events(trial_dir))
 
     if stored is not None:
         # Only now that its deltas are made, so a rebuild that fails reading the images keeps
         # the steps built before.
         logger.info("%s: rebuilding trial %s, built before without images", trial_dir, result.id)
         with connect(record_path(store_dir), read_only=False) as con, _transaction(con):
-            for table in ("job_notices", "deltas", "steps", "trials"):
+            for table in ("writes", "job_notices", "deltas", "steps", "trials"):
                 con.execute(f"DELETE FROM {table} WHERE trial_id = ?", [result.id])
 
     with connect(heldout_path(store_dir), read_only=False) as con, _transaction(con):
@@ -370,12 +380,14 @@ def build_trial(
         insert_rows(con, "steps", steps.rows)
         insert_rows(con, "deltas", deltas)
         insert_rows(con, "job_notices", notices)
+        insert_rows(con, "writes", writes)
     logger.info(
-        "%s: %d steps, %d deltas, %d job notices, chain %s",
+        "%s: %d steps, %d deltas, %d job notices, %d write rows, chain %s",
         trial_dir,
         len(steps.rows),
         len(deltas),
         len(notices),
+        len(writes),
         "complete" if report.complete else f"incomplete ({'; '.join(report.reasons)})",
     )
     return BuildResult(
@@ -385,4 +397,5 @@ def build_trial(
         chain=report,
         skipped_existing=False,
         job_notices=notices,
+        writes=writes,
     )

@@ -21,8 +21,10 @@ And ADR-0020's attribution of a delta to the call that caused it:
 
 - `step_jobs`, per tool call: whether Claude Code moved it to the background (its task id,
   when its job ended) and whether its command launched a job by hand (`&`, `nohup`);
-- `delta_attribution`, per delta row: `attribution` and the causal step, from the row's write
-  time (`deltas.mtime_after`) against the landing call's window and the open jobs' windows.
+- `delta_attribution`, per delta row: `attribution` and the causal step, from the processes the
+  capture saw write the path (`writes`, ADR-0021) when it saw any that a call started, else
+  from the row's write time (`deltas.mtime_after`) against the landing call's window and the
+  open jobs' windows (ADR-0020).
 
 The predicates and thresholds below are candidates until the preregistration freezes them
 (ADR-0016, item 5). Changing any of them changes `derived_id()`; a store built under another id
@@ -34,7 +36,7 @@ from dataclasses import dataclass
 
 from trajlab.contracts import DerivedSpec
 
-DERIVE_VERSION = 2
+DERIVE_VERSION = 3
 
 # Files a tool writes for itself, not the agent's work: Python's bytecode and pytest's cache.
 CACHE_PATH = r"/__pycache__/|\.pyc$|/\.pytest_cache/"
@@ -366,6 +368,11 @@ STEP_JOBS = f"""
 #   - untrusted_mtime: no launcher, m before the trial began (a preserved timestamp);
 #   - unknown: anything else, a delete included (its time is the parent's, which the store
 #     does not keep).
+# Before all of these, the record of writing processes (ADR-0021): when the processes of
+# exactly one call wrote the path in the row's checkpoint interval, `recorded`, and that call is
+# the causal step; of several calls, `multi_writer`, with the landing step as the causal step
+# and the calls listed. The rule above stays for rows the record does not settle, and its answer
+# is kept beside the record's (`rule_attribution`, `rule_causal_step`) for their agreement.
 DELTA_ATTRIBUTION = f"""
     WITH jobs AS (
         SELECT j.trial_id, j.step_idx, s.t_start AS launched_at, j.backgrounded, j.job_end,
@@ -462,7 +469,7 @@ DELTA_ATTRIBUTION = f"""
             END AS attribution
         FROM judged j
     ),
-    attributed AS (
+    ruled AS (
         SELECT
             n.*,
             CASE n.attribution
@@ -471,8 +478,32 @@ DELTA_ATTRIBUTION = f"""
                 WHEN 'background_by_path' THEN n.launcher
                 WHEN 'background_untracked' THEN n.launcher
                 WHEN 'untrusted_mtime' THEN CASE WHEN n.any_job_before THEN NULL ELSE n.step_idx END
-            END AS launched_by_step
+            END AS rule_step
         FROM named n
+    ),
+    recorded AS (
+        SELECT trial_id, step_idx, path,
+               list_sort(list_distinct(list(writer_step))) AS writer_steps
+        FROM writes
+        GROUP BY trial_id, step_idx, path
+    ),
+    attributed AS (
+        SELECT
+            r.*,
+            w.writer_steps,
+            CASE
+                WHEN len(w.writer_steps) = 1 THEN 'recorded'
+                WHEN len(w.writer_steps) > 1 THEN 'multi_writer'
+                ELSE r.attribution
+            END AS final_attribution,
+            CASE
+                WHEN len(w.writer_steps) = 1 THEN w.writer_steps[1]
+                WHEN len(w.writer_steps) > 1 THEN NULL
+                ELSE r.rule_step
+            END AS launched_by_step
+        FROM ruled r
+        LEFT JOIN recorded w ON w.trial_id = r.trial_id AND w.step_idx = r.step_idx
+            AND w.path = r.path
     )
     SELECT
         a.trial_id,
@@ -481,10 +512,13 @@ DELTA_ATTRIBUTION = f"""
         a.write_at,
         a.in_landing_window,
         a.launcher AS launcher_step,
-        a.attribution,
+        a.final_attribution AS attribution,
         a.launched_by_step,
         coalesce(a.launched_by_step, a.step_idx) AS causal_step,
-        coalesce(a.launched_by_step < a.step_idx, false) AS is_late
+        coalesce(a.launched_by_step < a.step_idx, false) AS is_late,
+        a.writer_steps,
+        a.attribution AS rule_attribution,
+        coalesce(a.rule_step, a.step_idx) AS rule_causal_step
     FROM attributed a"""
 
 
@@ -640,7 +674,8 @@ VIEWS: tuple[View, ...] = (
     ),
     View(
         "delta_attribution",
-        "One row per delta row: the call that made the change, by the write time against the "
+        "One row per delta row: the call that made the change, by the processes the capture "
+        "saw write the path (ADR-0021) when they settle it, else by the write time against the "
         "landing call's window and the jobs open at the time (ADR-0020).",
         _columns(
             "delta_attribution",
@@ -662,16 +697,18 @@ VIEWS: tuple[View, ...] = (
             ),
             (
                 "attribution",
-                "`foreground` (the landing call wrote it), `background` (the launcher's job "
-                "did; `background_by_path` when a job naming the file overrode a later one, "
-                "`background_untracked` for a hand-launched job), `contested` (the landing "
-                "call or the launcher's job), `untrusted_mtime` (a time before the attempt "
-                "began), or `unknown`.",
+                "`recorded` (the processes of one call wrote it, as the capture saw: "
+                "writes.writer_step), `multi_writer` (those of several calls did, listed in "
+                "writer_steps), else by times: `foreground` (the landing call wrote it), "
+                "`background` (the launcher's job did; `background_by_path` when a job naming "
+                "the file overrode a later one, `background_untracked` for a hand-launched job), "
+                "`contested` (the landing call or the launcher's job), `untrusted_mtime` (a time "
+                "before the attempt began), or `unknown`.",
             ),
             (
                 "launched_by_step",
                 "The step that caused the change when the attribution names one; null for "
-                "`contested` and `unknown`.",
+                "`multi_writer`, `contested`, and `unknown`.",
             ),
             (
                 "causal_step",
@@ -679,6 +716,23 @@ VIEWS: tuple[View, ...] = (
                 "timeline should read as the step that made the change.",
             ),
             ("is_late", "The causal step is earlier than the landing step."),
+            (
+                "writer_steps",
+                "The steps whose processes the capture saw write the path in this row's "
+                "checkpoint interval (writes.writer_step), in order; empty when only processes "
+                "of no call did; null when it saw no write, or the attempt was captured without "
+                "the record.",
+            ),
+            (
+                "rule_attribution",
+                "What the write time alone says (the cases after `multi_writer`), whatever the "
+                "record says.",
+            ),
+            (
+                "rule_causal_step",
+                "The causal step by the write time alone: the step rule_attribution names, else "
+                "the landing step.",
+            ),
         ),
         DELTA_ATTRIBUTION,
     ),

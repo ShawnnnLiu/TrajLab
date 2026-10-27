@@ -89,6 +89,13 @@ class DockerCommitBackend(SnapshotBackend):
             )
         return ids[0]
 
+    def init_pid(self, container: str) -> int:
+        """The host pid of the container's init process (the write recorder reads its mounts)."""
+        raw = self._docker("container", "inspect", "--format", "{{.State.Pid}}", container)
+        if not raw.isdigit() or raw == "0":
+            raise BackendError(f"container {container} has no running init process ({raw!r})")
+        return int(raw)
+
     def compose_labels(self, container: str) -> list[str]:
         """The container's Compose label keys, which its images must not inherit. Cached."""
         if container not in self._compose_labels:

@@ -1,4 +1,5 @@
 import json
+import os
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -73,6 +74,14 @@ def test_run_refuses_without_starting_harbor(tmp_path: Path) -> None:
     result = CliRunner().invoke(app, ["run", str(config), "--manifests-dir", str(tmp_path)])
     assert result.exit_code == 1
     assert "new job_name" in result.output
+
+
+def test_record_writes_needs_root(tmp_path: Path) -> None:
+    if os.geteuid() == 0:
+        pytest.skip("run as root")
+    result = CliRunner().invoke(app, ["record-writes", str(tmp_path)])
+    assert result.exit_code == 1
+    assert "needs root" in result.output
 
 
 def test_watch_rejects_unknown_backend(tmp_path: Path) -> None:

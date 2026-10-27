@@ -1,0 +1,30 @@
+{
+    "job_name": "pretrain-writes-v1",
+    "jobs_dir": "corpus/jobs",
+    "n_attempts": 1,
+    "n_concurrent_trials": 1,
+    "agent_timeout_multiplier": 0.5,
+    "agents": [
+        {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+                "reasoning_effort": "medium",
+                "version": "2.1.278",
+                "config": "configs/claude-code/settings.hooks.json"
+            }
+        }
+    ],
+    "datasets": [
+        {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "4.0.0",
+            "task_names": [
+                "terminal-bench/pretrain-shard-corruption"
+            ]
+        }
+    ],
+    "environment": {
+        "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+    }
+}

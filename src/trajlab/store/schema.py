@@ -2,7 +2,8 @@
 
 A store is a directory:
 
-    <store>/record.duckdb    trials, steps, deltas, store_meta, and the derived views
+    <store>/record.duckdb    trials, steps, deltas, job_notices, writes, store_meta, and the
+                             derived views
                              (trajlab.store.derive): what an agent may read
     <store>/heldout.duckdb   checks, faults, blame, chains, store_meta: never shown to an agent
     <store>/blobs/<sha256>   later versions of changed rows without a hunk (`blob_ref`)
@@ -107,6 +108,18 @@ RECORD_TABLES: dict[str, str] = {
             status VARCHAR NOT NULL,
             noticed_at TIMESTAMPTZ NOT NULL,
             PRIMARY KEY (trial_id, task_id)
+        )""",
+    "writes": """
+        CREATE TABLE writes (
+            trial_id UUID NOT NULL,
+            step_idx INTEGER NOT NULL,
+            path VARCHAR NOT NULL,
+            writer_step INTEGER,
+            mapped_by VARCHAR,
+            events INTEGER NOT NULL,
+            ops VARCHAR[] NOT NULL,
+            first_at TIMESTAMPTZ NOT NULL,
+            last_at TIMESTAMPTZ NOT NULL
         )""",
 }
 
