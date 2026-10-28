@@ -4,10 +4,10 @@ attempt into the chain's store (record arms) and start the next one.
 
 `chain_state` reads what a chain needs next from its two logs alone, so the loop resumes from
 disk: a chain is done (passed, or N attempts counted), stopped (an ingest failed, the harness
-failed one attempt `max_reruns` times, an unclassified exception waits for a person, or the
-prompt would leak), or needs its last attempt ingested, or its next attempt launched. An
-attempt the harness failed (`infra`) or that left no result (`lost`) is not an attempt: it is
-run again under a new job name, `-r<n>`, and its job dir is kept.
+failed one attempt `max_reruns` times, usage limits aside, an unclassified exception waits for
+a person, or the prompt would leak), or needs its last attempt ingested, or its next attempt
+launched. An attempt the harness failed (`infra`) or that left no result (`lost`) is not an
+attempt: it is run again under a new job name, `-r<n>`, and its job dir is kept.
 
 `Exp2Runner` runs the chains `max_running` attempts at a time. Each attempt is one `trajlab run`
 subprocess, so it gets the same pins, watcher check, and manifest as a corpus trial; the loop
@@ -129,10 +129,12 @@ def chain_state(
             reason=f"{tries[-1].exception_type} is unclassified; a person decides "
             "(ADR-0012 item 4)",
         )
-    if len(tries) >= max_reruns:
-        return ChainState(
-            "stopped", upcoming, reason=f"the harness failed attempt {upcoming} {len(tries)} times"
-        )
+    # A usage limit is the subscription's, not the harness's: it reruns without limit, since the
+    # same chains are first in line each time launches resume.
+    harness = [a for a in tries if a.exception_type != USAGE_LIMIT_EXCEPTION]
+    if len(harness) >= max_reruns:
+        reason = f"the harness failed attempt {upcoming} {len(harness)} times"
+        return ChainState("stopped", upcoming, reason=reason)
     parent = counted[-1].trial_id if counted else root_trial_id
     return ChainState("launch", upcoming, rerun=len(tries), parent_trial_id=parent)
 

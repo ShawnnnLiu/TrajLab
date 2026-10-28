@@ -77,6 +77,13 @@ def test_harness_failures_are_run_again_up_to_max_reruns() -> None:
     assert state([unclassified], rerun_unclassified=True).kind == "launch"
 
 
+def test_usage_limits_do_not_use_up_the_reruns() -> None:
+    limited = attempt(1, outcome="infra", exception_type="ApiUsageLimitError")
+    assert state([limited] * 5) == ChainState("launch", 1, rerun=5, parent_trial_id=ROOT)
+    infra = attempt(1, outcome="infra")
+    assert state([limited, infra, limited, infra, infra]).kind == "stopped"
+
+
 # -- the runner, with a fake `trajlab run` -----------------------------------------------------
 
 
