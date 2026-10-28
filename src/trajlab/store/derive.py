@@ -17,6 +17,13 @@ The views carry ADR-0016's three layers (item 5):
 - `trial_summary`, occurrence views per trial: counts, the first error step, the last mutating
   step, and `unverified_completion`.
 
+And ADR-0020's attribution of a delta to the call that caused it:
+
+- `step_jobs`, per tool call: whether Claude Code moved it to the background (its task id,
+  when its job ended) and whether its command launched a job by hand (`&`, `nohup`);
+- `delta_attribution`, per delta row: `attribution` and the causal step, from the row's write
+  time (`deltas.mtime_after`) against the landing call's window and the open jobs' windows.
+
 The predicates and thresholds below are candidates until the preregistration freezes them
 (ADR-0016, item 5). Changing any of them changes `derived_id()`; a store built under another id
 is refused by `create_store` until `trajlab store derive` replaces its views.
@@ -27,7 +34,7 @@ from dataclasses import dataclass
 
 from trajlab.contracts import DerivedSpec
 
-DERIVE_VERSION = 1
+DERIVE_VERSION = 2
 
 # Files a tool writes for itself, not the agent's work: Python's bytecode and pytest's cache.
 CACHE_PATH = r"/__pycache__/|\.pyc$|/\.pytest_cache/"
@@ -76,13 +83,28 @@ IDLE_SECONDS = 120
 # non-blank lines are lines of the earlier script, and it has at least this many.
 VARIANT_OVERLAP = 0.5
 VARIANT_MIN_LINES = 5
+# How Claude Code 2.1.278 answers a Bash call it moved to the background (ADR-0020): on the
+# foreground timeout, or when the model asked for it; group 1 is the task id.
+BACKGROUNDED = r"(?:moved to the background \(ID: |running in background with ID: )([a-z0-9]+)"
+# A job launched by hand, in the shell's own text (steps.command_shell): `&` as a separator
+# (not `&&`, not the redirects `>&` and `&>`, not `|&`), or nohup, setsid, disown.
+JOB_LAUNCH = r"(^|[^&>|])&([^&>]|$)|\bnohup\b|\bsetsid\b|\bdisown\b"
+# A redirect target in a command: `> name`, `>> dir/name` (`2>&1` is none), and, in its
+# basename, what the shell expands: `$s` and `${s}` stand for any text. So `> log_$s.txt`
+# redirects into `log_11.txt`.
+REDIRECT_TARGET = r">>?\s*([^\s;&|)]+)"
+SHELL_VARIABLE = r"\$\w+|\$\{[^}]*\}"
+REGEX_METACHAR = r"([.^$|()\[\]{}*+?\\])"
+_WILDCARD = "VARIABLEWILDCARD"
+# Tools whose call writes the file it names, with no command text to read.
+WRITE_TOOLS = ("Write", "Edit", "MultiEdit", "NotebookEdit")
 
 
 def _literal(text: str) -> str:
     return "'" + text.replace("'", "''") + "'"
 
 
-CACHE, SCRIPT, PROMPT, ERROR, TEST, SUCCESS, NOT_DONE_SQL = (
+CACHE, SCRIPT, PROMPT, ERROR, TEST, SUCCESS, NOT_DONE_SQL, BACKGROUNDED_SQL, LAUNCH = (
     _literal(pattern)
     for pattern in (
         CACHE_PATH,
@@ -92,8 +114,28 @@ CACHE, SCRIPT, PROMPT, ERROR, TEST, SUCCESS, NOT_DONE_SQL = (
         TEST_COMMAND,
         SUCCESS_CLAIM,
         NOT_DONE,
+        BACKGROUNDED,
+        JOB_LAUNCH,
     )
 )
+WRITE_TOOLS_SQL = ", ".join(_literal(tool) for tool in WRITE_TOOLS)
+
+
+def _redirects_into(command: str, base: str) -> str:
+    """SQL: whether a redirect target of `command` has `base` as its basename after expansion.
+
+    Each target's basename becomes a pattern: a shell variable stands for any text, every
+    other character for itself (metacharacters escaped), anchored at both ends.
+    """
+    target_base = "regexp_extract(t, '[^/]+$')"
+    expanded = f"regexp_replace({target_base}, {_literal(SHELL_VARIABLE)}, '{_WILDCARD}', 'g')"
+    escaped = f"regexp_replace({expanded}, {_literal(REGEX_METACHAR)}, '" + "\\\\\\1" + "', 'g')"
+    pattern = f"'^' || replace({escaped}, '{_WILDCARD}', '.*') || '$'"
+    return (
+        f"len(list_filter(regexp_extract_all({command}, {_literal(REDIRECT_TARGET)}, 1), "
+        f"t -> regexp_matches({base}, {pattern}))) > 0"
+    )
+
 
 # Scripts the agent added, each with its distinct non-blank lines as first written (the `+`
 # lines of an add's hunk), and the earlier script each is a variant of: the one sharing the
@@ -263,6 +305,188 @@ TRIAL_SUMMARY = f"""
     LEFT JOIN paths p ON p.trial_id = t.trial_id
     LEFT JOIN final f ON f.trial_id = t.trial_id"""
 
+# A backgrounded call's job runs from its t_start to the notice of its end, or to the trial's
+# last recorded instant when no notice came (the job outlived the agent).
+STEP_JOBS = f"""
+    WITH bounds AS (
+        SELECT trial_id,
+               coalesce(
+                   greatest(max(coalesce(t_end, t_start)), max(checkpoint_at)),
+                   max(coalesce(t_end, t_start)),
+                   max(checkpoint_at)
+               ) AS trial_end
+        FROM steps
+        GROUP BY trial_id
+    ),
+    calls AS (
+        SELECT
+            s.trial_id,
+            s.step_idx,
+            s.t_start,
+            s.tool = 'Bash' AND regexp_matches(coalesce(s.output, ''), {BACKGROUNDED_SQL})
+                AS backgrounded,
+            s.tool = 'Bash' AND regexp_matches(coalesce(s.command_shell, ''), {LAUNCH})
+                AS launches_job,
+            n.status,
+            n.noticed_at
+        FROM steps s
+        LEFT JOIN job_notices n ON n.trial_id = s.trial_id AND n.tool_call_id = s.tool_call_id
+        WHERE s.tool IS NOT NULL AND s.tool NOT IN ('Stop', 'StopFailure')
+    )
+    SELECT
+        c.trial_id,
+        c.step_idx,
+        c.backgrounded,
+        CASE WHEN c.backgrounded
+             THEN regexp_extract(s.output, {BACKGROUNDED_SQL}, 1) END AS task_id,
+        CASE WHEN c.backgrounded THEN c.status END AS job_status,
+        CASE WHEN c.backgrounded THEN coalesce(c.noticed_at, b.trial_end) END AS job_end,
+        CASE WHEN c.backgrounded AND c.noticed_at IS NOT NULL THEN (
+            SELECT min(x.step_idx) FROM steps x
+            WHERE x.trial_id = c.trial_id AND x.t_start >= c.noticed_at
+        ) END AS background_done_step,
+        c.launches_job
+    FROM calls c
+    JOIN steps s ON s.trial_id = c.trial_id AND s.step_idx = c.step_idx
+    JOIN bounds b ON b.trial_id = c.trial_id"""
+
+# One ordered rule, no judgment call (ADR-0020 as amended 2026-10-27). For a delta row landing
+# at step k with write time m:
+#   - the landing window is [k.t_start, k.checkpoint_at] (the commit, 3-4 s past t_end);
+#   - the candidate launchers are the earlier calls whose job was open at m: a backgrounded
+#     call whose window holds m, or a hand-launched job started before m (no end is known);
+#   - the best launcher is the one that redirects into the file (a shell variable in the
+#     target standing for anything), else names it, else the latest;
+#   - foreground: m in the landing window and no launcher;
+#   - background / background_by_path / background_untracked: a launcher, and either m is
+#     outside the landing window or the launcher redirects into the file and the landing call
+#     writes nothing it names (by_path: the naming tie-break overrode the latest launcher;
+#     untracked: a hand-launched job);
+#   - contested: a launcher and m in the landing window: either could have written it;
+#   - untrusted_mtime: no launcher, m before the trial began (a preserved timestamp);
+#   - unknown: anything else, a delete included (its time is the parent's, which the store
+#     does not keep).
+DELTA_ATTRIBUTION = f"""
+    WITH jobs AS (
+        SELECT j.trial_id, j.step_idx, s.t_start AS launched_at, j.backgrounded, j.job_end,
+               coalesce(s.args_json, '') AS command
+        FROM step_jobs j
+        JOIN steps s ON s.trial_id = j.trial_id AND s.step_idx = j.step_idx
+        WHERE j.backgrounded OR j.launches_job
+    ),
+    bounds AS (
+        SELECT trial_id, min(t_start) AS trial_start FROM steps GROUP BY trial_id
+    ),
+    landing AS (
+        SELECT
+            d.trial_id,
+            d.step_idx,
+            d.path,
+            CASE WHEN d.op = 'delete' THEN NULL ELSE d.mtime_after END AS write_at,
+            regexp_extract(d.path, '[^/]+$') AS base,
+            s.t_start AS k_start,
+            coalesce(s.checkpoint_at, s.t_end, s.t_start) AS k_end,
+            s.tool IN ({WRITE_TOOLS_SQL})
+                OR contains(coalesce(s.command_shell, ''), '>')
+                OR position(regexp_extract(d.path, '[^/]+$') IN coalesce(s.args_json, '')) > 0
+                AS k_writes,
+            b.trial_start,
+            EXISTS (
+                SELECT 1 FROM jobs j WHERE j.trial_id = d.trial_id AND j.step_idx < d.step_idx
+            ) AS any_job_before
+        FROM deltas d
+        JOIN steps s ON s.trial_id = d.trial_id AND s.step_idx = d.step_idx
+        JOIN bounds b ON b.trial_id = d.trial_id
+    ),
+    candidates AS (
+        SELECT
+            l.trial_id,
+            l.step_idx,
+            l.path,
+            j.step_idx AS launcher,
+            j.backgrounded,
+            position(l.base IN j.command) > 0 AS names,
+            {_redirects_into("j.command", "l.base")} AS redirects
+        FROM landing l
+        JOIN jobs j ON j.trial_id = l.trial_id AND j.step_idx < l.step_idx
+        WHERE l.write_at IS NOT NULL
+          AND j.launched_at <= l.write_at + INTERVAL 1 SECOND
+          AND (j.job_end IS NULL OR l.write_at <= j.job_end)
+    ),
+    ranked AS (
+        SELECT
+            c.*,
+            row_number() OVER (
+                PARTITION BY c.trial_id, c.step_idx, c.path
+                ORDER BY c.redirects DESC, c.names DESC, c.launcher DESC
+            ) AS rank,
+            max(c.launcher) OVER (PARTITION BY c.trial_id, c.step_idx, c.path) AS latest
+        FROM candidates c
+    ),
+    judged AS (
+        SELECT
+            l.trial_id,
+            l.step_idx,
+            l.path,
+            l.write_at,
+            l.write_at IS NOT NULL AND l.k_start IS NOT NULL
+                AND l.write_at + INTERVAL 1 SECOND > l.k_start AND l.write_at <= l.k_end
+                AS in_landing_window,
+            r.launcher,
+            r.backgrounded,
+            r.redirects,
+            r.latest,
+            l.k_writes,
+            l.trial_start,
+            l.any_job_before
+        FROM landing l
+        LEFT JOIN ranked r ON r.trial_id = l.trial_id AND r.step_idx = l.step_idx
+            AND r.path = l.path AND r.rank = 1
+    ),
+    named AS (
+        SELECT
+            j.*,
+            CASE
+                WHEN j.write_at IS NULL THEN 'unknown'
+                WHEN j.launcher IS NULL AND j.in_landing_window THEN 'foreground'
+                WHEN j.launcher IS NOT NULL
+                     AND (NOT j.in_landing_window OR (j.redirects AND NOT j.k_writes)) THEN
+                    CASE
+                        WHEN NOT j.backgrounded THEN 'background_untracked'
+                        WHEN j.launcher = j.latest THEN 'background'
+                        ELSE 'background_by_path'
+                    END
+                WHEN j.launcher IS NOT NULL THEN 'contested'
+                WHEN j.write_at < j.trial_start THEN 'untrusted_mtime'
+                ELSE 'unknown'
+            END AS attribution
+        FROM judged j
+    ),
+    attributed AS (
+        SELECT
+            n.*,
+            CASE n.attribution
+                WHEN 'foreground' THEN n.step_idx
+                WHEN 'background' THEN n.launcher
+                WHEN 'background_by_path' THEN n.launcher
+                WHEN 'background_untracked' THEN n.launcher
+                WHEN 'untrusted_mtime' THEN CASE WHEN n.any_job_before THEN NULL ELSE n.step_idx END
+            END AS launched_by_step
+        FROM named n
+    )
+    SELECT
+        a.trial_id,
+        a.step_idx,
+        a.path,
+        a.write_at,
+        a.in_landing_window,
+        a.launcher AS launcher_step,
+        a.attribution,
+        a.launched_by_step,
+        coalesce(a.launched_by_step, a.step_idx) AS causal_step,
+        coalesce(a.launched_by_step < a.step_idx, false) AS is_late
+    FROM attributed a"""
+
 
 @dataclass(frozen=True)
 class View:
@@ -378,6 +602,85 @@ VIEWS: tuple[View, ...] = (
             ),
         ),
         TRIAL_SUMMARY,
+    ),
+    View(
+        "step_jobs",
+        "One row per tool call: whether the harness moved it to the background and when its job "
+        "ended, and whether its command launched a job by hand (ADR-0020).",
+        _columns(
+            "step_jobs",
+            _TRIAL,
+            _STEP,
+            (
+                "backgrounded",
+                "A Bash call the harness moved to the background: its output is a task id and "
+                "its t_end is the moment of the move, not the job's end.",
+            ),
+            ("task_id", "The harness's id for that job; null unless backgrounded."),
+            (
+                "job_status",
+                "`completed` or `failed` from the job's completion notice; null without one.",
+            ),
+            (
+                "job_end",
+                "When the job ended: the notice's time, or the attempt's last recorded instant "
+                "when no notice came; null unless backgrounded.",
+            ),
+            (
+                "background_done_step",
+                "The first step that began after the job ended; null without a notice.",
+            ),
+            (
+                "launches_job",
+                "A Bash call whose shell text starts a job with `&`, nohup, setsid, or disown: "
+                "a process that may write after the call returns, with no end on record.",
+            ),
+        ),
+        STEP_JOBS,
+    ),
+    View(
+        "delta_attribution",
+        "One row per delta row: the call that made the change, by the write time against the "
+        "landing call's window and the jobs open at the time (ADR-0020).",
+        _columns(
+            "delta_attribution",
+            _TRIAL,
+            _STEP,
+            _PATH,
+            (
+                "write_at",
+                "When the later version was written (deltas.mtime_after); null for a delete.",
+            ),
+            (
+                "in_landing_window",
+                "The write time lies between the landing call's start and its checkpoint.",
+            ),
+            (
+                "launcher_step",
+                "The earlier call whose job was open at the write time and best fits the path: "
+                "one that redirects into the file, else names it, else the latest; null if none.",
+            ),
+            (
+                "attribution",
+                "`foreground` (the landing call wrote it), `background` (the launcher's job "
+                "did; `background_by_path` when a job naming the file overrode a later one, "
+                "`background_untracked` for a hand-launched job), `contested` (the landing "
+                "call or the launcher's job), `untrusted_mtime` (a time before the attempt "
+                "began), or `unknown`.",
+            ),
+            (
+                "launched_by_step",
+                "The step that caused the change when the attribution names one; null for "
+                "`contested` and `unknown`.",
+            ),
+            (
+                "causal_step",
+                "launched_by_step, else the landing step: what the derived views and the "
+                "timeline should read as the step that made the change.",
+            ),
+            ("is_late", "The causal step is earlier than the landing step."),
+        ),
+        DELTA_ATTRIBUTION,
     ),
 )
 

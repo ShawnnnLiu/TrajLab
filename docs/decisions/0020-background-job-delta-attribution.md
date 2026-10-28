@@ -102,3 +102,66 @@ Harbor applies the job's declarative env (`--ae`) after it sets its own two vari
 - What the paper must say: a checkpoint proves presence after a call, and cause is inferred by this rule with a stated agreement; the "Background writes" threat becomes a measured number; the record arms' timeline carries both steps.
 - Clock: the container shares the host kernel clock on Linux, so mtimes compare with the JSONL timestamps there; on the Mac's Docker VM the offset is measured once before the rule is trusted on Mac-built stores.
 - Open: the two text patterns; whether `background_by_path` should match the full path rather than the basename; whether a job window with no completion notice should end at the stop record's `t_start` or at the stop checkpoint's `captured_at`; how `background_untracked` behaves on a corpus without process snapshots (it still attributes when exactly one hand-launched job is open).
+
+## Amendment (2026-10-27): validation on `tb40-sonnet-v3`, and the rule as implemented
+
+### What was measured
+
+The rule above was replayed before implementing it, on the 10 trials of `tb40-sonnet-v3` (69 first attempts, captured 2026-10-26 on the Linux server) whose steps hold a backgrounded call, with each delta row's write time read from the checkpoint images' top layers (`TarInfo.mtime`, whole seconds) and joined to the schema-2 store.
+Corpus-wide, 15 of the 69 trials (11 of the 57 failures) ran a job past a call's return: 10 through Claude Code's timeout move (32 calls) and 14 by hand (`&`, `nohup`); the problem is concentrated in `layout-config-recreation`, `layout-config-recreation2`, `pretrain-shard-corruption`, and `sound-change-cascade`.
+In the other 54 trials no process outlived its call, so the landing step is the causal step.
+
+The two text patterns, fixed here:
+
+- A backgrounded call's `steps.output` begins `Command did not complete within its 120s timeout and was moved to the background (ID: <task id>)` (`run_in_background` gives `Command running in background with ID: <task id>`; none in this corpus).
+- The completion notice is a `queue-operation` event in the native session JSONL, `operation` `enqueue`, whose `content` is `<task-notification>` text carrying `<task-id>`, `<tool-use-id>` (the call's `tool_call_id`), and `<status>` (`completed` or `failed`).
+  No user step ever carries it: every notice in the corpus was removed again as `absorbed_mid_turn` or dequeued, so `background_done_step` as worded in item 2 does not exist in the ATIF trajectory.
+  The enqueue event's own timestamp is the job's end, within Claude Code's polling, and is what the job window ends at.
+
+Replay of the seven cases over 23,064 delta rows of the 10 trials:
+
+| Attribution | Rows |
+|---|---|
+| `foreground` | 20,728 |
+| `background` | 826 |
+| `background_untracked` | 52 |
+| `unknown` | 1,458 |
+| `ambiguous` | 0 |
+
+878 late deltas, with lags of 1 to 37 calls (the 40-trial corpus's maximum of 18 does not bound this one), most of them Chromium profile files written by headless browsers that background scans spawned.
+
+Where the rule is right: `layout-config-recreation2__bBNCaCw`'s deliverable `/app/output/config.json` landed at step 54 and the rule returns step 53, the backgrounded refine job; `sound-change-cascade__AjkhsMS`'s `/app/rules_greedy.json` landed at step 12 and the rule returns the backgrounded step 6.
+
+Where it is wrong, three ways:
+
+1. **Case 1 fires on a background writer.** `pretrain-shard-corruption__XK8w3KT` step 97 runs `nohup python climb2.py ... > log_$s.txt &` eight times; the logs get a line every few seconds; steps 98 and 100 are `sleep 115; tail -qn1 /tmp/w/log_1[1-8].txt`. At each commit the logs' times lie inside the sleeping call's own window, so case 1 says `foreground` of step 98 and 100: 16 rows confidently wrong, and 3 more at the stop record. The same shape is in `pretrain-shard-corruption__2pVLuf4` (steps 104, 107), `pretrain-shard-corruption__q34Z4ZX` (54, 66, 67), `layout-config-recreation__dzr9cbd` (64, 100), and `layout-config-recreation__VUc3qgg` (74): about 60 rows whose landing call is `sleep` and `cat` or `tail`, 1,324 non-cache rows over 11 trials by the looser count of rows landing on such calls.
+2. **Case 5 gives up on two hand-launched jobs.** 1,458 `unknown` rows, 720 in `dzr9cbd` and 730 in `VUc3qgg`, where several scans ran at once. Taking the latest hand-launched call before the write resolves 1,452 of them, and was right in every case checked by hand (`VUc3qgg` 73 for the rows landing at 74; `q34Z4ZX` 57 for 59 and 82 for 90; `AjkhsMS` 17 for 19).
+3. **Case 2's window absorbs other jobs' writes.** Windows run to 1,404 s. In `dzr9cbd`, `/tmp/g8.log` is attributed to the backgrounded step 160 although step 188 launched `g8.py` by hand into it, because case 2 is tested before case 5.
+
+A detail the replay also settled: layer mtimes are whole seconds, and a commit lands 3 to 4 s after `t_end`, so a call's own last write can carry a time past `t_end` and fall out of case 1 as worded.
+
+### Decision, amended
+
+Items 1 to 3 are replaced by what landed on `main` with this amendment; items 0, 4 to 7 stand, with item 4's consumer change deferred as noted.
+
+1. **Schema version 3.** `deltas` gains `mtime_before` and `mtime_after` (aware UTC, whole seconds, from the tar entries; `Entry.mtime` in `trajlab.store.layers`, never compared). `steps` gains `checkpoint_at`, when the image named by `checkpoint_seq` was committed, and `command_shell`, a Bash command with heredoc bodies and inline `-c` programs cut out (`trajlab.store.steps.shell_text`), since an `&` inside either is the program's, not a launch, and RE2 cannot strip them. A new agent-readable table `job_notices` (`trial_id`, `task_id`, `tool_call_id`, `status`, `noticed_at`) holds the completion notices, read from the session JSONL by `trajlab.atif.jobs` at build time. No store of another version is upgraded in place: the values are in the rows, so a schema-1 or schema-2 store is built again from its trial dirs and images, and the schema-1 upgrade path of ADR-0018 is removed.
+2. **`step_jobs`.** Per tool call: `backgrounded` and `task_id` from the output pattern; `job_status`, `job_end` (the notice's time, else the attempt's last recorded instant), and `background_done_step` (the first step that began after `job_end`, kept as information) from `job_notices`; `launches_job` from `command_shell` matching an `&` separator, `nohup`, `setsid`, or `disown`.
+3. **`delta_attribution`**, one ordered rule, `DERIVE_VERSION` 2. For a row landing at step k with write time m = `mtime_after` (null for a delete):
+   - the landing window is [k.`t_start`, k.`checkpoint_at`] (else `t_end`), so the commit gap no longer drops a call's own write;
+   - the candidate launchers are the earlier calls whose job was open at m: a backgrounded call whose window [`t_start`, `job_end`] holds m, or a hand-launched job started before m, which has no end on record;
+   - among candidates the best is the one whose command redirects into the file (a target's basename after shell expansion, `$s` and `${s}` standing for any text, so `> log_$s.txt` redirects into `log_11.txt`), else one that names the file, else the latest launched; `launcher_step` names it;
+   - `foreground`: m in the landing window and no candidate;
+   - `background`, `background_by_path`, `background_untracked`: a candidate, and either m is outside the landing window, or the best launcher redirects into the file and the landing call writes nothing it names (no write tool, no `>` in its shell text, no mention of the file); `by_path` when the naming tie-break overrode the latest launcher, `untracked` for a hand-launched job;
+   - `contested`: a candidate and m inside the landing window, otherwise; `launched_by_step` is null, `causal_step` the landing step, and `launcher_step` the alternative, for the windowed score;
+   - `untrusted_mtime`: no candidate and m before the attempt's first step; `launched_by_step` is k when no job was launched before k, else null;
+   - `unknown`: anything else, a delete included (its time is the parent directory's, which the store does not keep).
+   `ambiguous` is gone: the ordering decides between launchers. `is_late` is `launched_by_step` < `step_idx`; `causal_step` is `coalesce(launched_by_step, step_idx)`.
+4. **Consumers.** `causal_step` is in the view, but ADR-0018's `is_mutating`, `version`, `variant_of`, and `is_tail_probe`, and ADR-0016's timeline, still read the landing step; moving them is the next PR, with its own derived id.
+
+The open questions of this ADR are answered: the basename, with shell variables as wildcards; the notice's own time; and, without process snapshots, the latest open launcher.
+
+### What the rule still cannot do
+
+A file that a background process keeps writing while a read-only call runs cannot be separated from a write by that call with timestamps and command text: the rule says `contested` when the landing call names the file, and `background` only when the job redirects into it. The exact signal is the identity of the writing process, recorded at capture time; ADR-0021 proposes it.
+
+Validation of the rule as implemented, on the schema-3 rebuild of the corpus store, is recorded below when `scripts/2026-10-27_adr0020_attribution_report.py` has run on it.

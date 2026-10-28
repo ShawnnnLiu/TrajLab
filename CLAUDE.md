@@ -34,8 +34,8 @@ src/trajlab/cli.py         typer app: run | watch | repair | postprocess | manif
 src/trajlab/contracts/     CheckpointRecord, TrialRecord, ATIF step extras, ProcessSnapshot/CallChanges, TrialLabels
 src/trajlab/capture/       harbor_runner, corpus manifest, trial/container discovery, preinstall (custom environment, ADR-0008), trace site and labels (ADR-0015)
 src/trajlab/checkpoint/    hook/ (PostToolUse hook script; delivery per ADR-0003), watcher, changes (ADR-0010), diffs and processes (--extras, ADR-0015), backends/, join
-src/trajlab/atif/          load, compaction recovery, postprocess, validate
-src/trajlab/store/         Exp 2 store (ADR-0014): schema, steps, reconcile (deltas from checkpoint top layers), docker_images, build; derive (derived views), describe (schema text), export (record-files bundle) (ADR-0018); query, query_child, serve, query.sh (the record-engine query tool, ADR-0019)
+src/trajlab/atif/          load, compaction recovery, jobs (background-job notices, ADR-0020), postprocess, validate
+src/trajlab/store/         Exp 2 store (ADR-0014): schema, steps, reconcile (deltas from checkpoint top layers, with write times), docker_images, build; derive (derived views, ADR-0018; step_jobs and delta_attribution, ADR-0020), describe (schema text), export (record-files bundle) (ADR-0018); query, query_child, serve, query.sh (the record-engine query tool, ADR-0019)
 src/trajlab/groundtruth/   ground truth by verifier replay (ADR-0013): extract, replay, admission, counterfactual fixes, items
 scripts/                   dated one-offs (2026-09-25_baseline.py); never imported by src/
 tests/fixtures/hello-world-trial/   one small real trial dir; every test runs against it

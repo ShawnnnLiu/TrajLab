@@ -33,6 +33,7 @@ from harbor.models.trial.paths import TrialPaths
 from harbor.models.trial.result import TrialResult
 from pydantic import BaseModel
 
+from trajlab.atif.jobs import read_job_notices
 from trajlab.atif.load import load_trajectory, trajectory_path
 from trajlab.atif.postprocess import enriched_trajectory_path
 from trajlab.contracts import (
@@ -42,6 +43,7 @@ from trajlab.contracts import (
     ChainReport,
     CheckpointRecord,
     DeltaRow,
+    JobNoticeRow,
     PreinstallRecord,
     ResumeRecord,
     StepRow,
@@ -86,6 +88,7 @@ class BuildResult:
     deltas: tuple[DeltaRow, ...]
     chain: ChainReport
     skipped_existing: bool
+    job_notices: tuple[JobNoticeRow, ...] = ()
 
 
 def start_image(trial_dir: Path) -> str | None:
@@ -233,12 +236,18 @@ def _stored(store_dir: Path, trial_id: UUID) -> BuildResult | None:
             return None
         steps = _select(con, "steps", StepRow, trial_id, "step_idx")
         deltas = _select(con, "deltas", DeltaRow, trial_id, "step_idx, path")
+        notices = _select(con, "job_notices", JobNoticeRow, trial_id, "noticed_at, task_id")
     with connect(heldout_path(store_dir), read_only=True) as con:
         chains = _select(con, "chains", ChainReport, trial_id, "trial_id")
     if len(chains) != 1:
         raise BuildError(f"{store_dir}: trial {trial_id} is in trials but has no chain row")
     return BuildResult(
-        trial_id=trial_id, steps=steps, deltas=deltas, chain=chains[0], skipped_existing=True
+        trial_id=trial_id,
+        steps=steps,
+        deltas=deltas,
+        chain=chains[0],
+        skipped_existing=True,
+        job_notices=notices,
     )
 
 
@@ -312,8 +321,19 @@ def build_trial(
     if not enriched_path.is_file():
         raise BuildError(f"{enriched_path} is missing; run `trajlab postprocess {trial_dir}` first")
     result = TrialResult.model_validate_json(result_path.read_text())
-    steps = build_steps(load_trajectory(enriched_path), trial_id=result.id)
+    trajectory = load_trajectory(enriched_path)
+    steps = build_steps(trajectory, trial_id=result.id)
     _check_source(trial_dir, steps)
+    notices = tuple(
+        JobNoticeRow(
+            trial_id=result.id,
+            task_id=notice.task_id,
+            tool_call_id=notice.tool_call_id,
+            status=notice.status,
+            noticed_at=notice.noticed_at,
+        )
+        for notice in read_job_notices(trial_dir, trajectory.session_id)
+    )
     trial = trial_row(
         result, steps.prompt, attempt_idx=attempt_idx, parent_trial_id=parent_trial_id
     )
@@ -339,7 +359,7 @@ def build_trial(
         # the steps built before.
         logger.info("%s: rebuilding trial %s, built before without images", trial_dir, result.id)
         with connect(record_path(store_dir), read_only=False) as con, _transaction(con):
-            for table in ("deltas", "steps", "trials"):
+            for table in ("job_notices", "deltas", "steps", "trials"):
                 con.execute(f"DELETE FROM {table} WHERE trial_id = ?", [result.id])
 
     with connect(heldout_path(store_dir), read_only=False) as con, _transaction(con):
@@ -349,11 +369,13 @@ def build_trial(
         insert_rows(con, "trials", [trial])
         insert_rows(con, "steps", steps.rows)
         insert_rows(con, "deltas", deltas)
+        insert_rows(con, "job_notices", notices)
     logger.info(
-        "%s: %d steps, %d deltas, chain %s",
+        "%s: %d steps, %d deltas, %d job notices, chain %s",
         trial_dir,
         len(steps.rows),
         len(deltas),
+        len(notices),
         "complete" if report.complete else f"incomplete ({'; '.join(report.reasons)})",
     )
     return BuildResult(
@@ -362,4 +384,5 @@ def build_trial(
         deltas=deltas,
         chain=report,
         skipped_existing=False,
+        job_notices=notices,
     )

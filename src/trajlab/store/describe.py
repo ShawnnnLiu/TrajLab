@@ -11,7 +11,7 @@ error, not a gap in the text.
 import duckdb
 from pydantic import BaseModel
 
-from trajlab.contracts import DeltaRow, StepRow, TrialRow
+from trajlab.contracts import DeltaRow, JobNoticeRow, StepRow, TrialRow
 from trajlab.store.derive import VIEWS
 
 _TABLES: dict[str, tuple[str, type[BaseModel] | None]] = {
@@ -28,6 +28,11 @@ _TABLES: dict[str, tuple[str, type[BaseModel] | None]] = {
         "One row per path whose state changed at a step: what changed, with a unified diff for "
         "text.",
         DeltaRow,
+    ),
+    "job_notices": (
+        "One row per command the harness moved to the background and later reported finished: "
+        "when its job ended.",
+        JobNoticeRow,
     ),
     "store_meta": ("How this record was built: one row per setting.", None),
 }

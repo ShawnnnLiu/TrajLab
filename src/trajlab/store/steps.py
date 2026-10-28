@@ -55,6 +55,7 @@ Hooked calls (`HOOKED_TOOLS`) are sorted for the chain report (ADR-0014, item 8)
 
 import json
 import logging
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -87,6 +88,29 @@ TOOL_USE_ERROR = "<tool_use_error>"
 
 class StepsError(ValueError):
     """The trajectory is not an enriched trajectory these rows can be built from."""
+
+
+# The parts of a Bash command that are not the shell's own text (ADR-0020): a heredoc body,
+# from `<<TAG`, `<<'TAG'`, `<<-TAG` to the line holding TAG alone, and a program passed inline
+# to an interpreter or shell (`python -c "..."`, `bash -c '...'`). An `&` or `nohup` inside
+# either is the program's, not a job launch.
+HEREDOC_BODY = re.compile(r"<<-?\s*['\"]?(\w+)['\"]?[^\n]*\n.*?^\1$", re.S | re.M)
+INLINE_PROGRAM = re.compile(r"(\s-c)\s+(?:\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*')", re.S)
+HEREDOC_MARK = "<<heredoc>"
+INLINE_MARK = "<code>"
+
+
+def shell_text(command: str) -> str:
+    """`command` with heredoc bodies replaced by `<<heredoc>` and inline programs by `<code>`."""
+    stripped = HEREDOC_BODY.sub(HEREDOC_MARK, command)
+    return INLINE_PROGRAM.sub(rf"\1 {INLINE_MARK}", stripped)
+
+
+def _command_shell(tool: str, arguments: Mapping[str, Any] | None) -> str | None:
+    if tool != "Bash" or not isinstance(arguments, Mapping):
+        return None
+    command = arguments.get("command")
+    return shell_text(command) if isinstance(command, str) else None
 
 
 @dataclass
@@ -258,10 +282,15 @@ class _Walk:
     """Step rows in order, with the checkpoint the environment is in after each."""
 
     def __init__(
-        self, trial_id: UUID, images: Mapping[int, str], covered_by: Mapping[str, int]
+        self,
+        trial_id: UUID,
+        images: Mapping[int, str],
+        captured: Mapping[int, datetime],
+        covered_by: Mapping[str, int],
     ) -> None:
         self.trial_id = trial_id
         self.images = images
+        self.captured = captured  # seq -> when its image was committed
         self.covered_by = covered_by  # tool_call_id -> the seq whose checkpoint first holds it
         self.current: int | None = None
         self.unknown = False  # a call's changes are in no checkpoint yet
@@ -299,6 +328,7 @@ class _Walk:
                 step_idx=step_idx,
                 checkpoint_seq=checkpoint_seq,
                 checkpoint_id=None if checkpoint_seq is None else self.images[checkpoint_seq],
+                checkpoint_at=None if checkpoint_seq is None else self.captured[checkpoint_seq],
                 **fields,
             )
         )
@@ -389,18 +419,20 @@ def build_steps(trajectory: Trajectory, *, trial_id: UUID) -> TrialSteps:
                 "reasoning": step.reasoning_content if n == 0 else None,
                 "t_start": step_time(step),
                 "t_end": None if record is None else record.requested_at,
+                "command_shell": _command_shell(call.function_name, call.arguments),
             }
             unknown = stopped or call.tool_call_id in timed_out
             specs.append(_Spec(fields, record=record, unknown=unknown))
 
     stop_calls = tuple(sorted(root.stop_calls, key=lambda record: record.call_seq))
     images = {seq: record.checkpoint_id for seq, record in checkpoints.items()}
+    captured = {seq: record.captured_at for seq, record in checkpoints.items()}
     covered_by = {
         call_id: seq
         for seq, record in sorted(checkpoints.items(), reverse=True)
         for call_id in record.covered_tool_call_ids
     }
-    walk = _Walk(trial_id, images, covered_by)
+    walk = _Walk(trial_id, images, captured, covered_by)
     placed = _place_stops(specs, stop_calls)
     for spec in placed:
         seq = (None if walk.unknown else walk.current) if spec.current else walk.state_after(spec)

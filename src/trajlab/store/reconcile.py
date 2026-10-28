@@ -86,6 +86,7 @@ from collections import Counter
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from difflib import SequenceMatcher
 from functools import partial
 from pathlib import Path
@@ -645,7 +646,14 @@ class _Reconciler:
             mode_after=f"{a.mode:04o}" if a else None,
             owner_before=f"{b.uid}:{b.gid}" if b else None,
             owner_after=f"{a.uid}:{a.gid}" if a else None,
+            mtime_before=_instant(b.mtime) if b else None,
+            mtime_after=_instant(a.mtime) if a else None,
         )
+
+
+def _instant(mtime: float | None) -> datetime | None:
+    """A tar entry's mtime as an aware UTC instant; None when the entry had none."""
+    return None if mtime is None else datetime.fromtimestamp(mtime, tz=UTC)
 
 
 def _printable(text: str) -> str:

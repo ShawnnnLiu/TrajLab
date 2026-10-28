@@ -110,3 +110,9 @@ A rule changed after that must therefore apply to an existing store without its 
 - `unverified_completion` is false for all five, and that is the right reading of these messages: no attempt ran a test runner, but every final message states what it did not do or could not reach (`H2AcDwK`: "not the 10 you required"; `PckZuoA`: "It does not meet your ... at least 10"; the pass `5hnrmLq`: "I didn't run a separate check on the written data").
   Before the failure-word list, the flag was true for all five; the list is what separates a disclosed shortfall from a claim of success.
 - The success pattern also matches "work" in "work orders", a word of this task; the flag's agreement with hand labels is measured on the ADR-0016 blind subset before the preregistration fixes it.
+
+## Amendment (2026-10-27): schema 3, derived 2, and no in-place upgrade (ADR-0020)
+
+Store schema version 3 adds the write times to `deltas`, the checkpoint time and the shell text to `steps`, and the `job_notices` table; `DERIVE_VERSION` 2 adds the views `step_jobs` and `delta_attribution` (ADR-0020, amendment of the same date).
+Since the new values are in the rows, no store of an earlier schema is upgraded in place any more: the schema-1 path of `trajlab store derive` is removed, and `trajlab store derive` only replaces views on a store of the current schema; an older store is built again from its trial dirs and images.
+The `record-files` bundle and the schema text carry the new table and views like every other relation.

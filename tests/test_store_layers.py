@@ -157,12 +157,12 @@ def test_entries_of_every_kind(gz: bool) -> None:
         gz=gz,
     )
     assert set(layer.entries) == {"/etc", "/etc/motd", "/etc/link", "/etc/pipe", "/root"}
-    assert layer.entries["/etc/motd"] == Entry("file", 0o644, 1000, 1001, 3, sha("hi\n"))
+    assert layer.entries["/etc/motd"] == Entry("file", 0o644, 1000, 1001, 3, sha("hi\n"), mtime=1)
     assert layer.entries["/etc/link"] == Entry(
-        "symlink", 0o777, 0, 0, len("/etc/motd"), sha("/etc/motd"), "/etc/motd"
+        "symlink", 0o777, 0, 0, len("/etc/motd"), sha("/etc/motd"), "/etc/motd", mtime=1
     )
-    assert layer.entries["/etc/pipe"] == Entry("other", 0o600, 0, 0)
-    assert layer.entries["/root"] == Entry("dir", 0o700, 0, 0)
+    assert layer.entries["/etc/pipe"] == Entry("other", 0o600, 0, 0, mtime=1)
+    assert layer.entries["/root"] == Entry("dir", 0o700, 0, 0, mtime=1)
     assert not layer.whiteouts and not layer.opaque
 
 
@@ -231,7 +231,7 @@ def test_a_hard_link_to_an_unkept_member_is_unresolved() -> None:
 
 def test_a_duplicated_member_takes_the_last() -> None:
     layer = _read(f("a", "first"), d("b"), f("a", "second", mode=0o600), f("b", "now a file"))
-    assert layer.entries["/a"] == Entry("file", 0o600, 0, 0, 6, sha("second"))
+    assert layer.entries["/a"] == Entry("file", 0o600, 0, 0, 6, sha("second"), mtime=1)
     assert layer.entries["/b"].kind == "file"
 
 

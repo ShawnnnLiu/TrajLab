@@ -12,6 +12,7 @@ import io
 import json
 import tarfile
 from collections.abc import Sequence
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, BinaryIO
 from uuid import UUID
@@ -216,8 +217,10 @@ def test_fixture_trial_builds_to_the_hand_count(trial_copy: Path, tmp_path: Path
             bytes_after=len(HELLO),
             mode_after="0644",
             owner_after="0:0",
+            mtime_after=datetime.fromtimestamp(TOP_MTIME, tz=UTC),
         ),
     )
+    assert result.job_notices == ()  # the fixture's session has no background job
     assert result.chain == ChainReport(
         trial_id=TRIAL_ID,
         complete=True,
@@ -514,8 +517,15 @@ def test_the_two_files_hold_separate_tables(trial_copy: Path, tmp_path: Path) ->
         heldout = {row[0] for row in con.execute("SHOW TABLES").fetchall()}
 
     assert record.isdisjoint({"checks", "faults", "blame", "chains"})
-    assert heldout.isdisjoint({"trials", "steps", "deltas"})
-    assert record == {"trials", "steps", "deltas", "store_meta", *(v.name for v in VIEWS)}
+    assert heldout.isdisjoint({"trials", "steps", "deltas", "job_notices"})
+    assert record == {
+        "trials",
+        "steps",
+        "deltas",
+        "job_notices",
+        "store_meta",
+        *(v.name for v in VIEWS),
+    }
 
 
 # -- parts -------------------------------------------------------------------------------------
@@ -755,3 +765,41 @@ def test_a_rebuild_that_cannot_read_the_images_keeps_the_steps(
     ]
     rebuilt = build_trial(trial_copy, store, images=all_images(), work_dir=tmp_path / "w")
     assert rebuilt.skipped_existing is False and rebuilt.chain.complete
+
+
+# -- background-job notices (ADR-0020) ----------------------------------------------------------
+
+
+def test_job_notices_are_built_from_the_session_log_and_replaced_on_a_rebuild(
+    trial_copy: Path, tmp_path: Path
+) -> None:
+    from tests.test_atif_jobs import append, event, notice_text
+    from trajlab.contracts import JobNoticeRow
+
+    capture(trial_copy)
+    append(trial_copy, event("enqueue", notice_text("b4cnj2dq1"), "2026-09-22T00:50:17Z"))
+    expected = JobNoticeRow(
+        trial_id=TRIAL_ID,
+        task_id="b4cnj2dq1",
+        tool_call_id=FIXTURE_TOOL_CALL_ID,
+        status="completed",
+        noticed_at=datetime(2026, 9, 22, 0, 50, 17, tzinfo=UTC),
+    )
+    store = tmp_path / "store"
+
+    without = build_trial(trial_copy, store, images=None, work_dir=tmp_path / "w")
+    assert without.job_notices == (expected,)
+    assert count(store, "job_notices") == 1
+
+    rebuilt = build_trial(trial_copy, store, images=all_images(), work_dir=tmp_path / "w")
+    assert rebuilt.skipped_existing is False
+    assert rebuilt.job_notices == (expected,)
+    assert count(store, "job_notices") == 1
+
+    skipped = build_trial(trial_copy, store, images=all_images(), work_dir=tmp_path / "w")
+    assert skipped.skipped_existing is True
+    assert skipped.job_notices == (expected,)
+    with schema.connect(schema.record_path(store), read_only=True) as con:
+        assert con.execute("SELECT backgrounded, job_end FROM step_jobs").fetchall() == [
+            (False, None)  # the Write call's output is no task id, notice or not
+        ]
