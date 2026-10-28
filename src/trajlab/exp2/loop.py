@@ -604,7 +604,10 @@ class Exp2Runner:
         problem = self.capture_problem(self.jobs_dir)
         if problem is not None:
             return problem
-        dirty = self.commit_manifests(self.manifests_dir)
+        try:
+            dirty = self.commit_manifests(self.manifests_dir)
+        except subprocess.CalledProcessError as error:  # e.g. another commit holds index.lock
+            return f"committing manifests failed: {error}"
         if dirty:
             return f"uncommitted changes `trajlab run` would refuse: {', '.join(dirty[:5])}"
         return None

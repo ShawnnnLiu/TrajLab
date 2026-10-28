@@ -3,6 +3,7 @@ trial dir from the fixture, scored as each test scripts, and checkpoint images a
 
 import itertools
 import json
+import subprocess
 import time
 from datetime import UTC, datetime
 from pathlib import Path
@@ -341,6 +342,17 @@ def test_launches_hold_while_capture_is_down(corpus: dict[str, Path], tmp_path: 
     runner = make_runner(corpus, tmp_path, harbor, capture_problem=lambda _: "no watcher")
     runner.step()
     assert harbor.launched == [] and runner.status()["hold"] == "no watcher"
+
+
+def test_a_failed_manifest_commit_holds_launches(corpus: dict[str, Path], tmp_path: Path) -> None:
+    def locked(_: Path) -> list[str]:
+        raise subprocess.CalledProcessError(128, ["git", "add"])
+
+    harbor = FakeHarbor()
+    runner = make_runner(corpus, tmp_path, harbor, commit_manifests=locked)
+    runner.step()
+    assert harbor.launched == []
+    assert runner.status()["hold"].startswith("committing manifests failed")
 
 
 def test_a_failed_ingest_stops_only_its_chain(corpus: dict[str, Path], tmp_path: Path) -> None:
