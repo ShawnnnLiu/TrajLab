@@ -133,8 +133,8 @@ The first launch (05:24 UTC) was stopped when the recorder's reader thread died 
 The run stopped at 09:12 UTC with 67 of 69 trials finished.
 The host's 968 GB root filesystem filled at 08:56 with checkpoint layers: the containerd snapshotter keeps each image twice (blobs and unpacked snapshots, about 1.85 times the records' `bytes`), and `docker commit` stores a call's whole upper directory again at every checkpoint, so `pretrain-shard-corruption__tgAfUZG`, with a pip cache under `/root/.cache/pip`, committed 238 GB in 42 checkpoints.
 Commits failed from 08:56 and the recorder died on `ENOSPC` at 09:06.
-The 67 had finished by 08:29 and are untouched; `layout-config-recreation__GFoCenW` and `pretrain-shard-corruption__tgAfUZG` are unfinished, to be rerun with `harbor jobs resume` (which reruns a trial with no result) once there is disk, with the watcher and the recorder running.
-Harbor has not exited 0, so `corpus/manifests/tb40-sonnet-v4.json` is not written yet.
+The 67 had finished by 08:29 and are untouched; `layout-config-recreation__GFoCenW` and `pretrain-shard-corruption__tgAfUZG` were unfinished, and were rerun later that day as `layout-config-recreation__RV5qQjA` and `pretrain-shard-corruption__6egdDwc` ("`tb40-sonnet-v4` finished", the amendment of 2026-10-28).
+The figures in this amendment are the 67's.
 
 The 67 finished trials: 13 passed, no exception, every chain complete; 1,656 hook requests and 1,656 acks, 957 checkpoints.
 The recorder ran from the relaunch to 09:06 as one process with no queue overflow; it wrote 2,827,219 event lines for the 67, and dropped 211,704 events whose directory handle no longer resolved (a directory removed before its events were read).
@@ -142,7 +142,8 @@ The recorder ran from the relaunch to 09:06 as one process with no queue overflo
 2,162,784 of the events (76%) are `layout-config-recreation__kb38wvM`'s, nearly all from the headless Chromium its jobs ran, which is why `start_time` ties 1,377,116 events (all but 236 of them in that trial) against `command`'s 1,371,359 and `session`'s 68,886; no call for 6,214 by Claude Code outside a write tool, 2,089 by writers gone and never read, and 1,547 others.
 The `eval` check: 1,564 of 1,587 Bash calls have an event by a shell running exactly their command; none of the 23 without one was backgrounded.
 20 of those 23 are in the 13 trials that have no `open` line at all, though their shells sourced a snapshot (their command lines name it) and the recorder logged no failed mark; in the other 54 trials the mark gave 1,399 lines for 1,402 calls, and the 3 calls it missed are the other 3 never seen. In those 13 the mark was on a directory Claude Code had since removed and made again; the 3 are shells that exited before the recorder read them. Both are set out, with the fix to the first, in "Why 13 trials have no `open` line" below.
-The store was built with `trajlab store build` on tmpfs (`/dev/shm/trajlab/stores/tb40-sonnet-v4.b`, linked from `corpus/stores/tb40-sonnet-v4`) for want of disk, from commit `781a743` (the carrying directory, below); it does not survive a reboot and is rebuilt from the trial dirs.
+The store was built with `trajlab store build` on tmpfs (`/dev/shm/trajlab/stores/tb40-sonnet-v4.b`, then linked from `corpus/stores/tb40-sonnet-v4`) for want of disk, from commit `781a743` (the carrying directory, below).
+The 69-trial store that replaced it is on disk at `corpus/stores/tb40-sonnet-v4`, and its rows for these 67 are the same.
 
 ### Rows by attribution
 
@@ -237,7 +238,91 @@ If the recorder is more than about 20 ms behind when the directory is made, the 
 **What it changes in a trial's record.** Only `open` lines: a trial whose first Bash call comes after Claude Code's sweep now has one per call, where the recorder of `fd8af06` wrote none.
 Write events, the `WriteEvent` schema, and the store are unchanged; the recorder's log gains a line `<trial>: marked <dir> again: the directory is a new one`.
 The 67 finished trials of `tb40-sonnet-v4` were recorded by `fd8af06`'s recorder (its code is the same at `aeecd44`).
-If `layout-config-recreation__GFoCenW` and `pretrain-shard-corruption__tgAfUZG` are resumed with the recorder of `66ac39f` or later, `tb40-sonnet-v4` mixes two recorder versions: those 2 can have `open` lines where the 67 could have had none.
-The corpus manifest would not show it (one `repo_sha`, taken when the manifest is written, and `writes_recorded` only says each trial has a write record), so this amendment is where it is recorded.
-Resuming them with `fd8af06`'s recorder keeps the corpus on one version.
+The 2 unfinished trials were resumed with `fd8af06`'s recorder too ("`tb40-sonnet-v4` finished", below), so the corpus has one recorder version.
+Had they been resumed with the recorder of `66ac39f` or later, those 2 could have had `open` lines where the 67 could have had none, and the corpus manifest would not show it (one `repo_sha`, taken when the manifest is written, and `writes_recorded` only says each trial has a write record).
 The next corpus captured with the recorder gets a new `corpus_id`.
+
+## Amendment (2026-10-28): `tb40-sonnet-v4` finished
+
+### The two resumed trials
+
+On the owner's call, the 42 checkpoint images of `pretrain-shard-corruption__tgAfUZG` were deleted on 2026-10-27, which left 460 GB free, and the two unfinished trials were rerun with `harbor jobs resume -p corpus/jobs/tb40-sonnet-v4` (log `/srv/trajlab/logs/run-tb40-sonnet-v4-2026-10-27.log`).
+Resume removes every trial dir with no `result.json` and reruns its task under a new trial name (`docs/harbor-facts.md`), so both dirs were first copied to `/srv/trajlab/aside/tb40-sonnet-v4-unfinished-2026-10-27/`.
+The first resume (21:38 UTC) failed before any trial started, on root-owned files under `tgAfUZG`'s `agent/sessions/`; after a `chown -R` of that dir, the second ran from 21:39:21 to 23:18:32 UTC and exited 0.
+`GFoCenW`'s 93 checkpoint images are still in the Docker store, referenced by no trial dir in the job.
+
+Every piece of capture code that ran is `fd8af06`'s, as for the 67.
+The recorder ran from a checkout of `fd8af06` (`/srv/trajlab/recorder-fd8af06`, by `PYTHONPATH`); the watcher, hook, and environment ran from `1d4a2c2`, whose capture code differs from `fd8af06`'s only in `checkpoint/writes.py` (`66ac39f`).
+The manifest, `corpus/manifests/tb40-sonnet-v4.json`, was written after Harbor exited; its `repo_sha` is `8f6e9e9`, the HEAD it was written at (a docs commit after `1d4a2c2`), not the commit the capture code came from.
+
+| Trial | Reward | Hook requests = acks | Checkpoints | Layer bytes | Event lines | Writer gone | `open` lines / Bash calls |
+|---|---|---|---|---|---|---|---|
+| `layout-config-recreation__RV5qQjA` | 0 | 140 | 111 | 16.5 GB | 3,530,383 | 170,710 | 139 / 139 |
+| `pretrain-shard-corruption__6egdDwc` | 0 | 61 | 30 | 3.7 GB | 9,851 | 278 | 60 / 60 |
+
+- The corpus: 69 trials, 13 passed (mean reward 0.188), no exception, every chain complete. 16 trials ran a job past a call's return (11 of them failures), the 2 resumed trials among them.
+- Every Bash call of both has its `open` line. Under `fd8af06`'s recorder that means each trial's first Bash call came before Claude Code's sweep, so the directory defect above did not arise.
+- 3,417,894 of `RV5qQjA`'s events (97%) are by `headless_shell`, the Chromium its jobs ran.
+- The recorder (log `/srv/trajlab/logs/record-2026-10-27-resume.log`) had no queue overflow, and dropped 324,969 events whose directory handle no longer resolved.
+- The first checkpoint took 73.6 s in `RV5qQjA` and 64.1 s in `6egdDwc` (`capture_ms`), against a median of 2.5 s (at most 9.5 s) for the first checkpoints of the 67; their later checkpoints took a median of 5.6 s and 7.0 s. The cause was not looked into.
+
+### The 69-trial store
+
+`trajlab store build corpus/jobs/tb40-sonnet-v4 --store corpus/stores/tb40-sonnet-v4 --work-dir /srv/trajlab/work` ran at `8f6e9e9`, from 2026-10-27 23:20 to 2026-10-28 00:43 UTC (82 min, exit 0; log `/srv/trajlab/logs/store-tb40-sonnet-v4-2026-10-27c.log`).
+The store is on disk (9.3 GB), schema 4, derived `3+c45ab40d3b46`: 69 trials, every chain complete, 217,841 delta rows, 217,583 write rows, and 17 job notices.
+For the 67 earlier trials, every row of `trials`, `steps`, `deltas`, `job_notices`, `writes`, `step_jobs`, and `delta_attribution` is the same as in the 67-trial tmpfs build (`EXCEPT ALL` both ways, same derived id), so the figures of the amendment above stand for those 67.
+
+From `scripts/2026-10-27_adr0020_attribution_report.py corpus/stores/tb40-sonnet-v4 --markdown` (log `/srv/trajlab/logs/attribution-tb40-sonnet-v4-2026-10-27c.md`):
+
+| Attribution | Rows | Of them cache | Added by the 2 |
+|---|---|---|---|
+| `recorded` | 217,385 | 55,150 | 20,710 |
+| `multi_writer` | 21 | 0 | 17 |
+| `foreground` | 84 | 1 | 5 |
+| `background`, `background_by_path`, `background_untracked` | 0 | 0 | 0 |
+| `contested` | 8 | 0 | 2 |
+| `untrusted_mtime` | 3 | 0 | 0 |
+| `unknown` | 340 | 9 | 164 |
+| total | 217,841 | 55,160 | 20,898 |
+
+- The record settles 217,406 rows (99.80%).
+- `RV5qQjA`'s 17 `multi_writer` rows are Chromium's files (9 `/tmp/.org.chromium.Chromium.*`, 5 in its profiles) and 3 job logs, each written by processes of more than one call.
+- Of the 171 rows the record does not settle in the 2 trials, 160 are `RV5qQjA` deletes with no event in their checkpoint interval (157 under Chromium's profiles and Playwright's directories in `/tmp`), the kind of row `kb38wvM` has 148 of; they were not broken down by cause.
+  The other 11 were written only by processes of no call: 4 `RV5qQjA` deletes, its 2 `contested` rows (`/app/output/tuned_text.json`) and 1 `foreground` row, and `6egdDwc`'s 4 `foreground` rows.
+
+### The rule against the record
+
+ADR-0020's answer on the 217,385 `recorded` rows is the same call on 199,286 (91.7%), or 144,137 of 162,235 (88.8%) without cache rows; on the 67 it was 98.2%.
+
+| Rule said | Recorded rows | Rule agrees | Cache rows (agree) |
+|---|---|---|---|
+| `foreground` | 203,726 | 195,313 (95.9%) | 55,147 (55,146) |
+| `untrusted_mtime` | 2,936 | 2,936 (100%) | 0 |
+| `unknown` | 9,870 | 434 (4.4%) | 3 (3) |
+| `contested` | 648 | 445 (68.7%) | 0 |
+| `background_untracked` | 199 | 152 (76.4%) | 0 |
+| `background` | 6 | 6 (100%) | 0 |
+
+- **`6egdDwc` adds no disagreement.** All 2,839 of its rows are `recorded`, mapped by `command`, and the rule calls every one `foreground`, the same call.
+- **`RV5qQjA` adds 14,513 of the 18,099 disagreements.** The rule is right on 3,358 of its 17,871 recorded rows (18.8%).
+  It is `kb38wvM`'s case again, larger.
+  From step 65 on, the agent hand-launched jobs in 16 calls (`for i in ...; do nohup python3 tune2.py $i ... > /tmp/t_$i.log 2>&1 & done` at steps 75 and 85, `nohup python3 tune4.py ...` at 127, and others), each job driving a headless Chromium through Playwright, and it polled them from later calls.
+  13,715 of the disagreements are in Chromium's profiles and Playwright's directories under `/tmp`: 6,294 adds inside a later call's window whose launchers name nothing, which the rule gives to the landing call (`foreground`), and 7,421 deletes, which have no time (`unknown`).
+  Of the other 798, 723 are the jobs' pages for the browser (`tempfile` names such as `/tmp/tmpqqk7mi3i.html`), 54 the jobs' logs and results (`/tmp/t_*.log`, `/tmp/g*.log`, `/tmp/res_*.json`), 19 `/tmp/tune.log`, and 2 under `/app`.
+  The record gives them to the launching calls (step 85: 5,417; 75: 2,950; 127: 2,751; 107: 1,412; 150: 658; others 1,325), which it ties by `start_time` (8,704 of the trial's write rows), `session` (6,234), and `command` (2,967).
+  By the record, 14,582 of the trial's rows landed 1 to 25 calls after the call whose process wrote them; over the corpus that is 18,245 rows in 10 trials, from 3,663 in 9. The rule calls 205 rows late (133 on the 67), 193 of them late by the record too and 158 to the same call.
+- **The two browser trials are nearly all of it.** Without `kb38wvM` and `RV5qQjA`, the rule agrees on 194,679 of 194,895 recorded rows (99.89%); the other 216 disagreements are in 8 trials.
+  With them, it agrees on 1,249 of `kb38wvM`'s 4,619 and 3,358 of `RV5qQjA`'s 17,871.
+  The rule's corpus-wide figure therefore depends on how many attempts happen to run browsers from hand-launched jobs: 1 of 67 gave 98.2%, and 2 of 69 give 91.7%.
+- **`contested`**, settled by the record: the landing call 445, the launcher 163, another call 40.
+
+### The acceptance script over the 69
+
+`scripts/2026-10-27_adr0021_acceptance.py --store corpus/stores/tb40-sonnet-v4` over the 69 trial dirs (22 min; log `/srv/trajlab/logs/acceptance-tb40-sonnet-v4-2026-10-27c.txt`; the 67's figures are in "The run" above):
+
+- **Event lines:** 6,367,453, made up of create 1,892,187, close_write 1,653,296, modify 1,506,364, delete 1,164,929, moved_to 149,079, and open 1,598. `RV5qQjA` alone has 3,530,383 of them, at a peak of 3,229 in one second.
+- **Writer gone:** 326,631 events (5.1%) found their writer gone.
+- **The `eval` check:** 1,763 of 1,786 Bash calls have an event by a shell running exactly their command, and all 199 calls of the 2 resumed trials are among them. The 23 without one are the same 23 as before.
+- **Events by mapping:** `start_time` 4,111,437, `command` 2,107,171, `session` 126,338, and `tool_window` 8.
+  `start_time` grew by 2,734,321 with `RV5qQjA`, whose browsers are tied to their job's call by when they started, as in `kb38wvM`.
+  No call for 13,413 others read alive (11,860 of them in `RV5qQjA`), 6,841 by Claude Code outside a write tool, and 2,245 by writers gone and never read.
