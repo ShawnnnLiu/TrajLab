@@ -81,13 +81,13 @@ def test_seeding_copies_the_root_failures_rows(corpus_store: Path, tmp_path: Pat
 
 
 def test_seeding_copies_the_blobs_the_rows_name(corpus_store: Path, tmp_path: Path) -> None:
-    ref = "ab" * 32
-    (schema.blobs_dir(corpus_store) / ref).write_bytes(b"later version")
+    ref = f"{schema.BLOBS_DIRNAME}/{'ab' * 32}"  # as reconcile names them
+    (corpus_store / ref).write_bytes(b"later version")
     with schema.connect(schema.record_path(corpus_store), read_only=False) as con:
         con.execute("UPDATE deltas SET blob_ref = ?", [ref])
     chain_store = tmp_path / "chain-store"
     chains.seed_store(corpus_store, chain_store, TRIAL_ID)
-    assert (schema.blobs_dir(chain_store) / ref).read_bytes() == b"later version"
+    assert (chain_store / ref).read_bytes() == b"later version"
 
 
 def test_seeding_refuses_a_trial_that_is_not_attempt_0(corpus_store: Path, tmp_path: Path) -> None:

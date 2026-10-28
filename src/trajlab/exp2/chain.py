@@ -192,8 +192,8 @@ def seed_store(corpus_store: Path, chain_store: Path, root_trial_id: UUID) -> No
     if _has_trial(chain_store, root_trial_id):
         return
     blobs_dir(chain_store).mkdir(parents=True, exist_ok=True)
-    for ref in refs:
-        _link_or_copy(blobs_dir(corpus_store) / ref, blobs_dir(chain_store) / ref)
+    for ref in refs:  # `blobs/<sha256>`, relative to the store (trajlab.store.reconcile)
+        _link_or_copy(corpus_store / ref, chain_store / ref)
     with connect(heldout_path(chain_store), read_only=False) as con, _transaction(con):
         con.execute(f"ATTACH {_literal(heldout_path(corpus_store))} AS corpus (READ_ONLY)")
         con.execute("DELETE FROM chains WHERE trial_id = ?", [root_trial_id])
