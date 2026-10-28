@@ -1,0 +1,728 @@
+{
+  "corpus_id": "tb40-sonnet-v3",
+  "created_at": "2026-10-26T23:49:55.359781Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "d79a9b9bb3ef50aec479ae3b984dc4df2b183901",
+  "repo_dirty": false,
+  "config_path": "configs/harbor/tb40-sonnet-v3.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 3,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 0.5,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "tasks": [
+    {
+      "name": "terminal-bench/bun-sourcemap-leak",
+      "digest": "sha256:e55ae542f338f50f4468d940c7d7c93a45d34fd418dc6cc5883c1fedc753603a"
+    },
+    {
+      "name": "terminal-bench/cad-model",
+      "digest": "sha256:037b83651678230c04217bc7bd077c9e2c3d5a383bb368cdeb19e88a2202f644"
+    },
+    {
+      "name": "terminal-bench/cargo-flight-dispatch",
+      "digest": "sha256:18a1c2670ce4be0e6752f48ed6c750281d7f97db025f5e74edc6c8728f62f5b5"
+    },
+    {
+      "name": "terminal-bench/foodstuff-beta-activity",
+      "digest": "sha256:52adca169e97e15fe8692986470b6556f478e7348a37c58739a5bdb3f02cc45a"
+    },
+    {
+      "name": "terminal-bench/freecad-impeller",
+      "digest": "sha256:40d322e979d30dd53c0a9330445b8799cf5c02099b0718a3b3ad15231b366dba"
+    },
+    {
+      "name": "terminal-bench/freecad-platform-drawing",
+      "digest": "sha256:ed6db89260074bd0db58b064d90977cc4d470843deefecd8a9caf7f21da9a747"
+    },
+    {
+      "name": "terminal-bench/freecad-spring-clip",
+      "digest": "sha256:c3110552902a44e17326df0a87083eb6028068cfbc7aa47461c7f2c0aa528bab"
+    },
+    {
+      "name": "terminal-bench/gsea-proteomics",
+      "digest": "sha256:7c0512e617cd4c0a0b595ebfb81258495d7e4a12c003cd0592c1137aa986a85d"
+    },
+    {
+      "name": "terminal-bench/interleaved-vigenere",
+      "digest": "sha256:238a75a32aad5e60b33a22ac53087790e95b752c6272f41d724407f198df4a14"
+    },
+    {
+      "name": "terminal-bench/layout-config-recreation",
+      "digest": "sha256:997003ffc98f6df316167de8752c9beada20cb1292588b0fa6409d87ed3a1def"
+    },
+    {
+      "name": "terminal-bench/layout-config-recreation2",
+      "digest": "sha256:193312b14b1dcb6ef551efff691cbb708b2032f58879b0b19efe88a2cddc9deb"
+    },
+    {
+      "name": "terminal-bench/mvcc-lsm-compaction",
+      "digest": "sha256:370406dd79cc164e50b73568de37c34eba1b0e30782d7dc03f87c38c68123137"
+    },
+    {
+      "name": "terminal-bench/pretrain-shard-corruption",
+      "digest": "sha256:0f17568e65b9e8b79480e474a457811a65815cdaf7272660efffd1bc690021a0"
+    },
+    {
+      "name": "terminal-bench/production-planning",
+      "digest": "sha256:1958ac51553517b79e3a642ed4f3bd9affb5b42166dcbacaa4c32f4b040edaff"
+    },
+    {
+      "name": "terminal-bench/protein-autointerp-disulfide",
+      "digest": "sha256:6b70d5b8b2ed87b10cd58461c58981d4296f504eda0869c63cd6b0fb2b9edfb9"
+    },
+    {
+      "name": "terminal-bench/risk-scorer-replay",
+      "digest": "sha256:3645f552b5485633a67027130c9d471eb1a364f1451b6ada140bacd148f9cd87"
+    },
+    {
+      "name": "terminal-bench/roy-polymorph-cn",
+      "digest": "sha256:012e714e79b4ff4f0d36eeb8fa2b6fa3be1043a71af880af8a71f61487669dfc"
+    },
+    {
+      "name": "terminal-bench/sglang-qwen-burst",
+      "digest": "sha256:32bdf75983144af64a855c3711df1136cd347219b05bf5ef3b839375b1f82941"
+    },
+    {
+      "name": "terminal-bench/sound-change-cascade",
+      "digest": "sha256:6214ceb80aaa657d72658a6f39a44fa11ea51f443822b6a1212eef1ba65bf91d"
+    },
+    {
+      "name": "terminal-bench/vba-userform-port",
+      "digest": "sha256:38f141630a3803538908de5080d4a38e87fa3ce77a9fbbaad284cb7f9e89fe22"
+    },
+    {
+      "name": "terminal-bench/vf2-speedup-networkx",
+      "digest": "sha256:cdbad1f303f57856199aae757bdbc6363111e8ad60d31db49c61d01706da63ab"
+    },
+    {
+      "name": "terminal-bench/vllm-deepseek-streaming",
+      "digest": "sha256:cb78aec591411780aedf133b95ca829584ba48768bbc437487fa773afbde321d"
+    },
+    {
+      "name": "terminal-bench/vpp-loss-divergence",
+      "digest": "sha256:6db99a33495fcd7489072a4753a365e0cb4db9ea64c2b3f85a8b44db984fd0d3"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb40-sonnet-v3",
+      "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+      "job_config": {
+        "job_name": "tb40-sonnet-v3",
+        "jobs_dir": "corpus/jobs",
+        "n_attempts": 3,
+        "agent_timeout_multiplier": 0.5,
+        "n_concurrent_trials": 6,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "sha256:39d9f44b40420cde8fdcc087579c0d72a7e14fa3656d603c3f0d22fb35e27732",
+            "task_names": [
+              "terminal-bench/bun-sourcemap-leak",
+              "terminal-bench/foodstuff-beta-activity",
+              "terminal-bench/freecad-platform-drawing",
+              "terminal-bench/cad-model",
+              "terminal-bench/freecad-impeller",
+              "terminal-bench/freecad-spring-clip",
+              "terminal-bench/interleaved-vigenere",
+              "terminal-bench/layout-config-recreation",
+              "terminal-bench/layout-config-recreation2",
+              "terminal-bench/pretrain-shard-corruption",
+              "terminal-bench/protein-autointerp-disulfide",
+              "terminal-bench/sglang-qwen-burst",
+              "terminal-bench/vllm-deepseek-streaming",
+              "terminal-bench/vpp-loss-divergence",
+              "terminal-bench/cargo-flight-dispatch",
+              "terminal-bench/roy-polymorph-cn",
+              "terminal-bench/gsea-proteomics",
+              "terminal-bench/mvcc-lsm-compaction",
+              "terminal-bench/production-planning",
+              "terminal-bench/risk-scorer-replay",
+              "terminal-bench/sound-change-cascade",
+              "terminal-bench/vba-userform-port",
+              "terminal-bench/vf2-speedup-networkx"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "ee28b826-b00b-4ba7-8f9d-83814398077e",
+          "trial_name": "bun-sourcemap-leak__RLdfGTB",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "611aa0de-423a-43e8-9372-5bc274fe6864"
+        },
+        {
+          "trial_id": "f38f2644-8728-4409-82b0-ca25c7d253f9",
+          "trial_name": "bun-sourcemap-leak__XHUbFv5",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "8399b974-c3b6-41c4-bab3-f85c627229a6"
+        },
+        {
+          "trial_id": "5793c8f9-228b-477c-8fe0-c0747368a84e",
+          "trial_name": "bun-sourcemap-leak__y2jBqoS",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "1d08b48f-f5cc-4dc5-bf3d-6e8f9bb953bb"
+        },
+        {
+          "trial_id": "0561c2a4-d23c-4877-bfd9-631a6e1cd825",
+          "trial_name": "cad-model__Q3wmwNC",
+          "task_name": "terminal-bench/cad-model",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "60620e86-9fed-461d-a1bd-eb3f0c99076e"
+        },
+        {
+          "trial_id": "5f608a70-ee28-414d-b492-09a153d991fd",
+          "trial_name": "cad-model__nzUkbzq",
+          "task_name": "terminal-bench/cad-model",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "c1b1d030-39af-46a1-ac22-7b1ee1221e9e"
+        },
+        {
+          "trial_id": "5d56116e-c69b-41a6-b182-8e54e46fb40b",
+          "trial_name": "cad-model__xyLsv5u",
+          "task_name": "terminal-bench/cad-model",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "04de2033-d8f1-43fa-b427-a552dc44844f"
+        },
+        {
+          "trial_id": "7c70f3c4-f1c8-47f9-9321-c9c88f391827",
+          "trial_name": "cargo-flight-dispatch__Q9rPTzd",
+          "task_name": "terminal-bench/cargo-flight-dispatch",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "d7ae5445-126f-45fe-afca-79c2c5eb09f3"
+        },
+        {
+          "trial_id": "3772bf17-5e90-4036-bb9d-b725688f29e8",
+          "trial_name": "cargo-flight-dispatch__xAGW5sv",
+          "task_name": "terminal-bench/cargo-flight-dispatch",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "5dbe0a94-fe27-45bc-a6d3-5f266b2d37ab"
+        },
+        {
+          "trial_id": "f7d0f70b-2d93-4799-97ce-59345fabe5c4",
+          "trial_name": "cargo-flight-dispatch__yn4ohjS",
+          "task_name": "terminal-bench/cargo-flight-dispatch",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "dd4c114e-73c3-4fb3-a063-39fd08d6618a"
+        },
+        {
+          "trial_id": "55aefd71-28c8-4852-ba42-91917cd16f62",
+          "trial_name": "foodstuff-beta-activity__3To5dwh",
+          "task_name": "terminal-bench/foodstuff-beta-activity",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "448fa28f-ade1-4e22-a281-6c72dc979373"
+        },
+        {
+          "trial_id": "005b7545-9c96-477d-a580-d2df2421cdea",
+          "trial_name": "foodstuff-beta-activity__BiZXQQK",
+          "task_name": "terminal-bench/foodstuff-beta-activity",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "df51d341-e26e-401d-ac01-92b88ec1ef04"
+        },
+        {
+          "trial_id": "f76d02cb-94b2-466f-9e3b-710bbeee91c8",
+          "trial_name": "foodstuff-beta-activity__qcPaHLL",
+          "task_name": "terminal-bench/foodstuff-beta-activity",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "6fa6e91f-68bc-413c-b7bd-5737989e0344"
+        },
+        {
+          "trial_id": "d4bc2510-78cb-4e1b-819b-1e9952dd50b3",
+          "trial_name": "freecad-impeller__FxN3Wma",
+          "task_name": "terminal-bench/freecad-impeller",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "415f7c90-edf6-44d1-8dff-37a8e075b7e4"
+        },
+        {
+          "trial_id": "dd68b4d6-3fce-4681-b379-df2b5af31f98",
+          "trial_name": "freecad-impeller__xSZd9fE",
+          "task_name": "terminal-bench/freecad-impeller",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "752b5019-1da3-4937-9187-7ed8ce1cf26e"
+        },
+        {
+          "trial_id": "d4a2d85c-2e99-445b-ad5b-345c699c53e1",
+          "trial_name": "freecad-impeller__xwg3Mra",
+          "task_name": "terminal-bench/freecad-impeller",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "df59190b-7ee1-46f2-a764-32029b4d5e9c"
+        },
+        {
+          "trial_id": "cca749ea-02a0-4c30-a884-47ef7975c006",
+          "trial_name": "freecad-platform-drawing__b8UQrEw",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "ef0b5ad0-22d8-4785-8590-85ca9e67567b"
+        },
+        {
+          "trial_id": "840e79d4-6f5a-46d5-af30-bcd7c1c72ca6",
+          "trial_name": "freecad-platform-drawing__brUAV7y",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "1c6287f2-200e-4b06-b9c5-1d0feea05cfd"
+        },
+        {
+          "trial_id": "7428683d-e955-4fb6-8a17-8785f20ba8e1",
+          "trial_name": "freecad-platform-drawing__m85sdty",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "4adad528-ca07-4861-9b92-457a28fcc411"
+        },
+        {
+          "trial_id": "90b9aced-4206-4847-9272-3b07a1b7aaef",
+          "trial_name": "freecad-spring-clip__PxjksiF",
+          "task_name": "terminal-bench/freecad-spring-clip",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "771fbb7c-f548-43ea-bc63-116bd5f8c49b"
+        },
+        {
+          "trial_id": "db052cfe-37f9-4bfc-94f9-271b023a25b3",
+          "trial_name": "freecad-spring-clip__fok6cpe",
+          "task_name": "terminal-bench/freecad-spring-clip",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "0dc0eeaf-7147-4910-9056-af4084f4e7d5"
+        },
+        {
+          "trial_id": "ac70de7c-c503-4e6a-891e-b9bd13fe8670",
+          "trial_name": "freecad-spring-clip__iBoZ2vM",
+          "task_name": "terminal-bench/freecad-spring-clip",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "d8cff99a-1737-4412-8e7a-19fc9cebd531"
+        },
+        {
+          "trial_id": "3af3fd44-e62f-470e-bc3c-ce57cfa1102c",
+          "trial_name": "gsea-proteomics__6RC8hmd",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "e6a55190-6174-4cdc-89c2-a9f6bda9ef4a"
+        },
+        {
+          "trial_id": "83ff0a9c-8775-4b2e-b22f-8a36a252e7bf",
+          "trial_name": "gsea-proteomics__6rsEPMW",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "1e6a21b2-f08a-45bf-a6e7-38b398cfb133"
+        },
+        {
+          "trial_id": "16c5b8f5-5273-460d-a050-d8dcffd4c926",
+          "trial_name": "gsea-proteomics__q5wuqnU",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "6a7f94ca-4a5a-4b0e-8a1a-d408ceb0bdf2"
+        },
+        {
+          "trial_id": "00fabadc-e36b-4756-baf2-27d02c807c15",
+          "trial_name": "interleaved-vigenere__BfscqyQ",
+          "task_name": "terminal-bench/interleaved-vigenere",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "94a2ed1b-f2cd-434e-82c2-626ac7fde5a1"
+        },
+        {
+          "trial_id": "ed45c5c7-48bd-4f45-98da-d43daa125cf8",
+          "trial_name": "interleaved-vigenere__WZaefan",
+          "task_name": "terminal-bench/interleaved-vigenere",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "188e4bb3-9e52-4ba5-852f-f84b280840f8"
+        },
+        {
+          "trial_id": "08a22696-cdd5-4df9-b899-e40173ed954c",
+          "trial_name": "interleaved-vigenere__z5jVHpg",
+          "task_name": "terminal-bench/interleaved-vigenere",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "b5d0b6a9-bc74-4186-9318-8233e9c4b85b"
+        },
+        {
+          "trial_id": "1dd14c61-1f60-4c01-b813-d282840d5e8e",
+          "trial_name": "layout-config-recreation2__HrTjTjc",
+          "task_name": "terminal-bench/layout-config-recreation2",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "31c77c87-c9a4-47e3-ba11-81ab6efb8d29"
+        },
+        {
+          "trial_id": "f7a01b32-9408-4f6e-af2b-f964b1feacf7",
+          "trial_name": "layout-config-recreation2__bBNCaCw",
+          "task_name": "terminal-bench/layout-config-recreation2",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "1b53c7da-d95b-4af7-bdca-04d798cc5c36"
+        },
+        {
+          "trial_id": "f974c8b7-efef-4c99-b3ca-da9f0a2c466c",
+          "trial_name": "layout-config-recreation2__p6Zdren",
+          "task_name": "terminal-bench/layout-config-recreation2",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "ac5f0df8-34ba-427c-b5b9-6469c610b2d7"
+        },
+        {
+          "trial_id": "add1a838-65d9-4c68-b534-35e31c162f18",
+          "trial_name": "layout-config-recreation__5Ke7oJk",
+          "task_name": "terminal-bench/layout-config-recreation",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "1be153d4-b0da-46c3-8cd1-62428c7e8f67"
+        },
+        {
+          "trial_id": "a9768daa-f8ca-4234-8056-d7624ce1977b",
+          "trial_name": "layout-config-recreation__VUc3qgg",
+          "task_name": "terminal-bench/layout-config-recreation",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "ad8db93f-29ff-40a2-b7e9-5355bb956e54"
+        },
+        {
+          "trial_id": "3ea3b445-3bea-49d4-bbdd-b1daf85c523f",
+          "trial_name": "layout-config-recreation__dzr9cbd",
+          "task_name": "terminal-bench/layout-config-recreation",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "6e6ade49-4663-4d4e-9de5-f3faf99cd4b5"
+        },
+        {
+          "trial_id": "e05da70f-2aef-4443-8175-385a22facf3e",
+          "trial_name": "mvcc-lsm-compaction__EgYaVWY",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "962c7d26-1454-46c9-bd79-99147a4cd4fc"
+        },
+        {
+          "trial_id": "c51f476a-2271-4cac-913e-e8eca7073e4a",
+          "trial_name": "mvcc-lsm-compaction__GGGJWMV",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "c5f81c76-d901-460f-a571-d7c79771a7c0"
+        },
+        {
+          "trial_id": "f0453339-0c30-442d-bcd5-ad4195f03be9",
+          "trial_name": "mvcc-lsm-compaction__RFUVtP4",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "871e2855-4445-4367-a52d-8794d0ffae0e"
+        },
+        {
+          "trial_id": "cf251086-ee00-4106-9142-139413416690",
+          "trial_name": "pretrain-shard-corruption__2pVLuf4",
+          "task_name": "terminal-bench/pretrain-shard-corruption",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "79b89618-f728-4a23-9eb5-24a3e7d71f2a"
+        },
+        {
+          "trial_id": "c80d8579-f822-4357-bffe-2066e524ff2a",
+          "trial_name": "pretrain-shard-corruption__XK8w3KT",
+          "task_name": "terminal-bench/pretrain-shard-corruption",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "1aa61eee-f8ab-4579-8c3c-d82eb6d77f1d"
+        },
+        {
+          "trial_id": "ba567e3e-6788-466d-bd1d-b90e263a94da",
+          "trial_name": "pretrain-shard-corruption__q34Z4ZX",
+          "task_name": "terminal-bench/pretrain-shard-corruption",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "8c86a562-925f-4bea-90eb-27d10faaae01"
+        },
+        {
+          "trial_id": "27ccc5d2-a9be-451f-8146-b80ce03a31c3",
+          "trial_name": "production-planning__QM5LU8X",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "5b18b13d-2f1e-49a2-b004-a14bea479927"
+        },
+        {
+          "trial_id": "830c7e89-3241-4154-90f0-adbae01c8377",
+          "trial_name": "production-planning__QP3oyyv",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "5af5984a-f5a0-4527-88ea-e53914d03293"
+        },
+        {
+          "trial_id": "b90cbe76-0845-45cb-a9da-6b946832224b",
+          "trial_name": "production-planning__iTJ2TNC",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "7cd47d2f-8963-4162-acbe-388307cc13a1"
+        },
+        {
+          "trial_id": "22daae08-14b2-45a9-99c7-a743ede692c6",
+          "trial_name": "protein-autointerp-disulfide__dmXidLc",
+          "task_name": "terminal-bench/protein-autointerp-disulfide",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "71642200-3057-4c67-8573-dedd885d8de5"
+        },
+        {
+          "trial_id": "5dce8492-1111-440b-a990-392a5f8ef365",
+          "trial_name": "protein-autointerp-disulfide__k64yQmD",
+          "task_name": "terminal-bench/protein-autointerp-disulfide",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "1cfc90b3-e6b7-4a69-9c29-376a93b72857"
+        },
+        {
+          "trial_id": "922ab80c-dd0b-40e2-84be-6fde50437a1c",
+          "trial_name": "protein-autointerp-disulfide__kCJ7G9S",
+          "task_name": "terminal-bench/protein-autointerp-disulfide",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "b18d4750-4ec4-49c8-9189-b4634ef9bed9"
+        },
+        {
+          "trial_id": "97b4c71e-e23f-49ce-8b46-d8b989be167e",
+          "trial_name": "risk-scorer-replay__6B6fiHe",
+          "task_name": "terminal-bench/risk-scorer-replay",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "f12790f8-2884-4796-8adc-f2ae04fd733d"
+        },
+        {
+          "trial_id": "13019a14-85f1-40a0-b34a-1792ef94cc45",
+          "trial_name": "risk-scorer-replay__BwtJ3at",
+          "task_name": "terminal-bench/risk-scorer-replay",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "629b5a86-aac9-4a4d-a59a-9f09e684360d"
+        },
+        {
+          "trial_id": "9079f674-eca7-4d2a-9e42-1efe331ebe04",
+          "trial_name": "risk-scorer-replay__rDzN3ep",
+          "task_name": "terminal-bench/risk-scorer-replay",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "62dcbfb2-3d0f-4511-9c6d-dc8b110caca7"
+        },
+        {
+          "trial_id": "b44e7cd5-ad05-4ef8-b5dc-5ee8565575d3",
+          "trial_name": "roy-polymorph-cn__5CPdNrQ",
+          "task_name": "terminal-bench/roy-polymorph-cn",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "fde688ae-5dd8-493b-85ce-63b88de252fc"
+        },
+        {
+          "trial_id": "78f951ef-f32c-4374-8e78-dcd2f4f83e75",
+          "trial_name": "roy-polymorph-cn__CxGX98X",
+          "task_name": "terminal-bench/roy-polymorph-cn",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "af07f96b-2730-4e82-98f7-315e8cd9224a"
+        },
+        {
+          "trial_id": "6d24412a-8b35-46ef-a63d-f836c303fb78",
+          "trial_name": "roy-polymorph-cn__NaQPKN7",
+          "task_name": "terminal-bench/roy-polymorph-cn",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "3465ecb9-bda8-4cad-ad70-341a412240cd"
+        },
+        {
+          "trial_id": "ff171a34-6559-4ad6-8fde-a5e9cd8e0734",
+          "trial_name": "sglang-qwen-burst__7vxkDdY",
+          "task_name": "terminal-bench/sglang-qwen-burst",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "24f3dd84-f5af-43bf-9444-6cb1158f300f"
+        },
+        {
+          "trial_id": "6d6c3cf5-8284-4aa9-ac2b-bc9d1338f6fc",
+          "trial_name": "sglang-qwen-burst__CZpTE5p",
+          "task_name": "terminal-bench/sglang-qwen-burst",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "d261ead9-87cd-45df-b5b1-912abfc8c485"
+        },
+        {
+          "trial_id": "029b4121-bbf7-49a2-9cc7-a24c3dc51494",
+          "trial_name": "sglang-qwen-burst__ZErk3F7",
+          "task_name": "terminal-bench/sglang-qwen-burst",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "e0b2ddc9-597a-4d81-99e3-d937a92f0161"
+        },
+        {
+          "trial_id": "40ae2f8d-6594-4379-bd4f-7a8bfb79ae85",
+          "trial_name": "sound-change-cascade__8y5pBYY",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "e71378fc-18a3-4893-a15e-f58bc20181dd"
+        },
+        {
+          "trial_id": "c2feeab0-9a18-4fe5-8442-06efbb6c5225",
+          "trial_name": "sound-change-cascade__AjkhsMS",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "ec141feb-d441-478a-810d-2fa967d5ac43"
+        },
+        {
+          "trial_id": "cc4c63bf-3052-46b1-b00d-0dd60138eb88",
+          "trial_name": "sound-change-cascade__Ho8GbFC",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "69889e4b-08c4-44a9-b062-55efa814d0d1"
+        },
+        {
+          "trial_id": "3b86c013-d2ef-4b55-a63d-d753e8589a55",
+          "trial_name": "vba-userform-port__K3NYT7L",
+          "task_name": "terminal-bench/vba-userform-port",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "7b38aa8c-9004-4966-8b1b-a69038d82047"
+        },
+        {
+          "trial_id": "a9e48978-28b0-4ccd-b5ee-8adc1c02ee11",
+          "trial_name": "vba-userform-port__eAHoE94",
+          "task_name": "terminal-bench/vba-userform-port",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "8c5e5a2d-393d-4b8e-a67d-252915967f3f"
+        },
+        {
+          "trial_id": "045f225f-f1e4-4ac3-84e1-c59352a1bec1",
+          "trial_name": "vba-userform-port__pwd9oMt",
+          "task_name": "terminal-bench/vba-userform-port",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "53cb3e02-c96b-4e48-841a-17ae22379b4b"
+        },
+        {
+          "trial_id": "38b2121b-a911-4284-b228-8a87a5c20e6e",
+          "trial_name": "vf2-speedup-networkx__4akUA3s",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "84f0333f-e4d9-415f-9eaf-673820571c3f"
+        },
+        {
+          "trial_id": "66ce8e7b-3c88-4498-b473-60637180a3a7",
+          "trial_name": "vf2-speedup-networkx__Ft8dxLU",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "4ce05df0-a978-4f91-9a19-8d765817ba39"
+        },
+        {
+          "trial_id": "2327b2ba-f5c4-4e40-aba2-b4abb708beeb",
+          "trial_name": "vf2-speedup-networkx__o7q8pfd",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "7b8af9bf-e490-45dd-83ce-76ffdfa5da74"
+        },
+        {
+          "trial_id": "4c397ddc-2f7e-474d-bb25-207a10fd9afb",
+          "trial_name": "vllm-deepseek-streaming__3BxJsTA",
+          "task_name": "terminal-bench/vllm-deepseek-streaming",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "2895beb1-47fb-49c1-94a7-762537b9ded5"
+        },
+        {
+          "trial_id": "b202a960-a377-4811-80f3-22f167e4433c",
+          "trial_name": "vllm-deepseek-streaming__NyAGofn",
+          "task_name": "terminal-bench/vllm-deepseek-streaming",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "aa4cf713-f3e0-404c-bcfd-05b3ad338ca5"
+        },
+        {
+          "trial_id": "d2ca75b2-55df-49e6-a2d3-1d2be1ad85d6",
+          "trial_name": "vllm-deepseek-streaming__R9SXpEZ",
+          "task_name": "terminal-bench/vllm-deepseek-streaming",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "4cf593fa-44b6-4f2b-89ee-faf1771aa893"
+        },
+        {
+          "trial_id": "816ace4b-329e-4f77-b2ec-8b02f1547695",
+          "trial_name": "vpp-loss-divergence__2rjEuiE",
+          "task_name": "terminal-bench/vpp-loss-divergence",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "f2d390e8-79a0-429f-bfcb-61205d319260"
+        },
+        {
+          "trial_id": "c5df6a63-b3c6-43bc-999b-952813f281bc",
+          "trial_name": "vpp-loss-divergence__BgUVSb2",
+          "task_name": "terminal-bench/vpp-loss-divergence",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "619d2a68-92ce-42ac-b30a-ec1340794c81"
+        },
+        {
+          "trial_id": "e766786d-9585-40dd-9e31-704d98614bee",
+          "trial_name": "vpp-loss-divergence__Mje5bnF",
+          "task_name": "terminal-bench/vpp-loss-divergence",
+          "job_id": "f14cd91c-c9ba-44d6-94d4-d31b08b14e64",
+          "job_dir": "tb40-sonnet-v3",
+          "claude_session_id": "62f91e4f-853c-48f7-84c1-a4d45755283a"
+        }
+      ]
+    }
+  ],
+  "storage": "/srv/trajlab/jobs"
+}

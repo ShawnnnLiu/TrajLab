@@ -17,7 +17,7 @@ from uuid import UUID
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
 # Bump with an ADR whenever any table below or in trajlab.store.schema changes shape.
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 RECORD_DB_FILENAME = "record.duckdb"
 HELDOUT_DB_FILENAME = "heldout.duckdb"
 # Content-addressed later versions of changed rows without a hunk (a file's bytes, text or
@@ -237,6 +237,68 @@ class JobNoticeRow(_Row):
     noticed_at: AwareDatetime = Field(
         description="When Claude Code queued the notice: the job's end, within its polling."
     )
+
+
+# How a writing process was tied to its call (ADR-0021, trajlab.store.writes): the call's command
+# text in the process's Bash tool shell; the session id of a tool shell seen at another event;
+# the process's start time inside one Bash call's window; Claude Code's own write during a Write,
+# Edit, or NotebookEdit call.
+WriterMapping = Literal["command", "session", "start_time", "tool_window"]
+
+
+class WriteRow(_Row):
+    """The recorded writes to one delta row's path, in that row's checkpoint interval, by the
+    processes of one call (ADR-0021).
+
+    From the trial's `agent/trajlab/writes.jsonl` (`trajlab record-writes`): every event on the
+    path after the previous checkpoint's commit and up to this one's, grouped by the call that
+    started the writing process. A row whose writer belongs to no call (Claude Code itself
+    outside a write tool, the harness, a program of the task image) has a null `writer_step`.
+    A path with no events of its own in the interval takes those of the nearest directory above
+    it that was renamed into place (for an added or modified path) or removed (for a deleted
+    one) in the interval, named in `via_dir`: `pip install --target` and uv build a directory
+    under another name and rename it, and a recursive delete removes children whose directory
+    is gone before the recorder can name it. A trial captured without the recorder has no rows.
+    """
+
+    trial_id: UUID = Field(description="The trial (trials.trial_id).")
+    step_idx: int = Field(ge=1, description="The delta row's step: whose checkpoint holds it.")
+    path: str = Field(pattern=r"^/", description="The delta row's path.")
+    writer_step: int | None = Field(
+        default=None,
+        ge=1,
+        description="The step whose call started the process that wrote the path; null when "
+        "no call did, or none could be found.",
+    )
+    mapped_by: WriterMapping | None = Field(
+        default=None,
+        description="How the process was tied to that call: `command` (its Bash shell ran the "
+        "call's command), `session` (it kept the session of such a shell), `start_time` (it "
+        "started inside the call's window), or `tool_window` (Claude Code wrote it during a "
+        "Write or Edit call); null when writer_step is.",
+    )
+    events: int = Field(ge=1, description="Write events on the path by those processes.")
+    ops: tuple[str, ...] = Field(
+        min_length=1,
+        description="Their kinds, sorted: create, modify, close_write, delete, moved_to.",
+    )
+    first_at: AwareDatetime = Field(description="The first event's time.")
+    last_at: AwareDatetime = Field(description="The last event's time.")
+    via_dir: str | None = Field(
+        default=None,
+        pattern=r"^/",
+        description="The directory above the path whose events these are, when the path had "
+        "none of its own: renamed into place (`moved_to`) for an added or modified path, "
+        "removed (`delete`) for a deleted one; null when the events are on the path itself.",
+    )
+
+    @model_validator(mode="after")
+    def _consistent(self) -> Self:
+        if (self.writer_step is None) != (self.mapped_by is None):
+            raise ValueError("writer_step and mapped_by are set together")
+        if self.first_at > self.last_at:
+            raise ValueError("first_at is after last_at")
+        return self
 
 
 class StoreMeta(_Row):

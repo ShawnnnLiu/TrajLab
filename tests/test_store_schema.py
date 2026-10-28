@@ -26,6 +26,7 @@ from trajlab.contracts import (
     StepRow,
     StoreMeta,
     TrialRow,
+    WriteRow,
 )
 from trajlab.store import exclusions, schema
 from trajlab.store.derive import VIEWS, derived_id
@@ -35,6 +36,7 @@ TABLE_MODELS: dict[str, type[BaseModel]] = {
     "steps": StepRow,
     "deltas": DeltaRow,
     "job_notices": JobNoticeRow,
+    "writes": WriteRow,
     "checks": CheckRow,
     "faults": FaultRow,
     "blame": BlameRow,
@@ -122,6 +124,17 @@ FULL_ROWS: dict[str, BaseModel] = {
         status="completed",
         noticed_at=datetime(2026, 9, 22, 6, 24, 18, 84000, tzinfo=KOLKATA),
     ),
+    "writes": WriteRow(
+        trial_id=TRIAL_ID,
+        step_idx=3,
+        path="/app/hello.txt",
+        writer_step=1,
+        mapped_by="session",
+        events=7,
+        ops=("close_write", "create", "modify"),
+        first_at=datetime(2026, 9, 22, 6, 19, 1, 250000, tzinfo=KOLKATA),
+        last_at=datetime(2026, 9, 21, 20, 49, 17, 999999, tzinfo=NEW_YORK),
+    ),
     "checks": CheckRow(
         trial_id=TRIAL_ID, check_id="pytest:test_hello_file", passed=False, fault_id="f1"
     ),
@@ -176,6 +189,15 @@ SPARSE_ROWS: dict[str, BaseModel] = {
         tool_call_id="toolu_c",
         status="failed",
         noticed_at=EPOCH,
+    ),
+    "writes": WriteRow(
+        trial_id=TRIAL_ID,
+        step_idx=1,
+        path="/opt/x",
+        events=1,
+        ops=("delete",),
+        first_at=EPOCH,
+        last_at=EPOCH,
     ),
     "checks": CheckRow(trial_id=TRIAL_ID, check_id="pytest:x", passed=None),
     "faults": FaultRow(trial_id=TRIAL_ID, fault_id="f2", kind="omission", method="replay"),
@@ -242,7 +264,7 @@ def sql_types(annotation: Any) -> set[str]:
 
 
 def test_every_table_has_a_row_model() -> None:
-    assert set(schema.RECORD_TABLES) == {"trials", "steps", "deltas", "job_notices"}
+    assert set(schema.RECORD_TABLES) == {"trials", "steps", "deltas", "job_notices", "writes"}
     assert set(schema.HELDOUT_TABLES) == {"checks", "faults", "blame", "chains"}
     assert {*schema.RECORD_TABLES, *schema.HELDOUT_TABLES} == set(TABLE_MODELS)
 
@@ -275,6 +297,7 @@ def test_each_file_holds_only_its_tables(tmp_path: Path) -> None:
             "steps",
             "deltas",
             "job_notices",
+            "writes",
             "store_meta",
             *(v.name for v in VIEWS),
         },

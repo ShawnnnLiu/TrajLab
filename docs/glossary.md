@@ -160,8 +160,23 @@ One trial is one task executed by one attempt.
 - **launcher** - a backgrounded or hand-launched call whose job was open when a file was written (`delta_attribution.launcher_step`): the one that redirects into the file, else names it, else the latest.
 - **write time** - a file's mtime inside the checkpoint image, `deltas.mtime_after`; the only recorded time of the write itself.
 - **landing window** - from the landing call's `t_start` to its checkpoint's commit (`steps.checkpoint_at`), where the call's own writes carry their times.
-- **attribution** - the value `delta_attribution` gives a delta row: `foreground`, `background`, `background_by_path`, `background_untracked`, `contested`, `untrusted_mtime`, or `unknown`; `launched_by_step` is set for the first four, and for `untrusted_mtime` when no job was open.
-- **contested** - a write inside the landing window while a launcher's job was open: either could have written it; the causal step is the landing step and `launcher_step` the alternative.
+- **attribution** - the value `delta_attribution` gives a delta row: `recorded` or `multi_writer` from the write record (ADR-0021), else `foreground`, `background`, `background_by_path`, `background_untracked`, `contested`, `untrusted_mtime`, or `unknown`; `launched_by_step` is set for `recorded` and the next four, and for `untrusted_mtime` when no job was open.
+- **contested** - a write inside the landing window while a launcher's job that names the file (a redirect into it, its basename, or its directory) was open: either could have written it; the causal step is the landing step and `launcher_step` the alternative.
+
+## Write record (ADR-0021)
+
+- **write recorder** - the host process `trajlab record-writes <jobs-dir>`, run as root beside the watcher: one fanotify group on the host filesystem that holds the containerd snapshots, and one write event per write in a running trial container's upper directory.
+  One per jobs dir, held by `<jobs-dir>/.trajlab-recorder.lock`.
+  Not: the watcher, which answers hooks and takes checkpoints.
+- **upper directory** - a container's overlay `upperdir` on the host, read from its init process's `mountinfo`; every write the container makes lands there, which is how an event is mapped to a trial and its container path found.
+- **write event** - one `WriteEvent` line of `agent/trajlab/writes.jsonl`: a `create`, `delete`, `moved_to`, `close_write`, or `modify` (at most one per process and path per second) of a container path, with the writing process as the recorder read it at the event (pids, command line, session id, start time, parents).
+  The one line that is not a write is `open`: a Bash call's tool shell sourcing its shell snapshot as it starts, recorded so every call's shell is known.
+- **tool shell** - the shell Claude Code runs one Bash call in, `bash -c '<setup> && eval <command> [< /dev/null] && pwd -P >| /tmp/claude-<id>-cwd'`, in a session of its own; its command text names the call.
+- **write record** - a trial's write events and the store's `writes` rows built from them; always qualified ("write record"), since unqualified "record" names a capture record.
+- **writer step** - the step whose call started the process that wrote a path (`writes.writer_step`), found by the tool shell's command, the session id, or the start time (`writes.mapped_by`).
+- **carrying directory** - for a delta row's path with no write events of its own in its checkpoint interval, the nearest directory above it that was renamed into place (an added or modified path) or removed (a deleted path) in that interval (`writes.via_dir`); its events stand for the path's.
+  Covers a directory built under another name and renamed (`pip install --target`, uv's cache) and a recursive delete whose children's events were lost with their directory.
+- **`recorded` / `multi_writer`** - the attributions the write record gives: the processes of exactly one call, or of several, wrote the path in the delta row's checkpoint interval; they come before ADR-0020's cases, which still decide rows the write record does not settle.
 
 ## Detector capture and labels (ADR-0015)
 

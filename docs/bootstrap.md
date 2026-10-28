@@ -101,6 +101,16 @@ uv run harbor datasets list
 
 Write `configs/harbor/tb_subset_v0.json` with the dataset name exactly as listed, `claude-code`, the model, `n_attempts`, `n_concurrent`, `environment.type = "docker"`, and a `tasks` filter for the subset in `configs/tasks/tb_subset_v0.txt`. Job config schema: `harbor.models.job.config.JobConfig`; Harbor's docs page `core-concepts/jobs/configs` has examples.
 
+## 5a. Linux capture server: what the write recorder needs (ADR-0021)
+
+Corpora from `tb40-sonnet-v4` on record which process wrote each file (`trajlab record-writes`), which works only on a Linux host and needs root:
+
+- **Docker with the containerd image store and the overlayfs snapshotter.** `/etc/docker/daemon.json` holds `"features": {"containerd-snapshotter": true}` (on the 2026-10-26 server, with `"data-root": "/srv/docker"`). The snapshots live in `/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/<n>/fs`; check with `sudo grep -o 'upperdir=[^,]*' /proc/$(docker inspect -f '{{.State.Pid}}' <container>)/mountinfo`. The recorder marks the host filesystem that holds them, so it must support file handles (ext4 and xfs do) and the kernel must be 5.9 or later (`uname -r`).
+- **Passwordless `sudo`** for the user who starts the recorder, or a root shell. The recorder runs as `sudo PYTHONDONTWRITEBYTECODE=1 .venv/bin/trajlab record-writes corpus/jobs`: the venv's own script, so root writes no bytecode into `src/` and nothing into `.venv` or uv's cache.
+- **One filesystem, many events.** The mark sees every write on that filesystem, the host's included (Docker's commits, store builds); the recorder drops host processes' events by pid namespace, but a store build or image pull running beside a capture costs it CPU. `fatrace` (`apt install fatrace`) shows the same events by hand: `sudo fatrace -t -f WC+ | grep -F <upperdir>`.
+
+Start it in its own tmux session before `trajlab run`, beside the watcher (`docs/checkpoint-protocol.md`, "Write recorder").
+
 ## 6. Hand off to Claude Code
 
 ```bash

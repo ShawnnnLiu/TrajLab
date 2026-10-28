@@ -59,6 +59,14 @@ from trajlab.checkpoint.watcher import (
     hold_watcher_lock,
     watcher_running,
 )
+from trajlab.checkpoint.writes import (
+    DEFAULT_DISCOVER_INTERVAL_S,
+    DEFAULT_SNAPSHOTS,
+    Recorder,
+    RecorderLockedError,
+    hold_recorder_lock,
+    recorder_running,
+)
 from trajlab.contracts import CheckpointRecord, RepairArm
 from trajlab.contracts.groundtruth import (
     GROUNDTRUTH_DIRNAME,
@@ -170,6 +178,11 @@ def run(
     except RunRefusedError as error:
         typer.echo(f"trajlab run: {error}", err=True)
         raise typer.Exit(code=1) from error
+    if not recorder_running(plan.job_dir.parent):
+        logging.getLogger(__name__).warning(
+            "no write recorder holds %s: trials will record no writes (ADR-0021)",
+            plan.job_dir.parent,
+        )
     raise typer.Exit(code=execute(plan, storage=storage))
 
 
@@ -417,6 +430,48 @@ def watch(
             ).run(stop)
     except WatcherLockedError as error:
         typer.echo(f"trajlab watch: {error}", err=True)
+        raise typer.Exit(code=1) from error
+
+
+@app.command("record-writes")
+def record_writes(
+    jobs_dir: Annotated[Path, typer.Argument(help="Harbor jobs dir, e.g. corpus/jobs.")],
+    snapshots: Annotated[
+        Path,
+        typer.Option(
+            help="The containerd overlayfs snapshotter's directory: its filesystem is marked."
+        ),
+    ] = DEFAULT_SNAPSHOTS,
+    discover_interval: Annotated[
+        float, typer.Option(min=0.1, help="Seconds between scans for trials that started.")
+    ] = DEFAULT_DISCOVER_INTERVAL_S,
+) -> None:
+    """Record which process wrote each file in running trials' containers (ADR-0021), into each
+    trial's agent/trajlab/writes.jsonl. Run as root beside the watcher; stop with Ctrl-C."""
+    if os.geteuid() != 0:
+        typer.echo(
+            "trajlab record-writes: needs root (fanotify on a whole filesystem); run it as "
+            "`sudo PYTHONDONTWRITEBYTECODE=1 .venv/bin/trajlab record-writes ...`",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+    stop = threading.Event()
+    for signum in (signal.SIGINT, signal.SIGTERM):
+        signal.signal(signum, lambda *_: stop.set())
+    try:
+        with hold_recorder_lock(jobs_dir):
+            Recorder(
+                jobs_dir,
+                identify_trial,
+                DockerCommitBackend(),
+                snapshots=snapshots,
+                discover_interval=discover_interval,
+            ).run(stop)
+    except RecorderLockedError as error:
+        typer.echo(f"trajlab record-writes: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    except (OSError, RuntimeError) as error:
+        typer.echo(f"trajlab record-writes: {error}", err=True)
         raise typer.Exit(code=1) from error
 
 
