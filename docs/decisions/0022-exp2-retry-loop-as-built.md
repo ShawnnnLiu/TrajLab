@@ -64,6 +64,8 @@ Four things the specs leave open, or say in ways the repo cannot follow, were pu
    - An attempt counts when the verifier scored it or the agent itself failed (`ended_turn`, `timeout`, `agent_error`: ADR-0012 item 4).
      One the harness failed (`infra`) or that left no `result.json` (`lost`) is not an attempt: it runs again under `-r<n>`, its job dir kept, and three such tries stop the chain; an `unclassified` exception stops it until a person decides (`--rerun-unclassified`), as Exp 1 has a person read those.
      A usage limit pauses launches for 30 minutes, and a try a usage limit ended does not count toward the three: launches resume with the same chains first in line, so a long limit would otherwise stop them.
+     Amended 2026-10-28, during the full run: a launch Harbor never started (no job dir: at 10:09 UTC Harbor's registry lookup got a Cloudflare 525 from supabase for about a minute, and two tries of one chain failed in seconds) pauses launches for two minutes and does not count toward the three either.
+     Such a failure hits every chain alike, so counting it would stop whichever chains were first in line during an outage; a persistent one (no Docker access, as in the dry run's first launch) now waits instead of stopping chains, and the monitor shows its `lost` lines.
    - The loop holds every launch while the watcher or the write recorder is not running, while the jobs disk has under 50 GB free, and while the tree has changes `trajlab run` would refuse; `exp2 run` refuses to start without both capture processes.
 
 6. **A chain's store is seeded by copying, and grows by building** (ADR-0016 item 3).

@@ -4,17 +4,20 @@ attempt into the chain's store (record arms) and start the next one.
 
 `chain_state` reads what a chain needs next from its two logs alone, so the loop resumes from
 disk: a chain is done (passed, or N attempts counted), stopped (an ingest failed, the harness
-failed one attempt `max_reruns` times, usage limits aside, an unclassified exception waits for
-a person, or the prompt would leak), or needs its last attempt ingested, or its next attempt
-launched. An attempt the harness failed (`infra`) or that left no result (`lost`) is not an
-attempt: it is run again under a new job name, `-r<n>`, and its job dir is kept.
+failed one attempt `max_reruns` times, usage limits and launches Harbor never started aside,
+an unclassified exception waits for a person, or the prompt would leak), or needs its last
+attempt ingested, or its next attempt launched. An attempt the harness failed (`infra`) or that
+left no result (`lost`) is not an attempt: it is run again under a new job name, `-r<n>`, and
+its job dir is kept.
 
 `Exp2Runner` runs the chains `max_running` attempts at a time. Each attempt is one `trajlab run`
 subprocess, so it gets the same pins, watcher check, and manifest as a corpus trial; the loop
 holds launches while the watcher or the write recorder is not running, while the disk is below
-`hold_below_gb`, while the tree has changes `trajlab run` would refuse, and for
-`usage_backoff_s` after a usage limit. A record-engine attempt has its query server for exactly
-the attempt's duration; the server is stopped before the attempt is ingested (ADR-0019 item 8).
+`hold_below_gb`, while the tree has changes `trajlab run` would refuse, for `usage_backoff_s`
+after a usage limit, and for `start_backoff_s` after a launch Harbor never started (no job dir:
+the registry or Docker was unreachable, or `trajlab run` refused). A record-engine attempt has
+its query server for exactly the attempt's duration; the server is stopped before the attempt
+is ingested (ADR-0019 item 8).
 Ingests run in worker threads, so a slow `docker image save` delays only its own chain.
 """
 
@@ -91,6 +94,9 @@ class ChainState:
     reason: str = ""
 
 
+NOT_STARTED_NOTE = "no job dir: Harbor did not start, or `trajlab run` refused; see the run log"
+
+
 def chain_state(
     attempts: Sequence[AttemptResult],
     ingests: Sequence[IngestResult],
@@ -129,9 +135,12 @@ def chain_state(
             reason=f"{tries[-1].exception_type} is unclassified; a person decides "
             "(ADR-0012 item 4)",
         )
-    # A usage limit is the subscription's, not the harness's: it reruns without limit, since the
+    # A usage limit is the subscription's, not the harness's, and a launch Harbor never started
+    # (no job dir) failed in seconds for every chain alike: both rerun without limit, since the
     # same chains are first in line each time launches resume.
-    harness = [a for a in tries if a.exception_type != USAGE_LIMIT_EXCEPTION]
+    harness = [
+        a for a in tries if a.exception_type != USAGE_LIMIT_EXCEPTION and a.note != NOT_STARTED_NOTE
+    ]
     if len(harness) >= max_reruns:
         reason = f"the harness failed attempt {upcoming} {len(harness)} times"
         return ChainState("stopped", upcoming, reason=reason)
@@ -227,8 +236,10 @@ def attempt_result(
     elif launch.arm == "record-engine":
         queries, ready = 0, False
     note = None
-    if outcome == "lost":
-        note = "no result.json: `trajlab run` refused or Harbor stopped; see the run log"
+    if outcome == "lost" and not job_dir.is_dir():
+        note = NOT_STARTED_NOTE
+    elif outcome == "lost":
+        note = "no result.json: Harbor stopped; see the run log"
     elif outcome == "infra":
         note = f"not an attempt: {exception or 'no reward'}"
     return AttemptResult(
@@ -294,6 +305,7 @@ class Exp2Runner:
     max_running: int = 6
     hold_below_gb: float = 50.0
     usage_backoff_s: float = 1800.0
+    start_backoff_s: float = 120.0
     max_reruns: int = 3
     ingest_workers: int = 1
     prune_ingested: bool = False
@@ -314,6 +326,7 @@ class Exp2Runner:
     stopped: dict[str, str] = field(default_factory=dict, init=False)
     retried_ingest: set[str] = field(default_factory=set, init=False)
     paused_until: float = field(default=0.0, init=False)
+    pause_reason: str = field(default="usage-limit pause", init=False)
     hold: str | None = field(default=None, init=False)
     executor: ThreadPoolExecutor | None = field(default=None, init=False)
     lock: threading.Lock = field(default_factory=threading.Lock, init=False)
@@ -532,8 +545,20 @@ class Exp2Runner:
             if result.prompt_delivered is False:
                 logger.error("%s: the agent's first message is not the rendered prompt", name)
             if result.exception_type == USAGE_LIMIT_EXCEPTION:
-                self.paused_until = self.clock() + self.usage_backoff_s
+                self._pause(self.usage_backoff_s, "usage-limit pause")
                 logger.warning("usage limit: launches paused for %.0f s", self.usage_backoff_s)
+            elif result.note == NOT_STARTED_NOTE:
+                self._pause(self.start_backoff_s, "Harbor did not start")
+                logger.warning(
+                    "%s: Harbor did not start; launches paused for %.0f s",
+                    name,
+                    self.start_backoff_s,
+                )
+
+    def _pause(self, seconds: float, reason: str) -> None:
+        until = self.clock() + seconds
+        if until > self.paused_until:
+            self.paused_until, self.pause_reason = until, reason
 
     # -- ingesting ---------------------------------------------------------------------------
 
@@ -597,7 +622,7 @@ class Exp2Runner:
 
     def hold_reason(self) -> str | None:
         if self.clock() < self.paused_until:
-            return "usage-limit pause"
+            return self.pause_reason
         free = self.disk_free_gb(self.jobs_dir)
         if free < self.hold_below_gb:
             return f"{free:.0f} GB free, below {self.hold_below_gb:.0f} GB"

@@ -18,7 +18,7 @@ from tests.test_exp2_chain import TRIAL_ID, as_attempt, copy_trial, memory_image
 from tests.test_store_build import PROMPT, all_images
 from trajlab.contracts import EXP2_ARMS, Exp2Settings
 from trajlab.exp2 import chain as chains
-from trajlab.exp2 import leaks, prereg
+from trajlab.exp2 import leaks, loop, prereg
 from trajlab.exp2.loop import ChainState, Exp2Runner, chain_state
 from trajlab.store.build import build_trial
 from trajlab.store.export import verify
@@ -96,7 +96,9 @@ class FakeProcess:
         self.job_dir, self.config, self.outcome = job_dir, config, outcome
         self.trial: Path | None = None
         self.code: int | None = None
-        if outcome != "lost":
+        if outcome == "lost":
+            job_dir.mkdir(parents=True)  # Harbor started, then stopped before a result
+        elif outcome != "unstarted":
             # Harbor makes the trial dir, agent/ included, before the container starts.
             self.trial = as_attempt(
                 copy_trial(job_dir),
@@ -335,6 +337,33 @@ def test_a_usage_limit_pauses_launches(corpus: dict[str, Path], tmp_path: Path) 
     clock[0] = 601.0
     runner.step()
     assert len(harbor.launched) == 2
+
+
+def test_a_launch_harbor_never_started_pauses_without_using_reruns(
+    corpus: dict[str, Path], tmp_path: Path
+) -> None:
+    clock = [0.0]
+    unstarted = {suffix: "unstarted" for suffix in ("control-a1", "-r1", "-r2", "-r3")}
+    harbor = FakeHarbor(unstarted)
+    runner = make_runner(
+        corpus,
+        tmp_path,
+        harbor,
+        settings=make_settings(corpus, ("control",), 1),
+        clock=lambda: clock[0],
+    )
+    runner.step()  # launch
+    runner.step()  # reap: no job dir
+    runner.step()
+    assert len(harbor.launched) == 1 and runner.hold == "Harbor did not start"
+    for _ in range(40):
+        clock[0] += 121.0
+        runner.step()
+        if runner.done():
+            break
+    attempts = chains.read_attempts(chain_of(runner, "control"))
+    assert [a.outcome for a in attempts] == ["lost"] * 4 + ["failed"]
+    assert {a.note for a in attempts[:4]} == {loop.NOT_STARTED_NOTE}
 
 
 def test_launches_hold_while_capture_is_down(corpus: dict[str, Path], tmp_path: Path) -> None:
