@@ -93,9 +93,13 @@ Four things the specs leave open, or say in ways the repo cannot follow, were pu
 
 ## Open, for the owner
 
-- One failure per task or all 56 (`sample.md`); `exp2 prereg` takes named trials or every usable failure, and a per-task draw would be added with its rule.
-- The primary comparison's test (McNemar, or a mixed logistic model with a task random effect; design spec §6), given to `exp2 prereg --test`.
 - `--prune-ingested` for the full run (item 7), and whether a retry with an incomplete checkpoint chain stops its chain (item 6).
+
+Settled by the owner on 2026-10-28, before the full run (`preregistration.md`):
+
+- The sample is all 56 usable failures, not one per task (`sample.md`): 21 tasks, most with 3 failures, carried by the task random effect.
+- The primary test, which I proposed and the owner accepted: a mixed-effects logistic regression of repaired by N = 3 on arm (record-engine against record-files), with random intercepts for task and for failure, and a two-sided likelihood-ratio test of the arm effect at α = 0.05; if that model is singular or does not converge, the exact McNemar test on the 56 failure pairs, two-sided, at α = 0.05.
+  McNemar alone would treat the pairs of one task's failures as independent.
 
 ## Consequences
 
