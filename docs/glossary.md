@@ -138,6 +138,10 @@ One trial is one task executed by one attempt.
   Not: "repair note", which is Exp 1's one-line note (`REPAIR_NOTE`).
 - **evidence sentence** - the one arm-specific sentence of the retry prompt: empty in `control`, the mount in `record-files`, the query command and schema in `record-engine`.
 - **root failure** - attempt 0 of a retry chain, the failed first attempt the chain retries.
+- **chain store** - a retry chain's store in a record arm: its root failure's rows copied from the corpus store, then each failed retry built in, so at retry t it holds exactly attempts 0 to t-1 (ADR-0022, item 6).
+  Not: the corpus store, which holds every first attempt and no retry.
+- **rerun** - the same attempt run again, as `<job>-r<n>`, because the harness failed it (`infra`) or it left no result (`lost`); a rerun is not a retry, and only the try that the verifier scored or the agent itself failed counts toward N.
+- **preregistration** - the committed file `trajlab exp2 prereg` writes (technical spec §5.3): Markdown and one `Exp2Settings` block, which `trajlab exp2 run` runs; a dry run has its own file.
 - **sibling failure** - another failed first attempt of the same task; never in a chain's store (ADR-0016, item 3).
 - **decisive step / `t_err` / `err_step`** - the step row of ADR-0013's decisive call, the earliest-introduced blamed call among a failed trial's confirmed faults; absent when no fault blames a call.
   Not: "first error", which may be a transient error the agent recovered from.

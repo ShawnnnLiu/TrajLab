@@ -116,3 +116,7 @@ A rule changed after that must therefore apply to an existing store without its 
 Store schema version 3 adds the write times to `deltas`, the checkpoint time and the shell text to `steps`, and the `job_notices` table; `DERIVE_VERSION` 2 adds the views `step_jobs` and `delta_attribution` (ADR-0020, amendment of the same date).
 Since the new values are in the rows, no store of an earlier schema is upgraded in place any more: the schema-1 path of `trajlab store derive` is removed, and `trajlab store derive` only replaces views on a store of the current schema; an older store is built again from its trial dirs and images.
 The `record-files` bundle and the schema text carry the new table and views like every other relation.
+
+## Amendment (2026-10-28): item 6 settled (ADR-0022)
+
+The owner chose on 2026-10-28 that both record arms get the schema text and no example rows: the `record-files` README is the layout paragraph and the schema text, and the `record-engine` prompt carries the same text after its command (ADR-0022 item 2, amending ADR-0016 item 1).
