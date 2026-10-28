@@ -67,7 +67,7 @@ from trajlab.checkpoint.writes import (
     hold_recorder_lock,
     recorder_running,
 )
-from trajlab.contracts import CheckpointRecord, RepairArm
+from trajlab.contracts import EXP2_ARMS, CheckpointRecord, RepairArm
 from trajlab.contracts.groundtruth import (
     GROUNDTRUTH_DIRNAME,
     POINTS_FILENAME,
@@ -75,6 +75,13 @@ from trajlab.contracts.groundtruth import (
     RefutationRecord,
     TrialCauses,
 )
+from trajlab.exp2.loop import Exp2Runner, capture_problem
+from trajlab.exp2.prereg import PREREG_PATH, prompt_leaks
+from trajlab.exp2.prereg import committed as prereg_committed
+from trajlab.exp2.prereg import drift as prereg_drift
+from trajlab.exp2.prereg import parse as parse_prereg
+from trajlab.exp2.prereg import render_markdown as render_prereg
+from trajlab.exp2.prereg import settings as exp2_settings
 from trajlab.groundtruth.blame import blame
 from trajlab.groundtruth.counterfactual import file_history, read_fixes, run_oracle, try_fix
 from trajlab.groundtruth.extract import TrialInputs, remove_stale_containers
@@ -1354,3 +1361,198 @@ def gt_oracle(
         record = run_oracle(inputs, timeout=timeout)
         outcome = record.error or f"reward {record.reward}, failed {list(record.failed_checks)}"
         typer.echo(f"{inputs.trial_dir.name}: {outcome}")
+
+
+exp2_app = typer.Typer(help="Exp 2's retry loop: three arms, N retries (ADR-0016, ADR-0022).")
+app.add_typer(exp2_app, name="exp2")
+
+
+class Exp2ArmChoice(StrEnum):
+    control = "control"
+    record_files = "record-files"
+    record_engine = "record-engine"
+
+
+PreregArgument = Annotated[
+    Path, typer.Argument(exists=True, dir_okay=False, help="The preregistration file.")
+]
+
+
+@exp2_app.command("prereg")
+def exp2_prereg(
+    run: Annotated[str, typer.Option(help="The run's name: the prefix of its job names.")],
+    test: Annotated[
+        str, typer.Option(help="The primary comparison's statistical test, as preregistered.")
+    ],
+    corpus_job: Annotated[Path, typer.Option(help="Job dir of the root failures.")] = Path(
+        "corpus/jobs/tb40-sonnet-v4"
+    ),
+    corpus_store: Annotated[Path, typer.Option(help="Its store (attempt 0's rows).")] = Path(
+        "corpus/stores/tb40-sonnet-v4"
+    ),
+    corpus_config: Annotated[
+        Path, typer.Option(help="The job config every attempt copies.")
+    ] = Path("configs/harbor/tb40-sonnet-v4.json"),
+    trial: Annotated[
+        list[str] | None,
+        typer.Option(help="A root failure by trial dir name; repeat. Default: every usable one."),
+    ] = None,
+    budget: Annotated[int, typer.Option(min=1, help="N: retries per chain at most.")] = 3,
+    arms: Annotated[
+        list[Exp2ArmChoice] | None, typer.Option(help="Arms; repeat. Default: all three.")
+    ] = None,
+    dry_run: Annotated[
+        bool, typer.Option("--dry-run", help="Mark it a dry run (build-order step 5's).")
+    ] = False,
+    out: Annotated[Path, typer.Option(help="The file written.")] = PREREG_PATH,
+    force: Annotated[bool, typer.Option("--force", help="Replace an existing file.")] = False,
+) -> None:
+    """Write the preregistration (technical spec §5.3); refused if any prompt would leak."""
+    if out.exists() and not force:
+        raise typer.BadParameter(f"{out} exists; pass --force to write it again")
+    chosen = [arm.value for arm in arms] if arms else list(EXP2_ARMS)
+    try:
+        found = exp2_settings(
+            run=run,
+            kind="dry-run" if dry_run else "full",
+            corpus_job=corpus_job,
+            corpus_store=corpus_store,
+            corpus_config=corpus_config,
+            trials=trial,
+            budget=budget,
+            arms=[a for a in EXP2_ARMS if a in chosen],
+            test=test,
+        )
+        leaked = prompt_leaks(found)
+    except (ValueError, OSError, duckdb.Error) as error:
+        typer.echo(f"trajlab exp2 prereg: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    if leaked:
+        for name, hits in leaked.items():
+            typer.echo(f"{name}: {'; '.join(hits)}", err=True)
+        typer.echo("trajlab exp2 prereg: prompts leak; nothing written", err=True)
+        raise typer.Exit(code=1)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(render_prereg(found))
+    prompts = len(found.sample) * len(found.arms) * found.budget
+    typer.echo(
+        f"wrote {out}: {len(found.sample)} root failures, {len(found.arms)} arms, N = "
+        f"{found.budget}; {prompts} prompts grep-clean. Commit it before `trajlab exp2 run`."
+    )
+
+
+@exp2_app.command("check")
+def exp2_check(prereg: PreregArgument) -> None:
+    """Check a preregistration against the code and its tasks' tests: committed, no drift, and
+    every prompt grep-clean."""
+    try:
+        found = parse_prereg(prereg)
+        problems = prereg_drift(found)
+        leaked = prompt_leaks(found)
+    except (ValueError, OSError, duckdb.Error) as error:
+        typer.echo(f"trajlab exp2 check: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    commit = prereg_committed(prereg)
+    problems += [f"{name}: {'; '.join(hits)}" for name, hits in leaked.items()]
+    if commit is None:
+        problems.append(f"{prereg} is not the version committed at HEAD")
+    for problem in problems:
+        typer.echo(f"trajlab exp2 check: {problem}", err=True)
+    if problems:
+        raise typer.Exit(code=1)
+    prompts = len(found.sample) * len(found.arms) * found.budget
+    typer.echo(f"{prereg}: committed at {commit[:12]}, no drift, {prompts} prompts grep-clean")
+
+
+@exp2_app.command("run")
+def exp2_run(
+    prereg: PreregArgument,
+    root: Annotated[
+        Path, typer.Option(help="Where chains keep their logs, stores, bundles.")
+    ] = Path("corpus/exp2"),
+    jobs_dir: Annotated[Path, typer.Option(help="Where attempts' job dirs are written.")] = Path(
+        "corpus/jobs"
+    ),
+    work_dir: Annotated[
+        Path, typer.Option(help="Scratch for ingests' `docker image save`.")
+    ] = Path("/srv/trajlab/work"),
+    env_file: Annotated[
+        Path | None,
+        typer.Option(exists=True, dir_okay=False, help="Credentials file passed to Harbor."),
+    ] = DEFAULT_ENV_FILE,
+    max_running: Annotated[int, typer.Option(min=1, help="Attempts at once.")] = 6,
+    hold_below_gb: Annotated[
+        float, typer.Option(help="Start nothing while the jobs dir's disk has less free.")
+    ] = 50.0,
+    usage_backoff: Annotated[
+        float, typer.Option(help="Seconds to pause launches after a usage-limit error.")
+    ] = 1800.0,
+    max_reruns: Annotated[
+        int, typer.Option(min=1, help="Harness failures of one attempt before its chain stops.")
+    ] = 3,
+    ingest_workers: Annotated[int, typer.Option(min=1, help="Ingests at once.")] = 1,
+    prune_ingested: Annotated[
+        bool,
+        typer.Option(
+            "--prune-ingested",
+            help="Remove a failed retry's checkpoint images once its rows are in its chain's "
+            "store and the bundle verifies. Off by default: the owner decides (ADR-0022).",
+        ),
+    ] = False,
+    retry_failed_ingests: Annotated[
+        bool, typer.Option("--retry-failed-ingests", help="Try each failed ingest once more.")
+    ] = False,
+    rerun_unclassified: Annotated[
+        bool,
+        typer.Option(
+            "--rerun-unclassified",
+            help="Run again an attempt that ended with an unclassified exception.",
+        ),
+    ] = False,
+    poll: Annotated[float, typer.Option(help="Seconds between passes.")] = 30.0,
+    storage: StorageOption = None,
+    manifests_dir: ManifestsDirOption = MANIFESTS_DIR,
+) -> None:
+    """Run the preregistered chains: attempt, verify, ingest, retry, until reward 1 or N
+    (technical spec §5.1). Restartable: it resumes from each chain's logs."""
+    try:
+        found = parse_prereg(prereg)
+        problems = prereg_drift(found)
+    except (ValueError, OSError, duckdb.Error) as error:
+        typer.echo(f"trajlab exp2 run: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    commit = prereg_committed(prereg)
+    if commit is None and "record-engine" in found.arms:
+        problems.append(f"{prereg} is not committed at HEAD; record-engine does not start")
+    problem = trial_env_problem(env_file)
+    if problem:
+        problems.append(f"{problem}; attempts would not run as the corpus did")
+    capture = capture_problem(jobs_dir)
+    if capture:
+        problems.append(f"{capture}; every attempt is captured as the corpus was")
+    for line in problems:
+        typer.echo(f"trajlab exp2 run: {line}", err=True)
+    if problems:
+        raise typer.Exit(code=1)
+    stop = threading.Event()
+    for signum in (signal.SIGINT, signal.SIGTERM):
+        signal.signal(signum, lambda *_: stop.set())
+    runner = Exp2Runner(
+        settings=found,
+        preregistration=commit,
+        root=root,
+        jobs_dir=jobs_dir,
+        manifests_dir=manifests_dir,
+        work_dir=work_dir,
+        env_file=env_file,
+        storage=storage,
+        max_running=max_running,
+        hold_below_gb=hold_below_gb,
+        usage_backoff_s=usage_backoff,
+        max_reruns=max_reruns,
+        ingest_workers=ingest_workers,
+        prune_ingested=prune_ingested,
+        retry_failed_ingests=retry_failed_ingests,
+        rerun_unclassified=rerun_unclassified,
+    )
+    runner.run(poll_s=poll, stop=stop)
