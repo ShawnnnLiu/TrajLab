@@ -106,6 +106,9 @@ Settled by the owner on 2026-10-28, before the full run (`preregistration.md`):
 - CLAUDE.md lists `src/trajlab/exp2/` and its import rule; the glossary gains chain store, rerun, and preregistration.
 - The design spec's stop hook and its checklist item are struck, with this ADR named; ADR-0016 and ADR-0018 carry amendments pointing here.
 - Each attempt adds one manifest under `corpus/manifests/` and one commit of new manifests on the branch the loop runs from, as Exp 1's launcher did.
+  Amended 2026-10-28, during the full run: `trajlab run` no longer refuses a tree whose only changes are under its manifests dir.
+  With six attempts at once, one could finish and write its manifest in the seconds between the loop's commit and the next launch's check; that launch was refused and counted as `lost` (5 of the first 74 launches, 4 of them `record-files`, whose bundle export widens the gap), each using one of its chain's three reruns.
+  A manifest records a run, not code, so `repo_sha` still describes the code that ran, and the manifest's `repo_dirty` still says the tree was not clean; nothing a trial records changes.
 - The record-engine arm's prompt is 14 KB longer than the others, all of it the schema text that the `record-files` agent reads in its README: the arms carry the same information and differ in how the agent gets it, which is the comparison.
 
 ## Validation (2026-10-28)

@@ -62,6 +62,21 @@ def _git(repo_dir: Path, *args: str) -> str:
     return completed.stdout.strip()
 
 
+def dirty_paths(repo_dir: Path) -> list[str]:
+    """The paths `git status` lists as changed or untracked, relative to the repo root."""
+    try:
+        completed = subprocess.run(
+            ["git", "status", "--porcelain", "--untracked-files=all"],
+            cwd=repo_dir,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as error:
+        raise ManifestError(f"git status failed in {repo_dir}: {error.stderr}") from error
+    return [line[3:] for line in completed.stdout.splitlines()]
+
+
 def repo_root(repo_dir: Path) -> Path:
     """The top level of the git repo containing `repo_dir`."""
     return Path(_git(repo_dir, "rev-parse", "--show-toplevel"))

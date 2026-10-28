@@ -101,6 +101,18 @@ def test_plan_run_refuses_dirty_tree_unless_allowed(repo: Path) -> None:
     assert _plan(repo, allow_dirty=True).repo.dirty
 
 
+def test_plan_run_allows_other_runs_manifests(repo: Path) -> None:
+    # Another attempt of the same launcher wrote its manifest after the launcher committed.
+    other = repo / "corpus" / "manifests" / "other-run.json"
+    other.parent.mkdir(parents=True)
+    other.write_text("{}")
+    plan = _plan(repo)
+    assert plan.repo.dirty  # the manifest still says so
+    (repo / "untracked.txt").write_text("x")
+    with pytest.raises(RunRefusedError, match="uncommitted changes"):
+        _plan(repo)
+
+
 def test_plan_run_refuses_missing_env_file(repo: Path) -> None:
     with pytest.raises(RunRefusedError, match="not found"):
         _plan(repo, env_file=repo / "missing.env")
