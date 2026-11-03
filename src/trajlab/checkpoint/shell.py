@@ -1,4 +1,4 @@
-"""Just enough of a POSIX shell parser to read what a Bash call meant to write (ADR-0022).
+"""Just enough of a POSIX shell parser to read what a Bash call meant to write (ADR-0023).
 
 It splits a command into simple commands, each with its words, redirects, and the operator that
 ends it, and keeps where each one sits in the text. It never runs anything and never expands:

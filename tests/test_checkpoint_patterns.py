@@ -1,4 +1,4 @@
-"""The checker (ADR-0022) on hand-written records: each check, each exclusion, and the prefix
+"""The checker (ADR-0023) on hand-written records: each check, each exclusion, and the prefix
 rule. No trial data, no Docker."""
 
 from datetime import UTC, datetime, timedelta
@@ -11,10 +11,12 @@ from trajlab.checkpoint.patterns import (
     Checker,
     StopFacts,
     TrialRecords,
+    apply_diff,
     crash_line,
     find_self_kill,
     instruction_commands,
     instruction_paths,
+    python_promises,
     read_command,
     replay,
     runs_command,
@@ -368,6 +370,113 @@ def test_another_error_next_to_a_probe_answer_is_still_flagged():
     flags, _ = run(view(1, bash('python3 -c "import cadquery"; python3 a.py', stdout=out)))
     (flag,) = flags
     assert flag.evidence["error_line"] == "KeyError: 'text'"
+
+
+# -- silent_no_write: writes promised inside programs --------------------------------------------
+
+DUMP = "python3 - <<'E'\nimport json\nif ok:\n    json.dump({}, open('/app/out.json', 'w'))\nE"
+
+
+def added(path: str, *lines: str, size: int | None = None) -> FileChange:
+    diff = f"--- /dev/null\n+++ b{path}\n@@ -0,0 +1,{len(lines)} @@\n" + "\n".join(
+        f"+{line}" for line in lines
+    )
+    text_size = sum(len(line) + 1 for line in lines)
+    return FileChange(
+        path=path,
+        op="added",
+        kind="file",
+        size=text_size if size is None else size,
+        sha256="c" * 64,
+        is_text=True,
+        diff=diff if lines else "",
+    )
+
+
+def changed_view(seq: int, command: str, *files: FileChange, **response: Any) -> CallView:
+    return view(
+        seq,
+        bash(command, **response),
+        rec=record(seq, changed=tuple(f"+{f.path}" for f in files)),
+        changes=changes(seq, *files),
+    )
+
+
+def test_a_promised_write_that_did_not_happen_is_flagged():
+    flags, _ = run(view(1, bash(DUMP)))
+    (flag,) = flags
+    assert (flag.pattern, flag.subtype) == ("silent_no_write", "promised")
+    assert flag.evidence["path"] == "/app/out.json"
+    assert flag.evidence["promise"] == {
+        "source": "heredoc or -c",
+        "line": "json.dump({}, open('/app/out.json', 'w'))",
+        "context": ["If"],
+    }
+
+
+def test_a_promise_is_not_flagged_after_a_crash_or_a_failure():
+    crash = "Traceback (most recent call last):\nNameError: name 'ok' is not defined"
+    flags, checks = run(view(1, bash(DUMP, stdout=crash)))
+    assert patterns(flags) == [("masked_error", None)]
+    assert "promised_crash: promised open 'w' /app/out.json" in checks[0].notes
+    flags, _ = run(view(1, bash(DUMP, error="Exit code 1")))
+    assert flags == []
+
+
+def test_paths_built_from_variables_are_unknown_and_strings_are_not_code():
+    code = (
+        "python3 -c \"import json; json.dump({}, open(f'/tmp/{n}.json', 'w')); "
+        "s = 'open(\\'/app/x\\', \\'w\\')'\""
+    )
+    flags, checks = run(view(1, bash(code)))
+    assert flags == []
+    assert [u.reason for u in checks[0].unknown] == ["promised_variable"]
+
+
+def test_a_script_written_earlier_is_read_when_it_runs():
+    script = added("/app/gen.py", "import numpy as np", "np.save('/tmp/arr', a)")
+    flags, _ = run(
+        changed_view(1, "cat > /app/gen.py <<'E'\n...\nE", script),
+        view(2, bash("cd /app && python3 gen.py")),
+    )
+    (flag,) = flags
+    assert flag.evidence["path"] == "/tmp/arr.npy"
+    assert flag.evidence["promise"]["source"] == "script /app/gen.py"
+
+
+def test_output_flags_are_promises_except_where_o_means_something_else():
+    flags, _ = run(view(1, bash("curl -s -o /tmp/page.html http://x; grep -o foo /tmp/a")))
+    assert [(f.subtype, f.evidence["path"]) for f in flags] == [("promised", "/tmp/page.html")]
+    flags, checks = run(view(1, bash("gcc x.c -o $OUT")))
+    assert flags == [] and checks[0].unknown[0].reason == "promised_expansion"
+
+
+def test_a_promised_file_that_is_empty_or_not_json():
+    for file, subtype in (
+        (added("/app/out.json", size=0), "empty"),
+        (added("/app/out.json", '{"a": 1,'), "broken"),
+    ):
+        flags, _ = run(changed_view(1, DUMP, file))
+        assert [(f.pattern, f.subtype) for f in flags] == [("silent_no_write", subtype)]
+    flags, _ = run(changed_view(1, DUMP, added("/app/out.json", '{"a": 1}')))
+    assert flags == []
+
+
+def test_promises_and_diffs():
+    promises, parsed = python_promises(
+        "Path('o.txt').write_text('x')\ndf.to_csv('t.csv')\nplt.savefig('/tmp/f.png')\n"
+        "im.save('a.png'); model.save('m.pt')\ndf.to_json()",
+        "/app",
+    )
+    assert parsed
+    assert [(p.path, p.how) for p in promises] == [
+        ("/app/o.txt", "Path().write_text"),
+        ("/app/t.csv", "to_csv"),
+        ("/tmp/f.png", "savefig"),
+        ("/app/a.png", ".save"),
+    ]
+    assert apply_diff(["a", "b", "c"], "--- a/x\n+++ b/x\n@@ -2 +2 @@\n-b\n+B") == ["a", "B", "c"]
+    assert apply_diff(["a", "z"], "--- a/x\n+++ b/x\n@@ -1,2 +1,2 @@\n a\n-b\n+B") is None
 
 
 # -- the stop ------------------------------------------------------------------------------------

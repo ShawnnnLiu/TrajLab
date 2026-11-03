@@ -396,7 +396,7 @@ def watch(
         bool,
         typer.Option(
             "--detect/--no-detect",
-            help="Also run the checker (ADR-0022) on each answered call before its ack, and write "
+            help="Also run the checker (ADR-0023) on each answered call before its ack, and write "
             "its flags and checks in <trial>/trajlab/. Shadow mode: nothing reaches the agent. "
             "Needs --extras and --gate change or audit.",
         ),
@@ -914,7 +914,7 @@ def patterns(
         typer.Option(help="Read the start and stop images with Docker for missing_output."),
     ] = True,
 ) -> None:
-    """Replay the checker (ADR-0022) call by call over finished trials; writes
+    """Replay the checker (ADR-0023) call by call over finished trials; writes
     `<out>/<trial>/flags.jsonl` and `checks.jsonl`, never into the job dir."""
     from trajlab.checkpoint.patterns import docker_path_probe, read_trial, replay, write_jsonl
 

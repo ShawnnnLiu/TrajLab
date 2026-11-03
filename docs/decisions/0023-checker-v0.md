@@ -1,8 +1,8 @@
-# ADR-0022: Checker v0, the rule-based detector of ADR-0015, and its shadow run
+# ADR-0023: Checker v0, the rule-based detector of ADR-0015, and its shadow run
 
 Status: proposed (2026-11-03).
 Narrows ADR-0015 §1 and §3 to five checks, fixed on the 40-trial `tb40-detector-off-v1` corpus.
-The number 0022 is also used on the unmerged `sl/exp2-retry-loop` branch (`0022-exp2-retry-loop-as-built.md`); whichever merges second renumbers.
+Numbered 0023 because 0022 is taken on the unmerged `sl/exp2-retry-loop` branch (`0022-exp2-retry-loop-as-built.md`); no branch used 0023 on 2026-11-03.
 
 ## TL;DR
 
@@ -27,7 +27,7 @@ The number 0022 is also used on the unmerged `sl/exp2-retry-loop` branch (`0022-
 | Check | Fires when | Message |
 |---|---|---|
 | `self_kill` | `pkill -f`, `pgrep -f`, or `kill $(pgrep -f ...)` whose pattern matches the call's own command text (read as a Python regex), on a call that exited 143 or 144. `-x` and the bracket trick (`[u]vicorn`) never match. | "Your `pkill -f <pattern>` also matched this command's own shell, so the command was killed and nothing after it ran." |
-| `silent_no_write` | A write target leaves its path unchanged on a call that exited 0, with a complete record. Targets come from Write/Edit/NotebookEdit, or from a shell redirect, `tee`, `sed -i`, `cp` or `mv`. | "`<path>` didn't change on this call, although the command looked like it wrote it." |
+| `silent_no_write` | A write target leaves its path unchanged on a call that exited 0, with a complete record. Targets come from Write/Edit/NotebookEdit, or from a shell redirect, `tee`, `sed -i`, `cp` or `mv` (subtypes `quiet`, `crash`). A write promised inside a program is subtype `promised`; a promised file that changed is `empty` at 0 bytes, or `broken` if it is a `.json` that doesn't parse. | "`<path>` didn't change on this call, although the command looked like it wrote it." / "`<path>` was written on this call, but it's empty." / "... but it isn't valid JSON." |
 | `masked_error` | A Bash call exits 0, but its output shows a crash. | "This command exited 0, but its output shows an error: <first error line>." |
 | `unverified_completion` | At the stop: no check ran after the last file-changing call (`no_test`), or the last check failed (`last_test_failed`). | "You're stopping, but no test ran after your last change (<path>, call <n>)." / "You're stopping, but your last test (call <n>) failed." |
 | `missing_output` | At the stop: a path the instruction names, absent from the start image, is absent from the stop's checkpoint. | "The task asks for `<path>`, and it doesn't exist." |
@@ -43,6 +43,22 @@ The number 0022 is also used on the unmerged `sl/exp2-retry-loop` branch (`0022-
   - a background sign with a new agent process: the write is recorded as held;
   - visible non-zero exits.
 - Each of these is recorded in the call's `CheckRecord`, as a note, an unknown or a held write.
+
+**`silent_no_write`, `promised`: writes promised inside programs**
+- A promise counts only when the output path is written literally:
+  - an output flag: `-o <path>`, `--output <path>`, `--out <path>`, or their `=` forms. Commands where `-o` means something else are left out (`grep -o`, `ssh -o`, `find -o`, `unzip -o`, ...);
+  - a write in the Python code the call runs: a heredoc, `python -c`, or a script whose text the records hold, written by this call or an earlier one.
+- **Script text.** It is rebuilt from the recorded diffs of `.py` and `.json` files. A version the diffs can't rebuild is unknown, for example a file changed past the diff limits or shipped with the task.
+- **The code** is parsed with `ast`, so text inside string literals is never read as code. The forms are:
+  - `open(<path>, ...)` with a `w`, `a` or `x` mode, which covers `json.dump(..., open(<path>, 'w'))`;
+  - `Path(<path>).write_text` and `write_bytes`;
+  - `.to_csv(<path>)` and `.to_json(<path>)`;
+  - `savefig(<path>)`;
+  - `np.save(<path>)`, which adds `.npy`;
+  - `.save(<path>)` with an image extension.
+- Paths built from variables, f-strings or joins are unknown, never guessed.
+- **When it flags.** Only when the call exited 0, its output shows no crash, and the path is unchanged under the completeness rules above. Background runs are held as before.
+- **Evidence.** The flag carries the code line and the blocks around it (`If`, `For`, `FunctionDef`, ...), since a write under an `if` that wasn't taken, or in a function never called, would be a false flag.
 
 **`masked_error`**
 - The crash markers are:
@@ -91,10 +107,10 @@ The number 0022 is also used on the unmerged `sl/exp2-retry-loop` branch (`0022-
 | `server_state` | Agents kill and restart their own servers on purpose, so it needs labels first. |
 | `forbidden_action` | Test edits are sometimes asked for, which needs task-specific rules. |
 
-- **Writes made inside a program.** 83 of the 104 reference write cases are outside `silent_no_write`'s definition. Examples are a heredoc script's `json.dump(open(..., "w"))`, `render.py ... out.png` and `gcc -o`.
-  - Reading what a program writes means guessing.
-  - Most of these cases were harmless: the agent saw the error or redid the write.
-  - No script parsing is planned for v1.
+- **Writes made inside a program.** 83 of the 104 reference write cases are outside the shell definition of `silent_no_write`. Examples are a heredoc script's `json.dump(open(..., "w"))`, `render.py ... out.png` and `gcc -o`.
+  - Reading what a program writes in general means guessing, and most of these cases were harmless: the agent saw the error or redid the write.
+  - So v0 reads only the narrow, literal `promised` form (§1). It reads 46 of the 83; another 8 are on calls whose promise has a variable path or whose script text the records do not hold.
+  - Nothing broader is planned for v1.
 - **Late writes.** ADR-0020's attribution of late writes uses later calls, so a live checker cannot use it.
 
 ### 4. Results of the replay on the off corpus
@@ -102,7 +118,7 @@ The number 0022 is also used on the unmerged `sl/exp2-retry-loop` branch (`0022-
 | Check | Flags | Runs | In passed runs | Against the reference |
 |---|---|---|---|---|
 | `self_kill` | 16 | 10 | 9 | 16 of 16 matched on the same call; 0 missed, 0 new |
-| `silent_no_write` | 2 | 2 | 0 | both match a reference case on its expected call |
+| `silent_no_write` | 4: 2 `quiet`, 2 `promised` | 3 | 1 | both `quiet` flags match a reference case on its expected call; the 2 `promised` flags (one call) are new: `greedy.py \| head -30` died of a `BrokenPipeError` before writing `rules.json` and `ordering.txt` |
 | `masked_error` | 21 (40 before the import-probe rule) | 12 | 4 | no reference list |
 | `unverified_completion` | 23 | 23 | 3 | no reference list |
 | `missing_output` | 0 | 0 | 0 | every output exists at every stop |
@@ -121,7 +137,19 @@ The number 0022 is also used on the unmerged `sl/exp2-retry-loop` branch (`0022-
 
 - With the task-agnostic rule off, the 15 stops of cad, vba and vf2 are `no check defined`, and 9 stops are flagged.
 - The rule recognized one check across those three tasks. 13 of the 23 flagged stops wrote and ran in one call, which the rule does not count by design. In vba, the last change is a background server's log or a cleanup `rm` of the database.
-- With the rule on, the flag tracks those three tasks, not the agent. Whether to keep it on is open (below).
+- **Decision (2026-11-03): the rule stays on.** It is the only version that does not depend on per-task lists; with it off, `unverified_completion` cannot judge 3 of the 8 tasks.
+- With it on, it flags 20 of 29 failed runs (69%) and 3 of 11 passed runs (27%). Only three tasks have both: layout2 (1 of 2 failed, 0 of 3 passed), pretrain (4 of 4, 0 of 1), and vba (3 of 3, 2 of 2).
+
+**`masked_error` stays in v0** (decision, 2026-11-03). The shadow run only records, so keeping it costs nothing, and in 4 failed runs it is the only flag before the deciding error. Fork-point lists mark a `masked_error` first flag, so it can be included or excluded later.
+
+**Timing.** First flags in the 29 failed runs, against Amina-agent's LLM marks:
+
+| First flag | Before `point_of_no_return` | Before `deciding_error` |
+|---|---|---|
+| any kind | 10 (34.5%) | 6 (20.7%) |
+| not `masked_error` | 3 (10.3%) | 2 (6.9%) |
+
+For comparison, arXiv 2607.09510's text-only monitor warned before the point of no return on 3.7% to 8.7% of failures. The marks here are an LLM's, not hand-checked.
 
 **Speed and the prefix rule.**
 - A call check takes 0.21 ms median and 7.6 ms at most.
@@ -152,9 +180,9 @@ uv run trajlab run configs/harbor/tb40-detector-shadow-v1.json --corpus-id tb40-
 
 ## Open questions
 
-- **The task-agnostic rule.** Keep it, which flags cad, vba and vf2 almost always? Or turn it off, which records `no check defined` for those tasks?
 - **Write-and-run.** Should the task-agnostic rule count a later command in the same call, such as `cat > m.py ...; python3 m.py`? v0 counts only later calls, as the rule was specified.
 - **Background writes.** Should changes written by a background process, such as a server's log, count as the agent's last change?
+- **`BrokenPipeError`.** v0 doesn't count a traceback whose only exception is `BrokenPipeError` as a crash, but in the one `promised` case it killed the writer before its writes. That case is flagged, because the `promised` rule needs no crash.
 - **Import probes beyond `-c`.** Should heredoc probes (`python3 - <<EOF` with only imports and prints) also be skipped? v0 skips only `-c` one-liners.
 
 ## Consequences

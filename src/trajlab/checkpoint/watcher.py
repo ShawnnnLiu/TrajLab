@@ -7,7 +7,7 @@ agent's turn (Stop, StopFailure) is answered like a call, but under gate `none` 
 checkpoint (ADR-0011). Every answered request gets a `CallRecord`.
 With `extras` on, each answered call also gets a process snapshot and the content of what it
 changed, under `<trial>/trajlab/`, before its ack (ADR-0015 §2).
-With `detect` on as well, the checker (`checkpoint.patterns`, ADR-0022) reads each answered call
+With `detect` on as well, the checker (`checkpoint.patterns`, ADR-0023) reads each answered call
 right after its `CallRecord` and before its ack, and writes its flags and checks under
 `<trial>/trajlab/`. Shadow mode: nothing reaches the agent, and a failing check never holds the
 ack.
@@ -99,7 +99,7 @@ DEFAULT_WORKERS = 8
 # Everything --extras does for one call, before its snapshot: well inside the hook's 240 s wait,
 # which the commit also needs (80 s after a 2.2 GB install, ADR-0015 §2).
 EXTRAS_BUDGET_S = 30.0
-# Each of the stop's two image reads for the checker (ADR-0022): a short `docker run`.
+# Each of the stop's two image reads for the checker (ADR-0023): a short `docker run`.
 DETECT_PROBE_TIMEOUT_S = 15.0
 
 
@@ -227,7 +227,7 @@ class _Trial:
     contents: dict[str, bytes | None] = field(default_factory=dict)  # last version seen per path
     start_image: str | None = None
     extras_recorded: set[str] | None = None  # calls with extras on disk; read on first use
-    checker: Checker | None = None  # --detect (ADR-0022): made on the first answered call
+    checker: Checker | None = None  # --detect (ADR-0023): made on the first answered call
 
     def covering(self, tool_call_id: str) -> CheckpointRecord | None:
         """The record whose checkpoint first shows this call's effects, if any."""
@@ -494,7 +494,7 @@ class Watcher:
         snapshot: ProcessSnapshot | None,
         changes: CallChanges | None,
     ) -> None:
-        """Run the checker on one answered call and record its flags and check (ADR-0022).
+        """Run the checker on one answered call and record its flags and check (ADR-0023).
         Shadow mode: nothing is written where the agent can read it, and any failure is logged
         and leaves the ack as it was."""
         try:
@@ -529,7 +529,7 @@ class Watcher:
     def _make_checker(self, trial_dir: Path, trial: _Trial, call: CallRecord) -> Checker:
         """A trial's checker. A watcher restarted mid-trial first feeds it the calls answered
         before, from their records, so its flags are those a watcher that never stopped would
-        have written (the prefix rule, ADR-0022); their flags are not written again."""
+        have written (the prefix rule, ADR-0023); their flags are not written again."""
         paths = TrialPaths(trial_dir)
         checker = Checker(start_cwd=stream_start_cwd(paths.agent_dir / "claude-code.txt"))
         earlier = [c for c in trial.calls.values() if c.call_seq < call.call_seq]

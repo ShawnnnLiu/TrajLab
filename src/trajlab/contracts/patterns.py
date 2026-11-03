@@ -16,7 +16,7 @@ CALL_INPUT_SUFFIX = ".call.json"
 TRAJLAB_DIRNAME = "trajlab"
 PROCESSES_FILENAME = "processes.jsonl"
 CHANGES_FILENAME = "changes.jsonl"
-# The checker's output (ADR-0022), beside the extras.
+# The checker's output (ADR-0023), beside the extras.
 FLAGS_FILENAME = "flags.jsonl"
 CHECKS_FILENAME = "checks.jsonl"
 # The text rule shared with ADR-0014's store: at most 1 MiB, no NUL byte, valid UTF-8.
@@ -108,7 +108,7 @@ class CallChanges(BaseModel):
     capture_ms: int = Field(ge=0)
 
 
-# The checker's patterns in v0 (ADR-0022). ADR-0015 §1's others are left out for now.
+# The checker's patterns in v0 (ADR-0023). ADR-0015 §1's others are left out for now.
 FlagPattern = Literal[
     "self_kill", "silent_no_write", "masked_error", "unverified_completion", "missing_output"
 ]

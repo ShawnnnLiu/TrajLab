@@ -994,7 +994,7 @@ def test_extras_keep_a_call_whose_before_versions_cannot_be_read(running_trial: 
     assert (a.sha256, a.before_sha256, a.diff) == (sha256(b"edited\n"), None, None)
 
 
-# The checker, live (--detect, ADR-0022) -------------------------------------------------------
+# The checker, live (--detect, ADR-0023) -------------------------------------------------------
 
 INSTRUCTION = "Write the result to `/app/out.txt`."
 
@@ -1134,8 +1134,12 @@ def test_live_flags_equal_the_replay_across_a_watcher_restart(detecting) -> None
     first.process(_hooked(trial, "toolu_1", "ls"))
     backend.put("/app/main.py", b"print(1)\n")
     first.process(_hooked(trial, "toolu_2", "echo 'print(1)' > /app/main.py"))
-    restarted = make()  # a new watcher: its checker first reads calls 1 and 2 from the records
+    backend.put("/app/gen.py", b"open('/app/z.json', 'w').write('{}')\n")
+    first.process(_hooked(trial, "toolu_2b", "cat > /app/gen.py <<'E'\n...\nE"))
+    restarted = make()  # a new watcher: its checker first reads calls 1 to 3 from the records
     restarted.process(_hooked(trial, "toolu_3", "python3 /app/main.py"))
+    # gen.py's text is known only from call 3's diff, read again after the restart.
+    restarted.process(_hooked(trial, "toolu_3b", "cd /app && python3 gen.py"))
     backend.write("/app/y")
     restarted.process(_hooked(trial, "toolu_4", 'pkill -f "main.py"; ls', error="Exit code 143"))
     restarted.process(_stop(trial))
@@ -1146,7 +1150,12 @@ def test_live_flags_equal_the_replay_across_a_watcher_restart(detecting) -> None
     live = [{k: v for k, v in f.items() if k != "flagged_at"} for f in _flags(trial)]
     again = [f.model_dump(mode="json", exclude={"flagged_at"}) for f in flags]
     assert live == again
-    assert [f["pattern"] for f in live] == ["self_kill", "unverified_completion", "missing_output"]
+    assert [(f["pattern"], f["subtype"]) for f in live] == [
+        ("silent_no_write", "promised"),
+        ("self_kill", "direct"),
+        ("unverified_completion", "no_test"),
+        ("missing_output", None),
+    ]
     ignore = {"check_ms", "checked_at"}
     assert [{k: v for k, v in c.items() if k not in ignore} for c in _checks(trial)] == [
         c.model_dump(mode="json", exclude=ignore) for c in checks

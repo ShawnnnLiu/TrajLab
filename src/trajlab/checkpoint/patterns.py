@@ -1,4 +1,4 @@
-"""The checker: rule-based failure-pattern flags for Claude Code runs (ADR-0015 §3, v0 ADR-0022).
+"""The checker: rule-based failure-pattern flags for Claude Code runs (ADR-0015 §3, v0 ADR-0023).
 
 `Checker` is fed one hooked call at a time, with only what the watcher holds when that call's
 hook fires (ADR-0015 §3): the call's hook input, `CallRecord`, `CallChanges` and
@@ -14,6 +14,9 @@ v0 checks, each tied to the call that triggered it:
   redirect, `tee`, `sed -i`, `cp`, `mv`) exits 0 and leaves the path unchanged, with a complete
   record. Identical rewrites, held background jobs, visible failures, and anything the records
   cannot decide are not flagged; the last two kinds are recorded as notes and unknowns.
+  Subtype `promised`: a write promised inside a program, read only when its path is literal
+  (`-o <path>`, or `open(<path>, 'w')` and a few other forms in Python code the call runs), on a
+  call with no crash in its output; a promised file that changed is `empty` or `broken` JSON.
 - `masked_error`: the call exits 0 but its output shows a crash. The answer to an import
   probe (`python -c "import X; print(X.__version__)"` failing with ImportError) is not one.
 - at the stop, `unverified_completion` (no check after the last change, or the last check
@@ -22,7 +25,7 @@ v0 checks, each tied to the call that triggered it:
   the start, or (task-agnostic, a later call) running, importing or comparing a file the last
   change touched. With none of these defined, the stop is noted `no check defined`.
 
-Left out of v0, with ADR-0022's reasons: `loop` and `stall` (the off corpus's six loops were
+Left out of v0, with ADR-0023's reasons: `loop` and `stall` (the off corpus's six loops were
 deliberate undos); `false_edit_claim` (2 of 104 missing writes were claims in the agent's own
 words); `false_test_claim` (covered for now by `unverified_completion`); `server_state` (agents
 kill and restart their own servers on purpose, so it needs labels first); `forbidden_action`
@@ -33,6 +36,7 @@ of late writes uses later calls, so the checker cannot use it.
 constraint 3).
 """
 
+import ast
 import json
 import logging
 import re
@@ -91,7 +95,7 @@ NOTEBOOK_TOOLS = {"NotebookEdit": "notebook_path"}
 SELF_KILL_EXITS = (143, 144)  # 128 + SIGTERM, and Claude Code's code for a killed shell
 
 # Output that shows a crash, chosen from the exit-0 Bash outputs of the 40 off runs
-# (ADR-0022). "command not found" and "No such file or directory" are left out: in those runs
+# (ADR-0023). "command not found" and "No such file or directory" are left out: in those runs
 # they are mostly the agent probing for a tool or a path.
 _TRACEBACK = re.compile(r"Traceback \(most recent call last\)")
 _EXCEPTION_LINE = re.compile(r"(?m)^(?:[\w.]+\.)?(\w*(?:Error|Exception|Exit)): ")
@@ -104,7 +108,7 @@ _CRASH_LINES = re.compile(
     r"|^make(?:\[\d+\])?: \*\*\* .*$"
 )
 # The shared test-command list. Task-specific checks come only from the instruction (the commands
-# it shows and the scripts it names), never from what agents ran (ADR-0022).
+# it shows and the scripts it names), never from what agents ran (ADR-0023).
 TEST_COMMAND = re.compile(TEST_COMMAND_PATTERN)
 _TEST_FAILED = re.compile(
     r"\b[1-9]\d* (?:failed|failures?|errors?)\b|\bFAILED\b|(?m:^FAIL\b)|\bAssertionError\b"
@@ -116,6 +120,7 @@ _EXIT_CODE = re.compile(r"Exit code (-?\d+)")
 _CACHE_PATH = re.compile(r"(?:^|/)(?:__pycache__|\.pytest_cache)(?:/|$)|\.pyc$")
 _INSTRUCTION_PATH = re.compile(r"(?<![\w.:/~-])/(?:[\w.+@-]+/)*[\w.+@-]*/?")
 _NOT_FILES = ("/dev/", "/proc/", "/sys/")
+_TEXT_KEPT = (".py", ".json")
 
 
 def crash_lines(output: str) -> list[str]:
@@ -201,6 +206,9 @@ class Target:
     any_of: tuple[str, ...]
     tree: bool = False
     removed_later: bool = False  # a later `rm` or `mv` in the same command takes it away
+    # A write promised inside a program (`-o <path>`, or Python code the call runs): where the
+    # promise is, its code line, and the blocks around it. None for the shell's own writes.
+    promise: Mapping[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -213,6 +221,7 @@ class Invocation:
     code: tuple[str, ...]  # code given to an interpreter: `-c`/`-e`, a heredoc, `-m module`
     cwd: str | None  # the shell's directory when it runs
     workdir: str | None  # the program's directory: `-C <dir>` if given, else `cwd`
+    index: int = 0  # the simple command's place in the call's command
 
 
 @dataclass
@@ -222,6 +231,7 @@ class ShellReading:
     background: bool = False  # `&` or `nohup` at some command
     cwd_known: bool = True
     invocations: list[Invocation] = field(default_factory=list)
+    removals: list[tuple[int, str]] = field(default_factory=list)  # (command index, path)
 
 
 # Programs that run a file given to them, or compare files. A path passed to one of these is
@@ -474,7 +484,13 @@ def read_command(command: str, cwd: str | None) -> tuple[Script | None, ShellRea
         words = simple.words[offset:]
         name = args[0] if args else ""
         if name != "cd":
-            reading.invocations.extend(_invocations(words, simple.redirects, own_bodies, here))
+            reading.invocations.extend(
+                replace(i, index=index)
+                for i in _invocations(words, simple.redirects, own_bodies, here)
+            )
+            _output_flags(
+                reading, basename(name), words, here, script.text[simple.start : simple.end]
+            )
         if name == "cd":
             operands = [w for w in words[1:] if not w.text.startswith("-") or w.text == "-"]
             if not operands or operands[0].text == "-" or operands[0].expands:
@@ -510,7 +526,47 @@ def read_command(command: str, cwd: str | None) -> tuple[Script | None, ShellRea
         ):
             reading.targets[t] = replace(target, removed_later=True)
     reading.cwd_known = all(value is not None for value in cwds.values())
+    reading.removals = removals
     return script, reading
+
+
+# `-o` is not an output path for these: a flag with no value, or an option list (`ssh -o`,
+# `mount -o`), or `find`'s "or".
+_O_NOT_OUTPUT = {
+    "grep", "egrep", "fgrep", "zgrep", "rg", "ls", "ps", "mount", "ssh", "scp", "sftp", "find",
+    "set", "bash", "sh", "zsh", "dash", "pgrep", "pkill", "kill", "top", "df", "du", "tar", "zip",
+    "unzip", "xargs", "od", "ip", "nm", "lsof", "netstat", "free", "cut", "uniq", "sed", "awk",
+    "docker",
+}  # fmt: skip
+_OUTPUT_OPTIONS = ("-o", "--output", "--out")
+
+
+def _output_flags(
+    reading: ShellReading, name: str, words: list[Word], cwd: str | None, text: str
+) -> None:
+    """Writes a command promises with an output flag: `-o <path>`, `--output <path>`,
+    `--out <path>` and their `=` forms. A path with an expansion is unknown, never guessed."""
+    if name in _O_NOT_OUTPUT:
+        return
+    for i, word in enumerate(words[1:], start=1):
+        flag, _, value = word.text.partition("=")
+        if word.text in _OUTPUT_OPTIONS and i + 1 < len(words):
+            target, how = words[i + 1], f"promised {name} {word.text}"
+        elif value and flag in ("--output", "--out"):
+            target, how = (
+                Word(value, word.raw, word.expands, word.globs),
+                f"promised {name} {flag}=",
+            )
+        else:
+            continue
+        if target.text.startswith("-") or target.text in ("/dev/null", "/dev/stdout", "-"):
+            continue
+        path, why = _path_of(target, cwd)
+        if path is None:
+            reading.unknown.append((target.raw, f"promised_{why or 'unknown'}"))
+            continue
+        promise = {"source": "output flag", "line": " ".join(text.split())[:300], "context": []}
+        reading.targets.append(Target(path=path, how=how, any_of=(path,), promise=promise))
 
 
 def _add(reading: ShellReading, word: Word, cwd: str | None, how: str) -> None:
@@ -554,6 +610,145 @@ def _copy_targets(reading: ShellReading, name: str, words: list[Word], cwd: str 
         inside = resolve(f"{dest}/{basename(source)}", "/") or dest
         any_of = (inside,) if into else (dest, inside)
         reading.targets.append(Target(dest if not into else inside, name, any_of, tree=True))
+
+
+# -- writes promised inside Python code -------------------------------------------------------
+
+_IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tif", ".tiff", ".webp")
+_OPEN_MODULES = {"io", "codecs", "gzip", "bz2", "lzma"}
+_PATH_CLASSES = {"Path", "PurePath", "PosixPath"}
+_BLOCKS = (
+    ast.If, ast.For, ast.AsyncFor, ast.While, ast.Try, ast.FunctionDef,
+    ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda,
+)  # fmt: skip
+
+
+@dataclass(frozen=True)
+class Promise:
+    """A write in Python code: the path (None when it is built from variables, an f-string or
+    a join), the form, the code line, and the blocks it sits in (a write under an `if` or in a
+    function may never run)."""
+
+    path: str | None
+    how: str
+    line: str
+    context: tuple[str, ...]
+
+
+def _arg(call: ast.Call, position: int, *keywords: str) -> ast.expr | None:
+    if len(call.args) > position:
+        return call.args[position]
+    return next((k.value for k in call.keywords if k.arg in keywords), None)
+
+
+def _written_arg(call: ast.Call) -> tuple[ast.expr, str] | None:
+    """The path argument of a call that writes a file, and the form, for the forms v0 reads."""
+    func = call.func
+    name = func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", None)
+    owner = func.value if isinstance(func, ast.Attribute) else None
+    if name == "open" and (owner is None or getattr(owner, "id", None) in _OPEN_MODULES):
+        mode = _arg(call, 1, "mode")
+        path = _arg(call, 0, "file", "filename")
+        if (
+            isinstance(mode, ast.Constant)
+            and isinstance(mode.value, str)
+            and any(c in mode.value for c in "wax")
+            and path is not None
+        ):
+            return path, f"open {mode.value!r}"
+        return None
+    if name in ("write_text", "write_bytes") and isinstance(owner, ast.Call):
+        inner = owner.func
+        if getattr(inner, "id", None) in _PATH_CLASSES or getattr(inner, "attr", None) in (
+            _PATH_CLASSES
+        ):
+            path = _arg(owner, 0)
+            return (path, f"Path().{name}") if path is not None else None
+    if name in ("to_csv", "to_json") and owner is not None:
+        path = _arg(call, 0, "path_or_buf")
+        return (path, name) if path is not None else None  # no path: it returns a string
+    if name == "savefig":
+        path = _arg(call, 0, "fname")
+        return (path, "savefig") if path is not None else None
+    if name == "save" and getattr(owner, "id", None) in ("np", "numpy"):
+        path = _arg(call, 0, "file")
+        return (path, "np.save") if path is not None else None
+    if name == "save" and owner is not None:
+        path = _arg(call, 0, "fp")
+        if isinstance(path, ast.Constant) and isinstance(path.value, str):
+            if path.value.lower().endswith(_IMAGE_SUFFIXES):
+                return path, ".save"
+        return None  # `.save(name)`: not known to be an image, so not a promise either way
+    return None
+
+
+def python_promises(code: str, cwd: str | None) -> tuple[list[Promise], bool]:
+    """The writes Python `code` promises, and whether it parsed. A path is read only when it is
+    written literally; relative paths are against the process's directory, `cwd`."""
+    try:
+        tree = ast.parse(code)
+    except (SyntaxError, ValueError):
+        return [], False
+    lines = code.splitlines()
+    parents: dict[ast.AST, ast.AST] = {}
+    for node in ast.walk(tree):
+        for child in ast.iter_child_nodes(node):
+            parents[child] = node
+    found: list[tuple[int, Promise]] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        written = _written_arg(node)
+        if written is None:
+            continue
+        arg, how = written
+        context: list[str] = []
+        up = parents.get(node)
+        while up is not None:
+            if isinstance(up, _BLOCKS):
+                label = type(up).__name__
+                context.append(f"{label} {up.name}" if hasattr(up, "name") else label)
+            up = parents.get(up)
+        line = lines[node.lineno - 1].strip()[:300] if node.lineno <= len(lines) else ""
+        path = None
+        if isinstance(arg, ast.Constant) and isinstance(arg.value, str) and arg.value:
+            path = resolve(arg.value, cwd)
+            if path is not None and how == "np.save" and not path.endswith(".npy"):
+                path += ".npy"  # numpy adds the suffix
+        found.append((node.lineno, Promise(path, how, line, tuple(reversed(context)))))
+    return [promise for _, promise in sorted(found, key=lambda f: f[0])], True
+
+
+def apply_diff(old: list[str] | None, diff: str) -> list[str] | None:
+    """The lines after a unified diff from `checkpoint/diffs.py`, or None if `old` is unknown or
+    does not match it."""
+    if old is None:
+        return None
+    out: list[str] = []
+    pos = 0
+    in_hunk = False
+    for line in diff.split("\n") if diff else []:
+        hunk = re.match(r"@@ -(\d+)(?:,(\d+))? \+\d+(?:,\d+)? @@", line)
+        if hunk:
+            start, count = int(hunk.group(1)), int(hunk.group(2) or 1)
+            at = start - 1 if count > 0 else start
+            if at < pos or at > len(old):
+                return None
+            out.extend(old[pos:at])
+            pos, in_hunk = at, True
+        elif not in_hunk:
+            continue  # the --- and +++ header
+        elif line.startswith("+"):
+            out.append(line[1:])
+        elif line.startswith((" ", "-")) or line == "":
+            text = line[1:]
+            if pos >= len(old) or old[pos] != text:
+                return None
+            if not line.startswith("-"):
+                out.append(text)
+            pos += 1
+    out.extend(old[pos:])
+    return out
 
 
 # -- self-kill ---------------------------------------------------------------------------------
@@ -785,7 +980,7 @@ class Checker:
         self.start_cwd = start_cwd
         self.stop_facts = stop_facts
         # The task-agnostic check: a later call runs, imports, renders or compares a file the
-        # last change touched (ADR-0022).
+        # last change touched (ADR-0023).
         self.uses_changed_file = uses_changed_file
         self.seen: list[_Seen] = []
         self.cwd: dict[str | None, str | None] = {}
@@ -794,6 +989,7 @@ class Checker:
         # the last hash read per path, and whether a call changed it unread since.
         self.read_hash: dict[str, str] = {}
         self.unread_since: dict[str, int] = {}
+        self.text: dict[str, list[str] | None] = {}  # `.py` and `.json` files, from the diffs
 
     def check(self, view: CallView, now: datetime) -> tuple[list[FlagRecord], CheckRecord]:
         start = time.perf_counter()
@@ -852,6 +1048,7 @@ class Checker:
         cwd = self.cwd.get(view.agent_id, self.start_cwd)
         pids = _agent_pids(view.snapshot)
         new_pids = {pid: cmd for pid, cmd in pids.items() if pid not in (self.previous_pids or {})}
+        self._learn_text(view)
         if view.hook_input is None:
             unknown.append(UnknownItem(check="silent_no_write", reason="no_hook_input"))
             self._remember(view, test=False, failed=False)
@@ -874,6 +1071,7 @@ class Checker:
                 unknown.append(
                     UnknownItem(check="silent_no_write", reason=reason, detail=text[:200])
                 )
+            targets = targets + self._promised(reading, targets, unknown, notes)
         elif tool in WRITE_TOOLS or tool in NOTEBOOK_TOOLS:
             key = WRITE_TOOLS.get(tool) or NOTEBOOK_TOOLS[tool]
             raw = str(tool_input.get(key) or "")
@@ -930,6 +1128,87 @@ class Checker:
             self.cwd[view.agent_id] = str(hook["cwd"])
         return flags, held, unknown, notes
 
+    def _learn_text(self, view: CallView) -> None:
+        """Keep the text of `.py` and `.json` files from the recorded diffs, for the scripts a
+        call runs and the JSON a promise writes. A version the diffs cannot rebuild is unknown."""
+        if view.changes is None:
+            return
+        for entry in view.changes.files:
+            if not entry.path.endswith(_TEXT_KEPT):
+                continue
+            if entry.op == "removed":
+                self.text.pop(entry.path, None)
+            elif entry.kind != "file" or entry.diff is None:
+                self.text[entry.path] = None
+            else:
+                old = [] if entry.op == "added" else self.text.get(entry.path)
+                self.text[entry.path] = apply_diff(old, entry.diff)
+
+    def _promised(
+        self,
+        reading: ShellReading,
+        shell_targets: list[Target],
+        unknown: list[UnknownItem],
+        notes: list[str],
+    ) -> list[Target]:
+        """Writes promised in the Python code a call runs: `-c`, a heredoc, or a script whose
+        text the records hold (written by this call or an earlier one)."""
+        taken = {t.path for t in shell_targets}
+        found: list[Target] = []
+        for invocation in reading.invocations:
+            if not _PYTHON.match(invocation.name):
+                continue
+            sources = [("heredoc or -c", code) for code in invocation.code]
+            if not invocation.code and invocation.operands and invocation.operands[0] != "-":
+                script = resolve(invocation.operands[0], invocation.cwd)
+                text = self.text.get(script) if script else None
+                if text is None:
+                    notes.append(
+                        f"promised: script text unknown {script or invocation.operands[0]}"
+                    )
+                else:
+                    sources.append((f"script {script}", "\n".join(text)))
+            for source, code in sources:
+                promises, parsed = python_promises(code, invocation.cwd)
+                if not parsed:
+                    unknown.append(
+                        UnknownItem(
+                            check="silent_no_write", reason="promised_unparsable", detail=source
+                        )
+                    )
+                for promise in promises:
+                    if promise.path is None:
+                        unknown.append(
+                            UnknownItem(
+                                check="silent_no_write",
+                                reason="promised_variable",
+                                detail=promise.line[:200],
+                            )
+                        )
+                        continue
+                    if promise.path in taken or promise.path.startswith(_NOT_FILES):
+                        continue
+                    taken.add(promise.path)
+                    gone = any(
+                        later > invocation.index
+                        and (promise.path == path or promise.path.startswith(path + "/"))
+                        for later, path in reading.removals
+                    )
+                    found.append(
+                        Target(
+                            path=promise.path,
+                            how=f"promised {promise.how}",
+                            any_of=(promise.path,),
+                            removed_later=gone,
+                            promise={
+                                "source": source,
+                                "line": promise.line,
+                                "context": list(promise.context),
+                            },
+                        )
+                    )
+        return found
+
     def _writes(  # type: ignore[no-untyped-def]
         self,
         view,
@@ -985,6 +1264,8 @@ class Checker:
                         notes.append(f"identical: {target.how} {hit}")
                 else:
                     notes.append(f"wrote: {target.how} {hit}")
+                    if target.promise is not None and entry is not None:
+                        self._promised_content(view, now, target, entry, flags, unknown)
                 continue
             if incomplete is not None:
                 unknown.append(UnknownItem(check="silent_no_write", reason=incomplete, path=path))
@@ -992,6 +1273,8 @@ class Checker:
             if background and new_pids:
                 pid, cmd = sorted(new_pids.items())[0]
                 held.append(HeldWrite(path=path, pid=pid, cmd=cmd[:300]))
+                if target.promise is not None:
+                    notes.append(f"held: {target.how} {path}")
                 continue
             if how == "background":
                 unknown.append(
@@ -1000,7 +1283,10 @@ class Checker:
                     )
                 )
                 continue
-            subtype = "crash" if crash else "quiet"
+            if target.promise is not None and crash:
+                notes.append(f"promised_crash: {target.how} {path}")
+                continue
+            subtype = "promised" if target.promise is not None else "crash" if crash else "quiet"
             evidence: dict[str, Any] = {
                 "path": path,
                 "how": target.how,
@@ -1011,6 +1297,8 @@ class Checker:
             }
             if crash:
                 evidence["error_line"] = crash[:300]
+            if target.promise is not None:
+                evidence["promise"] = dict(target.promise)
             if view.hook_input and (view.hook_input.get("tool_input") or {}).get("command"):
                 evidence["command"] = str(view.hook_input["tool_input"]["command"])[:300]
             flags.append(
@@ -1022,6 +1310,47 @@ class Checker:
                     evidence,
                     f"`{path}` didn't change on this call, although the command looked like it "
                     "wrote it.",
+                )
+            )
+
+    def _promised_content(self, view, now, target, entry, flags, unknown) -> None:  # type: ignore[no-untyped-def]
+        """A promised file that did change: `empty` at 0 bytes, `broken` for JSON that does
+        not parse."""
+        if entry.op == "removed" or entry.kind != "file":
+            return
+        evidence = {"path": entry.path, "how": target.how, "size": entry.size,
+                    "promise": dict(target.promise)}  # fmt: skip
+        if entry.size == 0:
+            flags.append(
+                self._flag(
+                    view,
+                    now,
+                    "silent_no_write",
+                    "empty",
+                    evidence,
+                    f"`{entry.path}` was written on this call, but it's empty.",
+                )
+            )
+            return
+        if not entry.path.endswith(".json"):
+            return
+        text = self.text.get(entry.path)
+        if text is None:
+            unknown.append(
+                UnknownItem(check="silent_no_write", reason="promised_no_text", path=entry.path)
+            )
+            return
+        try:
+            json.loads("\n".join(text))
+        except ValueError as error:
+            flags.append(
+                self._flag(
+                    view,
+                    now,
+                    "silent_no_write",
+                    "broken",
+                    {**evidence, "json_error": str(error)[:200]},
+                    f"`{entry.path}` was written on this call, but it isn't valid JSON.",
                 )
             )
 
@@ -1222,7 +1551,7 @@ class Checker:
 def instruction_paths(instruction: str) -> list[str]:
     """Absolute file paths named in an instruction: no directories (a path ending in `/` may be
     needed only in some cases) and no URL paths. The start image decides what each is: absent
-    there, an output; present, an input or a provided script (ADR-0022)."""
+    there, an output; present, an input or a provided script (ADR-0023)."""
     found: list[str] = []
     for match in _INSTRUCTION_PATH.finditer(instruction):
         path = match.group(0).rstrip(".,:;")

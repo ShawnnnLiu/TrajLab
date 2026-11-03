@@ -51,7 +51,7 @@ Each call gets at most one line in each file, even when it is retried.
 All of a call's extras share a 30 s budget, so they never cost the call its checkpoint.
 `changes.jsonl` needs a filesystem listing, so it is written only under `--gate change` or `audit`.
 
-With `--detect` as well (ADR-0022, needs `--extras` and a gate), the checker reads each answered call after its `CallRecord` is appended and before its `.ack`, and writes in the same directory:
+With `--detect` as well (ADR-0023, needs `--extras` and a gate), the checker reads each answered call after its `CallRecord` is appended and before its `.ack`, and writes in the same directory:
 
 | File | Content |
 | --- | --- |
