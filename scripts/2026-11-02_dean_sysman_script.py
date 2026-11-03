@@ -87,7 +87,7 @@ import tempfile
 import time
 import urllib.request
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 try:
@@ -260,7 +260,11 @@ class WaypointEnvironment(BaseEnvironment):
                         pass
                 else:
                     killer = await asyncio.create_subprocess_exec(
-                        *root_prefix(), "pkill", "-TERM", "-f", kill_marker,
+                        *root_prefix(),
+                        "pkill",
+                        "-TERM",
+                        "-f",
+                        kill_marker,
                         stdin=asyncio.subprocess.DEVNULL,
                         stdout=asyncio.subprocess.DEVNULL,
                         stderr=asyncio.subprocess.DEVNULL,
@@ -268,7 +272,7 @@ class WaypointEnvironment(BaseEnvironment):
                     await killer.wait()
                 try:
                     await asyncio.wait_for(proc.wait(), timeout=30)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     pass
             raise
         text = out.decode(errors="replace")
@@ -280,9 +284,7 @@ class WaypointEnvironment(BaseEnvironment):
         return proc.returncode or 0, text
 
     async def _wp(self, *args: str, **kwargs) -> tuple[int, str]:
-        return await self._run(
-            waypoint_argv(self._state_dir, self._waypoint_bin, *args), **kwargs
-        )
+        return await self._run(waypoint_argv(self._state_dir, self._waypoint_bin, *args), **kwargs)
 
     async def _image_ids(self) -> set[str]:
         _, out = await self._run(
@@ -315,9 +317,7 @@ class WaypointEnvironment(BaseEnvironment):
                 shutil.rmtree(tmp, ignore_errors=True)
         # --quiet prints "<session id>,<work dir>,<bash pid>" as the last line.
         self._wp_session = out.strip().splitlines()[-1].split(",")[0].strip()
-        self.logger.info(
-            f"Waypoint session {self._wp_session} started for {self.session_id}"
-        )
+        self.logger.info(f"Waypoint session {self._wp_session} started for {self.session_id}")
 
         if self._is_agent_env:
             record = {
@@ -410,7 +410,7 @@ class WaypointEnvironment(BaseEnvironment):
 
         runner = ["#!/bin/bash", "{"]
         if merged_env:
-            runner.append(f'  . {guest}/env; rm -f {guest}/env')
+            runner.append(f"  . {guest}/env; rm -f {guest}/env")
         if cwd:
             runner.append(f"  cd {shlex.quote(cwd)} || exit 125")
         runner += [f"  bash {guest}/cmd", f"}} </dev/null >{guest}/out 2>{guest}/err", ""]
@@ -434,15 +434,17 @@ class WaypointEnvironment(BaseEnvironment):
             try:
                 try:
                     code, _ = await self._wp(
-                        "exec", session, "main", "--", f"bash {guest}/run.sh",
+                        "exec",
+                        session,
+                        "main",
+                        "--",
+                        f"bash {guest}/run.sh",
                         timeout=timeout_sec,
                         check=False,
                         kill_marker=f"exec {session} main -- bash {guest}/run.sh",
                     )
-                except asyncio.TimeoutError:
-                    raise RuntimeError(
-                        f"Command timed out after {timeout_sec} seconds"
-                    ) from None
+                except TimeoutError:
+                    raise RuntimeError(f"Command timed out after {timeout_sec} seconds") from None
                 streams = {}
                 for name in ("out", "err"):
                     host = Path(tmp) / name
@@ -450,13 +452,9 @@ class WaypointEnvironment(BaseEnvironment):
                     streams[name] = host.read_text(errors="replace")
             finally:
                 await asyncio.shield(
-                    self._wp(
-                        "exec", session, "main", "--", f"rm -rf {guest}", check=False
-                    )
+                    self._wp("exec", session, "main", "--", f"rm -rf {guest}", check=False)
                 )
-        return ExecResult(
-            stdout=streams["out"], stderr=streams["err"], return_code=code
-        )
+        return ExecResult(stdout=streams["out"], stderr=streams["err"], return_code=code)
 
     # -- file transfer ------------------------------------------------------ #
 
@@ -518,8 +516,15 @@ class WaypointEnvironment(BaseEnvironment):
                 # List the tree as root, choose the members here, and let tar
                 # pack exactly that list. Every argument is passed as argv.
                 _, listing = await self._run(
-                    [*root_prefix(), "find", str(source_dir), "-mindepth", "1",
-                     "-printf", "%y %P\\0"]  # fmt: skip
+                    [
+                        *root_prefix(),
+                        "find",
+                        str(source_dir),
+                        "-mindepth",
+                        "1",
+                        "-printf",
+                        "%y %P\\0",
+                    ]  # fmt: skip
                 )
                 members: list[str] = []
                 for line in filter(None, listing.split("\0")):
@@ -530,8 +535,18 @@ class WaypointEnvironment(BaseEnvironment):
                 member_list = Path(tmp) / "members"
                 member_list.write_text("".join(f"{name}\0" for name in members))
                 await self._run(
-                    [*root_prefix(), "tar", "--null", "--no-recursion", "-C", str(source_dir),
-                     "-T", str(member_list), "-cf", str(host_tar)]  # fmt: skip
+                    [
+                        *root_prefix(),
+                        "tar",
+                        "--null",
+                        "--no-recursion",
+                        "-C",
+                        str(source_dir),
+                        "-T",
+                        str(member_list),
+                        "-cf",
+                        str(host_tar),
+                    ]  # fmt: skip
                 )
             if skipped:
                 self.logger.warning(
@@ -563,17 +578,14 @@ class WaypointEnvironment(BaseEnvironment):
         target.mkdir(parents=True, exist_ok=True)
         guest_tar = f"{GUEST_SCRATCH}/down-{uuid.uuid4().hex}.tar"
         result = await self.exec(
-            f"mkdir -p {GUEST_SCRATCH} && "
-            f"tar -cf {guest_tar} -C {shlex.quote(source_dir)} .",
+            f"mkdir -p {GUEST_SCRATCH} && tar -cf {guest_tar} -C {shlex.quote(source_dir)} .",
             user="root",
         )
         try:
             await self._check(result, f"download of {source_dir}")
             with self._staging_dir() as tmp:
                 host_tar = Path(tmp) / "down.tar"
-                await self._wp(
-                    "cp", self._session(), f"main:{guest_tar}", str(host_tar)
-                )
+                await self._wp("cp", self._session(), f"main:{guest_tar}", str(host_tar))
                 with tarfile.open(host_tar) as tar:
                     for member in tar:
                         try:
@@ -649,7 +661,7 @@ def require_usable_key(api_key: str, agent: str, where: str) -> None:
     allowed = AGENT_PROVIDERS.get(agent)
     if allowed and provider not in allowed:
         sys.exit(
-            f"{where}: agent \"{agent}\" cannot use an {provider} key; "
+            f'{where}: agent "{agent}" cannot use an {provider} key; '
             f"it needs one from: {', '.join(allowed)}"
         )
 
@@ -699,9 +711,7 @@ def api_env(
     if agent == "codex":
         # Codex speaks the OpenAI Responses API. Harbor hands it OPENAI_API_KEY
         # and writes OPENAI_BASE_URL into its config, whichever service that is.
-        endpoint = endpoint or (
-            OPENAI_ENDPOINT if provider == "openai" else OPENROUTER_ENDPOINT
-        )
+        endpoint = endpoint or (OPENAI_ENDPOINT if provider == "openai" else OPENROUTER_ENDPOINT)
         env = {"OPENAI_API_KEY": api_key}
         if endpoint != OPENAI_ENDPOINT:
             env["OPENAI_BASE_URL"] = endpoint
@@ -1010,16 +1020,14 @@ def run_analyzer(analyzer: dict, api_key: str, checkpoint_path: str, out_dir: Pa
     return result
 
 
-
-
 # Run in the fork just before the checkpoint: end any `asciinema rec` process and
 # print how many were found. CRIU cannot dump a session whose terminal is held
 # by the recorder.
 STOP_RECORDERS = (
-    'n=0; for p in /proc/[0-9]*; do '
+    "n=0; for p in /proc/[0-9]*; do "
     'if tr "\\0" " " < $p/cmdline 2>/dev/null | grep -q "asciinem[a] rec"; then '
-    'kill ${p#/proc/} 2>/dev/null && n=$((n+1)); fi; done; '
-    'if [ $n -gt 0 ]; then sleep 2; fi; echo $n'
+    "kill ${p#/proc/} 2>/dev/null && n=$((n+1)); fi; done; "
+    "if [ $n -gt 0 ]; then sleep 2; fi; echo $n"
 )
 
 TOP_LEVEL_KEYS = {"dataset", "agent", "trials", "passk"}
@@ -1098,9 +1106,7 @@ def resolve_context(entry: dict, agent: str, base_dir: Path, where: str):
         # Relative paths are relative to the input file, not the cwd.
         source = (base_dir / item["path"]).resolve()
         if not source.is_file() and not source.is_dir():
-            raise TrialConfigError(
-                f'{where}: context file or directory not found: {source}'
-            )
+            raise TrialConfigError(f"{where}: context file or directory not found: {source}")
         destination = item.get("dest") or f"{CONTEXT_DIR}/{source.name}"
         if not isinstance(destination, str) or not destination.startswith("/"):
             raise TrialConfigError(
@@ -1118,6 +1124,7 @@ def resolve_context(entry: dict, agent: str, base_dir: Path, where: str):
             resolved[-1]["exclude"] = exclude
     return context, resolved
 
+
 REDACTED = "<redacted>"
 
 
@@ -1131,9 +1138,7 @@ PHASES = ("environment_setup", "agent_setup", "agent_execution", "verifier")
 def read_config(config_path: Path) -> dict:
     """Read the input JSON as written, API keys included."""
     try:
-        return json.loads(
-            config_path.read_text(), object_pairs_hook=reject_duplicate_keys
-        )
+        return json.loads(config_path.read_text(), object_pairs_hook=reject_duplicate_keys)
     except TrialConfigError as exc:
         raise TrialConfigError(f"{config_path}: {exc}") from None
     except (OSError, json.JSONDecodeError) as exc:
@@ -1248,7 +1253,7 @@ def load_trials(
     if not isinstance(config, dict) or not isinstance(config.get("trials"), list):
         sys.exit(f'{config_path}: expected an object with a "trials" list')
     if not config["trials"]:
-        sys.exit(f"{config_path}: \"trials\" is empty")
+        sys.exit(f'{config_path}: "trials" is empty')
     if unknown := set(config) - TOP_LEVEL_KEYS:
         sys.exit(f"{config_path}: unknown keys {sorted(unknown)}")
 
@@ -1292,8 +1297,7 @@ def load_trials(
             "endpoint_url": endpoint,
             "context": None,
             "context_files": [],
-            "restore_check_command": entry.get("restore_check_command")
-            or DEFAULT_RESTORE_CHECK,
+            "restore_check_command": entry.get("restore_check_command") or DEFAULT_RESTORE_CHECK,
         }
         if entry.get("dockerfile_dir"):
             # Relative paths are relative to the input file, not the cwd.
@@ -1327,7 +1331,7 @@ def load_trials(
             model = spec["model"]
             if spec["agent"] == "claude-code" and model.startswith("openrouter/"):
                 sys.exit(
-                    f'{where}: with an OpenRouter key, claude-code takes the OpenRouter '
+                    f"{where}: with an OpenRouter key, claude-code takes the OpenRouter "
                     f'model ID itself, e.g. "anthropic/claude-opus-5.5", not "{model}"'
                 )
             # codex is exempt: harbor passes it only the last segment of the
@@ -1355,15 +1359,11 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
         action="store_true",
         help="only check that this host has what the trials need, then exit",
     )
-    parser.add_argument(
-        "--output", help="output JSON path (default: <output-dir>/results.json)"
-    )
+    parser.add_argument("--output", help="output JSON path (default: <output-dir>/results.json)")
     parser.add_argument(
         "--run-name", default=time.strftime("%Y%m%d-%H%M%S"), help="names the output directory"
     )
-    parser.add_argument(
-        "--output-dir", help="default: ./runs/<run-name> beside this script"
-    )
+    parser.add_argument("--output-dir", help="default: ./runs/<run-name> beside this script")
     parser.add_argument(
         "--state-dir",
         default=DEFAULT_STATE_DIR,
@@ -1394,7 +1394,7 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
 
 
 def utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def command_output(argv: list[str]) -> str | None:
@@ -1434,10 +1434,12 @@ def provenance(harbor: str, waypoint_bin: str) -> dict:
     return {
         "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "git_commit": commit,
-        "git_dirty": bool(commit) and bool(
+        "git_dirty": bool(commit)
+        and bool(
             subprocess.run(
                 [*git, "status", "--porcelain", "--", str(HERE)],
-                capture_output=True, text=True,
+                capture_output=True,
+                text=True,
             ).stdout.strip()
         ),  # fmt: skip
         "harbor": version("harbor"),
@@ -1509,7 +1511,7 @@ def run_trial(
         "--include-task-name", spec["task"],
         "--agent", spec["agent"],
         "--model", spec["model"],
-        "--env", "run_trial:WaypointEnvironment",
+        "--env", f"{Path(__file__).stem}:WaypointEnvironment",
         "--ek", f"state_dir={state_dir}",
         "--ek", f"waypoint_bin={args.waypoint_bin}",
         "--ek", "keep_agent_session=true",
@@ -1528,14 +1530,11 @@ def run_trial(
         # text comes first and the task instruction follows it. `raw` keeps
         # Jinja from interpreting braces in the user's text.
         template = trial_out / "prompt-template.j2"
-        template.write_text(
-            "{% raw %}" + spec["context"] + "{% endraw %}\n\n{{ instruction }}\n"
-        )
+        template.write_text("{% raw %}" + spec["context"] + "{% endraw %}\n\n{{ instruction }}\n")
         harbor_cmd += ["--ak", f"prompt_template_path={template}"]
     if spec["context_files"]:
         pairs = [
-            [item["path"], item["dest"], item.get("exclude", [])]
-            for item in spec["context_files"]
+            [item["path"], item["dest"], item.get("exclude", [])] for item in spec["context_files"]
         ]
         harbor_cmd += ["--ek", f"context_files={json.dumps(pairs)}"]
     if spec["agent"] == "terminus-2":
@@ -1708,9 +1707,7 @@ def analyze(spec: dict, record: dict, api_key: str, out_dir: Path) -> dict:
         log("analyzer skipped: the trial saved no checkpoint")
         return {**analyzer, "output": None, "error": "the trial saved no checkpoint"}
     log(f"analyzer: {analyzer['agent']} with {analyzer['model']} in {checkpoint}")
-    usage_before = (
-        openrouter_usage(api_key) if key_provider(api_key) == "openrouter" else None
-    )
+    usage_before = openrouter_usage(api_key) if key_provider(api_key) == "openrouter" else None
     trial_out = Path(record.get("output_dir") or out_dir)
     analysis = run_analyzer(analyzer, api_key, checkpoint, trial_out)
     analysis["openrouter_billed_usd"] = openrouter_billed(api_key, usage_before)
@@ -1750,7 +1747,7 @@ def run_input(
             api_keys[position] = value
         elif spec["agent"] in AGENT_PROVIDERS:
             sys.exit(
-                f"trials[{spec['index']}] has no \"api-key\" and {name} is not set; "
+                f'trials[{spec["index"]}] has no "api-key" and {name} is not set; '
                 f"{spec['agent']} needs a key."
             )
 
@@ -1762,8 +1759,7 @@ def run_input(
             name, value = env_fallback_key(analyzer["agent"], analyzer["endpoint_url"])
             if not value:
                 sys.exit(
-                    f"trials[{spec['index']}]: the analyzer has no \"api-key\" and {name} "
-                    "is not set"
+                    f'trials[{spec["index"]}]: the analyzer has no "api-key" and {name} is not set'
                 )
             require_usable_key(value, analyzer["agent"], f"{name} in the environment")
             analyzer_keys[position] = value
@@ -1785,7 +1781,7 @@ def run_input(
                 f"sandbox, which does not work on this host: {problem} (see README: Analyzer)"
             )
 
-    for spec, api_key in zip(trials, api_keys):
+    for spec, api_key in zip(trials, api_keys, strict=False):
         service = endpoint_provider(spec["endpoint_url"])
         if api_key and service and service != key_provider(api_key):
             # e.g. an Anthropic key with an openrouter.ai endpoint: the key
@@ -1812,15 +1808,13 @@ def run_input(
         output_path.write_text(json.dumps(output, indent=2) + "\n")
 
     exit_code = 0
-    for spec, api_key, analyzer_key in zip(trials, api_keys, analyzer_keys):
+    for spec, api_key, analyzer_key in zip(trials, api_keys, analyzer_keys, strict=False):
         log(f"=== trial {spec['index'] + 1}/{len(trials)}: {spec['task']} with {spec['model']}")
         # cost_usd is the agent's or harbor's own estimate, which can be far off
         # for models they have no prices for. For OpenRouter keys, also measure
         # what was actually billed: the key's total usage after the trial minus
         # before. Any other use of the same key meanwhile is included.
-        usage_before = (
-            openrouter_usage(api_key) if key_provider(api_key) == "openrouter" else None
-        )
+        usage_before = openrouter_usage(api_key) if key_provider(api_key) == "openrouter" else None
         try:
             record = run_trial(
                 spec,
@@ -1963,10 +1957,7 @@ def run_passk(
         input_copy.write_text(
             json.dumps(load_trials(config_path, iteration_raw)[0], indent=2) + "\n"
         )
-        log(
-            f"##### pass@k iteration {iteration}/{passk['iterations']}: "
-            f"{len(remaining)} trial(s)"
-        )
+        log(f"##### pass@k iteration {iteration}/{passk['iterations']}: {len(remaining)} trial(s)")
         iteration_args = argparse.Namespace(**vars(args))
         iteration_args.run_name = f"{args.run_name}-iter{iteration:02d}"
         results_path = iteration_dir / "results.json"
@@ -1991,7 +1982,7 @@ def run_passk(
         )
 
         still_remaining = []
-        for origin, record in zip(remaining, output["trials"]):
+        for origin, record in zip(remaining, output["trials"], strict=False):
             trial = summary["trials"][origin]
             trial["attempts"].append(
                 {
@@ -1999,11 +1990,23 @@ def run_passk(
                     **{
                         key: record.get(key)
                         for key in (
-                            "reward", "cost_usd", "openrouter_billed_usd", "duration_sec",
-                            "started_at", "finished_at", "checkpoint_path", "context",
-                            "context_files", "exception", "error", "output_dir",
-                            "phase_sec", "agent_ran", "restore_check_exit_code",
-                            "api_key_found_in", "analysis",
+                            "reward",
+                            "cost_usd",
+                            "openrouter_billed_usd",
+                            "duration_sec",
+                            "started_at",
+                            "finished_at",
+                            "checkpoint_path",
+                            "context",
+                            "context_files",
+                            "exception",
+                            "error",
+                            "output_dir",
+                            "phase_sec",
+                            "agent_ran",
+                            "restore_check_exit_code",
+                            "api_key_found_in",
+                            "analysis",
                         )
                     },
                     "context_from_iteration": last_upper.get(origin, (None,))[0],
@@ -2013,9 +2016,7 @@ def run_passk(
                 trial["passed"] = True
                 trial["first_pass_iteration"] = iteration
             if record.get("checkpoint_path") and record.get("agent_ran"):
-                last_upper[origin] = (
-                    iteration, str(Path(record["checkpoint_path"]) / "upper")
-                )
+                last_upper[origin] = (iteration, str(Path(record["checkpoint_path"]) / "upper"))
                 # Only an answer about this attempt goes with its files; a
                 # failed analysis leaves none rather than an older one.
                 analysis = record.get("analysis") or {}
@@ -2073,9 +2074,10 @@ def preflight(args: argparse.Namespace) -> int:
     )  # fmt: skip
     if machine not in ("x86_64", "AMD64"):
         note("warn", "x86-64", f"{machine}: the example Dockerfile installs an x86-64 Node.js")
-    root_ok = os.geteuid() == 0 or subprocess.run(
-        ["sudo", "-n", "true"], capture_output=True
-    ).returncode == 0
+    root_ok = (
+        os.geteuid() == 0
+        or subprocess.run(["sudo", "-n", "true"], capture_output=True).returncode == 0
+    )
     note(
         "ok" if root_ok else "FAIL", "root access",
         "root" if os.geteuid() == 0 else "passwordless sudo",
