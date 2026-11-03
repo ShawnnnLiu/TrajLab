@@ -59,7 +59,14 @@ from trajlab.checkpoint.watcher import (
     hold_watcher_lock,
     watcher_running,
 )
-from trajlab.contracts import CheckpointRecord, RepairArm
+from trajlab.contracts import (
+    CHECKS_FILENAME,
+    FLAGS_FILENAME,
+    PREINSTALL_RECORD_FILENAME,
+    CheckpointRecord,
+    PreinstallRecord,
+    RepairArm,
+)
 from trajlab.contracts.groundtruth import (
     GROUNDTRUTH_DIRNAME,
     POINTS_FILENAME,
@@ -880,6 +887,52 @@ def trace(
         raise typer.Exit(code=1) from error
     except KeyboardInterrupt:
         pass
+
+
+@app.command()
+def patterns(
+    job_dir: Annotated[Path, typer.Argument(help="A finished job dir, e.g. corpus/jobs/x.")],
+    out: Annotated[Path, typer.Option("--out", help="Where flags and checks go, per trial.")],
+    trial: Annotated[
+        list[str] | None, typer.Option("--trial", help="Only this trial (repeatable).")
+    ] = None,
+    probe: Annotated[
+        bool,
+        typer.Option(help="Read the start and stop images with Docker for missing_output."),
+    ] = True,
+) -> None:
+    """Replay the checker (ADR-0022) call by call over finished trials; writes
+    `<out>/<trial>/flags.jsonl` and `checks.jsonl`, never into the job dir."""
+    from trajlab.checkpoint.patterns import docker_path_probe, read_trial, replay, write_jsonl
+
+    if not job_dir.is_dir():
+        typer.echo(f"trajlab patterns: {job_dir}: not a directory", err=True)
+        raise typer.Exit(code=1)
+    if out.resolve().is_relative_to(job_dir.resolve()):
+        typer.echo("trajlab patterns: --out must be outside the job dir", err=True)
+        raise typer.Exit(code=1)
+    trials = [d for d in _trial_dirs(job_dir) if not trial or d.name in trial]
+    reader = docker_path_probe() if probe else None
+    failed = 0
+    for trial_dir in trials:
+        try:
+            records = read_trial(trial_dir)
+            preinstall = trial_dir / PREINSTALL_RECORD_FILENAME
+            start_image = (
+                PreinstallRecord.model_validate_json(preinstall.read_text()).image
+                if preinstall.is_file()
+                else None
+            )
+            flags, checks = replay(records, start_image=start_image, probe=reader)
+        except (OSError, ValueError) as error:
+            typer.echo(f"{trial_dir.name}: not read: {error}", err=True)
+            failed += 1
+            continue
+        write_jsonl(out / trial_dir.name / FLAGS_FILENAME, flags)
+        write_jsonl(out / trial_dir.name / CHECKS_FILENAME, checks)
+        typer.echo(f"{trial_dir.name}: {len(checks)} checks, {len(flags)} flags")
+    if failed:
+        raise typer.Exit(code=1)
 
 
 gt_app = typer.Typer(help="Ground truth for error localization by verifier replay (ADR-0013).")
