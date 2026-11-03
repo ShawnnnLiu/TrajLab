@@ -12,6 +12,7 @@ Numbered 0023 because 0022 is taken on the unmerged `sl/exp2-retry-loop` branch 
 - **Live:** `trajlab watch --extras --detect`. It runs after the call's `CallRecord` is appended and before its ack, and writes `<trial>/trajlab/flags.jsonl` and `checks.jsonl`. Shadow mode: nothing reaches the agent, and a failing check never holds the ack.
 - **Offline:** `trajlab patterns <job-dir> --out <dir>` replays finished trials through the same code.
 - **Shadow run:** `configs/harbor/tb40-detector-shadow-v1.json`, 2 trials (`vba-userform-port` and `layout-config-recreation2`, one attempt each), with the off corpus's agent and settings.
+- **Result:** the checker ran live on all 63 answered calls of the shadow run, with no timeouts, and wrote 4 flags. The offline replay gives the same flags and checks. Per-call checks took a median of 1.05 ms; the two stops took 3.4 s and 10.5 s, mostly the Docker probes (§5, Result).
 
 ## Context
 
@@ -177,6 +178,23 @@ uv run trajlab run configs/harbor/tb40-detector-shadow-v1.json --corpus-id tb40-
   - Every answered call has one `CheckRecord`.
   - No `.timeout`.
   - `trajlab patterns` on the finished job gives the same flags as the live files, ignoring timestamps.
+
+#### Result (2026-11-03)
+
+Run from `49944f2` (manifest `corpus/manifests/tb40-detector-shadow-v1.json`), 13:37–14:13 UTC, 36 min. All three acceptance checks pass.
+
+| Trial | Reward | Answered calls | `CheckRecord`s | `.timeout` | Flags live | Replay matches |
+| --- | --- | --- | --- | --- | --- | --- |
+| `layout-config-recreation2__uFh7Jdg` | 0.0 | 41 | 41 | 0 | 1 | yes |
+| `vba-userform-port__WbRXsRU` | 1.0 | 22 | 22 | 0 | 3 | yes |
+
+- **Flags.**
+  - layout-config-recreation2, call_seq 11: `silent_no_write`/`quiet` on `/tmp/fit.py` (an empty heredoc appended with `>>`).
+  - vba-userform-port, call_seq 15 and 21: `self_kill`/`direct` (`pkill -f "uvicorn app.main"`, `pkill -f run.sh`).
+  - vba-userform-port, the stop: `unverified_completion`/`no_test`. The last change it names is `/tmp/run.log`, a background server's log, in a passing trial: the open question on background writes below.
+- **Replay.** `trajlab patterns corpus/jobs/tb40-detector-shadow-v1 --out <dir>`: `flags.jsonl` equal ignoring `flagged_at`, and `checks.jsonl` equal ignoring `checked_at` and `check_ms`.
+- **Cost to the agent.** `check_ms` over the 61 tool-call checks: median 1.05 ms, max 4.3 ms. The two stops: 3,414 ms and 10,502 ms, inside the 30 s extras budget. The hook's 240 s ack wait was never reached.
+- **What this shows.** The checker can run inside the watcher, between a call and the agent's next step, without holding the agent up or changing the trial, and gives the same flags it gives offline. So a later mode can act on a flag at the call that raised it (ADR-0015 §4), and a flag can mark where a mid-run checkpoint would branch.
 
 ## Open questions
 
