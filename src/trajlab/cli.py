@@ -392,6 +392,15 @@ def watch(
             "records: use a new corpus_id.",
         ),
     ] = False,
+    detect: Annotated[
+        bool,
+        typer.Option(
+            "--detect/--no-detect",
+            help="Also run the checker (ADR-0022) on each answered call before its ack, and write "
+            "its flags and checks in <trial>/trajlab/. Shadow mode: nothing reaches the agent. "
+            "Needs --extras and --gate change or audit.",
+        ),
+    ] = False,
 ) -> None:
     """Watch running trials and checkpoint their state-mutating calls. Stop with Ctrl-C."""
     if gate is not Gate.none and every != 1:
@@ -408,6 +417,9 @@ def watch(
             "file diffs need --gate change or audit",
             err=True,
         )
+    if detect and (not extras or gate is Gate.none):
+        typer.echo("trajlab watch: --detect needs --extras and --gate change or audit", err=True)
+        raise typer.Exit(code=1)
     stop = threading.Event()
     for signum in (signal.SIGINT, signal.SIGTERM):
         signal.signal(signum, lambda *_: stop.set())
@@ -421,6 +433,7 @@ def watch(
                 gate=gate.value,
                 sweep_interval=sweep_interval,
                 extras=extras,
+                detect=detect,
             ).run(stop)
     except WatcherLockedError as error:
         typer.echo(f"trajlab watch: {error}", err=True)

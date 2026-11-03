@@ -44,7 +44,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from harbor.models.task.task import Task
 from harbor.models.trajectories import Trajectory
+from harbor.models.trial.config import TrialConfig
 from harbor.models.trial.paths import TrialPaths
 from pydantic import BaseModel, ValidationError
 
@@ -1345,7 +1347,9 @@ _PROBE = 'for p in "$@"; do if [ -e "$p" ]; then echo "1 $p"; else echo "0 $p"; 
 
 
 def docker_path_probe(
-    docker: str = "docker", runner: Callable[..., subprocess.CompletedProcess] = subprocess.run
+    docker: str = "docker",
+    runner: Callable[..., subprocess.CompletedProcess] = subprocess.run,
+    timeout: float = 120,
 ) -> PathProbe:
     """Whether paths exist in an image, by a short read-only container with no network."""
 
@@ -1355,7 +1359,7 @@ def docker_path_probe(
         argv = [docker, "run", "--rm", "--network", "none", "--entrypoint", "/bin/sh", image,
                 "-c", _PROBE, "sh", *paths]  # fmt: skip
         try:
-            done = runner(argv, capture_output=True, text=True, timeout=120, check=False)
+            done = runner(argv, capture_output=True, text=True, timeout=timeout, check=False)
         except (OSError, subprocess.TimeoutExpired):
             return dict.fromkeys(paths)
         found: dict[str, bool | None] = dict.fromkeys(paths)
@@ -1367,6 +1371,36 @@ def docker_path_probe(
         return found
 
     return probe
+
+
+def read_stop_facts(
+    instruction: str, probe: PathProbe, *, start_image: str | None, stop_image: str | None
+) -> StopFacts:
+    """The stop checks' facts, the same way in a replay and live: the instruction's paths, read
+    in the start image and, for those absent there, in the stop's checkpoint image."""
+    paths = tuple(instruction_paths(instruction))
+    at_start = probe(start_image, paths) if start_image else dict.fromkeys(paths)
+    candidates = tuple(p for p in paths if at_start.get(p) is False)
+    at_stop = probe(stop_image, candidates) if stop_image else dict.fromkeys(candidates)
+    return StopFacts(
+        paths=paths,
+        at_start=at_start,
+        at_stop=at_stop,
+        commands=tuple(instruction_commands(instruction)),
+    )
+
+
+def task_instruction(trial_dir: Path) -> str | None:
+    """The instruction Harbor gives the agent, read live from the trial's `config.json` and
+    Harbor's cached task (`Task.instruction`, canary lines stripped). None if unreadable."""
+    try:
+        config = TrialConfig.model_validate_json(TrialPaths(trial_dir).config_path.read_text())
+        return Task(
+            config.task.get_local_path(), extra_instruction_paths=config.extra_instruction_paths
+        ).instruction
+    except (OSError, ValueError):
+        logger.warning("no instruction for %s", trial_dir, exc_info=True)
+        return None
 
 
 def replay(
@@ -1386,20 +1420,12 @@ def replay(
     def stop_facts(stop: CallRecord) -> StopFacts | None:
         if probe is None or records.instruction is None:
             return None
-        paths = tuple(instruction_paths(records.instruction))
-        at_start = probe(start_image, paths) if start_image else dict.fromkeys(paths)
-        candidates = tuple(p for p in paths if at_start.get(p) is False)
         checkpoint = records.checkpoints.get(stop.checkpoint_seq or 0)
-        at_stop = (
-            probe(checkpoint.checkpoint_id, candidates)
-            if checkpoint is not None
-            else dict.fromkeys(candidates)
-        )
-        return StopFacts(
-            paths=paths,
-            at_start=at_start,
-            at_stop=at_stop,
-            commands=tuple(instruction_commands(records.instruction)),
+        return read_stop_facts(
+            records.instruction,
+            probe,
+            start_image=start_image,
+            stop_image=checkpoint.checkpoint_id if checkpoint is not None else None,
         )
 
     checker = Checker(start_cwd=records.start_cwd, uses_changed_file=uses_changed_file)

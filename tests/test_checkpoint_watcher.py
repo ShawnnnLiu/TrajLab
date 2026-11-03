@@ -992,3 +992,162 @@ def test_extras_keep_a_call_whose_before_versions_cannot_be_read(running_trial: 
 
     [a] = _changes(running_trial)[-1].files
     assert (a.sha256, a.before_sha256, a.diff) == (sha256(b"edited\n"), None, None)
+
+
+# The checker, live (--detect, ADR-0022) -------------------------------------------------------
+
+INSTRUCTION = "Write the result to `/app/out.txt`."
+
+
+def _hooked(
+    trial: Path,
+    tool_use_id: str,
+    command: str,
+    *,
+    error: str | None = None,
+    event: str = "PostToolUse",
+) -> Path:
+    """A Bash call's `.call.json` (the hook's stdin), then its `.req`, as the hook writes them."""
+    directory = checkpoints_dir(trial)
+    directory.mkdir(parents=True, exist_ok=True)
+    hook: dict[str, object] = {
+        "hook_event_name": "PostToolUseFailure" if error else event,
+        "tool_name": "Bash",
+        "tool_input": {"command": command},
+        "cwd": "/app",
+    }
+    if error:
+        hook["error"] = error
+    else:
+        hook["tool_response"] = {"stdout": "", "stderr": "", "interrupted": False}
+    (directory / f"{tool_use_id}.call.json").write_text(json.dumps(hook))
+    return _request(trial, tool_use_id, event="PostToolUseFailure" if error else event)
+
+
+def _flags(trial: Path) -> list[dict]:
+    path = trial / TRAJLAB_DIRNAME / "flags.jsonl"
+    return [json.loads(line) for line in path.read_text().splitlines()] if path.exists() else []
+
+
+def _checks(trial: Path) -> list[dict]:
+    path = trial / TRAJLAB_DIRNAME / "checks.jsonl"
+    return [json.loads(line) for line in path.read_text().splitlines()] if path.exists() else []
+
+
+class _Probe:
+    """Path existence per image, as `docker_path_probe` reads it."""
+
+    def __init__(self, backend: "ExtrasBackend") -> None:
+        self.backend = backend
+        self.calls: list[tuple[str, tuple[str, ...]]] = []
+
+    def __call__(self, image: str, paths: Sequence[str]) -> dict[str, bool | None]:
+        self.calls.append((image, tuple(paths)))
+        files = self.backend.images.get(image, {})
+        return {p: p in files for p in paths}
+
+
+@pytest.fixture
+def detecting(running_trial: Path, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr("trajlab.checkpoint.watcher.task_instruction", lambda _: INSTRUCTION)
+    backend = ExtrasBackend()
+    probe = _Probe(backend)
+
+    def make() -> Watcher:
+        return _watcher(
+            running_trial, backend, gate="change", extras=True, detect=True, path_probe=probe
+        )
+
+    return running_trial, backend, probe, make
+
+
+def test_detect_needs_extras(running_trial: Path) -> None:
+    with pytest.raises(ValueError, match="needs extras"):
+        _watcher(running_trial, FakeBackend(), gate="change", detect=True)
+
+
+def test_detect_checks_every_call_before_its_ack(detecting, monkeypatch) -> None:
+    trial, backend, _, make = detecting
+    import trajlab.checkpoint.watcher as watcher_module
+
+    real_ack = watcher_module.write_ack
+    seen: list[int] = []
+
+    def ack(directory: Path, call: CallRecord) -> None:
+        seen.append(len(_checks(trial)))  # the check is on disk when the ack is written
+        real_ack(directory, call)
+
+    monkeypatch.setattr(watcher_module, "write_ack", ack)
+    watcher = make()
+    watcher.process(_hooked(trial, "toolu_1", "ls"))
+    backend.write("/app/x")
+    kill = 'pkill -f "uvicorn app.main"; rm -f db.sqlite'
+    watcher.process(_hooked(trial, "toolu_2", kill, error="Exit code 144"))
+
+    assert seen == [1, 2]
+    [flag] = _flags(trial)
+    assert (flag["pattern"], flag["tool_call_id"], flag["call_seq"]) == ("self_kill", "toolu_2", 2)
+    assert [c["tool_call_id"] for c in _checks(trial)] == ["toolu_1", "toolu_2"]
+    # Shadow mode: nothing reaches the agent.
+    assert not list(checkpoints_dir(trial).glob("*.feedback"))
+    assert not list(checkpoints_dir(trial).glob("*flags*"))
+
+
+def test_a_failing_check_never_holds_the_ack(detecting, monkeypatch) -> None:
+    trial, _, _, make = detecting
+
+    def broken(*_: object, **__: object) -> None:
+        raise RuntimeError("checker bug")
+
+    monkeypatch.setattr("trajlab.checkpoint.watcher.Checker.check", broken)
+    req = _hooked(trial, "toolu_1", "ls")
+    call = make().process(req)
+    assert call is not None and req.with_suffix(".ack").exists()
+    assert _checks(trial) == []
+    assert "no check for toolu_1" in (checkpoints_dir(trial) / WATCHER_LOG_FILENAME).read_text()
+
+
+def test_the_stop_reads_the_instruction_outputs_in_the_images(detecting) -> None:
+    trial, backend, probe, make = detecting
+    watcher = make()
+    watcher.process(_hooked(trial, "toolu_1", "ls"))
+    backend.put("/app/main.py", b"print(1)\n")
+    watcher.process(_hooked(trial, "toolu_2", "echo 'print(1)' > /app/main.py"))
+    watcher.process(_stop(trial))
+
+    assert [(f["pattern"], f["subtype"]) for f in _flags(trial)] == [
+        ("unverified_completion", "no_test"),
+        ("missing_output", None),
+    ]
+    stop_image = _records(trial)[-1].checkpoint_id
+    assert probe.calls == [
+        (ExtrasBackend.START_IMAGE, ("/app/out.txt",)),
+        (stop_image, ("/app/out.txt",)),
+    ]
+
+
+def test_live_flags_equal_the_replay_across_a_watcher_restart(detecting) -> None:
+    from trajlab.checkpoint.patterns import read_trial, replay
+
+    trial, backend, probe, make = detecting
+    first = make()
+    first.process(_hooked(trial, "toolu_1", "ls"))
+    backend.put("/app/main.py", b"print(1)\n")
+    first.process(_hooked(trial, "toolu_2", "echo 'print(1)' > /app/main.py"))
+    restarted = make()  # a new watcher: its checker first reads calls 1 and 2 from the records
+    restarted.process(_hooked(trial, "toolu_3", "python3 /app/main.py"))
+    backend.write("/app/y")
+    restarted.process(_hooked(trial, "toolu_4", 'pkill -f "main.py"; ls', error="Exit code 143"))
+    restarted.process(_stop(trial))
+
+    records = read_trial(trial)
+    records.instruction = INSTRUCTION
+    flags, checks = replay(records, start_image=ExtrasBackend.START_IMAGE, probe=probe)
+    live = [{k: v for k, v in f.items() if k != "flagged_at"} for f in _flags(trial)]
+    again = [f.model_dump(mode="json", exclude={"flagged_at"}) for f in flags]
+    assert live == again
+    assert [f["pattern"] for f in live] == ["self_kill", "unverified_completion", "missing_output"]
+    ignore = {"check_ms", "checked_at"}
+    assert [{k: v for k, v in c.items() if k not in ignore} for c in _checks(trial)] == [
+        c.model_dump(mode="json", exclude=ignore) for c in checks
+    ]
