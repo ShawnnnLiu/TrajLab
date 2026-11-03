@@ -14,9 +14,13 @@ v0 checks, each tied to the call that triggered it:
   redirect, `tee`, `sed -i`, `cp`, `mv`) exits 0 and leaves the path unchanged, with a complete
   record. Identical rewrites, held background jobs, visible failures, and anything the records
   cannot decide are not flagged; the last two kinds are recorded as notes and unknowns.
-- `masked_error`: the call exits 0 but its output shows a crash.
-- at the stop, `unverified_completion` (no test after the last change, or the last test
-  failed) and `missing_output` (a path the instruction asks for is absent).
+- `masked_error`: the call exits 0 but its output shows a crash. The answer to an import
+  probe (`python -c "import X; print(X.__version__)"` failing with ImportError) is not one.
+- at the stop, `unverified_completion` (no check after the last change, or the last check
+  failed) and `missing_output` (a path the instruction asks for is absent). A check is the
+  shared test-command list, a command the instruction shows, a script it names that exists at
+  the start, or (task-agnostic, a later call) running, importing or comparing a file the last
+  change touched. With none of these defined, the stop is noted `no check defined`.
 
 Left out of v0, with ADR-0022's reasons: `loop` and `stall` (the off corpus's six loops were
 deliberate undos); `false_edit_claim` (2 of 104 missing writes were claims in the agent's own
@@ -97,15 +101,9 @@ _CRASH_LINES = re.compile(
     r"|^\S+:\d+:\d+: (?:fatal )?error: .*$"  # gcc and clang
     r"|^make(?:\[\d+\])?: \*\*\* .*$"
 )
-# The checker's test commands: the shared list, plus what the off runs' agents ran to check
-# their work. The additions after the first line are task-specific (ADR-0022).
-TEST_COMMAND_V0 = re.compile(
-    TEST_COMMAND_PATTERN
-    + r"|\bmake(?: -C \S+)? repro\b|\bpython3? -m unittest\b|(?:^|[\s/])test\w*\.py\b"
-    + r"|\bplaywright\b|\bcurl\b[^\n|;]*\b(?:localhost|127\.0\.0\.1)\b"
-    + r"|\brender\.py\b|\bimport render\b|\bfrom render import\b|\brun_pretrain\.sh\b"
-    + r"|\bapply\.py\b|\bfrom apply import\b|\bscore\.(?:sh|py)\b"
-)
+# The shared test-command list. Task-specific checks come only from the instruction (the commands
+# it shows and the scripts it names), never from what agents ran (ADR-0022).
+TEST_COMMAND = re.compile(TEST_COMMAND_PATTERN)
 _TEST_FAILED = re.compile(
     r"\b[1-9]\d* (?:failed|failures?|errors?)\b|\bFAILED\b|(?m:^FAIL\b)|\bAssertionError\b"
     r"|(?m:^make(?:\[\d+\])?: \*\*\* )"
@@ -118,18 +116,74 @@ _INSTRUCTION_PATH = re.compile(r"(?<![\w.:/~-])/(?:[\w.+@-]+/)*[\w.+@-]*/?")
 _NOT_FILES = ("/dev/", "/proc/", "/sys/")
 
 
-def crash_line(output: str) -> str | None:
-    """The first line that shows a crash, or None. A traceback whose only exception is a
+def crash_lines(output: str) -> list[str]:
+    """Every line that shows a crash, in output order. A traceback whose only exception is a
     `BrokenPipeError` (output piped into `head`) is not a crash."""
+    found: list[tuple[int, str]] = []
     if _TRACEBACK.search(output):
         lines = list(_EXCEPTION_LINE.finditer(output))
-        real = next((m for m in lines if m.group(1) != "BrokenPipeError"), None)
-        if real is not None:
-            return output[real.start() :].split("\n", 1)[0].strip()
+        real = [m for m in lines if m.group(1) != "BrokenPipeError"]
+        found.extend((m.start(), output[m.start() :].split("\n", 1)[0].strip()) for m in real)
         if not lines:
-            return "Traceback (most recent call last)"
-    match = _CRASH_LINES.search(output)
-    return match.group(0).strip() if match else None
+            found.append((_TRACEBACK.search(output).start(), "Traceback (most recent call last)"))  # type: ignore[union-attr]
+    found.extend((m.start(), m.group(0).strip()) for m in _CRASH_LINES.finditer(output))
+    return [line for _, line in sorted(found)]
+
+
+def crash_line(output: str) -> str | None:
+    """The first line that shows a crash, or None."""
+    lines = crash_lines(output)
+    return lines[0] if lines else None
+
+
+# An import probe: `python -c` code that only imports modules and prints, run to see whether
+# they are installed. Its ImportError is the answer the agent asked for, so nothing is masked.
+_PRINTED = r"(?:[\w.]+|'[^']*'|\"[^\"]*\")"  # print only names, attributes and literals
+_PROBE_STATEMENT = re.compile(
+    r"\s*(?:import\s+[\w.]+(?:\s+as\s+\w+)?(?:\s*,\s*[\w.]+(?:\s+as\s+\w+)?)*"
+    r"|from\s+[\w.]+\s+import\s+[\w\s,*()]+"
+    rf"|print\(\s*(?:{_PRINTED}(?:\s*,\s*{_PRINTED})*)?\s*\)|)\s*"
+)
+_IMPORT_ERROR = re.compile(r"^(?:[\w.]+\.)?(?:ModuleNotFoundError|ImportError): ")
+_PYTHON = re.compile(r"python(?:\d(?:\.\d+)?)?$|pypy3?$")
+
+
+def imported_modules(code: str) -> list[str]:
+    """Top-level-first dotted names of the modules Python `code` imports (`import a.b, c as d`,
+    `from a.b import x`)."""
+    modules: list[str] = []
+    for line in re.split(r"[\n;]", code):
+        line = line.strip()
+        match = re.match(r"from\s+([\w.]+)\s+import\b", line)
+        if match:
+            modules.append(match.group(1))
+            continue
+        match = re.match(r"import\s+(.+)$", line)
+        if match:
+            for part in match.group(1).split(","):
+                name = part.split(" as ")[0].strip()
+                if re.fullmatch(r"[\w.]+", name):
+                    modules.append(name)
+    return modules
+
+
+def probe_modules(script: Script) -> set[str]:
+    """The top-level modules a command's import probes ask for."""
+    modules: set[str] = set()
+    for simple in script.commands:
+        args = simple.args_from()
+        if not args or not _PYTHON.match(basename(args[0])) or len(args) < 3 or args[1] != "-c":
+            continue
+        code = args[2]
+        if all(_PROBE_STATEMENT.fullmatch(s) for s in re.split(r"[\n;]", code)):
+            modules.update(m.split(".")[0] for m in imported_modules(code))
+    return modules
+
+
+def _probe_answer(line: str, probes: set[str]) -> bool:
+    if not _IMPORT_ERROR.match(line):
+        return False
+    return any(re.search(rf"['\"]{re.escape(m)}(?:[.'\"])", line) for m in probes)
 
 
 # -- what a call meant to write ---------------------------------------------------------------
@@ -147,12 +201,157 @@ class Target:
     removed_later: bool = False  # a later `rm` or `mv` in the same command takes it away
 
 
+@dataclass(frozen=True)
+class Invocation:
+    """One simple command, as the stop's check rules read it."""
+
+    name: str  # the program's basename, after wrappers such as `timeout` and `env`
+    operands: tuple[str, ...]  # its arguments as written, options left out
+    paths: tuple[str, ...]  # what it runs, or passes to an interpreter or a comparer, resolved
+    code: tuple[str, ...]  # code given to an interpreter: `-c`/`-e`, a heredoc, `-m module`
+    cwd: str | None  # the shell's directory when it runs
+    workdir: str | None  # the program's directory: `-C <dir>` if given, else `cwd`
+
+
 @dataclass
 class ShellReading:
     targets: list[Target] = field(default_factory=list)
     unknown: list[tuple[str, str]] = field(default_factory=list)  # (written text, reason)
     background: bool = False  # `&` or `nohup` at some command
     cwd_known: bool = True
+    invocations: list[Invocation] = field(default_factory=list)
+
+
+# Programs that run a file given to them, or compare files. A path passed to one of these is
+# used, not just looked at; `cat`, `ls`, `grep` and editors are not in the list.
+_INTERPRETER = re.compile(
+    r"(?:python(?:\d(?:\.\d+)?)?|pypy3?|node|deno|bun|ts-node|tsx|ruby|perl|php|Rscript|lua"
+    r"|java)$"
+)
+_SHELLS = {"bash", "sh", "zsh", "dash", "source", "."}
+_COMPARERS = {"diff", "cmp", "comm", "sdiff", "colordiff", "compare"}
+_RUNNERS_OF_OTHERS = {"npx"}
+# Wrappers that run the command after them, with their options that take a value.
+_WRAPPERS = {
+    "timeout": {"-s", "--signal", "-k", "--kill-after"},
+    "env": {"-u", "--unset", "-C", "--chdir"},
+    "nice": {"-n", "--adjustment"},
+    "stdbuf": {"-i", "-o", "-e"},
+    "xvfb-run": {"-n", "-s", "-f", "-e", "-p"},
+    "unbuffer": set(),
+    "nohup": set(),
+}
+
+
+def _unwrap(words: list[Word]) -> list[Word]:
+    """The words from the real program on: `timeout 60 python x` is `python x`, and
+    `uv run python x` is `python x`."""
+    while words:
+        name = basename(words[0].text)
+        if name == "uv" and len(words) > 1 and words[1].text == "run":
+            words = words[2:]
+            while words and words[0].text.startswith("-"):
+                words = words[1:]
+            continue
+        if name not in _WRAPPERS:
+            return words
+        takes_value = _WRAPPERS[name]
+        i = 1
+        while i < len(words):
+            text = words[i].text
+            if text in takes_value:
+                i += 2
+            elif text.startswith("-") or _ASSIGNMENT.match(text):
+                i += 1
+            else:
+                break
+        if name == "timeout" and i < len(words):
+            i += 1  # the duration
+        words = words[i:]
+    return words
+
+
+_ASSIGNMENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*=")
+
+
+def _invocations(
+    words: list[Word], redirects: list[Any], bodies: list[str], here: str | None
+) -> list[Invocation]:
+    """How one simple command uses files: what it runs, and the code it gives an interpreter.
+    `bodies` are its heredoc bodies, in order."""
+    words = _unwrap(words)
+    if not words:
+        return []
+    name = basename(words[0].text)
+    paths: list[str] = []
+    code: list[str] = []
+    nested: list[Invocation] = []
+    operands: list[str] = []
+    workdir = here
+
+    def add_path(word: Word) -> None:
+        if word.text == "-":
+            return  # stdin
+        path, _ = _path_of(word, here)
+        if path is not None:
+            paths.append(path)
+
+    if "/" in words[0].text:
+        add_path(words[0])  # ./run.sh, /app/build/test_x
+    interpreter = _INTERPRETER.match(name) is not None
+    shell = name in _SHELLS
+    i = 1
+    while i < len(words):
+        word = words[i]
+        text = word.text
+        if text in ("-c", "-e", "--eval") and (interpreter or shell) and i + 1 < len(words):
+            body = words[i + 1].text
+            if shell:
+                nested.extend(read_command(body, here)[1].invocations)
+            else:
+                code.append(body)
+            i += 2
+            break  # what follows is the code's own argv
+        if text == "-m" and interpreter and i + 1 < len(words):
+            code.append(f"import {words[i + 1].text}")
+            operands.extend(w.text for w in words[i + 1 :])
+            for later in words[i + 2 :]:
+                if not later.text.startswith("-"):
+                    add_path(later)
+            break
+        if text == "-C" and i + 1 < len(words):
+            workdir = resolve(words[i + 1].text, here) if not words[i + 1].expands else None
+            i += 2
+            continue
+        if text.startswith("-") and text != "-":
+            i += 1
+            continue
+        operands.append(text)
+        if interpreter or shell or name in _COMPARERS or name in _RUNNERS_OF_OTHERS:
+            add_path(word)
+        i += 1
+    body_index = 0
+    for redirect in redirects:
+        if redirect.op in ("<<", "<<-"):
+            body = bodies[body_index] if body_index < len(bodies) else ""
+            body_index += 1
+            if interpreter:
+                code.append(body)
+            elif shell:
+                nested.extend(read_command(body, here)[1].invocations)
+        elif redirect.op == "<<<" and interpreter:
+            code.append(redirect.target.text)
+        elif redirect.op == "<" and (interpreter or shell):
+            add_path(redirect.target)
+    own = Invocation(
+        name=name,
+        operands=tuple(operands),
+        paths=tuple(paths),
+        code=tuple(code),
+        cwd=here,
+        workdir=workdir,
+    )
+    return [own, *nested]
 
 
 def _path_of(word: Word, cwd: str | None) -> tuple[str | None, str | None]:
@@ -254,8 +453,10 @@ def read_command(command: str, cwd: str | None) -> tuple[Script | None, ShellRea
     previous_depth = 0
     written: list[tuple[int, int]] = []  # (command index, target index)
     removals: list[tuple[int, str]] = []
+    bodies = iter(script.heredocs)
     for index, simple in enumerate(script.commands):
         first_target = len(reading.targets)
+        own_bodies = [next(bodies, "") for r in simple.redirects if r.op in ("<<", "<<-")]
         if simple.depth < previous_depth:
             for depth in [d for d in cwds if d > simple.depth]:
                 del cwds[depth]
@@ -270,6 +471,8 @@ def read_command(command: str, cwd: str | None) -> tuple[Script | None, ShellRea
         offset = len(simple.words) - len(args)
         words = simple.words[offset:]
         name = args[0] if args else ""
+        if name != "cd":
+            reading.invocations.extend(_invocations(words, simple.redirects, own_bodies, here))
         if name == "cd":
             operands = [w for w in words[1:] if not w.text.startswith("-") or w.text == "-"]
             if not operands or operands[0].text == "-" or operands[0].expands:
@@ -407,6 +610,87 @@ def find_self_kill(script: Script, command: str) -> dict[str, Any] | None:
     return None
 
 
+# -- what counts as a check, for unverified_completion -----------------------------------------
+
+# A file the instruction names, that exists at the start, with one of these suffixes, is a
+# provided script: running or importing it is a check (`/app/render.py`, `/app/run_pretrain.sh`).
+SCRIPT_SUFFIXES = (".py", ".sh", ".bash", ".js", ".mjs", ".cjs", ".ts", ".rb", ".pl")
+_MODULE_FILE = re.compile(r"(?:\.cpython-[\w-]+|\.abi3)?\.(?:py|pyx|so|pyd)$")
+_INSTRUCTION_SPAN = re.compile(r"(?<!`)`([^`\n]+)`(?!`)|^[ \t]*\$ (.+)$", re.MULTILINE)
+_COMMAND_PROGRAMS = {
+    "make", "cmake", "ctest", "pytest", "tox", "nox", "npm", "yarn", "pnpm", "cargo", "go",
+    "bash", "sh", "node", "deno", "bun",
+}  # fmt: skip
+
+
+def instruction_commands(instruction: str) -> list[Invocation]:
+    """The shell commands an instruction shows, in backticks or as `$ ` lines, that run a
+    program (`make -C /app repro`, `bash /app/run_pretrain.sh`). Code such as
+    `import fast_networkx as fnx` is not a command."""
+    found: list[Invocation] = []
+    for match in _INSTRUCTION_SPAN.finditer(instruction):
+        span = (match.group(1) or match.group(2) or "").strip()
+        try:
+            script = parse_shell(span)
+        except ShellParseError:
+            continue
+        for simple in script.commands:
+            words = simple.words[len(simple.words) - len(simple.args_from()) :]
+            for invocation in _invocations(words, simple.redirects, [], None)[:1]:
+                name = invocation.name
+                if name in _COMMAND_PROGRAMS or _INTERPRETER.match(name):
+                    if invocation not in found:
+                        found.append(invocation)
+    return found
+
+
+def _same_program(a: str, b: str) -> bool:
+    return a == b or (_PYTHON.match(a) is not None and _PYTHON.match(b) is not None)
+
+
+def runs_command(invocation: Invocation, wanted: Invocation) -> bool:
+    """Whether a call's command is an instruction's command: the same program, in the same
+    directory when the instruction gives one (`-C /app`), with all its operands; options and
+    extra operands are allowed (`make -C /app repro 2>&1 | tail`)."""
+    if not _same_program(invocation.name, wanted.name):
+        return False
+    if wanted.workdir is not None and invocation.workdir != wanted.workdir:
+        return False
+    have = set(invocation.operands) | set(invocation.paths)
+    have |= {p for p in (resolve(o, invocation.workdir) for o in invocation.operands) if p}
+    return all(operand in have for operand in wanted.operands)
+
+
+def mentions(code: str, path: str, cwd: str | None) -> bool:
+    """Whether interpreter code names `path` (absolute, or relative to `cwd`) or imports it as
+    a Python module (`import fast_networkx` uses `/app/fast_networkx/core.py`)."""
+    end = r"(?![\w/-]|\.\w)"
+    if re.search(rf"(?<![\w./-]){re.escape(path)}{end}", code):
+        return True
+    if cwd and path.startswith(cwd.rstrip("/") + "/"):
+        relative = path[len(cwd.rstrip("/")) + 1 :]
+        if re.search(rf"(?<![\w./-])(?:\./)?{re.escape(relative)}{end}", code):
+            return True
+    if _MODULE_FILE.search(path):
+        stem = _MODULE_FILE.sub("", path) + "/"
+        return any(f"/{m.replace('.', '/')}/" in stem for m in imported_modules(code))
+    return False
+
+
+def uses(invocation: Invocation, paths: Iterable[str]) -> str | None:
+    """The first of `paths` that a command runs, passes to an interpreter or a comparer, or
+    names or imports in interpreter code; None if it uses none of them."""
+    wanted = [p for p in paths if p]
+    for path in invocation.paths:
+        if path in wanted:
+            return path
+    for code in invocation.code:
+        for path in wanted:
+            if mentions(code, path, invocation.cwd):
+                return path
+    return None
+
+
 # -- the checker -------------------------------------------------------------------------------
 
 
@@ -423,12 +707,21 @@ class CallView:
 
 @dataclass(frozen=True)
 class StopFacts:
-    """For `missing_output`: the paths the instruction asks the agent to create, and whether
-    each exists in the start image and at the stop (None: could not be read)."""
+    """What the instruction gives the stop checks: the absolute file paths it names, whether
+    each exists in the start image and at the stop (None: could not be read), and the commands
+    it shows. A path absent at the start is an output (`missing_output`); one present at the
+    start with a script suffix is a provided script (`unverified_completion`)."""
 
-    outputs: tuple[str, ...] = ()
+    paths: tuple[str, ...] = ()
     at_start: Mapping[str, bool | None] = field(default_factory=dict)
     at_stop: Mapping[str, bool | None] = field(default_factory=dict)
+    commands: tuple[Invocation, ...] = ()
+
+    @property
+    def scripts(self) -> tuple[str, ...]:
+        return tuple(
+            p for p in self.paths if self.at_start.get(p) is True and p.endswith(SCRIPT_SUFFIXES)
+        )
 
 
 @dataclass
@@ -437,10 +730,11 @@ class _Seen:
 
     seq: int
     tool_call_id: str
-    test: bool
-    test_failed: bool
+    test: bool  # matched the shared test-command list
+    failed: bool  # exited non-zero, or its output shows a failed test or a crash
     changed: tuple[str, ...]
     changed_total: int | None
+    invocations: tuple[Invocation, ...] = ()
 
 
 def _exit_code(hook_input: Mapping[str, Any], record: CallRecord) -> tuple[int | None, str]:
@@ -484,9 +778,13 @@ class Checker:
         *,
         start_cwd: str | None = None,
         stop_facts: Callable[[], StopFacts] | StopFacts | None = None,
+        uses_changed_file: bool = True,
     ) -> None:
         self.start_cwd = start_cwd
         self.stop_facts = stop_facts
+        # The task-agnostic check: a later call runs, imports, renders or compares a file the
+        # last change touched (ADR-0022).
+        self.uses_changed_file = uses_changed_file
         self.seen: list[_Seen] = []
         self.cwd: dict[str | None, str | None] = {}
         self.previous_pids: dict[int, str] | None = None
@@ -554,18 +852,21 @@ class Checker:
         new_pids = {pid: cmd for pid, cmd in pids.items() if pid not in (self.previous_pids or {})}
         if view.hook_input is None:
             unknown.append(UnknownItem(check="silent_no_write", reason="no_hook_input"))
-            self._remember(view, test=False, test_failed=False)
+            self._remember(view, test=False, failed=False)
             return flags, held, unknown, notes
         code, how = _exit_code(hook, record)
         output = _output(hook)
-        crash = crash_line(output)
+        crashes = crash_lines(output)
+        crash = crashes[0] if crashes else None
         command = str(tool_input.get("command") or "") if tool == "Bash" else ""
         script: Script | None = None
         targets: list[Target] = []
+        invocations: tuple[Invocation, ...] = ()
         background = bool(tool_input.get("run_in_background")) or how == "background"
         if tool == "Bash":
             script, reading = read_command(command, cwd)
             targets = reading.targets
+            invocations = tuple(reading.invocations)
             background = background or reading.background
             for text, reason in reading.unknown:
                 unknown.append(
@@ -597,29 +898,32 @@ class Checker:
                     )
                 )
 
-        # masked_error
-        if code == 0 and crash is not None and tool == "Bash":
-            flags.append(
-                self._flag(
-                    view,
-                    now,
-                    "masked_error",
-                    None,
-                    {"error_line": crash[:300], "exit_code": 0, "command": command[:300]},
-                    f"This command exited 0, but its output shows an error: {crash[:200]}",
+        # masked_error, leaving out the answers to import probes
+        if code == 0 and crashes and tool == "Bash":
+            probes = probe_modules(script) if script is not None else set()
+            shown = [line for line in crashes if not _probe_answer(line, probes)]
+            if len(shown) < len(crashes):
+                notes.append(f"import_probe: {', '.join(sorted(probes))}")
+            if shown:
+                flags.append(
+                    self._flag(
+                        view,
+                        now,
+                        "masked_error",
+                        None,
+                        {"error_line": shown[0][:300], "exit_code": 0, "command": command[:300]},
+                        f"This command exited 0, but its output shows an error: {shown[0][:200]}",
+                    )
                 )
-            )
 
         # silent_no_write
         self._writes(
             view, now, targets, code, how, crash, background, new_pids, flags, held, unknown, notes
         )
 
-        test = bool(command) and TEST_COMMAND_V0.search(command) is not None
-        test_failed = test and (
-            code != 0 or _TEST_FAILED.search(output) is not None or crash is not None
-        )
-        self._remember(view, test=test, test_failed=test_failed)
+        test = bool(command) and TEST_COMMAND.search(command) is not None
+        failed = code != 0 or _TEST_FAILED.search(output) is not None or crash is not None
+        self._remember(view, test=test, failed=failed, invocations=invocations)
         if hook.get("cwd"):
             self.cwd[view.agent_id] = str(hook["cwd"])
         return flags, held, unknown, notes
@@ -747,7 +1051,14 @@ class Checker:
                 stale.add(entry.path)
         return stale
 
-    def _remember(self, view: CallView, *, test: bool, test_failed: bool) -> None:
+    def _remember(
+        self,
+        view: CallView,
+        *,
+        test: bool,
+        failed: bool,
+        invocations: tuple[Invocation, ...] = (),
+    ) -> None:
         record = view.record
         changes = view.changes
         if changes is not None:
@@ -767,9 +1078,10 @@ class Checker:
                 seq=record.call_seq,
                 tool_call_id=record.tool_call_id,
                 test=test,
-                test_failed=test_failed,
+                failed=failed,
                 changed=work,
                 changed_total=record.changed_paths_total if work or not (listed or own) else 0,
+                invocations=invocations,
             )
         )
 
@@ -779,53 +1091,12 @@ class Checker:
         flags: list[FlagRecord] = []
         unknown: list[UnknownItem] = []
         notes: list[str] = []
-        calls = [s for s in self.seen]
-        changing = [s for s in calls if s.changed_total]
-        tests = [s for s in calls if s.test]
-        if not changing:
-            notes.append("unverified_completion: no file-changing call")
-        else:
-            last = changing[-1]
-            after = [t for t in tests if t.seq >= last.seq]
-            path = last.changed[0] if last.changed else "?"
-            if not after:
-                flags.append(
-                    self._flag(
-                        view,
-                        now,
-                        "unverified_completion",
-                        "no_test",
-                        {
-                            "last_change_call": last.seq,
-                            "last_change_tool_call_id": last.tool_call_id,
-                            "last_change_path": path,
-                            "last_test_call": tests[-1].seq if tests else None,
-                        },
-                        f"You're stopping, but no test ran after your last change ({path}, "
-                        f"call {last.seq}).",
-                    )
-                )
-            elif after[-1].test_failed:
-                flags.append(
-                    self._flag(
-                        view,
-                        now,
-                        "unverified_completion",
-                        "last_test_failed",
-                        {
-                            "last_change_call": last.seq,
-                            "last_change_path": path,
-                            "last_test_call": after[-1].seq,
-                            "last_test_tool_call_id": after[-1].tool_call_id,
-                        },
-                        f"You're stopping, but your last test (call {after[-1].seq}) failed.",
-                    )
-                )
         facts = self.stop_facts() if callable(self.stop_facts) else self.stop_facts
+        self._unverified(view, now, facts, flags, unknown, notes)
         if facts is None:
             unknown.append(UnknownItem(check="missing_output", reason="no_stop_facts"))
         else:
-            for path in facts.outputs:
+            for path in facts.paths:
                 start, stop = facts.at_start.get(path), facts.at_stop.get(path)
                 if start is True:
                     notes.append(f"missing_output: {path} existed at the start, not an output")
@@ -853,11 +1124,103 @@ class Checker:
         )
         return flags, [], unknown, notes
 
+    def check_rules(self, facts: StopFacts | None) -> dict[str, Any]:
+        """The ways this trial's checks are recognized: the shared test commands always, the
+        instruction's commands and provided scripts, and the task-agnostic rule if on."""
+        return {
+            "instruction_commands": [
+                " ".join([c.name, *c.operands]) for c in (facts.commands if facts else ())
+            ],
+            "instruction_scripts": list(facts.scripts) if facts else [],
+            "uses_changed_file": self.uses_changed_file,
+        }
 
-def instruction_outputs(instruction: str) -> list[str]:
-    """Absolute paths named in an instruction, as candidate outputs: no directories (a path
-    ending in `/` may be needed only in some cases) and no URL paths. Which of them are outputs
-    is decided by the start image: a path that exists there is an input (ADR-0022)."""
+    def _check_kind(
+        self, seen: _Seen, last: _Seen, facts: StopFacts | None
+    ) -> tuple[str, str] | None:
+        """(rule, detail) if `seen` checks the work of the last change, else None. The named
+        checks count from the last change's own call on; the task-agnostic rule only after it."""
+        if seen.seq >= last.seq:
+            if seen.test:
+                return "test_command", ""
+            for invocation in seen.invocations:
+                for wanted in facts.commands if facts else ():
+                    if runs_command(invocation, wanted):
+                        return "instruction_command", " ".join([wanted.name, *wanted.operands])
+                script = uses(invocation, facts.scripts) if facts else None
+                if script is not None:
+                    return "instruction_script", script
+        if self.uses_changed_file and seen.seq > last.seq:
+            for invocation in seen.invocations:
+                path = uses(invocation, last.changed)
+                if path is not None:
+                    return "uses_changed_file", path
+        return None
+
+    def _unverified(self, view, now, facts, flags, unknown, notes) -> None:  # type: ignore[no-untyped-def]
+        calls = self.seen
+        changing = [s for s in calls if s.changed_total]
+        rules = self.check_rules(facts)
+        if not changing:
+            notes.append("unverified_completion: no file-changing call")
+            return
+        named = rules["instruction_commands"] or rules["instruction_scripts"]
+        if not named and not self.uses_changed_file:
+            # The shared test list alone does not define a check for a task: these runs never
+            # use it, so the flag would track the task, not the agent.
+            if facts is None:
+                unknown.append(UnknownItem(check="unverified_completion", reason="no_stop_facts"))
+            else:
+                notes.append("unverified_completion: no check defined")
+            return
+        last = changing[-1]
+        path = last.changed[0] if last.changed else "?"
+        checks = [(s, k) for s in calls if (k := self._check_kind(s, last, facts)) is not None]
+        evidence: dict[str, Any] = {
+            "last_change_call": last.seq,
+            "last_change_tool_call_id": last.tool_call_id,
+            "last_change_path": path,
+            "last_change_paths": list(last.changed[:20]),
+            "rules": rules,
+        }
+        if not checks:
+            flags.append(
+                self._flag(
+                    view,
+                    now,
+                    "unverified_completion",
+                    "no_test",
+                    evidence,
+                    f"You're stopping, but no test ran after your last change ({path}, "
+                    f"call {last.seq}).",
+                )
+            )
+            return
+        final, (kind, detail) = checks[-1]
+        notes.append(f"unverified_completion: last check call {final.seq} ({kind} {detail})")
+        if final.failed:
+            flags.append(
+                self._flag(
+                    view,
+                    now,
+                    "unverified_completion",
+                    "last_test_failed",
+                    {
+                        **evidence,
+                        "last_test_call": final.seq,
+                        "last_test_tool_call_id": final.tool_call_id,
+                        "last_test_rule": kind,
+                        "last_test_detail": detail,
+                    },
+                    f"You're stopping, but your last test (call {final.seq}) failed.",
+                )
+            )
+
+
+def instruction_paths(instruction: str) -> list[str]:
+    """Absolute file paths named in an instruction: no directories (a path ending in `/` may be
+    needed only in some cases) and no URL paths. The start image decides what each is: absent
+    there, an output; present, an input or a provided script (ADR-0022)."""
     found: list[str] = []
     for match in _INSTRUCTION_PATH.finditer(instruction):
         path = match.group(0).rstrip(".,:;")
@@ -1012,6 +1375,7 @@ def replay(
     start_image: str | None = None,
     probe: PathProbe | None = None,
     limit: int | None = None,
+    uses_changed_file: bool = True,
 ) -> tuple[list[FlagRecord], list[CheckRecord]]:
     """Run the checker over a finished trial's calls, one at a time, as the watcher would.
 
@@ -1022,18 +1386,23 @@ def replay(
     def stop_facts(stop: CallRecord) -> StopFacts | None:
         if probe is None or records.instruction is None:
             return None
-        outputs = tuple(instruction_outputs(records.instruction))
-        at_start = probe(start_image, outputs) if start_image else dict.fromkeys(outputs)
-        candidates = tuple(p for p in outputs if at_start.get(p) is False)
+        paths = tuple(instruction_paths(records.instruction))
+        at_start = probe(start_image, paths) if start_image else dict.fromkeys(paths)
+        candidates = tuple(p for p in paths if at_start.get(p) is False)
         checkpoint = records.checkpoints.get(stop.checkpoint_seq or 0)
         at_stop = (
             probe(checkpoint.checkpoint_id, candidates)
             if checkpoint is not None
             else dict.fromkeys(candidates)
         )
-        return StopFacts(outputs=outputs, at_start=at_start, at_stop=at_stop)
+        return StopFacts(
+            paths=paths,
+            at_start=at_start,
+            at_stop=at_stop,
+            commands=tuple(instruction_commands(records.instruction)),
+        )
 
-    checker = Checker(start_cwd=records.start_cwd)
+    checker = Checker(start_cwd=records.start_cwd, uses_changed_file=uses_changed_file)
     flags: list[FlagRecord] = []
     checks: list[CheckRecord] = []
     for view in records.views[:limit]:

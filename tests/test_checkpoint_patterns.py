@@ -13,9 +13,11 @@ from trajlab.checkpoint.patterns import (
     TrialRecords,
     crash_line,
     find_self_kill,
-    instruction_outputs,
+    instruction_commands,
+    instruction_paths,
     read_command,
     replay,
+    runs_command,
 )
 from trajlab.checkpoint.shell import parse
 from trajlab.contracts import (
@@ -345,6 +347,29 @@ def test_broken_pipe_alone_and_probes_are_not_crashes():
     )
 
 
+MISSING = "Traceback (most recent call last):\nModuleNotFoundError: No module named 'cadquery'"
+
+
+def test_an_import_probe_answer_is_not_a_masked_error():
+    cmd = 'python -c "import cadquery;print(cadquery.__version__)"; ls /app'
+    flags, checks = run(view(1, bash(cmd, stdout=MISSING)))
+    assert flags == []
+    assert checks[0].notes == ("import_probe: cadquery",)
+
+
+def test_code_that_does_more_than_import_is_not_a_probe():
+    cmd = "python3 -c \"\nimport cadquery\nprint(open('/app/x').read())\"; ls"
+    flags, _ = run(view(1, bash(cmd, stdout=MISSING)))
+    assert patterns(flags) == [("masked_error", None)]
+
+
+def test_another_error_next_to_a_probe_answer_is_still_flagged():
+    out = MISSING + "\nTraceback (most recent call last):\nKeyError: 'text'"
+    flags, _ = run(view(1, bash('python3 -c "import cadquery"; python3 a.py', stdout=out)))
+    (flag,) = flags
+    assert flag.evidence["error_line"] == "KeyError: 'text'"
+
+
 # -- the stop ------------------------------------------------------------------------------------
 
 
@@ -378,9 +403,108 @@ def test_stop_after_a_failed_test():
     assert patterns(flags) == [("unverified_completion", "last_test_failed")]
 
 
+INSTRUCTION = (
+    "Fix the model under `/app/src/`. The suite runs with `make -C /app test`, and the "
+    "reproducer with `make -C /app repro`. `import fast_networkx as fnx` must work. Render "
+    "with the provided `/app/render.py` into `/app/out.png`.\n\n```\n$ bash /app/run.sh\n```"
+)
+
+
+def test_instruction_commands_are_programs_not_paths_or_code():
+    commands = [
+        " ".join([c.name, c.workdir or "", *c.operands]) for c in instruction_commands(INSTRUCTION)
+    ]
+    assert commands == ["make /app test", "make /app repro", "bash  /app/run.sh"]
+
+
+def test_an_instruction_command_matches_with_cd_or_dash_c():
+    (_, repro, _) = instruction_commands(INSTRUCTION)
+    for command, cwd, expected in [
+        ("make repro 2>&1 | tail -5", "/app", True),
+        ("cd /tmp && make -C /app repro", "/app", True),
+        ("make repro", "/tmp", False),
+        ("make -C /app test", "/app", False),
+    ]:
+        _, reading = read_command(command, cwd)
+        assert any(runs_command(i, repro) for i in reading.invocations) is expected, command
+
+
+def facts_with(*scripts: str, commands: str = "") -> StopFacts:
+    return StopFacts(
+        paths=scripts,
+        at_start=dict.fromkeys(scripts, True),
+        commands=tuple(instruction_commands(commands)),
+    )
+
+
+def test_running_a_provided_script_is_a_check():
+    facts = facts_with("/app/render.py")
+    write = write_call(1, "/app/output/config.json")
+    for command in (
+        "python3 render.py output/config.json /tmp/o.png",
+        "python3 - <<'E'\nimport sys; sys.path.insert(0, '/app')\nfrom render import draw\nE",
+    ):
+        flags, _ = run(write, view(2, bash(command)), stop_view(3), stop_facts=facts,
+                       uses_changed_file=False)  # fmt: skip
+        assert flags == [], command
+
+
+def test_an_instruction_command_after_the_last_change_is_a_check():
+    facts = facts_with(commands="Run `make -C /app repro`.")
+    flags, _ = run(write_call(1), view(2, bash("make repro")), stop_view(3), stop_facts=facts)
+    assert flags == []
+
+
+def test_a_later_call_that_uses_a_changed_file_is_a_check():
+    for command in (
+        "python3 /app/main.py",
+        "cd /app && python3 -c 'import main; main.run()'",
+        "diff /app/main.py /tmp/want.py",
+    ):
+        flags, checks = run(write_call(1), view(2, bash(command)), stop_view(3))
+        assert flags == [], command
+        assert "uses_changed_file /app/main.py" in checks[-1].notes[0]
+
+
+def test_looking_at_a_changed_file_is_not_a_check():
+    flags, _ = run(write_call(1), view(2, bash("cat /app/main.py; ls -l /app")), stop_view(3))
+    assert patterns(flags) == [("unverified_completion", "no_test")]
+
+
+def test_the_task_agnostic_rule_counts_only_later_calls():
+    change = FileChange(path="/app/m.py", op="added", kind="file", sha256="b" * 64)
+    write_and_run = view(
+        1,
+        bash("cat > /app/m.py <<'E'\nprint(1)\nE\npython3 /app/m.py"),
+        rec=record(1, changed=("+/app/m.py",)),
+        changes=changes(1, change),
+    )
+    flags, _ = run(write_and_run, stop_view(2))
+    assert patterns(flags) == [("unverified_completion", "no_test")]
+
+
+def test_a_failed_use_of_a_changed_file_is_a_failed_test():
+    failed = bash(
+        "python3 /app/main.py", stdout="Traceback (most recent call last):\nKeyError: 'x'"
+    )
+    flags, _ = run(write_call(1), view(2, failed), stop_view(3))
+    assert patterns(flags) == [
+        ("masked_error", None),
+        ("unverified_completion", "last_test_failed"),
+    ]
+
+
+def test_no_check_defined_is_recorded_not_flagged():
+    flags, checks = run(
+        write_call(1), stop_view(2), stop_facts=StopFacts(), uses_changed_file=False
+    )
+    assert flags == []
+    assert "unverified_completion: no check defined" in checks[-1].notes
+
+
 def test_missing_output_at_the_stop():
     facts = StopFacts(
-        outputs=("/app/out.step", "/app/schematic.png", "/app/rules.json"),
+        paths=("/app/out.step", "/app/schematic.png", "/app/rules.json"),
         at_start={"/app/out.step": False, "/app/schematic.png": True, "/app/rules.json": False},
         at_stop={"/app/out.step": False, "/app/rules.json": True},
     )
@@ -394,7 +518,7 @@ def test_instruction_outputs_skip_directories_and_urls():
         "Write `/app/output/config.json` from `/app/data/layout.png`. Put SVGs under "
         "`/app/output/gen/`. See https://fonts.google.com/x."
     )
-    assert instruction_outputs(text) == ["/app/output/config.json", "/app/data/layout.png"]
+    assert instruction_paths(text) == ["/app/output/config.json", "/app/data/layout.png"]
 
 
 # -- the prefix rule -----------------------------------------------------------------------------
