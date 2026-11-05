@@ -5,12 +5,13 @@ The file is Markdown for people and one fenced JSON block, the run's `Exp2Settin
 loop: the sample with each exclusion's reason, N, the arms, the primary comparison and its
 test, the store's schema version and derived id, the sha256 of the protocol steps and of every
 prompt prefix (arm by number of prior attempts; the whole prompt is a prefix and the root
-failure's own instruction, whose sha256 is listed per failure), the hooks file, the stop hook
+failure's own instruction, whose sha256 is listed per failure) and of the record's schema text
+(the descriptions both record arms can read, ADR-0023), the hooks file, the stop hook
 (none, ADR-0022), the query tool's caps, the model and its settings, and the repo sha.
 
 `exp2 run` refuses to start a record-engine attempt unless the file, as it is on disk, is the
 version committed at HEAD (`committed`), and refuses any run whose settings the current code
-would not reproduce (`drift`): a changed protocol, evidence sentence, schema text, or derived
+would not reproduce (`drift`): a changed protocol, record text, schema text, or derived
 view changes a hash, and the file has to be written and committed again.
 """
 
@@ -102,10 +103,8 @@ def schema_text(store: Path) -> str:
         return describe(con)
 
 
-def prefix_hashes(arms: Sequence[Exp2Arm], budget: int, text: str) -> dict[str, str]:
-    return {
-        f"{arm}/{k}": sha256(prefix(arm, k, text)) for arm in arms for k in range(1, budget + 1)
-    }
+def prefix_hashes(arms: Sequence[Exp2Arm], budget: int) -> dict[str, str]:
+    return {f"{arm}/{k}": sha256(prefix(arm, k)) for arm in arms for k in range(1, budget + 1)}
 
 
 def _file_sha256(path: Path) -> str:
@@ -166,7 +165,8 @@ def settings(
         derived=derived_id(),
         derived_views=tuple(view.name for view in VIEWS),
         protocol_sha256=sha256(PROTOCOL_STEPS),
-        prefix_sha256=prefix_hashes(arms, budget, schema_text(corpus_store)),
+        schema_sha256=sha256(schema_text(corpus_store)),
+        prefix_sha256=prefix_hashes(arms, budget),
         hooks_sha256=_file_sha256(root / HOOKS),
         stop_hook=None,
         query=query if "record-engine" in arms else None,
@@ -180,14 +180,13 @@ def settings(
 def prompt_leaks(found: Exp2Settings, needles_of: Any = leaks.needles) -> dict[str, list[str]]:
     """Every rendered prompt of the run checked against its task's tests: root failure to its
     leaks, for those with any. `needles_of(trial_dir)` reads a root failure's needles."""
-    text = schema_text(Path(found.corpus_store))
     instruction = instructions(Path(found.corpus_store), found.sample)
     out: dict[str, list[str]] = {}
     for root in found.sample:
         needles = needles_of(Path(found.corpus_job) / root.trial_name)
         prompts = [
             (
-                render(prefix(arm, k, text), instruction[root.trial_name]),
+                render(prefix(arm, k), instruction[root.trial_name]),
                 instruction[root.trial_name],
             )
             for arm in found.arms
@@ -208,7 +207,8 @@ def drift(found: Exp2Settings) -> list[str]:
         "derived": derived_id(),
         "derived_views": tuple(view.name for view in VIEWS),
         "protocol_sha256": sha256(PROTOCOL_STEPS),
-        "prefix_sha256": prefix_hashes(found.arms, found.budget, schema_text(store)),
+        "schema_sha256": sha256(schema_text(store)),
+        "prefix_sha256": prefix_hashes(found.arms, found.budget),
         "hooks_sha256": _file_sha256(repo_root(Path.cwd()) / HOOKS),
     }
     problems = [
@@ -273,6 +273,7 @@ def render_markdown(found: Exp2Settings, written_at: datetime | None = None) -> 
         f"{', '.join(f'`{v}`' for v in found.derived_views)}.",
         f"- Protocol steps sha256 `{found.protocol_sha256}`; hooks file sha256 "
         f"`{found.hooks_sha256}`.",
+        *([f"- Record schema text sha256 `{found.schema_sha256}`."] if found.schema_sha256 else []),
     ]
     if found.query is not None:
         lines.append(

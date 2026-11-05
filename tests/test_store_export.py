@@ -11,10 +11,11 @@ from tests.test_store_build import HUNK, TRIAL_ID, all_images, capture
 from tests.test_store_derive import as_schema, change, make_store, script
 from tests.test_store_derive import call as make_call_row
 from trajlab.cli import app
+from trajlab.contracts import SCHEMA_VERSION
 from trajlab.store import schema
 from trajlab.store.build import build_trial
 from trajlab.store.describe import DescribeError, describe, relations
-from trajlab.store.export import ExportError, export, hunk_file, readme, verify
+from trajlab.store.export import ExportError, export, hunk_file, readme, verify, version_file
 
 
 @pytest.fixture
@@ -39,13 +40,15 @@ def lines(path: Path) -> list[dict[str, object]]:
 
 def test_the_fixture_exports_and_reads_back(store: Path, bundle: Path) -> None:
     assert sorted(entry.name for entry in bundle.iterdir()) == sorted(
-        ["README.md", "deltas", *(f"{name}.jsonl" for name in relations())]
+        ["README.md", "deltas", "versions", *(f"{name}.jsonl" for name in relations())]
     )
     assert verify(store, bundle) == []
     (delta,) = lines(bundle / "deltas.jsonl")
     assert delta["path"] == "/app/hello.txt"
     assert delta["hunk"] == HUNK
+    assert delta["text_after"] == "Hello, world!\n"
     assert hunk_file(bundle, TRIAL_ID, 1, "/app/hello.txt").read_text() == HUNK
+    assert version_file(bundle, TRIAL_ID, 1, "/app/hello.txt").read_text() == "Hello, world!\n"
     (summary,) = lines(bundle / "trial_summary.jsonl")
     assert summary["trial_id"] == str(TRIAL_ID)
     assert summary["mutating_calls"] == 1
@@ -110,7 +113,7 @@ def test_paths_differing_in_case_are_refused_only_where_case_folds(tmp_path: Pat
     (tmp_path / "probe").touch()
     folds = (tmp_path / "PROBE").exists()
     if folds:
-        with pytest.raises(ExportError, match="would be one hunk file here"):
+        with pytest.raises(ExportError, match="would be one file under deltas/ here"):
             export(store, tmp_path / "bundle")
     else:
         export(store, tmp_path / "bundle")
@@ -166,14 +169,26 @@ def test_verify_catches_edited_missing_and_extra_hunk_files(store: Path, bundle:
     hunk = hunk_file(bundle, TRIAL_ID, 1, "/app/hello.txt")
     hunk.write_text("+something else\n")
     assert verify(store, bundle) == [
-        f"hunk files that differ from their row: ['{hunk.relative_to(bundle)}']"
+        f"deltas/ files that differ from their row: ['{hunk.relative_to(bundle)}']"
     ]
     hunk.unlink()
     extra = hunk.with_name("notes.txt.diff")
     extra.write_text("+x\n")
     assert verify(store, bundle) == [
-        f"hunk files with no delta row: ['{extra.relative_to(bundle)}'] (1 in all)",
-        f"missing hunk files: ['{hunk.relative_to(bundle)}'] (1 in all)",
+        f"deltas/ files with no delta row: ['{extra.relative_to(bundle)}'] (1 in all)",
+        f"missing deltas/ files: ['{hunk.relative_to(bundle)}'] (1 in all)",
+    ]
+
+
+def test_verify_catches_an_edited_or_missing_version_file(store: Path, bundle: Path) -> None:
+    version = version_file(bundle, TRIAL_ID, 1, "/app/hello.txt")
+    version.write_text("Hello, world?\n")
+    assert verify(store, bundle) == [
+        f"versions/ files that differ from their row: ['{version.relative_to(bundle)}']"
+    ]
+    version.unlink()
+    assert verify(store, bundle) == [
+        f"missing versions/ files: ['{version.relative_to(bundle)}'] (1 in all)"
     ]
 
 
@@ -196,7 +211,7 @@ def test_store_export_writes_and_verifies(store: Path, tmp_path: Path) -> None:
     result = CliRunner().invoke(app, ["store", "export", str(store), str(out)])
     assert result.exit_code == 0, result.output
     assert result.output.startswith(f"wrote {out}: trials 1, steps 3, deltas 1, ")
-    assert result.output.rstrip().endswith("1 hunk files; verified")
+    assert result.output.rstrip().endswith("1 hunk files, 1 version files; verified")
 
     again = CliRunner().invoke(app, ["store", "export", str(store), str(out), "--verify"])
     assert again.exit_code == 0, again.output
@@ -227,7 +242,7 @@ def test_store_derive_refuses_a_store_of_another_schema_version(tmp_path: Path) 
     as_schema(store, 3)
     result = CliRunner().invoke(app, ["store", "derive", str(store)])
     assert result.exit_code == 1
-    assert "has schema 3; this code reads 4" in result.output
+    assert f"has schema 3; this code reads {SCHEMA_VERSION}" in result.output
     assert "build it again" in result.output
 
 

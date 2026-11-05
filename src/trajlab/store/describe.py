@@ -3,9 +3,10 @@
 `describe(con)` lists every relation of `record.duckdb` an agent can read (the tables,
 `store_meta`, and the derived views) with each column's type, from DuckDB's catalog, and its
 description, from the row models in `trajlab.contracts` or the derived views' specs. The
-`record-files` README is this text, and the `record-engine` prompt is to carry the same, so the
-two arms are told the same about the record. A relation or column without a description is an
-error, not a gap in the text.
+`record-files` README is this text; the same descriptions are on `record.duckdb` itself as
+DuckDB comments (`comment_statements`, ADR-0023), which a `record-engine` agent reads with
+`duckdb_columns()`, so the two arms are told the same about the record. A relation or column
+without a description is an error, not a gap in the text.
 """
 
 import duckdb
@@ -25,8 +26,8 @@ _TABLES: dict[str, tuple[str, type[BaseModel] | None]] = {
         StepRow,
     ),
     "deltas": (
-        "One row per path whose state changed at a step: what changed, with a unified diff for "
-        "text.",
+        "One row per path whose state changed at a step: what changed, with a unified diff and "
+        "the whole later version for text.",
         DeltaRow,
     ),
     "job_notices": (
@@ -64,6 +65,27 @@ def _descriptions(name: str) -> tuple[str, dict[str, str]]:
         return description, _META_COLUMNS
     fields = model.model_fields
     return description, {field: info.description or "" for field, info in fields.items()}
+
+
+def _sql_string(text: str) -> str:
+    return "'" + text.replace("'", "''") + "'"
+
+
+def comment_statements() -> list[str]:
+    """`COMMENT ON` statements putting every description on the record's relations and their
+    columns: what `describe` prints, readable in the store through `duckdb_tables()`,
+    `duckdb_views()`, and `duckdb_columns()`."""
+    views = {view.name for view in VIEWS}
+    out: list[str] = []
+    for name in relations():
+        description, notes = _descriptions(name)
+        kind = "VIEW" if name in views else "TABLE"
+        out.append(f"COMMENT ON {kind} {name} IS {_sql_string(description)}")
+        out.extend(
+            f"COMMENT ON COLUMN {name}.{column} IS {_sql_string(note)}"
+            for column, note in notes.items()
+        )
+    return out
 
 
 def columns(con: duckdb.DuckDBPyConnection, name: str) -> list[tuple[str, str]]:

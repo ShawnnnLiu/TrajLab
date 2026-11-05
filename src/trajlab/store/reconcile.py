@@ -62,6 +62,8 @@ for a file of few distinct lines edited in many scattered places, which gets one
 the whole file. A path with a newline, tab, double quote, or backslash is quoted in the headers
 the way GNU diff and git quote it (`+++ "b/app/x\\n.txt"`), with a byte that is not UTF-8
 as an octal escape.
+A row with a hunk also stores its whole later version as text (`text_after`; a file's text, or
+a symlink's target written as in a hunk), unless the path has no content after the step (ADR-0023).
 A row whose content changed but which gets no hunk (a version that is not text) stores its
 later version instead, if it has one: a file's bytes or a symlink's target go to
 `<blobs_dir>/<sha256>`, named `blobs/<sha256>` in `blob_ref`. A mode- or owner-only change
@@ -624,6 +626,7 @@ class _Reconciler:
     ) -> DeltaRow:
         is_text, hunk, blob = shape
         b, a = change.before, change.after
+        after_text = self.contents.text(a) if hunk else None
         return DeltaRow(
             trial_id=self.trial_id,
             step_idx=step_idx,
@@ -632,11 +635,8 @@ class _Reconciler:
             kind_before=b.kind if b else None,
             kind_after=a.kind if a else None,
             is_text=is_text,
-            hunk=(
-                _unified_diff(change.path, self.contents.text(b), self.contents.text(a))
-                if hunk
-                else None
-            ),
+            hunk=(_unified_diff(change.path, self.contents.text(b), after_text) if hunk else None),
+            text_after=after_text,
             blob_ref=f"{BLOBS_DIRNAME}/{a.sha256}" if blob and a else None,
             sha256_before=b.sha256 if b else None,
             sha256_after=a.sha256 if a else None,

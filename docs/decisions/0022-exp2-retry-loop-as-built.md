@@ -154,3 +154,8 @@ Settled by the owner on 2026-10-28, before the full run (`preregistration.md`):
     Repaired by N = 1, all 56 failures: control 3, record-files 7, record-engine 4; by N = 2, all 56: control 8, record-files 12, record-engine 9 (paired, record-engine against record-files: 2 against 5 discordant). N = 3, the preregistered point, is not reached.
     The interim results and the list of what is left are in `docs/experiments/exp2/tb40-exp2-interim-2026-10-30.md`; the data are exported to `/srv/trajlab/exports/tb40-exp2-2026-10-30/` on the host.
     To resume on this volume: free space by deleting the images of attempts never to be ingested (control retries, record-arm passes, record-arm third retries), start the watcher and recorder (under `sg docker` and `sudo`), and run the wrapper in `/srv/trajlab/ops/exp2/` (`full-run2.sh`, flags in `exp2-flags.txt`); the runner resumes from the chain logs.
+
+## Amendment (2026-11-02)
+
+Item 2 holds for `tb40-exp2` only.
+For runs after it, ADR-0023 gives both record arms one text but for how the record is reached, keeps `control`'s steps, moves the record's descriptions onto the store as comments, and adds each file's whole later version to the record (store schema 5).

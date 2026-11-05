@@ -267,6 +267,13 @@ class Exp2Settings(_Model):
     derived: str = Field(min_length=1, description="The store's derived id (ADR-0018 item 4).")
     derived_views: tuple[str, ...]
     protocol_sha256: str = Field(pattern=SHA256, description="Of the four protocol steps.")
+    schema_sha256: str | None = Field(
+        default=None,
+        pattern=SHA256,
+        description="Of the record's schema text (trajlab.store.describe): the record-files "
+        "README, and the descriptions the record-engine store carries as comments (ADR-0023); "
+        "null in settings written before them.",
+    )
     prefix_sha256: dict[str, str] = Field(
         description="`<arm>/<k>` to the sha256 of the prompt before the instruction, k prior "
         "attempts; the whole prompt is that and the root's instruction."

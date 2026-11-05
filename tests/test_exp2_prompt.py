@@ -1,9 +1,11 @@
-"""The retry prompt (ADR-0016 item 1, ADR-0022): the three arms of one chain differ only in the
-evidence sentence, each says FAILED, and none names a check or quotes the verifier."""
+"""The retry prompt (ADR-0016 item 1, ADR-0022, ADR-0023): control keeps round 2's steps, the
+two record arms get one text but for how the record is reached, every query the text gives runs
+and every file it names is in the bundle, each prompt says FAILED, and none names a check or
+quotes the verifier."""
 
 import asyncio
 import json
-import shutil
+import re
 from pathlib import Path
 from typing import Any
 
@@ -15,18 +17,31 @@ from trajlab.capture.repair import REPAIR_PROTOCOL, RepairClaudeCode
 from trajlab.contracts import EXP2_ARMS, Exp2Arm
 from trajlab.exp2 import leaks
 from trajlab.exp2.prompt import (
+    CLAIMS,
     EARLIER_WORK_CLAUSE,
+    ENGINE_ACCESS,
+    ENGINE_DESCRIPTIONS,
+    FILES_ACCESS,
+    FILES_DESCRIPTIONS,
+    GUIDE,
+    GUIDE_REST,
     PROTOCOL_STEPS,
+    QUERY_COMMAND,
+    QUESTIONS,
+    RECORD_INTRO,
+    RECORD_STEPS,
+    TABLE_GUIDE,
     PromptError,
-    evidence,
+    answer,
     prefix,
     protocol_steps,
+    record_text,
     render,
     sha256,
 )
 from trajlab.store import schema
 from trajlab.store.build import build_trial
-from trajlab.store.describe import describe
+from trajlab.store.describe import _descriptions, columns, relations
 from trajlab.store.export import export
 
 # hello-world's tests: the two checks the fixture's verifier ran (verifier/ctrf.json).
@@ -41,6 +56,7 @@ def test_hello_file_exists():
 def test_hello_file_contents():
     assert Path("/app/hello.txt").read_text().strip() == "Hello, world!"
 """
+RECORD_ARMS: tuple[Exp2Arm, ...] = ("record-files", "record-engine")
 
 
 @pytest.fixture
@@ -53,12 +69,6 @@ def chain_store(trial_copy: Path, tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def schema_text(chain_store: Path) -> str:
-    with schema.connect_agent(chain_store) as con:
-        return describe(con)
-
-
-@pytest.fixture
 def needles(trial_copy: Path, tmp_path: Path) -> leaks.Needles:
     tests = tmp_path / "tests"
     tests.mkdir()
@@ -66,55 +76,132 @@ def needles(trial_copy: Path, tmp_path: Path) -> leaks.Needles:
     return leaks.needles(trial_copy, tests)
 
 
-def rendered(schema_text: str, k: int = 1) -> dict[Exp2Arm, str]:
-    return {arm: render(prefix(arm, k, schema_text), PROMPT) for arm in EXP2_ARMS}
+def rendered(k: int = 1) -> dict[Exp2Arm, str]:
+    return {arm: render(prefix(arm, k), PROMPT) for arm in EXP2_ARMS}
 
 
-def test_the_arms_differ_only_in_the_evidence_sentence(schema_text: str) -> None:
+def note_of(k: int) -> str:
+    return (
+        f"{k} previous attempt(s) at this task FAILED the task's tests. The tests are not "
+        "visible to you and may check cases beyond the examples in the environment."
+    )
+
+
+def test_the_record_arms_differ_only_in_how_the_record_is_reached() -> None:
+    own = {
+        "record-engine": (ENGINE_ACCESS, ENGINE_DESCRIPTIONS),
+        "record-files": (FILES_ACCESS, FILES_DESCRIPTIONS),
+    }
+    skeletons = set()
+    for arm in RECORD_ARMS:
+        text = record_text(arm)
+        access, descriptions = own[arm]
+        for shared in (RECORD_INTRO, RECORD_STEPS, CLAIMS, TABLE_GUIDE):
+            assert text.count(shared) == 1
+        for question in QUESTIONS:
+            assert text.count(f"{question.text}:\n{answer(arm, question)}") == 1
+        skeleton = text.replace(access, "<access>").replace(descriptions, "<descriptions>")
+        for question in QUESTIONS:
+            skeleton = skeleton.replace(answer(arm, question), "<answer>")
+        skeletons.add(skeleton)
+    assert len(skeletons) == 1
+    assert FILES_ACCESS not in record_text("record-engine")
+    assert ENGINE_ACCESS not in record_text("record-files")
+    assert QUERY_COMMAND not in record_text("record-files")
+
+
+def test_the_prompt_is_note_arm_text_instruction() -> None:
     for k in (1, 2, 3):
-        prompts = rendered(schema_text, k)
-        control = prompts["control"]
-        for arm in ("record-files", "record-engine"):
-            sentence = evidence(arm, schema_text)
-            assert sentence is not None and sentence not in control
-            assert prompts[arm].count(sentence) == 1
-            assert prompts[arm].replace(sentence + "\n\n", "", 1) == control
+        prompts = rendered(k)
+        assert prompts["control"] == "\n\n".join([note_of(k), PROTOCOL_STEPS, PROMPT])
+        for arm in RECORD_ARMS:
+            assert prompts[arm] == "\n\n".join([note_of(k), record_text(arm), PROMPT])
         assert len(set(prompts.values())) == 3
+    with pytest.raises(PromptError):
+        record_text("control")
 
 
-def test_the_prompt_is_note_evidence_steps_instruction(schema_text: str) -> None:
-    for arm, text in rendered(schema_text, 2).items():
-        sentence = evidence(arm, schema_text)
-        middle = [] if sentence is None else [sentence]
-        parts = [
-            "2 previous attempt(s) at this task FAILED the task's tests. The tests are not "
-            "visible to you and may check cases beyond the examples in the environment.",
-            *middle,
-            PROTOCOL_STEPS,
-            PROMPT,
-        ]
-        assert text == "\n\n".join(parts)
+def test_the_guide_names_real_relations_and_columns(chain_store: Path) -> None:
+    with schema.connect_agent(chain_store) as con:
+        for entry in GUIDE:
+            found = {name for name, _ in columns(con, entry.table)}
+            named = {column.split(" = ")[0] for column in entry.columns}
+            assert named <= found, (entry.table, named - found)
+    rest = set(GUIDE_REST.split(":")[0].split(", "))
+    assert {entry.table for entry in GUIDE} | rest == set(relations())
+
+
+def test_every_query_the_engine_is_given_runs(chain_store: Path) -> None:
+    with schema.connect_agent(chain_store) as con:
+        for question in QUESTIONS:
+            for sql in question.queries:
+                runnable = sql.replace("/path/to/file", "/app/hello.txt")
+                con.execute(runnable).fetchall()
+        (sql,) = re.findall(r'"(SELECT [^"]*)"', ENGINE_DESCRIPTIONS)
+        rows = con.execute(sql).fetchall()
+        assert rows and all(comment for _, _, _, comment in rows)
+        (file_query,) = QUESTIONS[4].queries
+        rows = con.execute(file_query.replace("/path/to/file", "/app/hello.txt")).fetchall()
+    # The file question's one query gives each diff with the whole file as that step left it.
+    assert rows
+    assert all(hunk and text for *_, hunk, text in rows)
+    assert rows[-1][-1] == "Hello, world!\n"
+
+
+def test_the_store_carries_every_description_the_readme_has(chain_store: Path) -> None:
+    with schema.connect_agent(chain_store) as con:
+        tables = dict(
+            con.execute(
+                "SELECT table_name, comment FROM duckdb_tables() UNION ALL "
+                "SELECT view_name, comment FROM duckdb_views() WHERE NOT internal"
+            ).fetchall()
+        )
+        notes = {
+            (table, column): comment
+            for table, column, comment in con.execute(
+                "SELECT table_name, column_name, comment FROM duckdb_columns() WHERE NOT internal"
+            ).fetchall()
+        }
+    for name in relations():
+        description, column_notes = _descriptions(name)
+        assert tables[name] == description
+        for column, note in column_notes.items():
+            assert notes[(name, column)] == note
+
+
+def test_every_file_the_files_arm_is_pointed_to_is_in_the_bundle(
+    chain_store: Path, tmp_path: Path
+) -> None:
+    bundle = tmp_path / "bundle"
+    export(chain_store, bundle)
+    text = record_text("record-files")
+    for name in set(re.findall(r"[a-z_]+\.jsonl", text)) - {"<table>.jsonl"}:
+        assert (bundle / name).is_file(), name
+    for entry in GUIDE:
+        assert (bundle / f"{entry.table}.jsonl").is_file()
+    assert (bundle / "README.md").is_file()
+    assert (bundle / "deltas").is_dir() and (bundle / "versions").is_dir()
+    assert "deltas/<trial_id>/<step_idx>/<path>.diff" in text
+    assert "versions/<trial_id>/<step_idx>/<path>" in text
 
 
 def test_every_arm_says_failed_and_leaks_nothing(
-    schema_text: str, needles: leaks.Needles, fixture_trial: Path
+    needles: leaks.Needles, fixture_trial: Path
 ) -> None:
     assert {"test_hello_file_exists", "test_hello_file_contents"} <= needles.check_names
     assert needles.verifier_lines  # the fixture's test-stdout.txt
     for k in (1, 2, 3):
-        for text in rendered(schema_text, k).values():
+        for text in rendered(k).values():
             assert "FAILED" in text
             assert leaks.hits(text, needles) == []
             assert leaks.leaks(text, PROMPT, needles) == []
     stdout = (fixture_trial / "verifier" / "test-stdout.txt").read_text()
-    for text in rendered(schema_text).values():
+    for text in rendered().values():
         assert not any(line.strip() and line.strip() in text for line in stdout.splitlines()[1:])
 
 
-def test_a_check_name_or_verifier_line_in_the_prompt_is_a_leak(
-    schema_text: str, needles: leaks.Needles
-) -> None:
-    text = rendered(schema_text)["record-engine"]
+def test_a_check_name_or_verifier_line_in_the_prompt_is_a_leak(needles: leaks.Needles) -> None:
+    text = rendered()["record-engine"]
     named = text.replace("FAILED the task's tests.", "FAILED test_hello_file_contents.")
     assert leaks.leaks(named, PROMPT, needles) == ["check name test_hello_file_contents"]
     line = sorted(needles.verifier_lines)[0]
@@ -123,9 +210,7 @@ def test_a_check_name_or_verifier_line_in_the_prompt_is_a_leak(
     assert leaks.hits("see test_hello_file_contents_v2", needles) == []
 
 
-def test_a_needle_the_instruction_holds_itself_is_not_a_leak(
-    schema_text: str, needles: leaks.Needles
-) -> None:
+def test_a_needle_the_instruction_holds_itself_is_not_a_leak(needles: leaks.Needles) -> None:
     instruction = PROMPT + "Your file must pass test_hello_file_exists.\n"
     text = render(prefix("control", 1), instruction)
     assert leaks.hits(text, needles) == ["check name test_hello_file_exists"]
@@ -213,40 +298,13 @@ def test_control_prefix_verbatim() -> None:
     )
 
 
-def test_the_files_sentence_names_the_bundles_files(chain_store: Path, tmp_path: Path) -> None:
-    sentence = evidence("record-files")
-    assert sentence is not None
-    bundle = tmp_path / "bundle"
-    export(chain_store, bundle)
-    listed = sentence.split("/logs/agent/record/: ", 1)[1].split(", and deltas/", 1)[0]
-    assert listed.split(", ") == sorted(
-        (path.name for path in bundle.glob("*.jsonl")), key=listed.split(", ").index
-    )
-    assert {name for name in listed.split(", ")} == {p.name for p in bundle.glob("*.jsonl")}
-    assert (bundle / "deltas").is_dir() and (bundle / "README.md").is_file()
-
-
-def test_the_engine_sentence_carries_the_readmes_schema_text(
-    chain_store: Path, schema_text: str, tmp_path: Path
-) -> None:
-    sentence = evidence("record-engine", schema_text)
-    assert sentence is not None
-    assert '/logs/agent/bin/query "SELECT ...". It prints the rows as JSON lines.' in sentence
-    bundle = tmp_path / "bundle"
-    export(chain_store, bundle)
-    assert sentence.endswith(schema_text.strip())
-    assert (bundle / "README.md").read_text().strip().endswith(schema_text.strip())
-    with pytest.raises(PromptError):
-        evidence("record-engine")
-
-
 def test_k_is_at_least_one() -> None:
     with pytest.raises(PromptError):
         prefix("control", 0)
 
 
 def test_render_is_what_repair_claude_code_pipes_in(
-    schema_text: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     seen: list[str] = []
 
@@ -257,7 +315,7 @@ def test_render_is_what_repair_claude_code_pipes_in(
 
     monkeypatch.setattr(ClaudeCode, "run", harbor_run)
     for arm in EXP2_ARMS:
-        note = prefix(arm, 1, schema_text)
+        note = prefix(arm, 1)
         agent = RepairClaudeCode(
             logs_dir=tmp_path, model_name="anthropic/claude-sonnet-5-5", repair_note=note
         )
@@ -266,12 +324,7 @@ def test_render_is_what_repair_claude_code_pipes_in(
         assert sha256(seen[-1]) == sha256(render(note, PROMPT))
 
 
-def test_the_prefix_hash_depends_only_on_arm_and_k(
-    chain_store: Path, schema_text: str, tmp_path: Path
-) -> None:
-    other = Path(shutil.copytree(chain_store, tmp_path / "other"))
-    with schema.connect_agent(other) as con:
-        assert describe(con) == schema_text
-    assert sha256(prefix("record-engine", 2, schema_text)) != sha256(
-        prefix("record-engine", 3, schema_text)
-    )
+def test_the_prefix_hash_depends_only_on_arm_and_k() -> None:
+    hashes = {sha256(prefix(arm, k)) for arm in EXP2_ARMS for k in (1, 2, 3)}
+    assert len(hashes) == 9
+    assert sha256(prefix("record-engine", 2)) == sha256(prefix("record-engine", 2))

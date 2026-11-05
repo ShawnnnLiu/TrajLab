@@ -51,10 +51,10 @@ def test_a_named_trial_must_be_usable(corpus: dict[str, Path]) -> None:
 
 def test_the_settings_fix_every_prompt_prefix(corpus: dict[str, Path]) -> None:
     found = make_settings(corpus, budget=3)
-    text = prereg.schema_text(corpus["store"])
     for arm in found.arms:
         for k in (1, 2, 3):
-            assert found.prefix_sha256[f"{arm}/{k}"] == sha256(prefix(arm, k, text))
+            assert found.prefix_sha256[f"{arm}/{k}"] == sha256(prefix(arm, k))
+    assert found.schema_sha256 == sha256(prereg.schema_text(corpus["store"]))
     assert found.stop_hook is None and found.query is not None and found.query.query_cap == 200
     assert found.agent_kwargs == {"reasoning_effort": "medium", "version": "2.1.278"}
     assert found.sample[0].instruction_sha256 == sha256(
@@ -80,6 +80,9 @@ def test_drift_is_empty_until_the_code_changes(
     monkeypatch.setattr(prereg, "PROTOCOL_STEPS", "Work in this order:\n1. Something else.")
     problems = prereg.drift(found)
     assert any(p.startswith("protocol_sha256:") for p in problems)
+    monkeypatch.setattr(prereg, "describe", lambda con: "another schema text")
+    problems = prereg.drift(found)
+    assert any(p.startswith("schema_sha256:") for p in problems)
 
 
 def test_drift_catches_a_changed_instruction(corpus: dict[str, Path]) -> None:

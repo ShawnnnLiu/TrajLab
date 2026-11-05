@@ -5,6 +5,8 @@
     <out>/README.md                                      the schema text (trajlab.store.describe)
     <out>/<relation>.jsonl                               every row, one JSON object per line
     <out>/deltas/<trial_id>/<step_idx>/<path>.diff       each delta row's hunk again, as a file
+    <out>/versions/<trial_id>/<step_idx>/<path>          each delta row's `text_after` again, as
+                                                         the file itself (ADR-0023)
 
 for every relation an agent's connection can read: `trials`, `steps`, `deltas`, the derived
 views, and `store_meta`. A row's JSON is DuckDB's own (UUIDs and instants as strings, instants in
@@ -20,6 +22,7 @@ import json
 import os
 import shutil
 import tempfile
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from uuid import UUID
@@ -32,13 +35,15 @@ from trajlab.store.schema import connect, record_path
 README_FILENAME = "README.md"
 HUNKS_DIRNAME = "deltas"
 HUNK_SUFFIX = ".diff"
+VERSIONS_DIRNAME = "versions"
 
 _LAYOUT = f"""\
 # The record
 
 Every file here is one relation of the record: `<relation>.jsonl` holds its rows, one JSON
 object per line, with the columns below. Instants are UTC. Each `deltas` row's `hunk` is also in
-`{HUNKS_DIRNAME}/<trial_id>/<step_idx>/<path>{HUNK_SUFFIX}`.
+`{HUNKS_DIRNAME}/<trial_id>/<step_idx>/<path>{HUNK_SUFFIX}`, and its `text_after` (the whole file
+as that step left it) in `{VERSIONS_DIRNAME}/<trial_id>/<step_idx>/<path>`.
 
 """
 
@@ -52,28 +57,48 @@ class ExportResult:
     out_dir: Path
     rows: dict[str, int]
     hunk_files: int
+    version_files: int = 0
 
 
 def readme(con: duckdb.DuckDBPyConnection) -> str:
     return _LAYOUT + describe(con)
 
 
-def hunk_file(out_dir: Path, trial_id: UUID | str, step_idx: int, path: str) -> Path:
-    """Where a delta row's hunk goes in a bundle."""
+def _row_file(
+    out_dir: Path, dirname: str, trial_id: UUID | str, step_idx: int, path: str, suffix: str
+) -> Path:
     parts = PurePosixPath(path).parts
     if not path.startswith("/") or any(part in ("", ".", "..") for part in path[1:].split("/")):
         raise ExportError(f"delta path {path!r} is not a normalized absolute path")
     *dirs, name = parts[1:]
-    return out_dir.joinpath(HUNKS_DIRNAME, str(trial_id), str(step_idx), *dirs, name + HUNK_SUFFIX)
+    return out_dir.joinpath(dirname, str(trial_id), str(step_idx), *dirs, name + suffix)
+
+
+def hunk_file(out_dir: Path, trial_id: UUID | str, step_idx: int, path: str) -> Path:
+    """Where a delta row's hunk goes in a bundle."""
+    return _row_file(out_dir, HUNKS_DIRNAME, trial_id, step_idx, path, HUNK_SUFFIX)
+
+
+def version_file(out_dir: Path, trial_id: UUID | str, step_idx: int, path: str) -> Path:
+    """Where a delta row's `text_after` goes in a bundle."""
+    return _row_file(out_dir, VERSIONS_DIRNAME, trial_id, step_idx, path, "")
 
 
 def _literal(path: Path) -> str:
     return "'" + str(path).replace("'", "''") + "'"
 
 
-def _hunks(con: duckdb.DuckDBPyConnection) -> list[tuple[UUID, int, str, str]]:
+# Each kind of per-row file: its directory, where a row's file goes, and the column it holds.
+_ROW_FILES = (
+    (HUNKS_DIRNAME, hunk_file, "hunk"),
+    (VERSIONS_DIRNAME, version_file, "text_after"),
+)
+
+
+def _row_texts(con: duckdb.DuckDBPyConnection, column: str) -> list[tuple[UUID, int, str, str]]:
     return con.execute(
-        "SELECT trial_id, step_idx, path, hunk FROM deltas WHERE hunk IS NOT NULL ORDER BY ALL"
+        f"SELECT trial_id, step_idx, path, {column} FROM deltas WHERE {column} IS NOT NULL "
+        "ORDER BY trial_id, step_idx, path"
     ).fetchall()
 
 
@@ -98,17 +123,22 @@ def export(store_dir: Path, out_dir: Path) -> ExportResult:
                     f"COPY (SELECT * FROM {name} ORDER BY ALL) TO {_literal(target)} (FORMAT json)"
                 ).fetchone()
                 rows[name] = written[0] if written else 0
-            hunks = _hunks(con)
-            targets = [
-                hunk_file(tmp, trial_id, step_idx, path) for trial_id, step_idx, path, _ in hunks
-            ]
-            _check_distinct(tmp, targets, [path for _, _, path, _ in hunks])
-            for (_, _, path, hunk), target in zip(hunks, targets, strict=True):
-                try:
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    target.write_bytes(hunk.encode("utf-8"))
-                except OSError as error:
-                    raise ExportError(f"cannot write the hunk of {path}: {error}") from error
+            written: dict[str, int] = {}
+            for dirname, where, column in _ROW_FILES:
+                texts = _row_texts(con, column)
+                targets = [
+                    where(tmp, trial_id, step_idx, path) for trial_id, step_idx, path, _ in texts
+                ]
+                _check_distinct(tmp / dirname, targets, [path for _, _, path, _ in texts])
+                for (_, _, path, text), target in zip(texts, targets, strict=True):
+                    try:
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        target.write_bytes(text.encode("utf-8"))
+                    except OSError as error:
+                        raise ExportError(
+                            f"cannot write the {column} of {path}: {error}"
+                        ) from error
+                written[column] = len(texts)
             problems = _verify(con, tmp)
         if problems:
             raise ExportError(f"the bundle does not match {store_dir}: {'; '.join(problems)}")
@@ -116,12 +146,21 @@ def export(store_dir: Path, out_dir: Path) -> ExportResult:
     except BaseException:
         shutil.rmtree(tmp, ignore_errors=True)
         raise
-    return ExportResult(out_dir=out_dir, rows=rows, hunk_files=len(hunks))
+    return ExportResult(
+        out_dir=out_dir,
+        rows=rows,
+        hunk_files=written["hunk"],
+        version_files=written["text_after"],
+    )
 
 
 def _check_distinct(root: Path, targets: list[Path], paths: list[str]) -> None:
-    """Refuse hunk files that would be one file, or a file and a directory, under `root`: paths
-    differing only in case on a case-insensitive file system, or a path `x` beside `x.diff/y`."""
+    """Refuse row files that would be one file, or a file and a directory, under `root`: paths
+    differing only in case on a case-insensitive file system, or a path `x` beside `x.diff/y`.
+    `root` is made only when there is a file to put in it."""
+    if not targets:
+        return
+    root.mkdir(parents=True, exist_ok=True)
     probe = root / "case-probe"
     probe.touch()
     folded = (root / "CASE-PROBE").exists()
@@ -134,7 +173,7 @@ def _check_distinct(root: Path, targets: list[Path], paths: list[str]) -> None:
     seen: dict[str, str] = {}
     for target, path in zip(targets, paths, strict=True):
         if (other := seen.setdefault(key(target), path)) != path:
-            raise ExportError(f"{other} and {path} would be one hunk file here")
+            raise ExportError(f"{other} and {path} would be one file under {root.name}/ here")
     for target, path in zip(targets, paths, strict=True):
         for parent in target.relative_to(root).parents:
             name = parent.as_posix().casefold() if folded else parent.as_posix()
@@ -153,12 +192,13 @@ def verify(store_dir: Path, out_dir: Path) -> list[str]:
 def _verify(con: duckdb.DuckDBPyConnection, out_dir: Path) -> list[str]:
     problems: list[str] = []
     names = relations()
-    expected = {README_FILENAME, HUNKS_DIRNAME, *(f"{name}.jsonl" for name in names)}
+    dirs = {dirname for dirname, _, _ in _ROW_FILES}
+    expected = {README_FILENAME, *dirs, *(f"{name}.jsonl" for name in names)}
     found = {entry.name for entry in out_dir.iterdir()}
     if extra := sorted(found - expected):
         problems.append(f"files that are not the record's: {extra}")
-    # No hunk at all leaves no deltas/ dir; a missing hunk file is _compare_hunks' to report.
-    if missing := sorted(expected - {HUNKS_DIRNAME} - found):
+    # A missing row file is _compare_row_files' to report.
+    if missing := sorted(expected - dirs - found):
         problems.append(f"missing: {missing}")
     readme_path = out_dir / README_FILENAME
     if readme_path.is_file() and readme_path.read_text(encoding="utf-8") != readme(con):
@@ -167,7 +207,8 @@ def _verify(con: duckdb.DuckDBPyConnection, out_dir: Path) -> list[str]:
         path = out_dir / f"{name}.jsonl"
         if path.is_file():
             problems.extend(_compare(con, name, path))
-    problems.extend(_compare_hunks(con, out_dir))
+    for dirname, where, column in _ROW_FILES:
+        problems.extend(_compare_row_files(con, out_dir, dirname, where, column))
     return problems
 
 
@@ -200,22 +241,30 @@ def _compare(con: duckdb.DuckDBPyConnection, name: str, path: Path) -> list[str]
     return []
 
 
-def _compare_hunks(con: duckdb.DuckDBPyConnection, out_dir: Path) -> list[str]:
+def _compare_row_files(
+    con: duckdb.DuckDBPyConnection,
+    out_dir: Path,
+    dirname: str,
+    where: Callable[[Path, UUID | str, int, str], Path],
+    column: str,
+) -> list[str]:
+    """Differences between the delta rows' `column` and their files under `dirname`."""
     expected: dict[Path, str] = {}
-    for trial_id, step_idx, path, hunk in _hunks(con):
-        expected[hunk_file(out_dir, trial_id, step_idx, path)] = hunk
-    root = out_dir / HUNKS_DIRNAME
+    for trial_id, step_idx, path, text in _row_texts(con, column):
+        expected[where(out_dir, trial_id, step_idx, path)] = text
+    root = out_dir / dirname
     found = {p for p in root.rglob("*") if p.is_file()} if root.is_dir() else set()
     problems: list[str] = []
+    what = f"{dirname}/ files"
     if extra := sorted(str(p.relative_to(out_dir)) for p in found - expected.keys()):
-        problems.append(f"hunk files with no delta row: {extra[:5]} ({len(extra)} in all)")
+        problems.append(f"{what} with no delta row: {extra[:5]} ({len(extra)} in all)")
     if missing := sorted(str(p.relative_to(out_dir)) for p in expected.keys() - found):
-        problems.append(f"missing hunk files: {missing[:5]} ({len(missing)} in all)")
+        problems.append(f"missing {what}: {missing[:5]} ({len(missing)} in all)")
     changed = [
         str(p.relative_to(out_dir))
         for p in sorted(expected.keys() & found)
         if p.read_bytes() != expected[p].encode("utf-8")
     ]
     if changed:
-        problems.append(f"hunk files that differ from their row: {changed[:5]}")
+        problems.append(f"{what} that differ from their row: {changed[:5]}")
     return problems

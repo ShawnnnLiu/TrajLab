@@ -17,7 +17,7 @@ from uuid import UUID
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
 # Bump with an ADR whenever any table below or in trajlab.store.schema changes shape.
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 RECORD_DB_FILENAME = "record.duckdb"
 HELDOUT_DB_FILENAME = "heldout.duckdb"
 # Content-addressed later versions of changed rows without a hunk (a file's bytes, text or
@@ -166,6 +166,12 @@ class DeltaRow(_Row):
         description="Unified diff from the earlier to the later version, for text whose content "
         "(sha256) changed; empty only when neither version has a line.",
     )
+    text_after: str | None = Field(
+        default=None,
+        description="The whole later version, as the step left it, for a row with a hunk "
+        "whose path still has content: a file's text or a symlink's target. Null for a "
+        "delete, a directory, and a row without a hunk.",
+    )
     blob_ref: str | None = Field(
         default=None,
         description="`blobs/<sha256>` of the later version (a file's bytes or a symlink's "
@@ -215,6 +221,8 @@ class DeltaRow(_Row):
             )
         if self.hunk is not None and self.is_text is not True:
             raise ValueError("only text has a hunk")
+        if self.text_after is not None and (self.hunk is None or self.kind_after is None):
+            raise ValueError("text_after is the later version of a row with a hunk")
         if self.blob_ref is not None and (self.is_text is not False or self.kind_after is None):
             raise ValueError("a blob_ref is the later version of a row that is not text")
         return self

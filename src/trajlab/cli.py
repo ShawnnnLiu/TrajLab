@@ -661,7 +661,10 @@ def store_export(
         typer.echo(f"trajlab store export: {error}", err=True)
         raise typer.Exit(code=1) from error
     rows = ", ".join(f"{name} {n}" for name, n in result.rows.items())
-    typer.echo(f"wrote {out_dir}: {rows}; {result.hunk_files} hunk files; verified")
+    typer.echo(
+        f"wrote {out_dir}: {rows}; {result.hunk_files} hunk files, "
+        f"{result.version_files} version files; verified"
+    )
 
 
 CapOption = Annotated[

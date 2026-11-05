@@ -207,6 +207,7 @@ def test_an_added_text_file(tmp_path: Path) -> None:
         kind_after="file",
         is_text=True,
         hunk="--- /dev/null\n+++ b/root/new.txt\n@@ -0,0 +1 @@\n+hi\n",
+        text_after="hi\n",
         sha256_after=sha("hi\n"),
         bytes_after=3,
         mode_after="0644",
@@ -242,6 +243,22 @@ def test_a_modified_base_file_diffs_against_the_base(tmp_path: Path) -> None:
         "--- a/etc/shells\n+++ b/etc/shells\n@@ -1,3 +1 @@\n"
         "-# valid login shells\n /bin/sh\n-/bin/ash\n"
     )
+    assert row.text_after == "/bin/sh\n"  # the whole later version, beside its hunk
+
+
+def test_text_after_is_the_whole_later_version_whatever_the_hunk_shows(tmp_path: Path) -> None:
+    before = "".join(f"line {i}\n" for i in range(1, 41))
+    after = before.replace("line 20\n", "line twenty\n")
+    tops = {
+        1: top(d("root", 0o700), f("root/a.txt", before)),
+        2: top(d("root", 0o700), f("root/a.txt", after)),
+    }
+    result = run(tmp_path, [alpine()], tops)
+    added, changed = rows_of(result, 1)["/root/a.txt"], rows_of(result, 2)["/root/a.txt"]
+    assert added.text_after == before
+    assert "line 1\n" not in (changed.hunk or "")  # 3 lines of context only
+    assert changed.text_after == after
+    assert hashlib.sha256(after.encode()).hexdigest() == changed.sha256_after
 
 
 def test_a_copy_up_with_the_same_bytes_is_no_change(tmp_path: Path) -> None:
@@ -253,7 +270,7 @@ def test_a_copy_up_with_the_same_bytes_is_no_change(tmp_path: Path) -> None:
 def test_chmod_only_is_a_modify_without_a_hunk(tmp_path: Path) -> None:
     result = run(tmp_path, [alpine()], {1: top(d("etc"), f("etc/motd", MOTD, mode=0o600))})
     row = rows_of(result)["/etc/motd"]
-    assert (row.op, row.is_text, row.hunk) == ("modify", True, None)
+    assert (row.op, row.is_text, row.hunk, row.text_after) == ("modify", True, None, None)
     assert (row.mode_before, row.mode_after) == ("0644", "0600")
     assert row.sha256_before == row.sha256_after == sha(MOTD)
 
@@ -273,7 +290,7 @@ def test_a_whiteout_deletes_a_base_file_with_a_hunk(tmp_path: Path) -> None:
     assert (
         row.hunk == "--- a/etc/issue\n+++ /dev/null\n@@ -1 +0,0 @@\n-Welcome to Alpine Linux 3.20\n"
     )
-    assert row.mode_after is None and row.sha256_after is None
+    assert row.mode_after is None and row.sha256_after is None and row.text_after is None
 
 
 def test_one_whiteout_deletes_a_whole_base_directory(tmp_path: Path) -> None:
@@ -399,6 +416,7 @@ def test_a_symlink_added_then_retargeted(tmp_path: Path) -> None:
         "--- /dev/null\n+++ b/root/link\n@@ -0,0 +1 @@\n+/root/a\n\\ No newline at end of file\n"
     )
     assert moved.op == "modify" and moved.bytes_after == 8
+    assert (added.text_after, moved.text_after) == ("/root/a", "/root/bb")
     assert moved.hunk == (
         "--- a/root/link\n+++ b/root/link\n@@ -1 +1 @@\n"
         "-/root/a\n\\ No newline at end of file\n+/root/bb\n\\ No newline at end of file\n"
@@ -420,7 +438,7 @@ def test_a_text_file_replaced_by_a_directory_diffs_its_content_away(tmp_path: Pa
     row = rows_of(result)["/etc/issue"]
     assert (row.op, row.kind_before, row.kind_after, row.is_text) == ("modify", "file", "dir", True)
     assert row.hunk is not None and row.hunk.startswith("--- a/etc/issue\n+++ /dev/null\n")
-    assert row.sha256_after is None and row.blob_ref is None
+    assert row.sha256_after is None and row.blob_ref is None and row.text_after is None
 
 
 def test_a_binary_file_writes_its_later_version_as_a_blob(tmp_path: Path) -> None:
@@ -431,6 +449,7 @@ def test_a_binary_file_writes_its_later_version_as_a_blob(tmp_path: Path) -> Non
     assert rows["/bin/busybox"].blob_ref == f"blobs/{sha(new)}"
     assert rows["/bin/busybox"].sha256_before == sha(BUSYBOX)
     assert (rows["/bin/busybox"].is_text, rows["/bin/busybox"].hunk) == (False, None)
+    assert rows["/bin/busybox"].text_after is None
     assert rows["/root/b.dat"].blob_ref == f"blobs/{sha(b'\0')}"
     blobs = sorted(p.name for p in (tmp_path / "blobs").iterdir())
     assert blobs == sorted([sha(new), sha(b"\0")])  # earlier versions are never stored

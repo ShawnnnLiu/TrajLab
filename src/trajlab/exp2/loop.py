@@ -68,8 +68,6 @@ from trajlab.exp2 import chain as chains
 from trajlab.exp2 import leaks, prompt
 from trajlab.exp2.arms import INPUTS_DIRNAME, QueryServer, arm_config, job_config, job_name
 from trajlab.exp2.prereg import instructions
-from trajlab.store.describe import describe
-from trajlab.store.schema import connect_agent
 
 logger = logging.getLogger(__name__)
 
@@ -398,11 +396,7 @@ class Exp2Runner:
         """The prompt's prefix (the agent's note) and the whole rendered prompt, refused unless
         the prefix is the preregistered one and the prompt names no check and quotes no
         verifier text."""
-        text = None
-        if chain.arm.arm == "record-engine":
-            with connect_agent(chain.store) as con:
-                text = describe(con)
-        before = prompt.prefix(chain.arm.arm, k, text)
+        before = prompt.prefix(chain.arm.arm, k)
         key = f"{chain.arm.arm}/{k}"
         if prompt.sha256(before) != self.settings.prefix_sha256.get(key):
             raise chains.ChainError(f"the prompt prefix {key} is not the preregistered one")
