@@ -2,8 +2,7 @@
 # a directory, or a symlink to shared storage (/srv/trajlab/jobs on the Linux server)
 corpus/jobs
 corpus/stores/
-# Exp 2 retry chains: logs, chain stores, bundles (trajlab exp2 run, ADR-0022)
-corpus/exp2/
+corpus/exports/
 .env
 *.jsonl
 !tests/fixtures/**/*.jsonl
@@ -25,3 +24,8 @@ notebooks/**/*.ipynb_checkpoints
 harbor-ref/
 # hand labels from `trajlab trace` (ADR-0015 §8); export them from the site
 corpus/labels/
+
+# Claude Code session state (skills in .claude/skills/ are committed)
+.claude/worktrees/
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
