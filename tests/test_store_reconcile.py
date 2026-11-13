@@ -32,11 +32,14 @@ from trajlab.store.exclusions import excluded
 from trajlab.store.layers import ancestors
 from trajlab.store.reconcile import (
     MAX_TEXT_BYTES,
+    HunkError,
     ImageChain,
     ReconcileError,
     ReconcileResult,
     _edit_script,
     _unified_diff,
+    hunk_versions,
+    narrow,
     reconcile,
 )
 
@@ -242,6 +245,33 @@ def test_a_modified_base_file_diffs_against_the_base(tmp_path: Path) -> None:
         "--- a/etc/shells\n+++ b/etc/shells\n@@ -1,3 +1 @@\n"
         "-# valid login shells\n /bin/sh\n-/bin/ash\n"
     )
+    before = "# valid login shells\n/bin/sh\n/bin/ash\n"
+    assert hunk_versions(row.hunk or "") == (before, "/bin/sh\n")  # both versions, whole
+
+
+def test_a_hunk_holds_the_whole_file_whatever_it_changes(tmp_path: Path) -> None:
+    """ADR-0024 as amended 2026-11-04: one hunk, every line, the changed ones marked."""
+    before = "".join(f"line {i}\n" for i in range(1, 41))
+    after = before.replace("line 20\n", "line twenty\n")
+    tops = {
+        1: top(d("root", 0o700), f("root/a.txt", before)),
+        2: top(d("root", 0o700), f("root/a.txt", after)),
+    }
+    result = run(tmp_path, [alpine()], tops)
+    added, changed = rows_of(result, 1)["/root/a.txt"], rows_of(result, 2)["/root/a.txt"]
+    assert hunk_versions(added.hunk or "") == (None, before)
+    assert changed.hunk == (
+        "--- a/root/a.txt\n+++ b/root/a.txt\n@@ -1,40 +1,40 @@\n"
+        + "".join(f" line {i}\n" for i in range(1, 20))
+        + "-line 20\n+line twenty\n"
+        + "".join(f" line {i}\n" for i in range(21, 41))
+    )
+    assert hunk_versions(changed.hunk) == (before, after)
+    assert hashlib.sha256(after.encode()).hexdigest() == changed.sha256_after
+    assert narrow(changed.hunk, 3) == (
+        "--- a/root/a.txt\n+++ b/root/a.txt\n@@ -17,7 +17,7 @@\n"
+        " line 17\n line 18\n line 19\n-line 20\n+line twenty\n line 21\n line 22\n line 23\n"
+    )
 
 
 def test_a_copy_up_with_the_same_bytes_is_no_change(tmp_path: Path) -> None:
@@ -399,6 +429,10 @@ def test_a_symlink_added_then_retargeted(tmp_path: Path) -> None:
         "--- /dev/null\n+++ b/root/link\n@@ -0,0 +1 @@\n+/root/a\n\\ No newline at end of file\n"
     )
     assert moved.op == "modify" and moved.bytes_after == 8
+    assert (hunk_versions(added.hunk or "")[1], hunk_versions(moved.hunk or "")[1]) == (
+        "/root/a",
+        "/root/bb",
+    )
     assert moved.hunk == (
         "--- a/root/link\n+++ b/root/link\n@@ -1 +1 @@\n"
         "-/root/a\n\\ No newline at end of file\n+/root/bb\n\\ No newline at end of file\n"
@@ -947,10 +981,17 @@ def test_hunks_apply_and_keep_their_shape(matching: str, monkeypatch: pytest.Mon
     for _ in range(1500):
         before = _random_text(rng, rng.randint(0, 40))
         after = _edit(rng, before) if rng.random() < 0.9 else _random_text(rng, 5)
-        hunk = _unified_diff("/p/q r", before, after)
+        hunk = _unified_diff("/p/q r", before, after, 3)
         assert apply_patch(before, hunk) == after, (before, after, hunk)
         assert (hunk == "") == (_LINE.findall(before) == _LINE.findall(after))
         check_hunk_shape(before, hunk)
+        whole = _unified_diff("/p/q r", before, after)  # the store's: the whole file as context
+        assert apply_patch(before, whole) == after
+        assert whole.count("\n@@ ") == (whole != "")
+        if whole:
+            assert hunk_versions(whole) == (before, after)
+        for context in (0, 1, 3, 7):
+            assert narrow(whole, context) == _unified_diff("/p/q r", before, after, context)
 
 
 def _edit_distance(a: Sequence[str], b: Sequence[str]) -> int:
@@ -1007,7 +1048,9 @@ def test_hunks_of_distinct_lines_equal_difflibs() -> None:
             else:
                 del new[at : at + rng.randint(1, 3)]
         expected = "".join(difflib.unified_diff(old, new, "a/p/q r", "b/p/q r"))
-        assert _unified_diff("/p/q r", "".join(old), "".join(new)) == expected
+        assert _unified_diff("/p/q r", "".join(old), "".join(new), 3) == expected
+        whole = difflib.unified_diff(old, new, "a/p/q r", "b/p/q r", n=max(len(old), len(new)))
+        assert _unified_diff("/p/q r", "".join(old), "".join(new)) == "".join(whole)
 
 
 def test_a_small_edit_to_a_repetitive_file_is_a_small_hunk() -> None:
@@ -1016,10 +1059,12 @@ def test_a_small_edit_to_a_repetitive_file_is_a_small_hunk() -> None:
     lines = [rng.choice(["}\n", "\n", "    return x\n", "  else:\n"]) for _ in range(20000)]
     before = "".join(lines)
     after = "".join(lines[:9000] + ["inserted\n"] + lines[9000:15000] + lines[15001:])
-    hunk = _unified_diff("/src/x.c", before, after)
+    hunk = _unified_diff("/src/x.c", before, after, 3)
     assert apply_patch(before, hunk) == after
     assert hunk.count("\n+") + hunk.count("\n-") <= 4  # one insertion, one deletion
     check_hunk_shape(before, hunk)
+    whole = _unified_diff("/src/x.c", before, after)
+    assert whole.count("\n+") + whole.count("\n-") <= 4 and narrow(whole, 3) == hunk
 
 
 def test_a_large_rewrite_of_ordinary_code_is_matched_exactly() -> None:
@@ -1050,9 +1095,10 @@ def test_a_rewritten_repetitive_file_still_gives_a_valid_hunk() -> None:
     rng = random.Random(2)
     before = "".join(f"{rng.randrange(4)},{rng.randrange(4)}\n" for _ in range(5000))
     after = "".join(f"{rng.randrange(4)},{rng.randrange(4)}\n" for _ in range(5000))
-    hunk = _unified_diff("/data.csv", before, after)
+    hunk = _unified_diff("/data.csv", before, after, 3)
     assert apply_patch(before, hunk) == after
     check_hunk_shape(before, hunk)
+    assert narrow(_unified_diff("/data.csv", before, after), 3) == hunk
 
 
 def test_hunk_headers_name_the_absent_side_dev_null() -> None:
@@ -1063,13 +1109,43 @@ def test_hunk_headers_name_the_absent_side_dev_null() -> None:
     assert _unified_diff("/x", None, "") == ""
 
 
-def test_separate_hunks_keep_three_lines_of_context() -> None:
+def test_narrowed_hunks_keep_three_lines_of_context() -> None:
     before = "".join(f"{i}\n" for i in range(20))
     after = before.replace("2\n", "two\n", 1).replace("17\n", "seventeen\n")
-    hunk = _unified_diff("/n", before, after)
+    whole = _unified_diff("/n", before, after)
+    assert whole.count("@@ -") == 1 and "@@ -1,20 +1,20 @@\n" in whole
+    hunk = narrow(whole, 3)
+    assert hunk == _unified_diff("/n", before, after, 3)
     assert hunk.count("@@ -") == 2
     assert "@@ -1,6 +1,6 @@\n" in hunk and "@@ -15,6 +15,6 @@\n" in hunk
     assert apply_patch(before, hunk) == after
+
+
+def test_the_versions_of_a_hunk_keep_a_missing_last_newline_and_carriage_returns() -> None:
+    before, after = "a\r\nb\nc", "a\r\nB\nc\n"
+    whole = _unified_diff("/x", before, after)
+    assert whole == (
+        "--- a/x\n+++ b/x\n@@ -1,3 +1,3 @@\n a\r\n-b\n-c\n\\ No newline at end of file\n+B\n+c\n"
+    )
+    assert hunk_versions(whole) == (before, after)
+    assert hunk_versions(_unified_diff("/x", "gone\n", None)) == ("gone\n", None)
+    assert hunk_versions("") == ("", "")
+
+
+@pytest.mark.parametrize(
+    "hunk",
+    [
+        "--- a/x\n+++ b/x\n",  # no hunk
+        "--- a/x\n+++ b/x\n@@ -2,1 +2,1 @@\n-b\n+B\n",  # not from line 1
+        "--- a/x\n+++ b/x\n@@ -1,3 +1,3 @@\n-b\n+B\n",  # not every line
+        "--- a/x\n+++ b/x\n@@ -1,2 +1,2 @@\n-a\n+A\n-b\n+B\n",  # two hunks' worth, merged
+        "--- a/x\n+++ b/x\n@@ -1 +1 @@\n*b\n",  # not a diff line
+        "--- a/x\n+++ b/x\n@@ -1 +1 @@\n\\ No newline at end of file\n b\n",
+    ],
+)
+def test_a_hunk_without_the_whole_file_is_refused(hunk: str) -> None:
+    with pytest.raises(HunkError):
+        narrow(hunk, 3)
 
 
 # -- differential test: reconcile against a filesystem simulator --------------------------------

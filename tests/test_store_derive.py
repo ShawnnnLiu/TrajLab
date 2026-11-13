@@ -12,7 +12,7 @@ import duckdb
 import pytest
 
 from trajlab.capture import trace
-from trajlab.contracts import DeltaRow, JobNoticeRow, StepRow, TrialRow
+from trajlab.contracts import DeltaRow, JobNoticeRow, StepRow, TrialRow, WriteRow
 from trajlab.store import derive, schema
 from trajlab.store.build import store_meta
 from trajlab.store.derive import IDLE_SECONDS, SUCCESS_CLAIM, VARIANT_MIN_LINES, VIEWS
@@ -117,6 +117,7 @@ def make_store(
     deltas: Sequence[DeltaRow] = (),
     trials: Sequence[TrialRow] = (),
     notices: Sequence[JobNoticeRow] = (),
+    writes: Sequence[WriteRow] = (),
 ) -> Path:
     store = tmp_path / "store"
     schema.create_store(store, store_meta())
@@ -125,6 +126,7 @@ def make_store(
         schema.insert_rows(con, "steps", steps)
         schema.insert_rows(con, "deltas", deltas)
         schema.insert_rows(con, "job_notices", notices)
+        schema.insert_rows(con, "writes", writes)
     return store
 
 
@@ -774,6 +776,7 @@ def test_a_job_without_a_notice_runs_to_the_attempts_last_instant(tmp_path: Path
         ("python -c 'import os; print(1 & 2)'", False),
         ('bash -c "nohup sleep 1"', False),
         ("ls", False),
+        ("sed -i 's/a/[\\&]/' f.txt", False),  # an escaped `&` in a sed replacement
     ],
 )
 def test_hand_launched_jobs(tmp_path: Path, command: str, expected: bool) -> None:
@@ -808,8 +811,8 @@ def test_a_late_write_of_a_backgrounded_job_goes_to_the_launching_call(tmp_path:
     )
     assert attributions(store) == {
         (3, "/app/out.json"): ("background", 1, 1, True),
-        # The job was still open and the landing call could have written it too.
-        (4, "/app/other"): ("contested", None, 4, False),
+        # The job was still open, but nothing ties it to this file: the landing call wrote it.
+        (4, "/app/other"): ("foreground", 4, 4, False),
     }
 
 
@@ -954,3 +957,165 @@ def test_a_jobs_window_is_its_own_trials(tmp_path: Path) -> None:
     )
     assert attributions(store) == {(2, "/app/x"): ("background", 1, 1, True)}
     assert attributions(store, OTHER) == {(2, "/app/x"): ("unknown", None, 2, False)}
+
+
+def test_a_server_left_running_does_not_contest_later_writes(tmp_path: Path) -> None:
+    """vba-userform-port__K3NYT7L: `uvicorn ... &` at one call has no end on record; a later
+    npm install's writes are the install's, not the server's."""
+    store = make_store(
+        tmp_path,
+        [
+            call(1, "cd /app && nohup uvicorn api:app --port 8000 > /tmp/api.log 2>&1 &"),
+            call(2, "cd /app/web && npm install", seconds=40),
+        ],
+        [
+            change(2, "/app/web/node_modules/left-pad/index.js", before=None, mtime=at(2, 20)),
+            change(2, "/tmp/api.log", mtime=at(2, 20)),
+        ],
+    )
+    assert attributions(store) == {
+        (2, "/app/web/node_modules/left-pad/index.js"): ("foreground", 2, 2, False),
+        # The server's own log: it redirects into it and npm names nothing of it.
+        (2, "/tmp/api.log"): ("background_untracked", 1, 1, True),
+    }
+
+
+def test_a_launcher_naming_the_file_or_its_directory_still_contests(tmp_path: Path) -> None:
+    store = make_store(
+        tmp_path,
+        [
+            call(1, "cd /tmp/w && nohup python grid.py results.csv &"),
+            call(2, "python summarize.py /tmp/w/results.csv > /tmp/w/summary.txt", seconds=10),
+        ],
+        [
+            change(2, "/tmp/w/results.csv", mtime=at(2, 5)),  # the launcher names it
+            change(2, "/tmp/w/grid.log", before=None, mtime=at(2, 5)),  # its directory
+            change(2, "/app/other.txt", before=None, mtime=at(2, 5)),  # neither: `/app` is shallow
+        ],
+    )
+    assert attributions(store) == {
+        (2, "/app/other.txt"): ("foreground", 2, 2, False),
+        (2, "/tmp/w/grid.log"): ("contested", None, 2, False),
+        (2, "/tmp/w/results.csv"): ("contested", None, 2, False),
+    }
+
+
+def test_a_name_counts_only_as_a_whole_word_of_the_launchers_command(tmp_path: Path) -> None:
+    """528 contested rows of the v3 rebuild had a one- or two-character basename (pip's and
+    Chromium's cache dirs) that a substring test found inside longer words of the command."""
+    store = make_store(
+        tmp_path,
+        [
+            call(1, "nohup node server.js --epochs 10 > /tmp/s.log 2>&1 &"),
+            call(2, "tail -f '/tmp/w/out.log' | head -3; cat x", seconds=10),
+            call(3, "pip install torch", seconds=20),
+        ],
+        [
+            change(3, "/root/.cache/pip/http-v2/a/0", before=None, mtime=at(3, 5)),
+            change(3, "/root/.cache/chromium/Code Cache/js", before=None, mtime=at(3, 5)),
+        ],
+    )
+    assert attributions(store) == {
+        (3, "/root/.cache/chromium/Code Cache/js"): ("foreground", 3, 3, False),
+        (3, "/root/.cache/pip/http-v2/a/0"): ("foreground", 3, 3, False),
+    }
+    quoted = make_store(
+        tmp_path / "quoted",
+        [
+            call(1, "cd /tmp/w && nohup python run.py 'out.log' &"),
+            call(2, "sleep 30; ls", seconds=31),
+        ],
+        [change(2, "/tmp/w/out.log", mtime=at(2, 20))],
+    )
+    assert attributions(quoted) == {(2, "/tmp/w/out.log"): ("contested", None, 2, False)}
+
+
+# -- the record of writing processes (ADR-0021) ------------------------------------------------
+
+
+def written(
+    idx: int, path: str, writer: int | None, when: datetime, trial_id: UUID = TRIAL
+) -> WriteRow:
+    return WriteRow(
+        trial_id=trial_id,
+        step_idx=idx,
+        path=path,
+        writer_step=writer,
+        mapped_by=None if writer is None else "session",
+        events=3,
+        ops=("close_write", "modify"),
+        first_at=when,
+        last_at=when,
+    )
+
+
+def recorded(store: Path) -> dict[tuple[int, str], tuple[Any, ...]]:
+    """(landing step, path) -> (attribution, causal_step, writer_steps, rule_attribution,
+    rule_causal_step)."""
+    found = rows(
+        store,
+        "SELECT step_idx, path, attribution, causal_step, writer_steps, rule_attribution, "
+        "rule_causal_step FROM delta_attribution ORDER BY 1, 2",
+    )
+    return {(k, path): tuple(rest) for k, path, *rest in found}
+
+
+def test_the_record_settles_what_the_write_time_cannot(tmp_path: Path) -> None:
+    """The XK8w3KT case again, now with the writing processes recorded: the log a job keeps
+    writing while the agent polls it is the job's, whatever the landing call names."""
+    steps = [
+        call(1, "cd /tmp/w && for s in 11 12; do nohup python c.py $s > log_$s.txt 2>&1 & done"),
+        call(2, "sleep 115; tail -qn1 /tmp/w/log_11.txt", seconds=116),
+        call(3, "python fix.py", seconds=5),
+        call(4, "ls"),
+    ]
+    deltas = [
+        change(2, "/tmp/w/log_11.txt", mtime=at(2, 110)),
+        change(3, "/tmp/w/log_11.txt", before=2, after=3, mtime=at(3, 2)),
+        change(4, "/app/result.bin", mtime=at(4, 0.5)),
+        change(4, "/app/cache.db", mtime=at(4, 0.5)),
+    ]
+    writes = [
+        written(2, "/tmp/w/log_11.txt", 1, at(2, 110)),
+        written(3, "/tmp/w/log_11.txt", 1, at(3, 1)),
+        written(3, "/tmp/w/log_11.txt", 3, at(3, 2)),
+        written(4, "/app/cache.db", None, at(4, 0.5)),  # only a process of no call
+    ]
+    store = make_store(tmp_path, steps, deltas, writes=writes)
+    assert recorded(store) == {
+        (2, "/tmp/w/log_11.txt"): ("recorded", 1, [1], "contested", 2),
+        # The rule names the job alone; the record saw the landing call write it too.
+        (3, "/tmp/w/log_11.txt"): ("multi_writer", 3, [1, 3], "background_untracked", 1),
+        # No record of a call's process: the write time decides, as without the recorder.
+        (4, "/app/result.bin"): ("foreground", 4, None, "foreground", 4),
+        (4, "/app/cache.db"): ("foreground", 4, [], "foreground", 4),
+    }
+    assert attributions(store)[(2, "/tmp/w/log_11.txt")] == ("recorded", 1, 1, True)
+    assert attributions(store)[(3, "/tmp/w/log_11.txt")] == ("multi_writer", None, 3, False)
+
+
+def test_a_record_of_the_landing_call_is_foreground_by_record(tmp_path: Path) -> None:
+    store = make_store(
+        tmp_path,
+        [call(1, "touch /app/x", seconds=2)],
+        [change(1, "/app/x", before=None, mtime=at(1, 1))],
+        writes=[written(1, "/app/x", 1, at(1, 1))],
+    )
+    assert recorded(store) == {(1, "/app/x"): ("recorded", 1, [1], "foreground", 1)}
+    assert attributions(store) == {(1, "/app/x"): ("recorded", 1, 1, False)}
+
+
+def test_a_record_is_its_own_trials(tmp_path: Path) -> None:
+    steps = [call(1, "nohup x > /app/x &"), call(2, "ls")]
+    store = make_store(
+        tmp_path,
+        [*steps, *(s.model_copy(update={"trial_id": OTHER}) for s in steps)],
+        [
+            change(2, "/app/x", mtime=at(2, 0.5)),
+            change(2, "/app/x", mtime=at(2, 0.5), trial_id=OTHER),
+        ],
+        trials=[trial(), trial(OTHER)],
+        writes=[written(2, "/app/x", 1, at(2, 0.5), trial_id=OTHER)],
+    )
+    assert attributions(store) == {(2, "/app/x"): ("background_untracked", 1, 1, True)}
+    assert attributions(store, OTHER) == {(2, "/app/x"): ("recorded", 1, 1, True)}

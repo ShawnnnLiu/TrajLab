@@ -122,6 +122,8 @@ One trial is one task executed by one attempt.
 - **top layer** - the layer a `docker commit` added over the start image: the container's whole writable layer when it was committed, so it holds every change since the container started; empty when the commit added no layer (a container with no changes).
 - **view** - the filesystem at a checkpoint: the start image with that checkpoint's top layer applied by the OCI rules (whiteouts, opaque directories, non-directory members replacing subtrees).
 - **delta** - the delta rows of one checkpoint: the paths whose kind, mode, owner, or content differ between the previous checkpoint's view (the start image, for the first) and this one's; keyed to the step row that owns the checkpoint.
+- **hunk** - a text delta row's unified diff (`deltas.hunk`), with the whole file as context: one hunk holding every line of both versions, the changed ones marked `-` and `+`, so it is both versions whole (store schema 6, ADR-0024 as amended 2026-11-04).
+  `narrow` cuts it to n lines of context; with 3 it is a schema 5 hunk.
   Not: the detector's `changed_paths` in a call record, which compare change times and are capped.
 - **derived view** - one of the SQL views over a store's tables in `record.duckdb` (`step_flags`, `delta_flags`, `path_versions`, `trial_summary`), each a function of one trial's rows, versioned by `store_meta`'s `derived` (ADR-0018).
   Not: "derived column"; schema version 1's `is_loop`, `is_revert`, and `files_touched` columns were dropped in version 2.
@@ -138,6 +140,10 @@ One trial is one task executed by one attempt.
   Not: "repair note", which is Exp 1's one-line note (`REPAIR_NOTE`).
 - **evidence sentence** - the one arm-specific sentence of the retry prompt: empty in `control`, the mount in `record-files`, the query command and schema in `record-engine`.
 - **root failure** - attempt 0 of a retry chain, the failed first attempt the chain retries.
+- **chain store** - a retry chain's store in a record arm: its root failure's rows copied from the corpus store, then each failed retry built in, so at retry t it holds exactly attempts 0 to t-1 (ADR-0022, item 6).
+  Not: the corpus store, which holds every first attempt and no retry.
+- **rerun** - the same attempt run again, as `<job>-r<n>`, because the harness failed it (`infra`) or it left no result (`lost`); a rerun is not a retry, and only the try that the verifier scored or the agent itself failed counts toward N.
+- **preregistration** - the committed file `trajlab exp2 prereg` writes (technical spec §5.3): Markdown and one `Exp2Settings` block, which `trajlab exp2 run` runs; a dry run has its own file.
 - **sibling failure** - another failed first attempt of the same task; never in a chain's store (ADR-0016, item 3).
 - **decisive step / `t_err` / `err_step`** - the step row of ADR-0013's decisive call, the earliest-introduced blamed call among a failed trial's confirmed faults; absent when no fault blames a call.
   Not: "first error", which may be a transient error the agent recovered from.
@@ -160,8 +166,23 @@ One trial is one task executed by one attempt.
 - **launcher** - a backgrounded or hand-launched call whose job was open when a file was written (`delta_attribution.launcher_step`): the one that redirects into the file, else names it, else the latest.
 - **write time** - a file's mtime inside the checkpoint image, `deltas.mtime_after`; the only recorded time of the write itself.
 - **landing window** - from the landing call's `t_start` to its checkpoint's commit (`steps.checkpoint_at`), where the call's own writes carry their times.
-- **attribution** - the value `delta_attribution` gives a delta row: `foreground`, `background`, `background_by_path`, `background_untracked`, `contested`, `untrusted_mtime`, or `unknown`; `launched_by_step` is set for the first four, and for `untrusted_mtime` when no job was open.
-- **contested** - a write inside the landing window while a launcher's job was open: either could have written it; the causal step is the landing step and `launcher_step` the alternative.
+- **attribution** - the value `delta_attribution` gives a delta row: `recorded` or `multi_writer` from the write record (ADR-0021), else `foreground`, `background`, `background_by_path`, `background_untracked`, `contested`, `untrusted_mtime`, or `unknown`; `launched_by_step` is set for `recorded` and the next four, and for `untrusted_mtime` when no job was open.
+- **contested** - a write inside the landing window while a launcher's job that names the file (a redirect into it, its basename, or its directory) was open: either could have written it; the causal step is the landing step and `launcher_step` the alternative.
+
+## Write record (ADR-0021)
+
+- **write recorder** - the host process `trajlab record-writes <jobs-dir>`, run as root beside the watcher: one fanotify group on the host filesystem that holds the containerd snapshots, and one write event per write in a running trial container's upper directory.
+  One per jobs dir, held by `<jobs-dir>/.trajlab-recorder.lock`.
+  Not: the watcher, which answers hooks and takes checkpoints.
+- **upper directory** - a container's overlay `upperdir` on the host, read from its init process's `mountinfo`; every write the container makes lands there, which is how an event is mapped to a trial and its container path found.
+- **write event** - one `WriteEvent` line of `agent/trajlab/writes.jsonl`: a `create`, `delete`, `moved_to`, `close_write`, or `modify` (at most one per process and path per second) of a container path, with the writing process as the recorder read it at the event (pids, command line, session id, start time, parents).
+  The one line that is not a write is `open`: a Bash call's tool shell sourcing its shell snapshot as it starts, recorded so every call's shell is known.
+- **tool shell** - the shell Claude Code runs one Bash call in, `bash -c '<setup> && eval <command> [< /dev/null] && pwd -P >| /tmp/claude-<id>-cwd'`, in a session of its own; its command text names the call.
+- **write record** - a trial's write events and the store's `writes` rows built from them; always qualified ("write record"), since unqualified "record" names a capture record.
+- **writer step** - the step whose call started the process that wrote a path (`writes.writer_step`), found by the tool shell's command, the session id, or the start time (`writes.mapped_by`).
+- **carrying directory** - for a delta row's path with no write events of its own in its checkpoint interval, the nearest directory above it that was renamed into place (an added or modified path) or removed (a deleted path) in that interval (`writes.via_dir`); its events stand for the path's.
+  Covers a directory built under another name and renamed (`pip install --target`, uv's cache) and a recursive delete whose children's events were lost with their directory.
+- **`recorded` / `multi_writer`** - the attributions the write record gives: the processes of exactly one call, or of several, wrote the path in the delta row's checkpoint interval; they come before ADR-0020's cases, which still decide rows the write record does not settle.
 
 ## Detector capture and labels (ADR-0015)
 
