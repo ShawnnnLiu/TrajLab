@@ -122,6 +122,8 @@ One trial is one task executed by one attempt.
 - **top layer** - the layer a `docker commit` added over the start image: the container's whole writable layer when it was committed, so it holds every change since the container started; empty when the commit added no layer (a container with no changes).
 - **view** - the filesystem at a checkpoint: the start image with that checkpoint's top layer applied by the OCI rules (whiteouts, opaque directories, non-directory members replacing subtrees).
 - **delta** - the delta rows of one checkpoint: the paths whose kind, mode, owner, or content differ between the previous checkpoint's view (the start image, for the first) and this one's; keyed to the step row that owns the checkpoint.
+- **hunk** - a text delta row's unified diff (`deltas.hunk`), with the whole file as context: one hunk holding every line of both versions, the changed ones marked `-` and `+`, so it is both versions whole (store schema 6, ADR-0023 as amended 2026-11-04).
+  `narrow` cuts it to n lines of context; with 3 it is a schema 5 hunk.
   Not: the detector's `changed_paths` in a call record, which compare change times and are capped.
 - **derived view** - one of the SQL views over a store's tables in `record.duckdb` (`step_flags`, `delta_flags`, `path_versions`, `trial_summary`), each a function of one trial's rows, versioned by `store_meta`'s `derived` (ADR-0018).
   Not: "derived column"; schema version 1's `is_loop`, `is_revert`, and `files_touched` columns were dropped in version 2.

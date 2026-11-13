@@ -213,7 +213,6 @@ def test_fixture_trial_builds_to_the_hand_count(trial_copy: Path, tmp_path: Path
             kind_after="file",
             is_text=True,
             hunk=HUNK,
-            text_after=HELLO.decode(),
             sha256_after=hashlib.sha256(HELLO).hexdigest(),
             bytes_after=len(HELLO),
             mode_after="0644",

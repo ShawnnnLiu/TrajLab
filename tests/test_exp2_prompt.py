@@ -25,6 +25,8 @@ from trajlab.exp2.prompt import (
     FILES_DESCRIPTIONS,
     GUIDE,
     GUIDE_REST,
+    OUTPUT_CAP,
+    PAGE_CHARS,
     PROTOCOL_STEPS,
     QUERY_COMMAND,
     QUESTIONS,
@@ -43,6 +45,7 @@ from trajlab.store import schema
 from trajlab.store.build import build_trial
 from trajlab.store.describe import _descriptions, columns, relations
 from trajlab.store.export import export
+from trajlab.store.reconcile import hunk_versions
 
 # hello-world's tests: the two checks the fixture's verifier ran (verifier/ctrf.json).
 TASK_TESTS = """\
@@ -135,17 +138,55 @@ def test_every_query_the_engine_is_given_runs(chain_store: Path) -> None:
     with schema.connect_agent(chain_store) as con:
         for question in QUESTIONS:
             for sql in question.queries:
-                runnable = sql.replace("/path/to/file", "/app/hello.txt")
-                con.execute(runnable).fetchall()
+                con.execute(sql).fetchall()  # as written: no placeholder to fill in
         (sql,) = re.findall(r'"(SELECT [^"]*)"', ENGINE_DESCRIPTIONS)
         rows = con.execute(sql).fetchall()
         assert rows and all(comment for _, _, _, comment in rows)
-        (file_query,) = QUESTIONS[4].queries
-        rows = con.execute(file_query.replace("/path/to/file", "/app/hello.txt")).fetchall()
-    # The file question's one query gives each diff with the whole file as that step left it.
+        _, diffs = QUESTIONS[2].queries
+        rows = con.execute(diffs).fetchall()
+        (length,) = con.execute("SELECT max(length(hunk)) FROM deltas").fetchone() or (0,)
+        # The paging the access paragraph gives reads a hunk back whole.
+        pages = [
+            con.execute(
+                f"SELECT substr(hunk, {start}, {PAGE_CHARS}) FROM deltas WHERE hunk IS NOT NULL "
+                "ORDER BY length(hunk) DESC LIMIT 1"
+            ).fetchone()[0]
+            for start in range(1, length + 1, PAGE_CHARS)
+        ]
+        (longest,) = con.execute(
+            "SELECT hunk FROM deltas WHERE hunk IS NOT NULL ORDER BY length(hunk) DESC LIMIT 1"
+        ).fetchone()
+    assert "".join(pages) == longest
+    # The file question's diffs hold each file whole, as that step left it.
     assert rows
-    assert all(hunk and text for *_, hunk, text in rows)
-    assert rows[-1][-1] == "Hello, world!\n"
+    assert hunk_versions(rows[-1][-1])[1] == "Hello, world!\n"
+
+
+def test_the_diagnosis_reads_the_files_and_no_given_query_cuts_a_hunk() -> None:
+    (last,) = re.findall(r"Answer questions 1 to (\d) below", RECORD_STEPS)
+    (versions,) = re.findall(r"failed attempts' versions \(question (\d)\)", RECORD_STEPS)
+    files = QUESTIONS[int(versions) - 1]
+    assert files.text.startswith("What each attempt wrote into its files")
+    assert int(versions) <= int(last)  # the diagnosis answers the file question
+    queries = [sql for question in QUESTIONS for sql in question.queries]
+    assert "d.hunk FROM deltas" in files.queries[-1]
+    assert not any(re.search(r"(left|substr)\([^)]*hunk", sql) for sql in queries)
+    # At least as wide as the cuts agents chose for themselves on 2026-11-03.
+    cuts = [
+        int(n) for sql in queries for n in re.findall(r"left\([^()]*(?:\([^()]*\))?, (\d+)\)", sql)
+    ]
+    assert cuts and min(cuts) >= 300
+    assert all(
+        int(n) >= 600 for sql in queries for n in re.findall(r"left\(s\.output, (\d+)\)", sql)
+    )
+    for access in (ENGINE_ACCESS, FILES_ACCESS):
+        assert OUTPUT_CAP in access
+    # The diagnosis is due before any file changes, as in control, not before the first command
+    # (a record-files agent's first read of its record is a command in the environment).
+    assert "Before you change any file, write them to /logs/agent/diagnosis.md" in RECORD_STEPS
+    # Record-files agents are pointed at the `.diff` files first, with the command that lists them.
+    assert files.files.startswith("each change's diff is its own file")
+    assert "find /logs/agent/record/deltas -name '*.diff'" in files.files
 
 
 def test_the_store_carries_every_description_the_readme_has(chain_store: Path) -> None:
@@ -180,9 +221,9 @@ def test_every_file_the_files_arm_is_pointed_to_is_in_the_bundle(
     for entry in GUIDE:
         assert (bundle / f"{entry.table}.jsonl").is_file()
     assert (bundle / "README.md").is_file()
-    assert (bundle / "deltas").is_dir() and (bundle / "versions").is_dir()
+    assert (bundle / "deltas").is_dir() and not (bundle / "versions").exists()
     assert "deltas/<trial_id>/<step_idx>/<path>.diff" in text
-    assert "versions/<trial_id>/<step_idx>/<path>" in text
+    assert "versions/" not in text and "text_after" not in record_text("record-engine")
 
 
 def test_every_arm_says_failed_and_leaks_nothing(

@@ -185,6 +185,11 @@ def run(
     except RunRefusedError as error:
         typer.echo(f"trajlab run: {error}", err=True)
         raise typer.Exit(code=1) from error
+    # As `repair` and `exp2 run` do: without it, a worktree with no .env runs on whatever key
+    # the shell holds, without ADR-0005's output cap.
+    if (problem := trial_env_problem(env_file)) is not None:
+        typer.echo(f"trajlab run: {problem}", err=True)
+        raise typer.Exit(code=1)
     if not recorder_running(plan.job_dir.parent):
         logging.getLogger(__name__).warning(
             "no write recorder holds %s: trials will record no writes (ADR-0021)",
@@ -661,10 +666,7 @@ def store_export(
         typer.echo(f"trajlab store export: {error}", err=True)
         raise typer.Exit(code=1) from error
     rows = ", ".join(f"{name} {n}" for name, n in result.rows.items())
-    typer.echo(
-        f"wrote {out_dir}: {rows}; {result.hunk_files} hunk files, "
-        f"{result.version_files} version files; verified"
-    )
+    typer.echo(f"wrote {out_dir}: {rows}; {result.hunk_files} hunk files; verified")
 
 
 CapOption = Annotated[

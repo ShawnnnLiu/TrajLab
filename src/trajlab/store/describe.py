@@ -26,8 +26,8 @@ _TABLES: dict[str, tuple[str, type[BaseModel] | None]] = {
         StepRow,
     ),
     "deltas": (
-        "One row per path whose state changed at a step: what changed, with a unified diff and "
-        "the whole later version for text.",
+        "One row per path whose state changed at a step: what changed, with a unified diff of "
+        "the whole file for text.",
         DeltaRow,
     ),
     "job_notices": (

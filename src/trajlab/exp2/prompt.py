@@ -8,13 +8,16 @@ run.
 
 - `control` gets round 2's four protocol steps (`PROTOCOL_STEPS`), as in `tb40-exp2`.
 - The two record arms get one text (ADR-0023): what the record holds (`RECORD_INTRO`), how to
-  reach it (the arm's only own paragraph: `ENGINE_ACCESS` or `FILES_ACCESS`), protocol steps
-  that work from the record (`RECORD_STEPS`), the failed attempts' conclusions as claims to check
-  (`CLAIMS`), a guide to the tables (`TABLE_GUIDE`), and six questions (`QUESTIONS`), each
-  answered for record-engine by ready queries and for record-files by the files that hold the
-  answer. The tables' full descriptions are one query away in record-engine (the store's
-  comments, `trajlab.store.describe.comment_statements`) and one file away in record-files (the
-  bundle's README, the same text).
+  reach it (the arm's only own paragraph: `ENGINE_ACCESS` or `FILES_ACCESS`, each ending with how
+  to read a long value past the shell's output cap, `OUTPUT_CAP`), protocol steps that work from
+  the record (`RECORD_STEPS`), the failed attempts' conclusions as claims to check (`CLAIMS`), a
+  guide to the tables (`TABLE_GUIDE`), and five questions (`QUESTIONS`), each answered for
+  record-engine by ready queries and for record-files by the files that hold the answer. The
+  diagnosis answers the first four, which include what each attempt wrote into its files, as
+  diffs holding the whole file (the amendment of 2026-11-04). The tables' full descriptions are
+  one query away in record-engine (the store's comments,
+  `trajlab.store.describe.comment_statements`) and one file away in record-files (the bundle's
+  README, the same text).
 
 The prefix depends only on the arm and the number of prior attempts, so the preregistration fixes
 every prefix's hash; the instruction is the root failure's own (`trials.prompt` of attempt 0).
@@ -25,12 +28,7 @@ from dataclasses import dataclass
 
 from trajlab.capture.repair import DIAGNOSIS_PATH, REPAIR_PROTOCOL, repair_instruction
 from trajlab.contracts import QUERY_TOOL_RELPATH, RECORD_MOUNT, Exp2Arm
-from trajlab.store.export import (
-    HUNK_SUFFIX,
-    HUNKS_DIRNAME,
-    README_FILENAME,
-    VERSIONS_DIRNAME,
-)
+from trajlab.store.export import HUNK_SUFFIX, HUNKS_DIRNAME, README_FILENAME
 from trajlab.store.query import DEFAULT_ROW_CAP
 
 NOTE = (
@@ -67,28 +65,40 @@ RECORD_INTRO = (
     "You are in a fresh environment: none of the earlier work is in it. What the earlier "
     "attempts did is kept in a record, and the record is your best evidence of why they failed. "
     "It holds every tool call each attempt made, with its full command and its full output; "
-    "every file each attempt created, changed, or deleted, as a diff and as the whole file after "
-    "each change; and each attempt's final message, including what it said it could not do or "
-    "did not check."
+    "every file each attempt created, changed, or deleted, as a diff that holds the whole file "
+    "with the changed lines marked; and each attempt's final message, including what it said it "
+    "could not do or did not check."
+)
+# Claude Code 2.1.278 (`trajlab.capture.pins.CLAUDE_CODE_VERSION`) shows at most this many
+# characters of a Bash command's output (its `bashOutputMaxChars` default, 30000); past it, the
+# agent sees the first 2,000 bytes and the path of a file holding the whole output. Read from the
+# installed binary on 2026-11-04 (ADR-0023, amendment of 2026-11-04).
+BASH_OUTPUT_CHARS = 30_000
+# A piece of a long value that fits under the cap with room for JSON escaping and other columns.
+PAGE_CHARS = 20_000
+OUTPUT_CAP = (
+    f"A command's output longer than {BASH_OUTPUT_CHARS:,} characters is cut to its first 2,000, "
+    "with the path of a file that holds all of it"
 )
 ENGINE_ACCESS = (
     f'Read the record with {QUERY_COMMAND} "SELECT ...". It is read-only SQL (DuckDB). Rows print '
     f"as JSON lines, at most {DEFAULT_ROW_CAP} per query, so a long text value prints as one JSON "
-    "string; shorten it with left(column, n), and narrow with WHERE or LIMIT."
+    f"string; shorten it with left(column, n), and narrow with WHERE or LIMIT. {OUTPUT_CAP}; "
+    f"read a long value in parts: substr(column, 1, {PAGE_CHARS}), then "
+    f"substr(column, {PAGE_CHARS + 1}, {PAGE_CHARS}), and so on."
 )
 FILES_ACCESS = (
     f"The record is under {RECORD_MOUNT}/. Each table below is a file there, <table>.jsonl, one "
-    "JSON object per line. Each change is also there as files: its diff in "
-    f"{HUNKS_DIRNAME}/<trial_id>/<step_idx>/<path>{HUNK_SUFFIX}, and the whole file as that step "
-    f"left it in {VERSIONS_DIRNAME}/<trial_id>/<step_idx>/<path>."
+    "JSON object per line. Each change's diff is also there as a file: "
+    f"{HUNKS_DIRNAME}/<trial_id>/<step_idx>/<path>{HUNK_SUFFIX}. {OUTPUT_CAP}; read a long file "
+    "in parts: with the Read tool's offset and limit, or sed -n."
 )
 RECORD_STEPS = f"""\
 Work in this order:
-1. Diagnose from the record, before anything else. Answer questions 1 to 3 below from the \
+1. Diagnose from the record, before anything else. Answer questions 1 to 4 below from the \
 record, read the calls and files they point to, and work out the most likely reasons the \
-previous attempts failed. Write them to {DIAGNOSIS_PATH} before your first command in the \
-environment: each suspected cause, the evidence for it (the attempt and step_idx), and how you \
-will check it.
+previous attempts failed. Before you change any file, write them to {DIAGNOSIS_PATH}: each \
+suspected cause, the evidence for it (the attempt and step_idx), and how you will check it.
 2. List every requirement in the task, each with a check you can run that would fail if the \
 requirement were not met. Whatever checks the failed attempts ran (question 2), they did not \
 catch why the attempt failed, so those checks passing proves little: add checks for the cases \
@@ -96,7 +106,7 @@ they did not cover, including inputs other than the ones provided.
 3. Fix, run the checks, and repeat until they all pass. Before you try an approach, look up \
 whether an earlier attempt tried it and what came of it.
 4. Before finishing, run every check again, and compare your deliverables with the failed \
-attempts' versions (question 5): a result that matches a failed one fails again. If you would \
+attempts' versions (question 3): a result that matches a failed one fails again. If you would \
 have to say a requirement is untested, test it instead."""
 CLAIMS = (
     "Every attempt in the record FAILED, so treat what it concluded as a claim to check, not as "
@@ -143,7 +153,7 @@ GUIDE: tuple[GuideEntry, ...] = (
     GuideEntry(
         "deltas",
         "change to one path at one step",
-        ("path", "op", "hunk = unified diff", "text_after = the whole file after the change"),
+        ("path", "op", "hunk = unified diff holding the whole file, the changed lines marked"),
     ),
     GuideEntry(
         "path_versions",
@@ -208,39 +218,39 @@ QUESTIONS: tuple[Question, ...] = (
         "attempt's `last_mutating_step` (trial_summary.jsonl) on",
     ),
     Question(
+        "What each attempt wrote into its files, version by version, the files the task names "
+        "first: each change as a diff that holds the whole file, the changed lines marked",
+        # Both run as written (agents ran given queries verbatim and skipped the one that needed
+        # a path filled in, 2026-11-03), and a hunk is never cut: it is the whole file.
+        (
+            "SELECT t.attempt_idx, p.path, p.versions, p.steps, p.names_prompt_path FROM "
+            "path_versions p JOIN trials t USING (trial_id) WHERE NOT p.is_cache ORDER BY "
+            "p.names_prompt_path DESC, t.attempt_idx, p.first_step LIMIT 100",
+            "SELECT t.attempt_idx, d.step_idx, d.path, d.op, d.hunk FROM deltas d JOIN trials t "
+            "USING (trial_id) JOIN delta_flags f USING (trial_id, step_idx, path) WHERE d.hunk "
+            "IS NOT NULL AND NOT f.is_cache ORDER BY f.names_prompt_path DESC, t.attempt_idx, "
+            "d.path, d.step_idx",
+        ),
+        # The diffs first, with the command that lists them: record-files agents read the calls
+        # in steps.jsonl and seldom opened a `.diff` when pointed at path_versions.jsonl first
+        # (2026-11-05).
+        "each change's diff is its own file, the whole file with the changed lines marked: "
+        f"{HUNKS_DIRNAME}/<trial_id>/<step_idx>/<path>{HUNK_SUFFIX} "
+        f"(`find {RECORD_MOUNT}/{HUNKS_DIRNAME} -name '*{HUNK_SUFFIX}'` lists them all), with "
+        "each attempt's `trial_id` in trials.jsonl; path_versions.jsonl lists the files each "
+        "attempt changed (`names_prompt_path` marks the files the task names)",
+    ),
+    Question(
         "Every call each attempt made, in order, with the ones that changed files or hit an "
         "error marked",
         (
             "SELECT t.attempt_idx, s.step_idx, s.tool, left(coalesce(s.command_shell, "
-            "s.args_json), 300) AS call, f.is_mutating, f.has_error_marker, left(s.output, 500) "
+            "s.args_json), 300) AS call, f.is_mutating, f.has_error_marker, left(s.output, 600) "
             "AS output FROM steps s JOIN trials t USING (trial_id) JOIN step_flags f USING "
             "(trial_id, step_idx) WHERE f.is_tool_call ORDER BY t.attempt_idx, s.step_idx",
         ),
         "steps.jsonl (`command_shell`, `args_json`, `output`), with step_flags.jsonl marking "
         "`is_mutating` and `has_error_marker`",
-    ),
-    Question(
-        "Which files each attempt changed, the files the task names first",
-        (
-            "SELECT t.attempt_idx, p.path, p.versions, p.steps, p.names_prompt_path FROM "
-            "path_versions p JOIN trials t USING (trial_id) WHERE NOT p.is_cache ORDER BY "
-            "p.names_prompt_path DESC, t.attempt_idx, p.first_step LIMIT 100",
-        ),
-        "path_versions.jsonl (`names_prompt_path` marks the files the task names)",
-    ),
-    Question(
-        "What an attempt wrote into one file, version by version: each change as a diff, and the "
-        "whole file as a step left it",
-        # One row per change carries both, so every diff the agent reads comes with its file
-        # (ADR-0023 item 4).
-        (
-            "SELECT t.attempt_idx, d.step_idx, d.op, d.hunk, d.text_after FROM deltas d JOIN "
-            "trials t USING (trial_id) WHERE d.path = '/path/to/file' ORDER BY t.attempt_idx, "
-            "d.step_idx",
-        ),
-        f"{HUNKS_DIRNAME}/<trial_id>/<step_idx>/<path>{HUNK_SUFFIX} and "
-        f"{VERSIONS_DIRNAME}/<trial_id>/<step_idx>/<path>, with each attempt's `trial_id` in "
-        "trials.jsonl",
     ),
     Question(
         "One call in full: its command, scripts written inline included, and its whole output",
@@ -261,7 +271,7 @@ def answer(arm: Exp2Arm, question: Question) -> str:
 
 
 def questions(arm: Exp2Arm) -> str:
-    """The six questions with the arm's answers."""
+    """The five questions with the arm's answers."""
     items = [
         f"{i}. {question.text}:\n{answer(arm, question)}" for i, question in enumerate(QUESTIONS, 1)
     ]

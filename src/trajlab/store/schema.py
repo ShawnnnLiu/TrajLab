@@ -90,7 +90,6 @@ RECORD_TABLES: dict[str, str] = {
             kind_after VARCHAR,
             is_text BOOLEAN,
             hunk VARCHAR,
-            text_after VARCHAR,
             blob_ref VARCHAR,
             sha256_before VARCHAR,
             sha256_after VARCHAR,
