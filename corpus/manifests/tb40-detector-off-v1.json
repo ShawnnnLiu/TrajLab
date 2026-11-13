@@ -1,0 +1,421 @@
+{
+  "corpus_id": "tb40-detector-off-v1",
+  "created_at": "2026-10-20T08:25:25.909921Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "111c2ea7efb89c5aae4894c212c022e2bc839ff0",
+  "repo_dirty": false,
+  "config_path": "configs/harbor/tb40-detector-off-v1.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 5,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 0.5,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "tasks": [
+    {
+      "name": "terminal-bench/cad-model",
+      "digest": "sha256:037b83651678230c04217bc7bd077c9e2c3d5a383bb368cdeb19e88a2202f644"
+    },
+    {
+      "name": "terminal-bench/layout-config-recreation",
+      "digest": "sha256:997003ffc98f6df316167de8752c9beada20cb1292588b0fa6409d87ed3a1def"
+    },
+    {
+      "name": "terminal-bench/layout-config-recreation2",
+      "digest": "sha256:193312b14b1dcb6ef551efff691cbb708b2032f58879b0b19efe88a2cddc9deb"
+    },
+    {
+      "name": "terminal-bench/mvcc-lsm-compaction",
+      "digest": "sha256:370406dd79cc164e50b73568de37c34eba1b0e30782d7dc03f87c38c68123137"
+    },
+    {
+      "name": "terminal-bench/pretrain-shard-corruption",
+      "digest": "sha256:0f17568e65b9e8b79480e474a457811a65815cdaf7272660efffd1bc690021a0"
+    },
+    {
+      "name": "terminal-bench/sound-change-cascade",
+      "digest": "sha256:6214ceb80aaa657d72658a6f39a44fa11ea51f443822b6a1212eef1ba65bf91d"
+    },
+    {
+      "name": "terminal-bench/vba-userform-port",
+      "digest": "sha256:38f141630a3803538908de5080d4a38e87fa3ce77a9fbbaad284cb7f9e89fe22"
+    },
+    {
+      "name": "terminal-bench/vf2-speedup-networkx",
+      "digest": "sha256:cdbad1f303f57856199aae757bdbc6363111e8ad60d31db49c61d01706da63ab"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb40-detector-off-v1",
+      "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+      "job_config": {
+        "job_name": "tb40-detector-off-v1",
+        "jobs_dir": "corpus/jobs",
+        "n_attempts": 5,
+        "agent_timeout_multiplier": 0.5,
+        "n_concurrent_trials": 3,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "sha256:39d9f44b40420cde8fdcc087579c0d72a7e14fa3656d603c3f0d22fb35e27732",
+            "task_names": [
+              "terminal-bench/layout-config-recreation2",
+              "terminal-bench/sound-change-cascade",
+              "terminal-bench/vba-userform-port",
+              "terminal-bench/cad-model",
+              "terminal-bench/mvcc-lsm-compaction",
+              "terminal-bench/vf2-speedup-networkx",
+              "terminal-bench/pretrain-shard-corruption",
+              "terminal-bench/layout-config-recreation"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "74e9132f-5572-480d-af76-b5e8e8ba6c38",
+          "trial_name": "cad-model__5s2sY2n",
+          "task_name": "terminal-bench/cad-model",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "d0bb21cf-aa78-4a4b-b577-303925ee8fc0"
+        },
+        {
+          "trial_id": "93c77f57-7bb0-42f7-b49f-ab1bfb6239d0",
+          "trial_name": "cad-model__F5wgyAe",
+          "task_name": "terminal-bench/cad-model",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "268d5b4c-4c44-4161-8c95-78adc486cd0b"
+        },
+        {
+          "trial_id": "052764e7-d3dc-45ec-81a6-bd3e32c777e4",
+          "trial_name": "cad-model__H9oQ9Cg",
+          "task_name": "terminal-bench/cad-model",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "8c33a3dc-7a26-42d1-a912-954ef91ead25"
+        },
+        {
+          "trial_id": "33c89728-dbf8-4f7a-ad2a-2d4903ce8cf7",
+          "trial_name": "cad-model__jbep9cW",
+          "task_name": "terminal-bench/cad-model",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "31862f8e-fdd9-465b-8292-5104f676bfce"
+        },
+        {
+          "trial_id": "b0413a4a-1b84-48c0-88f0-b473d4e46577",
+          "trial_name": "cad-model__tnb6Q6k",
+          "task_name": "terminal-bench/cad-model",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "d44ba3a3-5f3a-405c-a67c-f7f6fffbea12"
+        },
+        {
+          "trial_id": "57652664-932d-4d79-a4fe-9a983884475e",
+          "trial_name": "layout-config-recreation2__FaRW5DZ",
+          "task_name": "terminal-bench/layout-config-recreation2",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "87deb23d-c938-41f7-8229-db95c4cb9635"
+        },
+        {
+          "trial_id": "40f6342e-2682-4da4-9c07-58091b7a89a3",
+          "trial_name": "layout-config-recreation2__X5QAazi",
+          "task_name": "terminal-bench/layout-config-recreation2",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "715858a7-63c4-4510-9f8e-2c64e2997020"
+        },
+        {
+          "trial_id": "1126d742-7cf2-4113-ad97-1b1b4c0dff40",
+          "trial_name": "layout-config-recreation2__fDhVbQ3",
+          "task_name": "terminal-bench/layout-config-recreation2",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "a2a97283-8f4f-45a5-8e98-33a987e8b6f9"
+        },
+        {
+          "trial_id": "f87eb799-b928-49ef-940f-8e8b87d53432",
+          "trial_name": "layout-config-recreation2__iDarzve",
+          "task_name": "terminal-bench/layout-config-recreation2",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "81e192d7-0c12-45ef-9184-4b1549f392c5"
+        },
+        {
+          "trial_id": "f515f426-6755-44f7-85a8-838faea026ca",
+          "trial_name": "layout-config-recreation2__vVgMwvb",
+          "task_name": "terminal-bench/layout-config-recreation2",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "a7b4af12-9cd4-425b-a9e4-fcfc80ca2d43"
+        },
+        {
+          "trial_id": "4fc2f84b-f0fa-4062-9e07-fb882582b5cd",
+          "trial_name": "layout-config-recreation__35oSiA4",
+          "task_name": "terminal-bench/layout-config-recreation",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "d926d9f3-0b27-4171-9074-8fca1e9ba159"
+        },
+        {
+          "trial_id": "938d88d7-de8c-42af-8789-fea84a3064f9",
+          "trial_name": "layout-config-recreation__Pfy8KHc",
+          "task_name": "terminal-bench/layout-config-recreation",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "449de854-ffb8-4492-8215-5df24ae3d46b"
+        },
+        {
+          "trial_id": "236646ef-2ab3-4f15-96f6-64507d400c4a",
+          "trial_name": "layout-config-recreation__rEGhEWU",
+          "task_name": "terminal-bench/layout-config-recreation",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "9ab6efbf-1c4f-4819-9db5-09a5f30ef18d"
+        },
+        {
+          "trial_id": "898db1de-7f99-4b0a-a7e0-692e9c1d0154",
+          "trial_name": "layout-config-recreation__siPKKrV",
+          "task_name": "terminal-bench/layout-config-recreation",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "609b588f-0150-417f-97f3-ec4cf7d80851"
+        },
+        {
+          "trial_id": "69a60c36-bdfd-4a48-a4e0-dba74dee17a2",
+          "trial_name": "layout-config-recreation__wApxpeF",
+          "task_name": "terminal-bench/layout-config-recreation",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "c8556de6-9f4a-4fda-876e-a229f042e92a"
+        },
+        {
+          "trial_id": "41982495-f6f5-4b32-ba7f-fcf614f44731",
+          "trial_name": "mvcc-lsm-compaction__5K4FSVt",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "be4bc900-e482-46fe-a5bf-ec1cfb14b347"
+        },
+        {
+          "trial_id": "1e9e4ab6-66c9-40a5-b571-904d12bd4ee4",
+          "trial_name": "mvcc-lsm-compaction__FwC24Qi",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "27cc1ad4-8bfa-4992-97f5-52b6bd63dab7"
+        },
+        {
+          "trial_id": "af1e4f89-c362-4ee6-bbf0-f2abc312cc39",
+          "trial_name": "mvcc-lsm-compaction__GLRCDXJ",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "772814df-1e0f-48fd-a3f5-ad95c9836b36"
+        },
+        {
+          "trial_id": "1e164b4e-ac4a-446a-b652-dc9b00b552ae",
+          "trial_name": "mvcc-lsm-compaction__d9ARScx",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "dfbfc26c-e41d-421e-85ec-ac300cbc857f"
+        },
+        {
+          "trial_id": "dcffdf01-974f-420d-ae3c-a03ff3a21b30",
+          "trial_name": "mvcc-lsm-compaction__tGWaF2B",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "caafcacd-f5f0-4ab3-8f87-423c2f74f373"
+        },
+        {
+          "trial_id": "25006138-5a6e-4fbb-aa49-70b2cb4fdb23",
+          "trial_name": "pretrain-shard-corruption__2Yr5ZPy",
+          "task_name": "terminal-bench/pretrain-shard-corruption",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "d953e4e0-a62e-438d-a699-3ddb755808d6"
+        },
+        {
+          "trial_id": "4b7ae974-6831-4bd0-8cb5-000ca896172f",
+          "trial_name": "pretrain-shard-corruption__5JYdhe5",
+          "task_name": "terminal-bench/pretrain-shard-corruption",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "8340deb3-2887-4668-85fe-5a5bef118b4e"
+        },
+        {
+          "trial_id": "b1c2e14c-9307-4ed9-b5bb-0d9ecd49a67f",
+          "trial_name": "pretrain-shard-corruption__Cbkt3j5",
+          "task_name": "terminal-bench/pretrain-shard-corruption",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "03014f06-f0c6-4b4d-a44c-22e41a32dac8"
+        },
+        {
+          "trial_id": "8df20244-debd-4f9e-b049-b6f88819010f",
+          "trial_name": "pretrain-shard-corruption__sCuBYoP",
+          "task_name": "terminal-bench/pretrain-shard-corruption",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "ed787fbd-9ed1-4e0b-897d-e66da8fd00ce"
+        },
+        {
+          "trial_id": "2186aead-6199-45fd-8d02-20facbcea615",
+          "trial_name": "pretrain-shard-corruption__xcSpGv3",
+          "task_name": "terminal-bench/pretrain-shard-corruption",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "822cb025-313d-4870-8adb-47d98266963b"
+        },
+        {
+          "trial_id": "0bc2722d-0c11-4bb2-8bd1-1e4dfe8c38cf",
+          "trial_name": "sound-change-cascade__5BHoo7E",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "5abd8d12-7133-469a-be29-dde62eb0ebfb"
+        },
+        {
+          "trial_id": "8cf07f15-32ed-458f-bda3-5bde6ebdf291",
+          "trial_name": "sound-change-cascade__Bosgekv",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "79113f70-1415-4f54-a857-e90f14a6f41f"
+        },
+        {
+          "trial_id": "c765d7c7-933a-4e79-86b3-2deec59eaf58",
+          "trial_name": "sound-change-cascade__FNwaUMq",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "595c5243-2ad8-4da7-a965-29bc55e1f58a"
+        },
+        {
+          "trial_id": "237e6f91-2efc-4fd6-836c-0b9de8f0f01d",
+          "trial_name": "sound-change-cascade__YNTaijC",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "5903e626-91e1-4e1f-bb78-67f64a50088a"
+        },
+        {
+          "trial_id": "b5733514-b021-482f-a1c1-4b822da1189d",
+          "trial_name": "sound-change-cascade__kNoUchv",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "760b72a0-58f2-4cbf-a5c5-20d1eded7721"
+        },
+        {
+          "trial_id": "37a2e068-039c-47be-ab90-d9b49ad883b6",
+          "trial_name": "vba-userform-port__EXVQJRD",
+          "task_name": "terminal-bench/vba-userform-port",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "82c5bc26-e0ce-4dcb-a154-078072989e3e"
+        },
+        {
+          "trial_id": "5ae16f6b-8c70-4317-b18f-328008e89c75",
+          "trial_name": "vba-userform-port__KgjxAEg",
+          "task_name": "terminal-bench/vba-userform-port",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "170d0635-6054-4a53-a697-068a02009786"
+        },
+        {
+          "trial_id": "3a164f9a-9a46-4876-8d94-329fc37fff01",
+          "trial_name": "vba-userform-port__LQVzzDp",
+          "task_name": "terminal-bench/vba-userform-port",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "2f97b56c-441c-41f4-9a29-d699d2994038"
+        },
+        {
+          "trial_id": "ff9feee9-2008-40aa-8537-c331213e8550",
+          "trial_name": "vba-userform-port__tT5cmf6",
+          "task_name": "terminal-bench/vba-userform-port",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "8e9f2b2d-8eee-4f8e-9b81-acb95e2f6cdf"
+        },
+        {
+          "trial_id": "a34790cf-1b68-4d00-bf47-01fe0384fc23",
+          "trial_name": "vba-userform-port__zghrG7E",
+          "task_name": "terminal-bench/vba-userform-port",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "4dc7a250-447f-4baa-ae28-624f8a60681f"
+        },
+        {
+          "trial_id": "94a5c154-e171-432a-9c25-478ffae2b277",
+          "trial_name": "vf2-speedup-networkx__4FYnh6n",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "27b5d820-f84e-4ee2-9440-5836597c87fa"
+        },
+        {
+          "trial_id": "1d585951-83c8-49ed-a577-94940cff59a3",
+          "trial_name": "vf2-speedup-networkx__4G8o8fx",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "be612ea2-b15d-49c1-bc5a-b619561c5355"
+        },
+        {
+          "trial_id": "dc2d04cd-cd9d-4796-abd6-84ef1e9f6bf2",
+          "trial_name": "vf2-speedup-networkx__6nPo6NH",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "75b2dd61-bd26-4014-a236-fff42087b788"
+        },
+        {
+          "trial_id": "1d01819c-5de4-4c2f-b2a3-b40c13135cf2",
+          "trial_name": "vf2-speedup-networkx__oNxEtrV",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "e7914b5f-d55f-4524-8c95-5211d4737be8"
+        },
+        {
+          "trial_id": "ad2b12e7-9fde-4e00-a7c0-37b391caee0c",
+          "trial_name": "vf2-speedup-networkx__wGHz7L8",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "8226cbd1-25ba-4f05-86c0-0e5b8e3cac75",
+          "job_dir": "tb40-detector-off-v1",
+          "claude_session_id": "2777449e-5321-4405-ab16-35fc968e71ee"
+        }
+      ]
+    }
+  ],
+  "storage": "/srv/trajlab/jobs"
+}

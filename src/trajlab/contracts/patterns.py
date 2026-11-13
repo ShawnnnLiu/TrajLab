@@ -6,7 +6,7 @@ files under `<trial>/trajlab/`, outside the bind-mounted `agent/` dir, so the ag
 them. Both are keyed by `tool_call_id` and `call_seq`, as in the call's `CallRecord`.
 """
 
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
@@ -16,8 +16,26 @@ CALL_INPUT_SUFFIX = ".call.json"
 TRAJLAB_DIRNAME = "trajlab"
 PROCESSES_FILENAME = "processes.jsonl"
 CHANGES_FILENAME = "changes.jsonl"
+# The checker's output (ADR-0023), beside the extras.
+FLAGS_FILENAME = "flags.jsonl"
+CHECKS_FILENAME = "checks.jsonl"
 # The text rule shared with ADR-0014's store: at most 1 MiB, no NUL byte, valid UTF-8.
 MAX_TEXT_BYTES = 1024 * 1024
+
+# Shared by the trace site (capture/) and the checker (checkpoint/), which import each other
+# only through contracts/ (CLAUDE.md constraint 3). Kept as pattern strings, compiled where
+# used: contracts/ imports nothing but typing, datetime, uuid, and pydantic.
+# Commands that run tests or checks, for the trace site's success-claim hint. The checker
+# extends this list with what the off corpus's agents ran (checkpoint/patterns.py).
+TEST_COMMAND_PATTERN = (
+    r"\b(?:pytest|unittest|tox|nox|ctest|jest|vitest|mocha)\b"
+    r"|\b(?:npm|yarn|pnpm)(?: run)? test\b|\b(?:cargo|go) test\b"
+    r"|\bmake(?: -C \S+)? (?:test|check)\b|\btest\.sh\b|\brun_tests\b"
+)
+# Processes of the harness, not the agent's: Claude Code and Harbor's launcher (whose command
+# lines name claude), the checkpoint hook (whose script names itself) and its wait loop, and
+# the container's keep-alive (pid 1 is `sh -c sleep infinity`).
+HARNESS_PROCESS_PATTERN = r"claude|trajlab hook|^(?:sh -c )?sleep (?:0\.2|1|infinity)$"
 
 
 class ProcessEntry(BaseModel):
@@ -88,3 +106,68 @@ class CallChanges(BaseModel):
         description="The trial's first measured call: no earlier listing, so no changes known.",
     )
     capture_ms: int = Field(ge=0)
+
+
+# The checker's patterns in v0 (ADR-0023). ADR-0015 §1's others are left out for now.
+FlagPattern = Literal[
+    "self_kill", "silent_no_write", "masked_error", "unverified_completion", "missing_output"
+]
+CheckEvent = Literal["tool_call", "stop"]
+
+
+class FlagRecord(BaseModel):
+    """One problem the checker found, tied to the call (or stop) that triggered it."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    tool_call_id: str = Field(min_length=1, description="tool_use_id, or the stop request id.")
+    call_seq: int = Field(ge=1)
+    event: CheckEvent
+    pattern: FlagPattern
+    subtype: str | None = None
+    evidence: dict[str, Any] = Field(description="What the flag rests on: paths, text, codes.")
+    message: str = Field(description="The one line the `state` arm would send (ADR-0015 §4).")
+    detector_version: str
+    flagged_at: AwareDatetime
+
+
+class HeldWrite(BaseModel):
+    """A write the checker did not judge because a background job the call started still runs."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    path: str
+    pid: int
+    cmd: str
+
+
+class UnknownItem(BaseModel):
+    """Something the records cannot decide; the checker records it instead of guessing."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    check: FlagPattern
+    reason: str
+    path: str | None = None
+    detail: str | None = None
+
+
+class CheckRecord(BaseModel):
+    """One run of the checker on one call or stop, flagged or not."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    tool_call_id: str = Field(min_length=1)
+    call_seq: int = Field(ge=1)
+    event: CheckEvent
+    check_ms: float = Field(ge=0)
+    flags: int = Field(ge=0)
+    held: tuple[HeldWrite, ...] = ()
+    unknown: tuple[UnknownItem, ...] = ()
+    notes: tuple[str, ...] = Field(
+        default=(),
+        description="Calls the checks saw and passed over, with why (e.g. a "
+        "visible failure), for the report's counts.",
+    )
+    detector_version: str
+    checked_at: AwareDatetime
