@@ -22,6 +22,7 @@ Owner: Shawn Liu. Team of four. Course milestones: Sep 25 first baseline result 
    No `analysis/`, `bench/` directories yet.
    `store/` imports only `contracts/`, `atif/`, Harbor, and DuckDB, never `capture/` or `checkpoint/`; `groundtruth/` imports only `contracts/` and Harbor.
    If capture needs a shape that analysis will use, put the model in `contracts/` and stop.
+   `src/trajlab/exp2/` (ADR-0022: the Exp 2 retry loop) is orchestration at `cli.py`'s level, not analysis: it may import `contracts/`, `capture/`, `checkpoint/`, `atif/`, `store/`, and Harbor, and nothing in `src/` but `cli.py` imports it.
 7. **Reuse Harbor's models.** ATIF is `harbor.models.trajectories`; trial results are `harbor.models.trial.result.TrialResult`; paths are `harbor.models.trial.paths.TrialPaths`. Do not redefine them.
 
 ## Layout
@@ -30,13 +31,14 @@ Owner: Shawn Liu. Team of four. Course milestones: Sep 25 first baseline result 
 configs/harbor/            one JSON job config per corpus version (the exact command that produced the data)
 configs/claude-code/       settings.hooks.json: PostToolUse hook wiring
 configs/tasks/             task-name lists per subset
-src/trajlab/cli.py         typer app: run | watch | repair | postprocess | manifest | validate | store build|derive|export|query|serve | trace | gt
-src/trajlab/contracts/     CheckpointRecord, TrialRecord, ATIF step extras, ProcessSnapshot/CallChanges, TrialLabels
+src/trajlab/cli.py         typer app: run | watch | repair | postprocess | manifest | validate | store build|derive|export|query|serve | exp2 prereg|check|run | trace | gt
+src/trajlab/contracts/     CheckpointRecord, TrialRecord, ATIF step extras, ProcessSnapshot/CallChanges, TrialLabels, store rows, Exp 2 retry-loop records
 src/trajlab/capture/       harbor_runner, corpus manifest, trial/container discovery, preinstall (custom environment, ADR-0008), trace site and labels (ADR-0015)
 src/trajlab/checkpoint/    hook/ (PostToolUse hook script; delivery per ADR-0003), watcher, changes (ADR-0010), diffs and processes (--extras, ADR-0015), backends/, join
 src/trajlab/atif/          load, compaction recovery, jobs (background-job notices, ADR-0020), postprocess, validate
 src/trajlab/store/         Exp 2 store (ADR-0014): schema, steps, reconcile (deltas from checkpoint top layers, with write times), docker_images, build; derive (derived views, ADR-0018; step_jobs and delta_attribution, ADR-0020), describe (schema text), export (record-files bundle) (ADR-0018); query, query_child, serve, query.sh (the record-engine query tool, ADR-0019)
 src/trajlab/groundtruth/   ground truth by verifier replay (ADR-0013): extract, replay, admission, counterfactual fixes, items
+src/trajlab/exp2/          the Exp 2 retry loop (ADR-0022): prompt and leak check, arms and an attempt's job config, chain store (seed, ingest), loop, preregistration
 scripts/                   dated one-offs (2026-09-25_baseline.py); never imported by src/
 tests/fixtures/hello-world-trial/   one small real trial dir; every test runs against it
 corpus/manifests/          committed; corpus/jobs/ ignored

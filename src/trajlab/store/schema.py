@@ -2,7 +2,8 @@
 
 A store is a directory:
 
-    <store>/record.duckdb    trials, steps, deltas, store_meta, and the derived views
+    <store>/record.duckdb    trials, steps, deltas, job_notices, writes, store_meta, and the
+                             derived views
                              (trajlab.store.derive): what an agent may read
     <store>/heldout.duckdb   checks, faults, blame, chains, store_meta: never shown to an agent
     <store>/blobs/<sha256>   later versions of changed rows without a hunk (`blob_ref`)
@@ -15,7 +16,9 @@ locked: no `read_blob`, `glob`, `read_csv`, `ATTACH`, or `COPY` can reach `heldo
 Every table's columns are, in order, the fields of its row model in `trajlab.contracts.store`; a
 test keeps them equal. A shape change bumps `SCHEMA_VERSION` and needs an ADR. The derived views
 are created with the tables and versioned apart from them (`StoreMeta.derived`): `replace_views`
-swaps a store's views for this code's without touching a row (ADR-0018).
+swaps a store's views for this code's without touching a row (ADR-0018). Every relation and column
+of `record.duckdb` carries its description as a DuckDB comment (ADR-0024), put there when the file
+is created and again whenever its views are replaced.
 """
 
 import json
@@ -36,6 +39,7 @@ from trajlab.contracts import (
     StoreMeta,
 )
 from trajlab.store.derive import VIEWS, derived_id
+from trajlab.store.describe import comment_statements
 
 RECORD_TABLES: dict[str, str] = {
     "trials": """
@@ -108,6 +112,19 @@ RECORD_TABLES: dict[str, str] = {
             noticed_at TIMESTAMPTZ NOT NULL,
             PRIMARY KEY (trial_id, task_id)
         )""",
+    "writes": """
+        CREATE TABLE writes (
+            trial_id UUID NOT NULL,
+            step_idx INTEGER NOT NULL,
+            path VARCHAR NOT NULL,
+            writer_step INTEGER,
+            mapped_by VARCHAR,
+            events INTEGER NOT NULL,
+            ops VARCHAR[] NOT NULL,
+            first_at TIMESTAMPTZ NOT NULL,
+            last_at TIMESTAMPTZ NOT NULL,
+            via_dir VARCHAR
+        )""",
 }
 
 HELDOUT_TABLES: dict[str, str] = {
@@ -178,9 +195,10 @@ def blobs_dir(store_dir: Path) -> Path:
     return store_dir / BLOBS_DIRNAME
 
 
-def _create(path: Path, ddls: Sequence[str], meta: StoreMeta) -> None:
+def _create(path: Path, ddls: Sequence[str], meta: StoreMeta, comments: Sequence[str] = ()) -> None:
     """Create a database file whole or not at all: it is built under a temporary name and
-    renamed, so a build killed midway leaves no file without its tables, views, and meta."""
+    renamed, so a build killed midway leaves no file without its tables, views, comments, and
+    meta."""
     tmp = path.with_name(f".{path.name}.tmp")
     for leftover in (tmp, tmp.with_name(tmp.name + ".wal")):
         leftover.unlink(missing_ok=True)
@@ -188,6 +206,8 @@ def _create(path: Path, ddls: Sequence[str], meta: StoreMeta) -> None:
         for ddl in ddls:
             con.execute(ddl)
         con.execute(META_TABLE)
+        for statement in comments:
+            con.execute(statement)
         con.executemany(
             "INSERT INTO store_meta VALUES (?, ?)",
             [(key, json.dumps(value)) for key, value in meta.model_dump(mode="json").items()],
@@ -240,16 +260,20 @@ def create_store(store_dir: Path, meta: StoreMeta) -> None:
         raise StoreError(f"this code writes schema {SCHEMA_VERSION}, not {meta.schema_version}")
     store_dir.mkdir(parents=True, exist_ok=True)
     blobs_dir(store_dir).mkdir(exist_ok=True)
-    for path, ddls in (
-        (record_path(store_dir), [*RECORD_TABLES.values(), *(view.ddl() for view in VIEWS)]),
-        (heldout_path(store_dir), list(HELDOUT_TABLES.values())),
+    for path, ddls, comments in (
+        (
+            record_path(store_dir),
+            [*RECORD_TABLES.values(), *(view.ddl() for view in VIEWS)],
+            comment_statements(),
+        ),
+        (heldout_path(store_dir), list(HELDOUT_TABLES.values()), []),
     ):
         wal = path.with_name(path.name + ".wal")
         if not path.exists():
             if wal.exists():
                 # DuckDB would replay it into the new file: old rows back, or a failed replay.
                 raise StoreError(f"{wal} is left from a deleted {path.name}; delete it too")
-            _create(path, ddls, meta)
+            _create(path, ddls, meta, comments)
             continue
         with duckdb.connect(str(path), read_only=True) as con:
             found = _existing_meta(con, path)
@@ -298,6 +322,8 @@ def replace_views(store_dir: Path, meta: StoreMeta) -> str:
                 con.execute(f'DROP VIEW "{name}"')
             for view in VIEWS:
                 con.execute(view.ddl())
+            for statement in comment_statements():
+                con.execute(statement)
             _write_versions(con, meta)
         except BaseException:
             con.rollback()

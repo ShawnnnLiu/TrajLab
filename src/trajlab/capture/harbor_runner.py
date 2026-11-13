@@ -24,6 +24,7 @@ from trajlab.capture.corpus import (
     ManifestError,
     RepoState,
     build_manifest,
+    dirty_paths,
     manifest_path,
     repo_root,
     repo_state,
@@ -165,10 +166,19 @@ def plan_run(
     if config_repo_path is None:
         raise RunRefusedError(f"{config_path} is not inside the repo at {root}")
     if repo.dirty and not allow_dirty:
-        raise RunRefusedError(
-            "working tree has uncommitted changes; the manifest's repo_sha would not describe "
-            "the code that ran. Commit first, or pass --allow-dirty for a throwaway run."
-        )
+        # Manifests record runs, not code: another run's new manifest leaves repo_sha true.
+        # Without this, a launcher running several attempts at once races its own manifests.
+        manifests = repo_relative(manifests_dir, root)
+        try:
+            changed = dirty_paths(root)
+        except ManifestError as error:
+            raise RunRefusedError(str(error)) from error
+        if any(manifests is None or not path.startswith(f"{manifests}/") for path in changed):
+            raise RunRefusedError(
+                "working tree has uncommitted changes; the manifest's repo_sha would not "
+                "describe the code that ran. Commit first, or pass --allow-dirty for a "
+                "throwaway run."
+            )
     if env_file is not None and not env_file.is_file():
         raise RunRefusedError(f"env file {env_file} not found")
     harbor = harbor_executable()

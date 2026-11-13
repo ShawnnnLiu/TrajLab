@@ -517,12 +517,13 @@ def test_the_two_files_hold_separate_tables(trial_copy: Path, tmp_path: Path) ->
         heldout = {row[0] for row in con.execute("SHOW TABLES").fetchall()}
 
     assert record.isdisjoint({"checks", "faults", "blame", "chains"})
-    assert heldout.isdisjoint({"trials", "steps", "deltas", "job_notices"})
+    assert heldout.isdisjoint({"trials", "steps", "deltas", "job_notices", "writes"})
     assert record == {
         "trials",
         "steps",
         "deltas",
         "job_notices",
+        "writes",
         "store_meta",
         *(v.name for v in VIEWS),
     }
@@ -803,3 +804,51 @@ def test_job_notices_are_built_from_the_session_log_and_replaced_on_a_rebuild(
         assert con.execute("SELECT backgrounded, job_end FROM step_jobs").fetchall() == [
             (False, None)  # the Write call's output is no task id, notice or not
         ]
+
+
+# -- recorded writes (ADR-0021) -----------------------------------------------------------------
+
+
+def test_recorded_writes_are_joined_to_the_deltas_and_replaced_on_a_rebuild(
+    trial_copy: Path, tmp_path: Path
+) -> None:
+    from trajlab.contracts import WriteEvent, WriteRow
+    from trajlab.store.writes import writes_path
+
+    capture(trial_copy)
+    plain = build_trial(trial_copy, tmp_path / "plain", images=all_images(), work_dir=tmp_path)
+    assert plain.writes == ()  # no recorder, no rows
+    write_step = plain.steps[0]
+    assert write_step.tool == "Write" and write_step.t_start is not None
+    when = write_step.t_start + (write_step.t_end - write_step.t_start) / 2  # type: ignore[operator]
+    own = WriteEvent(at=when, op="close_write", path="/app/hello.txt", pid=1100, agent=True)
+    path = writes_path(trial_copy)
+    path.parent.mkdir()
+    path.write_text(own.model_dump_json() + "\n")
+    expected = WriteRow(
+        trial_id=TRIAL_ID,
+        step_idx=1,
+        path="/app/hello.txt",
+        writer_step=1,
+        mapped_by="tool_window",
+        events=1,
+        ops=("close_write",),
+        first_at=when,
+        last_at=when,
+    )
+    store = tmp_path / "store"
+
+    without = build_trial(trial_copy, store, images=None, work_dir=tmp_path / "w")
+    assert without.writes == ()  # no deltas to join
+
+    rebuilt = build_trial(trial_copy, store, images=all_images(), work_dir=tmp_path / "w")
+    assert rebuilt.writes == (expected,)
+    assert count(store, "writes") == 1
+
+    skipped = build_trial(trial_copy, store, images=all_images(), work_dir=tmp_path / "w")
+    assert skipped.skipped_existing is True
+    assert skipped.writes == (expected,)
+    with schema.connect(schema.record_path(store), read_only=True) as con:
+        assert con.execute(
+            "SELECT attribution, causal_step, writer_steps, rule_attribution FROM delta_attribution"
+        ).fetchall() == [("recorded", 1, [1], "untrusted_mtime")]  # the layer's made-up time

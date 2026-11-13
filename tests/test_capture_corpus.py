@@ -46,6 +46,7 @@ def test_build_manifest_from_fixture_job(job_dir: Path) -> None:
     assert manifest.agent_timeout_multiplier is None
     assert manifest.checkpoint_every is None  # the fixture trial ran without checkpoints
     assert manifest.checkpoint_gate is None
+    assert manifest.writes_recorded is False  # nor with the write recorder
     assert manifest.tasks == [CorpusTask(name="hello-world/hello-world", digest=HELLO_DIGEST)]
     [job] = manifest.jobs
     assert job.job_name == "hello-world-smoke"
@@ -92,6 +93,22 @@ def test_build_manifest_records_checkpoint_gate(tmp_path: Path) -> None:
         _set_policy(job, 1, "change")
     manifest = build_manifest(jobs, corpus_id="gated", repo=REPO)
     assert (manifest.checkpoint_every, manifest.checkpoint_gate) == (1, "change")
+
+
+def test_build_manifest_records_whether_every_trial_has_a_write_record(tmp_path: Path) -> None:
+    jobs = [assemble_job_dir(tmp_path, name) for name in ("job-a", "job-b")]
+    records = [
+        trial / "agent" / "trajlab" / "writes.jsonl"
+        for job in jobs
+        for trial in job.iterdir()
+        if trial.is_dir()
+    ]
+    for record in records:
+        record.parent.mkdir()
+        record.touch()
+    assert build_manifest(jobs, corpus_id="w", repo=REPO).writes_recorded is True
+    records[0].unlink()
+    assert build_manifest(jobs, corpus_id="w", repo=REPO).writes_recorded is False
 
 
 def test_build_manifest_refuses_mixed_gates(tmp_path: Path) -> None:

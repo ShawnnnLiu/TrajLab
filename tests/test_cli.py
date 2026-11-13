@@ -1,14 +1,18 @@
 import json
+import os
 from collections.abc import Sequence
 from pathlib import Path
+from types import SimpleNamespace
 
 import duckdb
 import pytest
 from typer.testing import CliRunner
 
+import trajlab.cli as cli
 from tests.conftest import FIXTURE_TRIAL_NAME, assemble_job_dir, make_checkpoint, write_capture
 from tests.test_store_build import all_images, capture
 from trajlab.atif.postprocess import postprocess_trial
+from trajlab.capture.pins import CLAUDE_CODE_MAX_OUTPUT_TOKENS
 from trajlab.capture.repair_launcher import Launcher
 from trajlab.checkpoint.watcher import hold_watcher_lock
 from trajlab.cli import app, identify_trial
@@ -73,6 +77,40 @@ def test_run_refuses_without_starting_harbor(tmp_path: Path) -> None:
     result = CliRunner().invoke(app, ["run", str(config), "--manifests-dir", str(tmp_path)])
     assert result.exit_code == 1
     assert "new job_name" in result.output
+
+
+def test_run_refuses_an_env_without_the_output_cap(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ADR-0005: every trial runs with Claude Code's output cap and a credential, from the env
+    file or, without one, from this process's environment."""
+    executed: list[object] = []
+    monkeypatch.setattr(cli, "plan_run", lambda *args, **kwargs: SimpleNamespace(job_dir=tmp_path))
+    monkeypatch.setattr(cli, "execute", lambda plan, storage: executed.append(plan) or 0)
+    monkeypatch.setattr(cli, "recorder_running", lambda path: True)
+    for name in (*cli.CREDENTIAL_VARS, "CLAUDE_CODE_MAX_OUTPUT_TOKENS", "CLAUDE_FORCE_OAUTH"):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.chdir(tmp_path)  # no .env here
+    config = str(tmp_path / "x.json")
+    result = CliRunner().invoke(app, ["run", config])
+    assert result.exit_code == 1 and "is set in the environment" in result.output
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "key")
+    result = CliRunner().invoke(app, ["run", config])
+    assert result.exit_code == 1 and "CLAUDE_CODE_MAX_OUTPUT_TOKENS is not" in result.output
+    env = tmp_path / "env"
+    env.write_text(f"CLAUDE_CODE_MAX_OUTPUT_TOKENS={CLAUDE_CODE_MAX_OUTPUT_TOKENS}\n")
+    assert executed == []
+    result = CliRunner().invoke(app, ["run", config, "--env-file", str(env)])
+    assert result.exit_code == 0, result.output
+    assert len(executed) == 1
+
+
+def test_record_writes_needs_root(tmp_path: Path) -> None:
+    if os.geteuid() == 0:
+        pytest.skip("run as root")
+    result = CliRunner().invoke(app, ["record-writes", str(tmp_path)])
+    assert result.exit_code == 1
+    assert "needs root" in result.output
 
 
 def test_watch_rejects_unknown_backend(tmp_path: Path) -> None:

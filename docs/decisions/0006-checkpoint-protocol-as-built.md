@@ -92,3 +92,10 @@ This must be decided before any checkpointed corpus run; the options belong in t
 - keep the install out of the writable layer, e.g. a custom environment (`--env module:Class`) that builds the task image with the agent pre-installed;
 - checkpoint every N calls, ADR-0001's stated fallback;
 - accept the cost for small corpora.
+
+## Amendment (2026-10-27): a write recorder beside the watcher
+
+From `tb40-sonnet-v4` on, the Linux capture server runs a second host process beside the watcher, `trajlab record-writes` (ADR-0021), as root in its own tmux session.
+It shares no file with the hook or the watcher and never delays a call: it reads the kernel's fanotify queue, takes on a trial when its main container is running, and lets it go when `result.json` appears or the container's init is gone.
+It writes `<trial>/agent/trajlab/writes.jsonl`; the watcher's files are unchanged.
+Its start, stop, and host requirements are in `docs/checkpoint-protocol.md`, "Write recorder".

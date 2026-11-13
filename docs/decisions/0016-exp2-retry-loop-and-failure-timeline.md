@@ -110,3 +110,12 @@ The exact predicates and thresholds of the rules are not settled here; they are 
 - **What the paper must say:** Exp 2's `control` is a fresh resample under the protocol prompt, not a bare resample; sibling failures are not given to any arm; `t_lock` is operationalized from deltas, which is narrower than the paper's behavioral judgment; `t_obs` is a proxy with a measured agreement; the paper's numbers come from Terminal-Bench 2.0 under other scaffolds without state capture, so comparisons with them are indicative.
 - **What the paper takes from arXiv 2607.09510**, recorded in `docs/paper-notes.md`: the rule set's provenance and base rates (Table III); the per-failure timeline and the `t_err` to `t_obs` gap as the measure of what token space cannot see (median 10 steps, 28% never, in their data); the bound on root-cause detection that keeps root cause out of the store; and the silent-`cd` case and the epistemic share as the motivation for state over tokens.
 - **Open:** whether omission faults get a hand-labeled `t_err`; the sibling-failure variant; the error-marker list and the overlap threshold of `variant_of`, both fixed on the sample before preregistration.
+
+## Amendment (2026-10-28): the evidence sentences, and no stop hook (ADR-0022)
+
+Item 1's two evidence sentences are replaced by the owner's decision of 2026-10-28, recorded in ADR-0022 item 2: both record arms are told the same about the record, the schema text (`trajlab.store.describe.describe`), with no example rows.
+`record-files` names every file of the bundle, rendered from its layout, and keeps "README.md lists the fields"; the README is the schema text.
+`record-engine` names the command and that it prints JSON lines (ADR-0019 item 9), then carries the schema text after "Tables:".
+Example rows were dropped because one `deltas` row can exceed the prompt's 128 KiB cap and because rows differ by chain and retry, so no prompt hash could be fixed before the run.
+The note, the four steps (from "Work in this order:", without the clause on earlier work), the order, and the blank lines are as item 1 states.
+No arm has a stop hook (ADR-0022 item 4).

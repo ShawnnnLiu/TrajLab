@@ -65,6 +65,11 @@ class CorpusManifest(_ManifestModel):
     checkpoint_gate: str | None = Field(
         description="gate from the trials' policy.json (ADR-0010); null without checkpoints.",
     )
+    writes_recorded: bool | None = Field(
+        default=None,
+        description="Every trial has the write recorder's agent/trajlab/writes.jsonl "
+        "(ADR-0021); false when any lacks it; null in manifests written before the recorder.",
+    )
     tasks: list[CorpusTask] = Field(min_length=1)
     jobs: list[CorpusJob] = Field(min_length=1)
     storage: str | None = Field(

@@ -6,6 +6,7 @@ that disagree on any shared input are refused: they are not one corpus.
 """
 
 import json
+import logging
 import subprocess
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -23,11 +24,15 @@ from trajlab.capture.discover import TrialNotFinishedError, iter_trial_dirs, tri
 from trajlab.contracts import (
     CHECKPOINTS_DIRNAME,
     POLICY_FILENAME,
+    WRITES_DIRNAME,
+    WRITES_FILENAME,
     CheckpointPolicy,
     CorpusJob,
     CorpusManifest,
     CorpusTask,
 )
+
+logger = logging.getLogger(__name__)
 
 # Harbor's Job hardcodes these names (harbor/job.py, _job_config_path etc.).
 JOB_CONFIG_FILENAME = "config.json"
@@ -55,6 +60,21 @@ def _git(repo_dir: Path, *args: str) -> str:
     except subprocess.CalledProcessError as error:
         raise ManifestError(f"git {' '.join(args)} failed in {repo_dir}: {error.stderr}") from error
     return completed.stdout.strip()
+
+
+def dirty_paths(repo_dir: Path) -> list[str]:
+    """The paths `git status` lists as changed or untracked, relative to the repo root."""
+    try:
+        completed = subprocess.run(
+            ["git", "status", "--porcelain", "--untracked-files=all"],
+            cwd=repo_dir,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as error:
+        raise ManifestError(f"git status failed in {repo_dir}: {error.stderr}") from error
+    return [line[3:] for line in completed.stdout.splitlines()]
 
 
 def repo_root(repo_dir: Path) -> Path:
@@ -211,6 +231,14 @@ def build_manifest(
     checkpoint_gate = _single_value(
         "checkpoint_gate", {k: p.gate if p else None for k, p in policies.items()}
     )
+    unrecorded = [
+        f"{job.dir.name}/{trial_dir.name}"
+        for job in jobs
+        for trial_dir in iter_trial_dirs(job.dir)
+        if not (TrialPaths(trial_dir).agent_dir / WRITES_DIRNAME / WRITES_FILENAME).is_file()
+    ]
+    if unrecorded and len(unrecorded) < len(policies):
+        logger.warning("no write record (ADR-0021) for %s", ", ".join(unrecorded))
 
     return CorpusManifest(
         corpus_id=corpus_id,
@@ -222,6 +250,7 @@ def build_manifest(
         n_attempts=n_attempts,
         checkpoint_every=checkpoint_every,
         checkpoint_gate=checkpoint_gate,
+        writes_recorded=not unrecorded,
         tasks=_tasks(jobs),
         jobs=[_corpus_job(job) for job in jobs],
         storage=storage,

@@ -51,17 +51,21 @@ Text rule (`TEXT_RULE`): a file version is text if it is at most `MAX_TEXT_BYTES
 NUL byte, and decodes as UTF-8; a symlink target is always text. A version without content (an
 absent path, a directory, or another kind) counts as text, so a row is text when each of its
 file or symlink versions is, and `is_text` is null when it has neither (a directory or another
-kind on both sides). A text row whose content changed gets a unified diff: headers `--- a<path>`
-and `+++ b<path>` (`/dev/null` for a side without content), 3 lines of context, lines split on
-"\\n" only (a "\\r" stays in its line), and "\\ No newline at end of file" after a last line
+kind on both sides). A text row whose content changed gets a unified diff whose context is the
+whole file (ADR-0024 as amended 2026-11-04): one hunk holding every line of both versions, an
+unchanged line once with " ", a removed line with "-", an added line with "+", so its " " and "+"
+lines are the later version and its " " and "-" lines the earlier (`hunk_versions`). Headers are
+`--- a<path>` and `+++ b<path>` (`/dev/null` for a side without content), lines are split on
+"\\n" only (a "\\r" stays in its line), and "\\ No newline at end of file" follows a last line
 without one. Lines are matched after trimming common leading and trailing lines: exactly
 (difflib without autojunk) when that is cheap, else by a shortest edit script (Myers) within a
 step budget, else by anchoring on lines unique to both sides (patience diff) with the gaps
-matched exactly within a budget, so a hunk is made in a few seconds at most; it is small except
-for a file of few distinct lines edited in many scattered places, which gets one hunk replacing
-the whole file. A path with a newline, tab, double quote, or backslash is quoted in the headers
-the way GNU diff and git quote it (`+++ "b/app/x\\n.txt"`), with a byte that is not UTF-8
-as an octal escape.
+matched exactly within a budget, so a hunk is made in a few seconds at most; the changes it marks
+are few except for a file of few distinct lines edited in many scattered places, which is marked
+as replaced whole. `narrow` cuts a hunk to n lines of context around each change; with n = 3 it
+gives the hunks of store schema 5 and earlier. A path with a newline, tab, double quote, or
+backslash is quoted in the headers the way GNU diff and git quote it (`+++ "b/app/x\\n.txt"`),
+with a byte that is not UTF-8 as an octal escape.
 A row whose content changed but which gets no hunk (a version that is not text) stores its
 later version instead, if it has one: a file's bytes or a symlink's target go to
 `<blobs_dir>/<sha256>`, named `blobs/<sha256>` in `blob_ref`. A mode- or owner-only change
@@ -77,6 +81,7 @@ Rows are ordered by (step_idx, path).
 import hashlib
 import logging
 import os
+import re
 import shutil
 import tarfile
 import tempfile
@@ -114,11 +119,12 @@ TEXT_RULE = (
     f"file at most {MAX_TEXT_BYTES} bytes, no NUL byte, valid UTF-8; symlink targets are text"
 )
 RECONCILE_METHOD = (
-    "top-layer-view-v1: view k = start image + checkpoint k's top layer (OCI whiteouts, opaque "
+    "top-layer-view-v2: view k = start image + checkpoint k's top layer (OCI whiteouts, opaque "
     "directories, non-directory entries replacing subtrees); delta k = view k-1 vs view k by "
-    "kind, mode, owner, content sha256; hunks for text: common ends trimmed, then exact difflib "
-    "(line product <= 250000), Myers (<= 2000000 steps), or unique-line anchors; blobs: the "
-    "later version of a changed row without a hunk; non-UTF-8 path bytes as \\xNN"
+    "kind, mode, owner, content sha256; hunks for text: one per row, the whole file as context; "
+    "lines matched with common ends trimmed, then exact difflib (line product <= 60000), Myers "
+    "(<= 2000000 steps), or unique-line anchors; blobs: the later version of a changed row "
+    "without a hunk; non-UTF-8 path bytes as \\xNN"
 )
 
 
@@ -209,7 +215,6 @@ def reconcile(
 # member) is fetched by reading the layers again, matching by size and then hash.
 
 _CONTENT_KINDS = frozenset({"file", "symlink"})
-_CONTEXT_LINES = 3
 # Hunks should show what changed and no more, in bounded time. difflib without autojunk is close
 # to cubic when lines repeat (0.8 s for 1,000 lines of pretty-printed JSON, 21 s for 3,000), and
 # with autojunk a one-line edit to such a file rewrites every line. So common leading and trailing
@@ -624,6 +629,7 @@ class _Reconciler:
     ) -> DeltaRow:
         is_text, hunk, blob = shape
         b, a = change.before, change.after
+        texts = (self.contents.text(b), self.contents.text(a)) if hunk else None
         return DeltaRow(
             trial_id=self.trial_id,
             step_idx=step_idx,
@@ -632,11 +638,7 @@ class _Reconciler:
             kind_before=b.kind if b else None,
             kind_after=a.kind if a else None,
             is_text=is_text,
-            hunk=(
-                _unified_diff(change.path, self.contents.text(b), self.contents.text(a))
-                if hunk
-                else None
-            ),
+            hunk=_unified_diff(change.path, *texts) if texts else None,
             blob_ref=f"{BLOBS_DIRNAME}/{a.sha256}" if blob and a else None,
             sha256_before=b.sha256 if b else None,
             sha256_after=a.sha256 if a else None,
@@ -900,22 +902,43 @@ def _header_name(name: str) -> str:
     return f'"{"".join(out)}"' if quoted else name
 
 
-def _unified_diff(path: str, before: str | None, after: str | None) -> str:
-    """The unified diff from `before` to `after` (None: the side does not exist); "" when no
-    line differs."""
+def _unified_diff(
+    path: str, before: str | None, after: str | None, context: int | None = None
+) -> str:
+    """The unified diff from `before` to `after` (None: the side does not exist), with `context`
+    lines around each change, or with the whole file as context when `context` is None: one
+    hunk holding every line of both versions. "" when no line differs."""
     old, new = _lines(before), _lines(after)
+    headers = (
+        f"--- {'/dev/null' if before is None else _header_name('a' + path)}\n",
+        f"+++ {'/dev/null' if after is None else _header_name('b' + path)}\n",
+    )
+    return _render(headers, old, new, _opcodes(old, new), context)
+
+
+def _render(
+    headers: tuple[str, str],
+    old: list[str],
+    new: list[str],
+    codes: list[_Opcode],
+    context: int | None,
+) -> str:
+    """The diff's text: its headers, then each hunk of `codes` grouped with `context` lines
+    (the whole file when None), each line once, with "\\ No newline at end of file" after a
+    line without one."""
     out: list[str] = []
 
     def emit(prefix: str, lines: list[str]) -> None:
         for line in lines:
             out.append(prefix + line)
             if not line.endswith("\n"):
-                out.append("\n\\ No newline at end of file\n")
+                out.append(_NO_NEWLINE)
 
-    for group in _groups(_opcodes(old, new), _CONTEXT_LINES):
+    # Context as long as the longer side never splits a group or cuts its ends: one hunk.
+    width = max(len(old), len(new)) if context is None else context
+    for group in _groups(codes, width):
         if not out:
-            out.append(f"--- {'/dev/null' if before is None else _header_name('a' + path)}\n")
-            out.append(f"+++ {'/dev/null' if after is None else _header_name('b' + path)}\n")
+            out.extend(headers)
         first, last = group[0], group[-1]
         out.append(f"@@ -{_range(first[1], last[2])} +{_range(first[3], last[4])} @@\n")
         for tag, i1, i2, j1, j2 in group:
@@ -925,3 +948,115 @@ def _unified_diff(path: str, before: str | None, after: str | None) -> str:
                 emit("-", old[i1:i2])
                 emit("+", new[j1:j2])
     return "".join(out)
+
+
+_NO_NEWLINE = "\n\\ No newline at end of file\n"
+_HUNK_RANGE = re.compile(r"@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
+
+
+class HunkError(ValueError):
+    """A hunk is not one this module makes for a row: headers, then one hunk with the whole file
+    as context."""
+
+
+@dataclass(frozen=True)
+class _Parsed:
+    headers: tuple[str, str]
+    old: list[str]  # lines, each with its "\n" but a last one without
+    new: list[str]
+    codes: list[_Opcode]
+    before_exists: bool
+    after_exists: bool
+
+
+def _parse(hunk: str) -> _Parsed:
+    """A whole-file hunk taken apart: its headers, both versions' lines, and the opcodes that
+    mark its changes, as `_render` writes them: equal and changed runs alternate, and a changed
+    run is its removed lines, then its added lines (one replace, delete, or insert)."""
+    rows = hunk.split("\n")  # on "\n" only, as `_lines` splits; "" after the last "\n"
+    if (
+        len(rows) < 4
+        or rows[-1] != ""
+        or not (rows[0].startswith("--- ") and rows[1].startswith("+++ "))
+    ):
+        raise HunkError("not a unified diff with headers")
+    header = _HUNK_RANGE.fullmatch(rows[2])
+    if header is None:
+        raise HunkError(f"not a hunk header: {rows[2]!r}")
+    entries: list[list[str]] = []  # [tag, line], the line with its "\n" unless the marker follows
+    for row in rows[3:-1]:
+        if row == _NO_NEWLINE.strip("\n"):
+            if not entries or not entries[-1][1].endswith("\n"):
+                raise HunkError("a no-newline marker that follows no line")
+            entries[-1][1] = entries[-1][1][:-1]
+        elif row[:1] in (" ", "-", "+"):
+            entries.append([row[:1], row[1:] + "\n"])
+        else:
+            raise HunkError(f"a line that is not context, removed, or added: {row[:40]!r}")
+    old: list[str] = []
+    new: list[str] = []
+    codes: list[_Opcode] = []
+    run: tuple[bool, int, int] | None = None  # (equal, where it starts in old, in new)
+    for tag, line in entries:
+        equal = tag == " "
+        if run is None or run[0] != equal:
+            if run is not None:
+                codes.append(_run_code(run, len(old), len(new)))
+            run = (equal, len(old), len(new))
+        elif tag == "-" and len(new) > run[2]:
+            raise HunkError("a removed line after an added one in the same change")
+        if tag != "+":
+            old.append(line)
+        if tag != "-":
+            new.append(line)
+    if run is not None:
+        codes.append(_run_code(run, len(old), len(new)))
+    start_old, start_new = int(header[1]), int(header[3])
+    count_old = 1 if header[2] is None else int(header[2])
+    count_new = 1 if header[4] is None else int(header[4])
+    if (count_old, count_new) != (len(old), len(new)) or (start_old, start_new) != (
+        min(1, len(old)),
+        min(1, len(new)),
+    ):
+        raise HunkError(f"{rows[2]!r} is not one hunk of the whole file")
+    return _Parsed(
+        headers=(rows[0] + "\n", rows[1] + "\n"),
+        old=old,
+        new=new,
+        codes=codes,
+        before_exists=rows[0] != "--- /dev/null",
+        after_exists=rows[1] != "+++ /dev/null",
+    )
+
+
+def _run_code(run: tuple[bool, int, int], i: int, j: int) -> _Opcode:
+    """The opcode of a run of lines that started at (`run[1]`, `run[2]`) and ends at (i, j)."""
+    equal, i1, j1 = run
+    if equal:
+        return ("equal", i1, i, j1, j)
+    return ("replace" if i > i1 and j > j1 else "delete" if i > i1 else "insert", i1, i, j1, j)
+
+
+def hunk_versions(hunk: str) -> tuple[str | None, str | None]:
+    """The two versions a row's hunk holds, (earlier, later): its " " and "-" lines, and its
+    " " and "+" lines; None for a side whose header is /dev/null. An empty hunk (neither version
+    has a line) gives ("", ""). Raises `HunkError` for a hunk without the whole file."""
+    if hunk == "":
+        return "", ""
+    parsed = _parse(hunk)
+    return (
+        "".join(parsed.old) if parsed.before_exists else None,
+        "".join(parsed.new) if parsed.after_exists else None,
+    )
+
+
+def narrow(hunk: str, context: int) -> str:
+    """A row's hunk with `context` lines around each change instead of the whole file: the same
+    headers and changes, split into hunks where `context` leaves lines out. Raises `HunkError`
+    for a hunk without the whole file."""
+    if context < 0:
+        raise ValueError(f"context is a number of lines, not {context}")
+    if hunk == "":
+        return ""
+    parsed = _parse(hunk)
+    return _render(parsed.headers, parsed.old, parsed.new, parsed.codes, context)

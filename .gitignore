@@ -2,6 +2,8 @@
 # a directory, or a symlink to shared storage (/srv/trajlab/jobs on the Linux server)
 corpus/jobs
 corpus/stores/
+# Exp 2 retry chains: logs, chain stores, bundles (trajlab exp2 run, ADR-0022)
+corpus/exp2/
 .env
 *.jsonl
 !tests/fixtures/**/*.jsonl
