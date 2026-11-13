@@ -1,0 +1,86 @@
+{
+  "corpus_id": "tb40-detector-shadow-v1",
+  "created_at": "2026-11-03T14:13:34.999045Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "49944f2a1ea7011fed035ff29820009f71e0ba3d",
+  "repo_dirty": false,
+  "config_path": "configs/harbor/tb40-detector-shadow-v1.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 1,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 0.5,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "tasks": [
+    {
+      "name": "terminal-bench/layout-config-recreation2",
+      "digest": "sha256:193312b14b1dcb6ef551efff691cbb708b2032f58879b0b19efe88a2cddc9deb"
+    },
+    {
+      "name": "terminal-bench/vba-userform-port",
+      "digest": "sha256:38f141630a3803538908de5080d4a38e87fa3ce77a9fbbaad284cb7f9e89fe22"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb40-detector-shadow-v1",
+      "job_id": "02166cfc-48e9-4358-b321-31cf2b8fd7df",
+      "job_config": {
+        "job_name": "tb40-detector-shadow-v1",
+        "jobs_dir": "corpus/jobs",
+        "agent_timeout_multiplier": 0.5,
+        "n_concurrent_trials": 2,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "sha256:39d9f44b40420cde8fdcc087579c0d72a7e14fa3656d603c3f0d22fb35e27732",
+            "task_names": [
+              "terminal-bench/vba-userform-port",
+              "terminal-bench/layout-config-recreation2"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "bcae1259-9be8-4fbb-93d4-f70f204ced3c",
+          "trial_name": "layout-config-recreation2__uFh7Jdg",
+          "task_name": "terminal-bench/layout-config-recreation2",
+          "job_id": "02166cfc-48e9-4358-b321-31cf2b8fd7df",
+          "job_dir": "tb40-detector-shadow-v1",
+          "claude_session_id": "fec55473-6ad4-4590-9856-6c0cc5de5505"
+        },
+        {
+          "trial_id": "f0885546-6789-4fab-bd75-b6327a84a0df",
+          "trial_name": "vba-userform-port__WbRXsRU",
+          "task_name": "terminal-bench/vba-userform-port",
+          "job_id": "02166cfc-48e9-4358-b321-31cf2b8fd7df",
+          "job_dir": "tb40-detector-shadow-v1",
+          "claude_session_id": "18e57b8f-e92c-495d-b358-7c1c7c9f1092"
+        }
+      ]
+    }
+  ],
+  "storage": "/srv/trajlab/jobs"
+}

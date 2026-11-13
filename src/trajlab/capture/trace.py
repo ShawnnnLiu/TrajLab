@@ -46,9 +46,11 @@ from trajlab.contracts import (
     CHANGES_FILENAME,
     CHECKPOINT_RECORDS_FILENAME,
     CHECKPOINTS_DIRNAME,
+    HARNESS_PROCESS_PATTERN,
     HOOKED_TOOLS,
     POLICY_FILENAME,
     PROCESSES_FILENAME,
+    TEST_COMMAND_PATTERN,
     TIMEOUT_SUFFIX,
     TRAJLAB_DIRNAME,
     CallChanges,
@@ -92,20 +94,14 @@ _PATH = re.compile(
     re.IGNORECASE,
 )
 # Commands that run tests or checks, for the success-claim hint.
-_TEST_COMMAND = re.compile(
-    r"\b(?:pytest|unittest|tox|nox|ctest|jest|vitest|mocha)\b"
-    r"|\b(?:npm|yarn|pnpm)(?: run)? test\b|\b(?:cargo|go) test\b"
-    r"|\bmake(?: -C \S+)? (?:test|check)\b|\btest\.sh\b|\brun_tests\b"
-)
+_TEST_COMMAND = re.compile(TEST_COMMAND_PATTERN)
 _SUCCESS_CLAIM = re.compile(
     r"\b(?:all (?:\d+ )?tests?|tests? (?:now )?(?:pass|passes|passed|passing)|verified"
     r"|works?|working|succeeded|successfully|fixed|done|complete[ds]?)\b",
     re.IGNORECASE,
 )
-# Processes of the harness, not the agent's: Claude Code and Harbor's launcher (whose command
-# lines name claude), the checkpoint hook (whose script names itself) and its wait loop, and
-# the container's keep-alive (pid 1 is `sh -c sleep infinity`).
-_HARNESS_PROCESS = re.compile(r"claude|trajlab hook|^(?:sh -c )?sleep (?:0\.2|1|infinity)$")
+# Processes of the harness, not the agent's (contracts/patterns.py).
+_HARNESS_PROCESS = re.compile(HARNESS_PROCESS_PATTERN)
 # Claude Code's own process. Each trial's container has its own pid namespace, where pids
 # rise, so a process with a higher pid started after Claude Code did.
 _CLAUDE_CODE = re.compile(r"(?:^|[\s/])claude(?:\s|$)")

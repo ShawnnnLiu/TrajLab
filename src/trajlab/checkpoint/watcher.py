@@ -7,6 +7,10 @@ agent's turn (Stop, StopFailure) is answered like a call, but under gate `none` 
 checkpoint (ADR-0011). Every answered request gets a `CallRecord`.
 With `extras` on, each answered call also gets a process snapshot and the content of what it
 changed, under `<trial>/trajlab/`, before its ack (ADR-0015 §2).
+With `detect` on as well, the checker (`checkpoint.patterns`, ADR-0023) reads each answered call
+right after its `CallRecord` and before its ack, and writes its flags and checks under
+`<trial>/trajlab/`. Shadow mode: nothing reaches the agent, and a failing check never holds the
+ack.
 `checkpoint/` does not import `capture/` (CLAUDE.md constraint 3), so the caller supplies how a
 trial dir maps to its name and compose project.
 """
@@ -57,9 +61,22 @@ from trajlab.checkpoint.join import (
     write_ack,
     write_policy,
 )
+from trajlab.checkpoint.patterns import (
+    CallView,
+    Checker,
+    PathProbe,
+    docker_path_probe,
+    read_stop_facts,
+    read_trial,
+    stream_start_cwd,
+    task_instruction,
+)
 from trajlab.checkpoint.processes import parse_probe
 from trajlab.contracts import (
+    CALL_INPUT_SUFFIX,
     CHANGES_FILENAME,
+    CHECKS_FILENAME,
+    FLAGS_FILENAME,
     MAX_LISTED_PATHS,
     MAX_TEXT_BYTES,
     PROCESSES_FILENAME,
@@ -82,6 +99,8 @@ DEFAULT_WORKERS = 8
 # Everything --extras does for one call, before its snapshot: well inside the hook's 240 s wait,
 # which the commit also needs (80 s after a 2.2 GB install, ADR-0015 §2).
 EXTRAS_BUDGET_S = 30.0
+# Each of the stop's two image reads for the checker (ADR-0023): a short `docker run`.
+DETECT_PROBE_TIMEOUT_S = 15.0
 
 
 class PolicyMismatchError(RuntimeError):
@@ -142,6 +161,30 @@ def _left(deadline: float) -> float:
     return deadline - time.monotonic()
 
 
+def _first_record[M: (ProcessSnapshot, CallChanges)](
+    path: Path, tool_call_id: str, model: type[M]
+) -> M | None:
+    """The first record of a call in a JSONL file of extras, as the checker reads it."""
+    if not path.is_file():
+        return None
+    for line in path.read_bytes().splitlines():
+        try:
+            record = model.model_validate_json(line)
+        except ValueError:
+            continue
+        if record.tool_call_id == tool_call_id:
+            return record
+    return None
+
+
+def _read_json(path: Path) -> dict | None:
+    try:
+        data = json.loads(path.read_text())
+    except (OSError, ValueError):
+        return None
+    return data if isinstance(data, dict) else None
+
+
 def _recorded_calls(path: Path) -> set[str]:
     """The `tool_call_id`s of a JSONL file of extras, skipping a line cut short by a crash
     (possibly mid-character, so each line is decoded on its own)."""
@@ -184,6 +227,7 @@ class _Trial:
     contents: dict[str, bytes | None] = field(default_factory=dict)  # last version seen per path
     start_image: str | None = None
     extras_recorded: set[str] | None = None  # calls with extras on disk; read on first use
+    checker: Checker | None = None  # --detect (ADR-0023): made on the first answered call
 
     def covering(self, tool_call_id: str) -> CheckpointRecord | None:
         """The record whose checkpoint first shows this call's effects, if any."""
@@ -207,7 +251,11 @@ class Watcher:
         sweep_interval: float = DEFAULT_SWEEP_INTERVAL_S,
         workers: int = DEFAULT_WORKERS,
         extras: bool = False,
+        detect: bool = False,
+        path_probe: PathProbe | None = None,
     ) -> None:
+        if detect and not extras:
+            raise ValueError("detect reads the extras' records, so it needs extras on")
         # Observers report absolute paths and the sweep reports paths under jobs_dir; both are
         # resolved so one request and one trial have exactly one key.
         self.jobs_dir = jobs_dir.resolve()
@@ -217,6 +265,8 @@ class Watcher:
         self.sweep_interval = sweep_interval
         self.workers = workers
         self.extras = extras
+        self.detect = detect
+        self.path_probe = path_probe
         self._trials: dict[Path, _Trial] = {}
         self._trials_lock = threading.Lock()
         self._in_flight: set[Path] = set()
@@ -288,10 +338,11 @@ class Watcher:
         trigger = "stop" if stop else "tool_call"
         measured = self._measure(trial, req_path) if self.policy.gate != "none" else None
         change = measured.change if measured else "not_checked"
+        extras: tuple[ProcessSnapshot | None, CallChanges | None] = (None, None)
         if self.extras:
             # Before the snapshot and the ack: the agent is still waiting, the last checkpoint
             # still holds the state before this call.
-            self._record_extras(trial_dir_of(req_path), trial, request, measured)
+            extras = self._record_extras(trial_dir_of(req_path), trial, request, measured)
 
         def answer(outcome: str, checkpoint_seq: int | None) -> CallRecord:
             call = CallRecord(
@@ -315,6 +366,9 @@ class Watcher:
             append_call(directory, call)
             trial.calls[call.tool_call_id] = call
             trial.bases.pop(call.tool_call_id, None)
+            if self.detect:
+                # After the record the checker reads, before the ack the agent waits for.
+                self._detect(trial_dir_of(req_path), trial, request, call, *extras)
             write_ack(directory, call)
             return call
 
@@ -391,11 +445,12 @@ class Watcher:
         trial: _Trial,
         request: CheckpointRequest,
         measured: "_Measurement | None",
-    ) -> None:
+    ) -> tuple[ProcessSnapshot | None, CallChanges | None]:
         """The process snapshot and the call's changes (ADR-0015 §2). Never blocks the ack.
 
         Once per call: when the sweep retries a call whose snapshot failed, the call's changes
-        are already measured, and measuring again would record that it changed nothing.
+        are already measured, and measuring again would record that it changed nothing; the
+        records already written are returned instead.
         """
         out = trial_dir / TRAJLAB_DIRNAME
         out.mkdir(exist_ok=True)
@@ -404,22 +459,103 @@ class Watcher:
                 out / CHANGES_FILENAME
             )
         if request.tool_use_id in trial.extras_recorded:
-            return
+            return (
+                _first_record(out / PROCESSES_FILENAME, request.tool_use_id, ProcessSnapshot),
+                _first_record(out / CHANGES_FILENAME, request.tool_use_id, CallChanges),
+            )
         trial.extras_recorded.add(request.tool_use_id)
+        snapshot: ProcessSnapshot | None = None
+        changes: CallChanges | None = None
         deadline = time.monotonic() + EXTRAS_BUDGET_S
         call_seq = len(trial.calls) + 1
+        # Returned only once written, so the checker reads what a replay of the records would.
         try:
-            snapshot = self._process_snapshot(trial, request.tool_use_id, call_seq, deadline)
-            if snapshot is not None:
-                append_line(out / PROCESSES_FILENAME, snapshot.model_dump_json())
+            taken = self._process_snapshot(trial, request.tool_use_id, call_seq, deadline)
+            if taken is not None:
+                append_line(out / PROCESSES_FILENAME, taken.model_dump_json())
+                snapshot = taken
         except Exception:
             trial.log.warning("no process snapshot for %s", request.tool_use_id, exc_info=True)
         try:
-            changes = self._call_changes(trial, request.tool_use_id, call_seq, measured, deadline)
-            if changes is not None:
-                append_line(out / CHANGES_FILENAME, changes.model_dump_json())
+            found = self._call_changes(trial, request.tool_use_id, call_seq, measured, deadline)
+            if found is not None:
+                append_line(out / CHANGES_FILENAME, found.model_dump_json())
+                changes = found
         except Exception:
             trial.log.warning("no changes recorded for %s", request.tool_use_id, exc_info=True)
+        return snapshot, changes
+
+    def _detect(
+        self,
+        trial_dir: Path,
+        trial: _Trial,
+        request: CheckpointRequest,
+        call: CallRecord,
+        snapshot: ProcessSnapshot | None,
+        changes: CallChanges | None,
+    ) -> None:
+        """Run the checker on one answered call and record its flags and check (ADR-0023).
+        Shadow mode: nothing is written where the agent can read it, and any failure is logged
+        and leaves the ack as it was."""
+        try:
+            checker = trial.checker or self._make_checker(trial_dir, trial, call)
+            hook_input = _read_json(
+                TrialPaths(trial_dir).agent_dir
+                / "checkpoints"
+                / f"{call.tool_call_id}{CALL_INPUT_SUFFIX}"
+            )
+            if call.trigger == "stop":
+                checker.stop_facts = lambda: self._stop_facts(trial_dir, trial, call)
+            view = CallView(
+                record=call,
+                hook_input=hook_input,
+                agent_id=request.agent_id,
+                changes=changes,
+                snapshot=snapshot,
+            )
+            flags, check = checker.check(view, datetime.now(UTC))
+            out = trial_dir / TRAJLAB_DIRNAME
+            out.mkdir(exist_ok=True)
+            for flag in flags:
+                append_line(out / FLAGS_FILENAME, flag.model_dump_json())
+            append_line(out / CHECKS_FILENAME, check.model_dump_json())
+            for flag in flags:
+                trial.log.info(
+                    "flag %s %s at call %d", flag.pattern, flag.subtype or "", flag.call_seq
+                )
+        except Exception:
+            trial.log.warning("no check for %s", call.tool_call_id, exc_info=True)
+
+    def _make_checker(self, trial_dir: Path, trial: _Trial, call: CallRecord) -> Checker:
+        """A trial's checker. A watcher restarted mid-trial first feeds it the calls answered
+        before, from their records, so its flags are those a watcher that never stopped would
+        have written (the prefix rule, ADR-0023); their flags are not written again."""
+        paths = TrialPaths(trial_dir)
+        checker = Checker(start_cwd=stream_start_cwd(paths.agent_dir / "claude-code.txt"))
+        earlier = [c for c in trial.calls.values() if c.call_seq < call.call_seq]
+        if earlier:
+            for view in read_trial(trial_dir).views:
+                if view.record.call_seq < call.call_seq:
+                    checker.stop_facts = None
+                    checker.check(view, view.record.answered_at)
+        trial.checker = checker
+        return checker
+
+    def _stop_facts(self, trial_dir: Path, trial: _Trial, call: CallRecord):  # type: ignore[no-untyped-def]
+        instruction = task_instruction(trial_dir)
+        if instruction is None:
+            return None
+        probe = self.path_probe or docker_path_probe(timeout=DETECT_PROBE_TIMEOUT_S)
+        deadline = time.monotonic() + EXTRAS_BUDGET_S
+        stop_image = next(
+            (r.checkpoint_id for r in trial.records if r.seq == call.checkpoint_seq), None
+        )
+        return read_stop_facts(
+            instruction,
+            probe,
+            start_image=self._start_image(trial, deadline) if trial.container else None,
+            stop_image=stop_image,
+        )
 
     def _process_snapshot(
         self, trial: _Trial, tool_call_id: str, call_seq: int, deadline: float
