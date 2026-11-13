@@ -271,7 +271,7 @@ class Exp2Settings(_Model):
         default=None,
         pattern=SHA256,
         description="Of the record's schema text (trajlab.store.describe): the record-files "
-        "README, and the descriptions the record-engine store carries as comments (ADR-0023); "
+        "README, and the descriptions the record-engine store carries as comments (ADR-0024); "
         "null in settings written before them.",
     )
     prefix_sha256: dict[str, str] = Field(

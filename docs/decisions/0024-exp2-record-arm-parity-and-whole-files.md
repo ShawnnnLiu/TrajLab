@@ -1,6 +1,7 @@
-# ADR-0023: Exp 2 record arms told the same, and whole file versions in the record
+# ADR-0024: Exp 2 record arms told the same, and whole file versions in the record
 
 Status: proposed (2026-11-02); amended 2026-11-04 (whole-file hunks, store schema 6; below).
+Drafted as ADR-0023 and renumbered on 2026-11-13, when the checker's ADR-0023 (`0023-checker-v0.md`) reached main first; commit messages and run notes before that date call it ADR-0023.
 Amends ADR-0022 item 2 (what the record arms are told), ADR-0014 (the `deltas` table: store schema 5, and from the amendment on, the hunk's context: schema 6), and ADR-0018 item 5 (the bundle's layout).
 
 ## Context

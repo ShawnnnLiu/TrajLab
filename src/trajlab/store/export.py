@@ -5,7 +5,7 @@
     <out>/README.md                                      the schema text (trajlab.store.describe)
     <out>/<relation>.jsonl                               every row, one JSON object per line
     <out>/deltas/<trial_id>/<step_idx>/<path>.diff       each delta row's hunk again, as a file:
-                                                         a diff holding the whole file (ADR-0023)
+                                                         a diff holding the whole file (ADR-0024)
 
 for every relation an agent's connection can read: `trials`, `steps`, `deltas`, the derived
 views, and `store_meta`. A row's JSON is DuckDB's own (UUIDs and instants as strings, instants in

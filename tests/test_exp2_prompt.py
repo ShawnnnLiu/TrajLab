@@ -1,4 +1,4 @@
-"""The retry prompt (ADR-0016 item 1, ADR-0022, ADR-0023): control keeps round 2's steps, the
+"""The retry prompt (ADR-0016 item 1, ADR-0022, ADR-0024): control keeps round 2's steps, the
 two record arms get one text but for how the record is reached, every query the text gives runs
 and every file it names is in the bundle, each prompt says FAILED, and none names a check or
 quotes the verifier."""

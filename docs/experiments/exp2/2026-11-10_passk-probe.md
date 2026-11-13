@@ -17,7 +17,7 @@ In control the attempts are fresh resamples, so this is pass@k in the usual sens
 - **Budget.** N = 20 retries per chain. A chain stops at its first pass.
 - **The record grows.** The loop is `trajlab.exp2.loop.Exp2Runner` (ADR-0022) unchanged: after a failed record-engine attempt, `trajlab.exp2.chain.ingest` builds that attempt's calls, per-call deltas, and final message into the chain's store, and the next attempt's query server reads the store with attempts 0 to t-1.
   A chain's store holds only its own attempts.
-- **Prompts.** `trajlab.exp2.prompt.prefix` unchanged: control's four protocol steps, and for record-engine the `v4` text (ADR-0023, amendment item 7).
+- **Prompts.** `trajlab.exp2.prompt.prefix` unchanged: control's four protocol steps, and for record-engine the `v4` text (ADR-0024, amendment item 7).
   The note counts the earlier attempts in both arms ("k previous attempt(s) ... FAILED"), so the arms differ only in the record.
 - **The given queries are not changed.** They were written for one earlier attempt and return every attempt's rows.
   Depth is the one factor this run changes; where the given queries hit the row cap or Claude Code's output cap is measured per attempt (`row_capped`, `cut_reads`), and whether agents filter by attempt (`attempt_filters`).

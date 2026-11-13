@@ -52,7 +52,7 @@ NUL byte, and decodes as UTF-8; a symlink target is always text. A version witho
 absent path, a directory, or another kind) counts as text, so a row is text when each of its
 file or symlink versions is, and `is_text` is null when it has neither (a directory or another
 kind on both sides). A text row whose content changed gets a unified diff whose context is the
-whole file (ADR-0023 as amended 2026-11-04): one hunk holding every line of both versions, an
+whole file (ADR-0024 as amended 2026-11-04): one hunk holding every line of both versions, an
 unchanged line once with " ", a removed line with "-", an added line with "+", so its " " and "+"
 lines are the later version and its " " and "-" lines the earlier (`hunk_versions`). Headers are
 `--- a<path>` and `+++ b<path>` (`/dev/null` for a side without content), lines are split on

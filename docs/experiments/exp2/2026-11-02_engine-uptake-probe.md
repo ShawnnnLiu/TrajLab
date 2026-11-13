@@ -106,8 +106,8 @@ Cost, API-equivalent on the subscription: $11.87 for the 13 retries and the 5 lo
 
 ## Whole files
 
-The owner chose recommendation 1 (the same text for both record arms) and asked for each file's whole version beside its diff, tested on one task first; ADR-0023 records both.
-`v2` is ADR-0023's text and store; `v2-nofile` is the same text with every mention of whole files taken out and `text_after` emptied in the chain store (the bundle then has no `versions/`).
+The owner chose recommendation 1 (the same text for both record arms) and asked for each file's whole version beside its diff, tested on one task first; ADR-0024 records both.
+`v2` is ADR-0024's text and store; `v2-nofile` is the same text with every mention of whole files taken out and `text_after` emptied in the chain store (the bundle then has no `versions/`).
 On 2026-11-03, before any attempt ran, the engine's file query was made one query returning `hunk` and `text_after` in the same rows, so a `v2` engine agent that reads a file's diffs gets the whole file with each one; `v2-nofile` drops the column.
 The two roots' changed files, from the stores:
 
@@ -140,7 +140,7 @@ The script starts the probe watcher (`--every 1000 --gate none`) if none is runn
 ### Results on mvcc (2026-11-03)
 
 - Command: `bash scripts/2026-11-02_exp2_whole_files.sh mvcc 5`, from 05:15:57Z to 07:41:25Z.
-- Code: branch `sl/exp2-engine-uptake` at 879e75d with ADR-0023's uncommitted changes, including the one-query file question above.
+- Code: branch `sl/exp2-engine-uptake` at 879e75d with ADR-0024's uncommitted changes, including the one-query file question above.
 - Machine: the development Mac, Docker 29.8.0, amd64 under emulation; agent settings as in Setup.
 - Root: `mvcc-lsm-compaction__CsiwPnL`, k = 1, from `corpus/stores/mvcc-local-v5`.
 - Counts: 20 attempts, 20 finished, no infra error, no hook timeout (every `.req` acked), no usage-limit error.
@@ -200,7 +200,7 @@ What the next whole-file test should change:
 Run to separate the shared text from the record: the same root, with control's prompt, which has no record.
 
 - Command: `caffeinate -dimsu bash scripts/2026-11-02_exp2_whole_files.sh mvcc 10 control`, from 01:40:52Z to 02:36:46Z on 2026-11-05 (UTC), beside one watcher started first (`uv run trajlab watch corpus/exp2/probe-jobs --every 1000 --gate none`).
-- Code: branch `sl/exp2-engine-uptake` at 7a4001a (ADR-0023, committed), with two script edits not yet committed: the probe's `baseline` variant gives control's text only (`prompt.prefix("control", k)`, 786 bytes at k = 1, unchanged since `tb40-exp2`) and refuses the record arms, whose `tb40-exp2` text is at 879e75d; and the launcher's `control` mode, which names attempts `probe-mv-control-<rep>`.
+- Code: branch `sl/exp2-engine-uptake` at 7a4001a (ADR-0024, committed), with two script edits not yet committed: the probe's `baseline` variant gives control's text only (`prompt.prefix("control", k)`, 786 bytes at k = 1, unchanged since `tb40-exp2`) and refuses the record arms, whose `tb40-exp2` text is at 879e75d; and the launcher's `control` mode, which names attempts `probe-mv-control-<rep>`.
 - Machine: the development Mac, Docker 29.8.0, amd64 under emulation, on AC power and kept awake (`pmset -g log` shows no sleep in the window); agent settings as in Setup.
 - Root: `mvcc-lsm-compaction__CsiwPnL`, k = 1, its instruction from `corpus/stores/mvcc-local-v5`.
 - Counts: 10 attempts, 10 finished, no infra error, every `.req` acked (46 of 46, no `.timeout`), no usage-limit error.
@@ -238,7 +238,7 @@ Run to separate the shared text from the record: the same root, with control's p
 
 ## Whole-file hunks (2026-11-04)
 
-The mvcc run showed that whole files offered in a separate place go unread; ADR-0023's amendment of 2026-11-04 puts them inside the diffs instead.
+The mvcc run showed that whole files offered in a separate place go unread; ADR-0024's amendment of 2026-11-04 puts them inside the diffs instead.
 Every text hunk now holds the whole file with the changed lines marked, in `deltas.hunk` and in the bundle's `.diff` files, and `text_after` and `versions/` are gone (store schema 6).
 The record arms' text moves the file question into the diagnosis (questions 1 to 4 of 5), its queries run as written, no given query cuts a hunk, and each access paragraph says how to read past Claude Code's 30,000-character output cap.
 
@@ -365,7 +365,7 @@ The owner asked for a slightly wider scope and more trials, on the Mac and with 
 
 ### Text change (`v4`)
 
-ADR-0023's amendment, item 7: step 1 asks for the diagnosis "Before you change any file" (not "before your first command in the environment", which a record-files agent's first read of its record already is), and question 3's record-files answer starts with the `.diff` files and the command that lists them (`find /logs/agent/record/deltas -name '*.diff'`).
+ADR-0024's amendment, item 7: step 1 asks for the diagnosis "Before you change any file" (not "before your first command in the environment", which a record-files agent's first read of its record already is), and question 3's record-files answer starts with the `.diff` files and the command that lists them (`find /logs/agent/record/deltas -name '*.diff'`).
 The record-engine prefix is 5,793 bytes and record-files' 4,711 (k = 1); control's is unchanged (786).
 The probe's `check` passed `v4` on the three mvcc roots and the vigenere root: no leak, every query runs, every file named is in the bundle.
 
@@ -448,7 +448,7 @@ What a pilot preregistration on such roots needs:
 - the corpus store rebuilt at schema 6 from the corpus trial dirs and their kept checkpoint images (`trajlab store build corpus/jobs/tb40-sonnet-v4 --store <new store>`), since this code refuses the schema 4 store;
 - the sample: the roots the script picks, each with a complete chain, plus any short-record tasks chosen with them;
 - N = 1 (`--budget 1`) in all three arms;
-- the branch with ADR-0023's amendment committed, since the preregistration records the repo sha and `exp2 run` refuses a preregistration file that is not committed at HEAD;
+- the branch with ADR-0024's amendment committed, since the preregistration records the repo sha and `exp2 run` refuses a preregistration file that is not committed at HEAD;
 - `trajlab exp2 prereg --run <name> --corpus-store <new store> --budget 1 --test <test>`, which fixes the new prefix hashes (record-engine 5,810 bytes, record-files 4,632, control 786 at k = 1), the schema text's hash, the derived id, and the query caps, and refuses a prompt that leaks; then `trajlab exp2 check`.
 
 Starting the host is the owner's call.

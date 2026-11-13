@@ -250,7 +250,7 @@ def test_a_modified_base_file_diffs_against_the_base(tmp_path: Path) -> None:
 
 
 def test_a_hunk_holds_the_whole_file_whatever_it_changes(tmp_path: Path) -> None:
-    """ADR-0023 as amended 2026-11-04: one hunk, every line, the changed ones marked."""
+    """ADR-0024 as amended 2026-11-04: one hunk, every line, the changed ones marked."""
     before = "".join(f"line {i}\n" for i in range(1, 41))
     after = before.replace("line 20\n", "line twenty\n")
     tops = {

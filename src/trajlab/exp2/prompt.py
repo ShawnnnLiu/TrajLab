@@ -1,4 +1,4 @@
-"""The retry prompt (ADR-0016 item 1; ADR-0022; the record arms' text, ADR-0023).
+"""The retry prompt (ADR-0016 item 1; ADR-0022; the record arms' text, ADR-0024).
 
 An attempt's agent receives, in order and apart by blank lines, the note, the arm's text, and the
 task instruction. `RepairClaudeCode` pipes `<repair_note>\\n\\n<instruction>` into Claude Code, so
@@ -7,7 +7,7 @@ the loop passes everything before the instruction as the agent's `repair_note` (
 run.
 
 - `control` gets round 2's four protocol steps (`PROTOCOL_STEPS`), as in `tb40-exp2`.
-- The two record arms get one text (ADR-0023): what the record holds (`RECORD_INTRO`), how to
+- The two record arms get one text (ADR-0024): what the record holds (`RECORD_INTRO`), how to
   reach it (the arm's only own paragraph: `ENGINE_ACCESS` or `FILES_ACCESS`, each ending with how
   to read a long value past the shell's output cap, `OUTPUT_CAP`), protocol steps that work from
   the record (`RECORD_STEPS`), the failed attempts' conclusions as claims to check (`CLAIMS`), a
@@ -42,7 +42,7 @@ QUERY_COMMAND = f"/logs/agent/{QUERY_TOOL_RELPATH}"
 
 
 class PromptError(ValueError):
-    """The retry prompt cannot be rendered as ADR-0016 and ADR-0023 define it."""
+    """The retry prompt cannot be rendered as ADR-0016 and ADR-0024 define it."""
 
 
 def protocol_steps(protocol: str = REPAIR_PROTOCOL) -> str:
@@ -59,7 +59,7 @@ def protocol_steps(protocol: str = REPAIR_PROTOCOL) -> str:
 # control's steps.
 PROTOCOL_STEPS = protocol_steps()
 
-# -- the record arms (ADR-0023) ---------------------------------------------------------------
+# -- the record arms (ADR-0024) ---------------------------------------------------------------
 
 RECORD_INTRO = (
     "You are in a fresh environment: none of the earlier work is in it. What the earlier "
@@ -72,7 +72,7 @@ RECORD_INTRO = (
 # Claude Code 2.1.278 (`trajlab.capture.pins.CLAUDE_CODE_VERSION`) shows at most this many
 # characters of a Bash command's output (its `bashOutputMaxChars` default, 30000); past it, the
 # agent sees the first 2,000 bytes and the path of a file holding the whole output. Read from the
-# installed binary on 2026-11-04 (ADR-0023, amendment of 2026-11-04).
+# installed binary on 2026-11-04 (ADR-0024, amendment of 2026-11-04).
 BASH_OUTPUT_CHARS = 30_000
 # A piece of a long value that fits under the cap with room for JSON escaping and other columns.
 PAGE_CHARS = 20_000

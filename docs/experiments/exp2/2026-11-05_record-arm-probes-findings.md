@@ -4,7 +4,7 @@ A summary and reading of the Exp 2 probes run on the development Mac between the
 Unlike the run note, this document interprets.
 Where each mvcc attempt succeeded or stopped, attempt by attempt, is in `2026-11-05_repair-anatomy.md`.
 The facts it rests on, with commands, per-attempt tables, and report files, are in `2026-11-02_engine-uptake-probe.md`.
-The decisions the probes led to are ADR-0023 and its amendment of 2026-11-04.
+The decisions the probes led to are ADR-0024 and its amendment of 2026-11-04.
 
 ## Why the probes ran
 
@@ -43,10 +43,10 @@ Every engine attempt queried in its first or second call, and none of the first 
 Query counts stay at 2 to 5 whatever the prompt says, and on these short records two or three queries return the whole record.
 So the interim result is not explained by agents failing to use the engine.
 
-**The full run's prompt tilted against the engine arm, and ADR-0023 fixed that.**
+**The full run's prompt tilted against the engine arm, and ADR-0024 fixed that.**
 The old protocol said to diagnose "from the files in the environment", which is the record only for record-files.
 The engine prompt also carried a 14 KB schema text inline.
-ADR-0023 gives both record arms the same text except the medium: a ready query in record-engine, a file pointer in record-files.
+ADR-0024 gives both record arms the same text except the medium: a ready query in record-engine, a file pointer in record-files.
 
 **Whole files reach agents only inside the diffs they already read.**
 - Offered in a separate place (`text_after`, the bundle's `versions/`), whole files were read by 1 of 10 agents.
@@ -108,6 +108,6 @@ So the step is not a stable measure across arms as written.
 
 ## Next experiment
 
-A pilot under a new run name with its own preregistration: the corpus store rebuilt at schema 6, roots picked by `scripts/2026-11-04_large_rewrite_roots.py` plus short-record tasks, N = 1 in all three arms, on the branch with ADR-0023's amendment committed.
+A pilot under a new run name with its own preregistration: the corpus store rebuilt at schema 6, roots picked by `scripts/2026-11-04_large_rewrite_roots.py` plus short-record tasks, N = 1 in all three arms, on the branch with ADR-0024's amendment committed.
 The run note's last section lists everything the preregistration needs.
 It resolves whether whole-file history helps on roots where a file is the evidence, which neither local root can show.

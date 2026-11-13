@@ -1,6 +1,6 @@
 """Check stores built with whole-file hunks (schema 6) against the same trials' schema 5 stores.
 
-ADR-0023 as amended on 2026-11-04 makes every delta row's hunk a unified diff whose context is the
+ADR-0024 as amended on 2026-11-04 makes every delta row's hunk a unified diff whose context is the
 whole file. For each pair of stores built from the same trial dirs and checkpoint images (the
 schema 6 store first, then the schema 5 one), this reads `deltas` from both `record.duckdb`
 files, read-only, and checks every row:

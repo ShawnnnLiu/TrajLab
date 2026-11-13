@@ -1,5 +1,5 @@
 """List failed first attempts that rewrote a large text file several times: roots for a test of
-whole-file hunks (ADR-0023, amendment of 2026-11-04).
+whole-file hunks (ADR-0024, amendment of 2026-11-04).
 
 Prepared on 2026-11-04 for the capture host, which holds `tb40-sonnet-v4`'s corpus store and
 checkpoint images; not yet run there (the host is stopped, and starting it is the owner's call).

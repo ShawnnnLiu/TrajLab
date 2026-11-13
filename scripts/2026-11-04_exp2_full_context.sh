@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Manual run (needs Docker and a Claude login; costs subscription usage): the comparison ADR-0023's
+# Manual run (needs Docker and a Claude login; costs subscription usage): the comparison ADR-0024's
 # amendment of 2026-11-04 asks for, hunks holding the whole file (`v3`) against the same hunks cut
 # to 3 lines of context (`v3-ctx3`), in both record arms, on one root, through
 # scripts/2026-11-02_exp2_engine_probe.py. One attempt at a time, interleaved (rep, arm, variant)

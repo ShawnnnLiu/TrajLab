@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Manual run (needs Docker and a Claude login; costs subscription usage): the ADR-0023 item 6
+# Manual run (needs Docker and a Claude login; costs subscription usage): the ADR-0024 item 6
 # comparison of whole files, `v2` against `v2-nofile`, in both record arms, on one task, through
 # scripts/2026-11-02_exp2_engine_probe.py. One attempt at a time, interleaved (rep, arm, variant)
 # so the four cells stay balanced if it stops early. Safe to run again: an attempt that finished

@@ -13,19 +13,19 @@ Variants (`VARIANTS`; the run note `docs/experiments/exp2/2026-11-02_engine-upta
 describes each): `baseline` (the note `tb40-exp2` ran), `guided`, `guided2`, `guided3`, and
 `guided4` (record-engine), and `guided4-files` (record-files). `guided2` to `guided4` first put
 the schema text's descriptions on the chain store as DuckDB comments (`comment_store`). Those
-five were run under store schema 4, before ADR-0023's code. Since ADR-0023, `baseline` is
+five were run under store schema 4, before ADR-0024's code. Since ADR-0024, `baseline` is
 control's text only (`prompt.prefix("control", k)`, unchanged since `tb40-exp2`) and refuses the
-record arms, whose `tb40-exp2` text ADR-0023 retired (it is at 879e75d).
+record arms, whose `tb40-exp2` text ADR-0024 retired (it is at 879e75d).
 
-Under ADR-0023's code (store schema 5): `v2`, `trajlab.exp2.prompt.prefix` itself, for either
+Under ADR-0024's code (store schema 5): `v2`, `trajlab.exp2.prompt.prefix` itself, for either
 record arm (the shared text, whole files included); and `v2-nofile`, the same text with every
 mention of whole files taken out (`without_whole_files`) and the chain store's `text_after`
 emptied before the attempt (`drop_whole_files`), so the bundle has no `versions/` either. The two
-differ only in the whole files, which is the comparison ADR-0023 item 2 asks for. A `v2-nofile`
+differ only in the whole files, which is the comparison ADR-0024 item 2 asks for. A `v2-nofile`
 store still has the empty column and its description, in both arms. Both ran under store
 schema 5 and are at 7a4001a; schema 6 has no `text_after`, so they refuse to run here.
 
-Under ADR-0023 as amended on 2026-11-04 (store schema 6, every hunk holding the whole file): `v3`,
+Under ADR-0024 as amended on 2026-11-04 (store schema 6, every hunk holding the whole file): `v3`,
 `trajlab.exp2.prompt.prefix` itself, for either record arm; and `v3-ctx3`, the same text with
 every mention of whole-file diffs taken out (`with_3_line_hunks`) and every hunk of the chain
 store cut to 3 lines of context (`narrow_store`, with `trajlab.store.reconcile.narrow`, which
@@ -35,7 +35,7 @@ differ only in how much of each file a diff shows. Both ran on 2026-11-05 (02:39
 the text before the change below; each attempt's prompt is in its `<jobs>/_exp2-probe/<name>/
 prompt.txt`, and both now refuse to run.
 
-After that run (2026-11-05, ADR-0023's amendment, item 7): `v4`, `trajlab.exp2.prompt.prefix`
+After that run (2026-11-05, ADR-0024's amendment, item 7): `v4`, `trajlab.exp2.prompt.prefix`
 again, whose step 1 asks for the diagnosis before any file is changed (not before the first
 command, which a record-files agent's first read of the record already is) and whose question 3
 points record-files agents at the `.diff` files first, with a command that lists them.
@@ -100,14 +100,14 @@ PROBE_DIRNAME = "_exp2-probe"
 
 
 def baseline(arm: Exp2Arm, k: int, store: Path) -> str:
-    """control's note, as `tb40-exp2` ran it (ADR-0022 item 2); ADR-0023 left it unchanged.
+    """control's note, as `tb40-exp2` ran it (ADR-0022 item 2); ADR-0024 left it unchanged.
 
     The record arms' `tb40-exp2` text (one sentence and, for record-engine, the schema text) was
-    retired by ADR-0023; it is `trajlab.exp2.prompt.prefix` at 879e75d, which is where the
+    retired by ADR-0024; it is `trajlab.exp2.prompt.prefix` at 879e75d, which is where the
     run note's record-arm `baseline` attempts ran."""
     if arm != "control":
         raise SystemExit(
-            f"baseline is control's text now; {arm}'s tb40-exp2 text was retired by ADR-0023 "
+            f"baseline is control's text now; {arm}'s tb40-exp2 text was retired by ADR-0024 "
             "(it is at 879e75d)"
         )
     return prompt.prefix("control", k)
@@ -438,7 +438,7 @@ def retired_v2(arm: Exp2Arm, k: int, store: Path) -> str:
 
 
 def retired_v3(arm: Exp2Arm, k: int, store: Path) -> str:
-    """`v3` and `v3-ctx3` ran with the text before item 7 of ADR-0023's amendment."""
+    """`v3` and `v3-ctx3` ran with the text before item 7 of ADR-0024's amendment."""
     raise SystemExit(
         "v3 and v3-ctx3 ran on 2026-11-05 with the text before the item 7 change; their prompts "
         "are in each attempt's _exp2-probe/<name>/prompt.txt"

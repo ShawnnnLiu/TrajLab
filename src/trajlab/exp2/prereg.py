@@ -6,7 +6,7 @@ loop: the sample with each exclusion's reason, N, the arms, the primary comparis
 test, the store's schema version and derived id, the sha256 of the protocol steps and of every
 prompt prefix (arm by number of prior attempts; the whole prompt is a prefix and the root
 failure's own instruction, whose sha256 is listed per failure) and of the record's schema text
-(the descriptions both record arms can read, ADR-0023), the hooks file, the stop hook
+(the descriptions both record arms can read, ADR-0024), the hooks file, the stop hook
 (none, ADR-0022), the query tool's caps, the model and its settings, and the repo sha.
 
 `exp2 run` refuses to start a record-engine attempt unless the file, as it is on disk, is the

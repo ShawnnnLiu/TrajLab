@@ -4,7 +4,7 @@
 `store_meta`, and the derived views) with each column's type, from DuckDB's catalog, and its
 description, from the row models in `trajlab.contracts` or the derived views' specs. The
 `record-files` README is this text; the same descriptions are on `record.duckdb` itself as
-DuckDB comments (`comment_statements`, ADR-0023), which a `record-engine` agent reads with
+DuckDB comments (`comment_statements`, ADR-0024), which a `record-engine` agent reads with
 `duckdb_columns()`, so the two arms are told the same about the record. A relation or column
 without a description is an error, not a gap in the text.
 """

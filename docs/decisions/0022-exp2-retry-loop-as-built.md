@@ -158,4 +158,4 @@ Settled by the owner on 2026-10-28, before the full run (`preregistration.md`):
 ## Amendment (2026-11-02)
 
 Item 2 holds for `tb40-exp2` only.
-For runs after it, ADR-0023 gives both record arms one text but for how the record is reached, keeps `control`'s steps, moves the record's descriptions onto the store as comments, and adds each file's whole later version to the record (store schema 5).
+For runs after it, ADR-0024 gives both record arms one text but for how the record is reached, keeps `control`'s steps, moves the record's descriptions onto the store as comments, and adds each file's whole later version to the record (store schema 5).

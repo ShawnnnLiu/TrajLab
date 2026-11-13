@@ -17,7 +17,7 @@ Every table's columns are, in order, the fields of its row model in `trajlab.con
 test keeps them equal. A shape change bumps `SCHEMA_VERSION` and needs an ADR. The derived views
 are created with the tables and versioned apart from them (`StoreMeta.derived`): `replace_views`
 swaps a store's views for this code's without touching a row (ADR-0018). Every relation and column
-of `record.duckdb` carries its description as a DuckDB comment (ADR-0023), put there when the file
+of `record.duckdb` carries its description as a DuckDB comment (ADR-0024), put there when the file
 is created and again whenever its views are replaced.
 """
 

@@ -15,7 +15,7 @@ Both tasks grade a number against a threshold, so this note compares arms on tha
 | freecad retries | `corpus/exp2/probe-jobs/probe-night-fp-*` | 30: 10 per arm, roots alternating by rep | 0 | $3.11 |
 | vf2 retries | `corpus/exp2/probe-jobs/probe-night-vf-*` | 30: 10 per arm, roots alternating by rep | 1 (record-files) | $22.95 |
 
-Settings: Claude Sonnet 5.5 at medium effort, Claude Code 2.1.278, amd64 under emulation, the `v4` record text (ADR-0023 amendment, item 7) for the record arms and the baseline text for control, k = 1 (one earlier attempt), stores of schema 6 (whole-file hunks).
+Settings: Claude Sonnet 5.5 at medium effort, Claude Code 2.1.278, amd64 under emulation, the `v4` record text (ADR-0024 amendment, item 7) for the record arms and the baseline text for control, k = 1 (one earlier attempt), stores of schema 6 (whole-file hunks).
 First attempts ran with full capture (`trajlab watch --every 1 --gate change`), retries with a stop checkpoint only (`--every 1000 --gate none`).
 Two trial containers ran at a time.
 Every trial ran on the subscription: all 64 `claude-code.txt` streams report `"apiKeySource":"none"`.
