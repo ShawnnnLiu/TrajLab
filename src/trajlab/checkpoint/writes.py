@@ -107,6 +107,12 @@ MAX_ANCESTRY = 32
 CLOCK_TICKS = os.sysconf("SC_CLK_TCK")
 
 
+# Process start times in /proc count from boot, sleep included: CLOCK_BOOTTIME. It exists only on
+# Linux, where the recorder runs; elsewhere (the tests' fake /proc on a Mac) the monotonic clock
+# stands in, which is the same clock until the host first sleeps.
+BOOT_CLOCK = getattr(time, "CLOCK_BOOTTIME", time.CLOCK_MONOTONIC)
+
+
 class RecorderLockedError(RuntimeError):
     """Another recorder already holds this jobs dir."""
 
@@ -319,7 +325,7 @@ class Processes:
     def _boot_time(self) -> float:
         now = time.monotonic()
         if now - self._boot_read > 60:
-            self._boot = time.time() - time.clock_gettime(time.CLOCK_BOOTTIME)
+            self._boot = time.time() - time.clock_gettime(BOOT_CLOCK)
             self._boot_read = now
         return self._boot
 

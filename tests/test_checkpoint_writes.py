@@ -25,6 +25,7 @@ from trajlab.checkpoint.fanotify import (
 )
 from trajlab.checkpoint.watcher import TrialIdentity
 from trajlab.checkpoint.writes import (
+    BOOT_CLOCK,
     CLOCK_TICKS,
     Processes,
     Recorder,
@@ -264,7 +265,7 @@ def test_start_times_are_wall_clock_times(tmp_path: Path) -> None:
     container(proc)
     reading = Processes(tmp_path).reading(CHILD)
     assert reading.process is not None
-    boot = time.time() - time.clock_gettime(time.CLOCK_BOOTTIME)
+    boot = time.time() - time.clock_gettime(BOOT_CLOCK)
     assert abs(reading.process.started_at.timestamp() - (boot + 41 / CLOCK_TICKS)) < 1
 
 
