@@ -2,6 +2,7 @@
 # a directory, or a symlink to shared storage (/srv/trajlab/jobs on the Linux server)
 corpus/jobs
 corpus/stores/
+corpus/exports/
 .env
 *.jsonl
 !tests/fixtures/**/*.jsonl
@@ -23,3 +24,8 @@ notebooks/**/*.ipynb_checkpoints
 harbor-ref/
 # hand labels from `trajlab trace` (ADR-0015 §8); export them from the site
 corpus/labels/
+
+# Claude Code session state (skills in .claude/skills/ are committed)
+.claude/worktrees/
+.claude/settings.local.json
+.claude/scheduled_tasks.lock

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run pytest)",
+      "Bash(uv run pytest *)",
+      "Bash(docker stats *)",
+      "Bash(shasum *)",
+      "Bash(docker image inspect *)",
+      "Bash(uv run ruff check *)",
+      "Bash(uv run ruff format --check *)",
+      "Bash(make test)",
+      "Bash(make lint)"
+    ]
+  }
+}
