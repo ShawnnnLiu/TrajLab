@@ -1,0 +1,118 @@
+{
+  "totals": {
+    "wal-recovery-ordering/control": {
+      "attempts": 41,
+      "repeats": 35,
+      "same_answer": 0
+    },
+    "wal-recovery-ordering/record-engine": {
+      "attempts": 19,
+      "repeats": 11,
+      "same_answer": 0
+    }
+  },
+  "chains": [
+    {
+      "task": "wal-recovery-ordering",
+      "root": "wal-recovery-ordering__yTJbbKx",
+      "arm": "control",
+      "repeats": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "task": "wal-recovery-ordering",
+      "root": "wal-recovery-ordering__yTJbbKx",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "task": "wal-recovery-ordering",
+      "root": "wal-recovery-ordering__Us63h7N",
+      "arm": "control",
+      "repeats": [
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "wal-recovery-ordering",
+      "root": "wal-recovery-ordering__Us63h7N",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "task": "wal-recovery-ordering",
+      "root": "wal-recovery-ordering__jQ8pDsF",
+      "arm": "control",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "task": "wal-recovery-ordering",
+      "root": "wal-recovery-ordering__jQ8pDsF",
+      "arm": "record-engine",
+      "repeats": [
+        0,
+        0
+      ]
+    }
+  ]
+}

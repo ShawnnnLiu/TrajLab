@@ -1,0 +1,30 @@
+{
+  "budget": 20,
+  "arms": [
+    "control",
+    "record-engine"
+  ],
+  "label": "none: replication probe of 2026-11-16 under ADR-0025, roots3 (scripts/2026-11-10_exp2_passk_chains.py)",
+  "lanes": [
+    {
+      "run": "roots3-bs",
+      "store": "corpus/stores/bun-sourcemap-leak-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v1",
+      "trials": [
+        "bun-sourcemap-leak__AWGyw3U",
+        "bun-sourcemap-leak__6aw2V5e",
+        "bun-sourcemap-leak__HzphLyv"
+      ]
+    },
+    {
+      "run": "roots3-fb",
+      "store": "corpus/stores/foodstuff-beta-activity-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v3",
+      "trials": [
+        "foodstuff-beta-activity__s2hWQjo",
+        "foodstuff-beta-activity__p8WVqXp",
+        "foodstuff-beta-activity__KsVCQH6"
+      ]
+    }
+  ]
+}

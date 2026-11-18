@@ -29,3 +29,9 @@ corpus/labels/
 .claude/worktrees/
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
+
+# Exp 2 chain runs: trial data, chain stores, and logs stay out; plan, report, repeats, and roots
+# JSON at the top of each run directory are committed
+corpus/exp2/*-jobs/
+corpus/exp2/*/*/
+corpus/exp2/*/status.json

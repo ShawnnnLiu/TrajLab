@@ -1,0 +1,88 @@
+{
+  "embedding-drift-monitor": {
+    "median": 11.0,
+    "roots": [],
+    "attempts": [
+      {
+        "trial": "embedding-drift-monitor__29MLQm8",
+        "score": 11.0,
+        "reward": 1.0,
+        "started_at": "2026-11-18T04:51:54.805519Z",
+        "exception": null
+      },
+      {
+        "trial": "embedding-drift-monitor__7oStctu",
+        "score": 11.0,
+        "reward": 1.0,
+        "started_at": "2026-11-18T04:41:27.446565Z",
+        "exception": null
+      },
+      {
+        "trial": "embedding-drift-monitor__NgUQvrz",
+        "score": 11.0,
+        "reward": 1.0,
+        "started_at": "2026-11-18T04:47:10.162948Z",
+        "exception": null
+      },
+      {
+        "trial": "embedding-drift-monitor__XoD9NCD",
+        "score": 11.0,
+        "reward": 1.0,
+        "started_at": "2026-11-18T04:35:21.288096Z",
+        "exception": null
+      },
+      {
+        "trial": "embedding-drift-monitor__d8SspGi",
+        "score": 11.0,
+        "reward": 1.0,
+        "started_at": "2026-11-18T04:29:02.768348Z",
+        "exception": null
+      }
+    ]
+  },
+  "atrx-vep-crispr": {
+    "median": 13.0,
+    "roots": [
+      "atrx-vep-crispr__V525sES",
+      "atrx-vep-crispr__2rQmNqC",
+      "atrx-vep-crispr__6zUStrp"
+    ],
+    "attempts": [
+      {
+        "trial": "atrx-vep-crispr__2rQmNqC",
+        "score": 14.0,
+        "reward": 0,
+        "started_at": "2026-11-18T04:29:02.899309Z",
+        "exception": null
+      },
+      {
+        "trial": "atrx-vep-crispr__6zUStrp",
+        "score": 14.0,
+        "reward": 0,
+        "started_at": "2026-11-18T04:39:17.525032Z",
+        "exception": null
+      },
+      {
+        "trial": "atrx-vep-crispr__FnXuYNp",
+        "score": 11.0,
+        "reward": 0,
+        "started_at": "2026-11-18T04:55:50.672680Z",
+        "exception": null
+      },
+      {
+        "trial": "atrx-vep-crispr__MiZk9Qc",
+        "score": 6.0,
+        "reward": 0,
+        "started_at": "2026-11-18T04:51:16.076790Z",
+        "exception": null
+      },
+      {
+        "trial": "atrx-vep-crispr__V525sES",
+        "score": 13.0,
+        "reward": 0,
+        "started_at": "2026-11-18T04:44:02.238937Z",
+        "exception": null
+      }
+    ]
+  }
+}

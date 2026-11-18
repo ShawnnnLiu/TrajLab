@@ -1,0 +1,152 @@
+{
+  "corpus_id": "tb40-passk-fresh-v3",
+  "created_at": "2026-11-16T09:56:41.610803Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "f90906e25bb4b2bcbdab4cc8583c021883820b69",
+  "repo_dirty": true,
+  "config_path": "configs/harbor/tb40-passk-fresh-v3.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 5,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 0.5,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "writes_recorded": false,
+  "tasks": [
+    {
+      "name": "terminal-bench/foodstuff-beta-activity",
+      "digest": "sha256:52adca169e97e15fe8692986470b6556f478e7348a37c58739a5bdb3f02cc45a"
+    },
+    {
+      "name": "terminal-bench/pretrain-shard-corruption",
+      "digest": "sha256:0f17568e65b9e8b79480e474a457811a65815cdaf7272660efffd1bc690021a0"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb40-passk-fresh-v3",
+      "job_id": "6c58dab4-b9c2-4491-a079-d1452a60551e",
+      "job_config": {
+        "job_name": "tb40-passk-fresh-v3",
+        "jobs_dir": "corpus/jobs",
+        "n_attempts": 5,
+        "agent_timeout_multiplier": 0.5,
+        "n_concurrent_trials": 2,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "sha256:39d9f44b40420cde8fdcc087579c0d72a7e14fa3656d603c3f0d22fb35e27732",
+            "task_names": [
+              "terminal-bench/foodstuff-beta-activity",
+              "terminal-bench/pretrain-shard-corruption"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "5ae2becd-97a9-4d47-a20c-1369e6df2f79",
+          "trial_name": "foodstuff-beta-activity__KsVCQH6",
+          "task_name": "terminal-bench/foodstuff-beta-activity",
+          "job_id": "6c58dab4-b9c2-4491-a079-d1452a60551e",
+          "job_dir": "tb40-passk-fresh-v3",
+          "claude_session_id": "3dfc9dfa-78b8-4d31-bf3d-4ff5c23caa04"
+        },
+        {
+          "trial_id": "81fee32e-01c4-4f4b-9df0-79376f506c6f",
+          "trial_name": "foodstuff-beta-activity__mRiQErG",
+          "task_name": "terminal-bench/foodstuff-beta-activity",
+          "job_id": "6c58dab4-b9c2-4491-a079-d1452a60551e",
+          "job_dir": "tb40-passk-fresh-v3",
+          "claude_session_id": "6dbd3623-2d18-48c2-8794-25e17815cb4c"
+        },
+        {
+          "trial_id": "531da371-b5ba-4847-ac1d-932c1b8633aa",
+          "trial_name": "foodstuff-beta-activity__p8WVqXp",
+          "task_name": "terminal-bench/foodstuff-beta-activity",
+          "job_id": "6c58dab4-b9c2-4491-a079-d1452a60551e",
+          "job_dir": "tb40-passk-fresh-v3",
+          "claude_session_id": "9d392536-f5e0-4937-b111-c6ddd619a49c"
+        },
+        {
+          "trial_id": "50e06bb3-5249-4958-bd47-3bbb1f1a8332",
+          "trial_name": "foodstuff-beta-activity__s2hWQjo",
+          "task_name": "terminal-bench/foodstuff-beta-activity",
+          "job_id": "6c58dab4-b9c2-4491-a079-d1452a60551e",
+          "job_dir": "tb40-passk-fresh-v3",
+          "claude_session_id": "50a6d2fb-7d84-4612-9e34-aa80e02033fc"
+        },
+        {
+          "trial_id": "3f895520-f0b8-46b7-8620-fe56457c498f",
+          "trial_name": "foodstuff-beta-activity__wrTURgU",
+          "task_name": "terminal-bench/foodstuff-beta-activity",
+          "job_id": "6c58dab4-b9c2-4491-a079-d1452a60551e",
+          "job_dir": "tb40-passk-fresh-v3",
+          "claude_session_id": "c5a1149a-5032-4d74-9f55-d00c39489e8a"
+        },
+        {
+          "trial_id": "8a2fae0c-d989-43b7-8288-51f20df29c68",
+          "trial_name": "pretrain-shard-corruption__AJTvzWe",
+          "task_name": "terminal-bench/pretrain-shard-corruption",
+          "job_id": "6c58dab4-b9c2-4491-a079-d1452a60551e",
+          "job_dir": "tb40-passk-fresh-v3",
+          "claude_session_id": "cc4ea7e4-9e79-48c2-b89f-7c74b910d0d1"
+        },
+        {
+          "trial_id": "12c691f8-f6d6-4c47-8679-d81dc33cc261",
+          "trial_name": "pretrain-shard-corruption__JBeuLeX",
+          "task_name": "terminal-bench/pretrain-shard-corruption",
+          "job_id": "6c58dab4-b9c2-4491-a079-d1452a60551e",
+          "job_dir": "tb40-passk-fresh-v3",
+          "claude_session_id": "85d3ef32-f943-4b0e-b292-ba476189df56"
+        },
+        {
+          "trial_id": "8f756672-4bdb-4699-80e0-f9128c1a12cc",
+          "trial_name": "pretrain-shard-corruption__THFz4Gk",
+          "task_name": "terminal-bench/pretrain-shard-corruption",
+          "job_id": "6c58dab4-b9c2-4491-a079-d1452a60551e",
+          "job_dir": "tb40-passk-fresh-v3",
+          "claude_session_id": "2859183f-b2f4-43e4-ae87-57931f577f91"
+        },
+        {
+          "trial_id": "9daf9d17-49ff-4e9b-b04d-2a29384e92bb",
+          "trial_name": "pretrain-shard-corruption__UGW3fmV",
+          "task_name": "terminal-bench/pretrain-shard-corruption",
+          "job_id": "6c58dab4-b9c2-4491-a079-d1452a60551e",
+          "job_dir": "tb40-passk-fresh-v3",
+          "claude_session_id": "a02155e6-02f8-47c5-b748-ae410ccd0ebb"
+        },
+        {
+          "trial_id": "c2fa52ca-884e-41fd-935d-d8b8e9b7b3e5",
+          "trial_name": "pretrain-shard-corruption__ebk7Cyu",
+          "task_name": "terminal-bench/pretrain-shard-corruption",
+          "job_id": "6c58dab4-b9c2-4491-a079-d1452a60551e",
+          "job_dir": "tb40-passk-fresh-v3",
+          "claude_session_id": "01e58077-988d-4c3a-94b5-d747c9c8a643"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}

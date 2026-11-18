@@ -1,0 +1,4200 @@
+{
+ "budget": 20,
+ "api_key_sources": [
+  "none"
+ ],
+ "curves": [
+  {
+   "task": "bun-sourcemap-leak",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "bun-sourcemap-leak",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "foodstuff-beta-activity",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [
+    1,
+    5
+   ],
+   "censored_at": [
+    20
+   ],
+   "attempts_run": 26,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 2,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "foodstuff-beta-activity",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [
+    14,
+    16
+   ],
+   "censored_at": [
+    20
+   ],
+   "attempts_run": 50,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 2,
+     "known": 3
+    }
+   ]
+  }
+ ],
+ "chains": [
+  {
+   "run": "roots3-bs",
+   "task": "bun-sourcemap-leak",
+   "root": "bun-sourcemap-leak__AWGyw3U",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1224,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 2,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1735,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 3,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1901,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 4,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1678,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 5,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1405,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 6,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1355,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 7,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.189,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 8,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.164,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 9,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1502,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 10,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1706,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 11,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1483,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 12,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1227,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 13,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1063,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 14,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1576,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 15,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1781,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 16,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.141,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 17,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1749,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 18,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1728,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 19,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1017,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 20,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1276,
+     "tool_calls": 8
+    }
+   ]
+  },
+  {
+   "run": "roots3-bs",
+   "task": "bun-sourcemap-leak",
+   "root": "bun-sourcemap-leak__AWGyw3U",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1364,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2128,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2825,
+     "tool_calls": 14,
+     "cut_reads": 1,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 4,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1828,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 5,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3008,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 6,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2762,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 7,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3498,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 8,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5555,
+     "tool_calls": 17,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 9,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.323,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 10,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4405,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 11,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4457,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 12,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 33,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4224,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 13,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 33,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4813,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 14,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 33,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.467,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 15,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 33,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4749,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 16,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 33,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4094,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 17,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 33,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3797,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 18,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 33,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3892,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 19,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 33,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4403,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 20,
+     "job": "roots3-bs-bun-sourcemap-leak__AWGyw3U-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 33,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3639,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    }
+   ]
+  },
+  {
+   "run": "roots3-bs",
+   "task": "bun-sourcemap-leak",
+   "root": "bun-sourcemap-leak__6aw2V5e",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1602,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 2,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1305,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 3,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1549,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 4,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1118,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 5,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1302,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 6,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1418,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 7,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1361,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 8,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1656,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 9,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1199,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 10,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1234,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 11,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1152,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 12,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1628,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 13,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1659,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 14,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1271,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 15,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1175,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 16,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1309,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 17,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1584,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 18,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1118,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 19,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1323,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 20,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1436,
+     "tool_calls": 10
+    }
+   ]
+  },
+  {
+   "run": "roots3-bs",
+   "task": "bun-sourcemap-leak",
+   "root": "bun-sourcemap-leak__6aw2V5e",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1596,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2148,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 3,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 26,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1615,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 4,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 26,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1916,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 5,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2213,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 6,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2588,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 7,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2844,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 8,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2974,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 9,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3352,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 10,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3928,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 11,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4214,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 12,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3002,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 13,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5011,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 14,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3624,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 15,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5378,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 16,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5915,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 17,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4399,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 18,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3373,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 19,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1324,
+     "tool_calls": 6,
+     "cut_reads": 1,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 20,
+     "job": "roots3-bs-bun-sourcemap-leak__6aw2V5e-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 26,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2964,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    }
+   ]
+  },
+  {
+   "run": "roots3-bs",
+   "task": "bun-sourcemap-leak",
+   "root": "bun-sourcemap-leak__HzphLyv",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1368,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 2,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1353,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 3,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1502,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 4,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1649,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 5,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1312,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 6,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1348,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 7,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1302,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 8,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1518,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 9,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1459,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 10,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1485,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 11,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1655,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 12,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1758,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 13,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 34,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1507,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 14,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1357,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 15,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1591,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 16,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.138,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 17,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.129,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 18,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1602,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 19,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1683,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 20,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1528,
+     "tool_calls": 10
+    }
+   ]
+  },
+  {
+   "run": "roots3-bs",
+   "task": "bun-sourcemap-leak",
+   "root": "bun-sourcemap-leak__HzphLyv",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 25,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2013,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 28,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2481,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 3,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 32,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2971,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 4,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 30,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2339,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 5,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 31,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2612,
+     "tool_calls": 19,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 6,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 33,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3082,
+     "tool_calls": 17,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 7,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 31,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3411,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 8,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 31,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4644,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 9,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 31,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3857,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 10,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 31,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4851,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 11,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 31,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.425,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 12,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 33,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6401,
+     "tool_calls": 18,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 13,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 33,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4442,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 14,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 31,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5297,
+     "tool_calls": 18,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 15,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 31,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2933,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 16,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 29,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.533,
+     "tool_calls": 19,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 17,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 29,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6832,
+     "tool_calls": 25,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 7
+    },
+    {
+     "attempt": 18,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 29,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5841,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 19,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3216,
+     "tool_calls": 11,
+     "cut_reads": 1,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 20,
+     "job": "roots3-bs-bun-sourcemap-leak__HzphLyv-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 33,
+     "checks_total": 36,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5449,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 2
+    }
+   ]
+  },
+  {
+   "run": "roots3-fb",
+   "task": "foodstuff-beta-activity",
+   "root": "foodstuff-beta-activity__s2hWQjo",
+   "arm": "control",
+   "counted": 5,
+   "first_pass": 5,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2097,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 2,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1379,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 3,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1864,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 4,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1357,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 5,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-control-a5",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 13,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1409,
+     "tool_calls": 6
+    }
+   ]
+  },
+  {
+   "run": "roots3-fb",
+   "task": "foodstuff-beta-activity",
+   "root": "foodstuff-beta-activity__s2hWQjo",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1253,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1367,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 3,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1151,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 4,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2032,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 5,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1883,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 6,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1985,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 7,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1707,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 8,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1746,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 9,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2027,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 10,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1972,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 11,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2301,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 12,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1957,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 13,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2029,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 14,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2958,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 15,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2087,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 16,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2801,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 17,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2827,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 18,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2497,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 19,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2068,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 20,
+     "job": "roots3-fb-foodstuff-beta-activity__s2hWQjo-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2455,
+     "tool_calls": 7,
+     "cut_reads": 1,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    }
+   ]
+  },
+  {
+   "run": "roots3-fb",
+   "task": "foodstuff-beta-activity",
+   "root": "foodstuff-beta-activity__p8WVqXp",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1208,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 2,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1879,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 3,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1568,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 4,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1347,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 5,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.145,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 6,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1616,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 7,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.168,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 8,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1689,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 9,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1617,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 10,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1542,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 11,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1375,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 12,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1593,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 13,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1507,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 14,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1515,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 15,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1573,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 16,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1789,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 17,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1495,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 18,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1403,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 19,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2089,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 20,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.113,
+     "tool_calls": 5
+    }
+   ]
+  },
+  {
+   "run": "roots3-fb",
+   "task": "foodstuff-beta-activity",
+   "root": "foodstuff-beta-activity__p8WVqXp",
+   "arm": "record-engine",
+   "counted": 16,
+   "first_pass": 16,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.062,
+     "tool_calls": 2,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1263,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1479,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 4,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1762,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 5,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1184,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 6,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1464,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 7,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1168,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 8,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.218,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 9,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1841,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 10,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2438,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 11,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2267,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 12,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.216,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 13,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1964,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 14,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2329,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 15,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2003,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 16,
+     "job": "roots3-fb-foodstuff-beta-activity__p8WVqXp-record-engine-a16",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 13,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2404,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    }
+   ]
+  },
+  {
+   "run": "roots3-fb",
+   "task": "foodstuff-beta-activity",
+   "root": "foodstuff-beta-activity__KsVCQH6",
+   "arm": "control",
+   "counted": 1,
+   "first_pass": 1,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots3-fb-foodstuff-beta-activity__KsVCQH6-control-a1",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 2.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 13,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1369,
+     "tool_calls": 7
+    }
+   ]
+  },
+  {
+   "run": "roots3-fb",
+   "task": "foodstuff-beta-activity",
+   "root": "foodstuff-beta-activity__KsVCQH6",
+   "arm": "record-engine",
+   "counted": 14,
+   "first_pass": 14,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots3-fb-foodstuff-beta-activity__KsVCQH6-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1033,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots3-fb-foodstuff-beta-activity__KsVCQH6-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1003,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 3,
+     "job": "roots3-fb-foodstuff-beta-activity__KsVCQH6-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1422,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 4,
+     "job": "roots3-fb-foodstuff-beta-activity__KsVCQH6-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1414,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 5,
+     "job": "roots3-fb-foodstuff-beta-activity__KsVCQH6-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1323,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 6,
+     "job": "roots3-fb-foodstuff-beta-activity__KsVCQH6-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1736,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 7,
+     "job": "roots3-fb-foodstuff-beta-activity__KsVCQH6-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1749,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 8,
+     "job": "roots3-fb-foodstuff-beta-activity__KsVCQH6-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1981,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 9,
+     "job": "roots3-fb-foodstuff-beta-activity__KsVCQH6-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2318,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 10,
+     "job": "roots3-fb-foodstuff-beta-activity__KsVCQH6-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1863,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 11,
+     "job": "roots3-fb-foodstuff-beta-activity__KsVCQH6-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1708,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 12,
+     "job": "roots3-fb-foodstuff-beta-activity__KsVCQH6-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1721,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 13,
+     "job": "roots3-fb-foodstuff-beta-activity__KsVCQH6-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2801,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 14,
+     "job": "roots3-fb-foodstuff-beta-activity__KsVCQH6-record-engine-a14",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 13,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2163,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    }
+   ]
+  }
+ ]
+}

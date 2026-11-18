@@ -1,0 +1,21 @@
+{
+  "budget": 20,
+  "arms": [
+    "control",
+    "record-engine"
+  ],
+  "label": "none: replication probe of 2026-11-17 under ADR-0025, roots4 (scripts/2026-11-10_exp2_passk_chains.py)",
+  "lanes": [
+    {
+      "run": "roots4-wr",
+      "store": "corpus/stores/wal-recovery-ordering-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v4",
+      "trials": [
+        "wal-recovery-ordering__yTJbbKx",
+        "wal-recovery-ordering__Us63h7N",
+        "wal-recovery-ordering__jQ8pDsF"
+      ],
+      "config": "configs/harbor/tb40-passk-fresh-v4.json"
+    }
+  ]
+}

@@ -18,6 +18,8 @@ from trajlab.contracts import EXP2_ARMS, Exp2Arm
 from trajlab.exp2 import leaks
 from trajlab.exp2.prompt import (
     CLAIMS,
+    CONTROL_CHECKS,
+    CONTROL_CHECKS_ANCHOR,
     EARLIER_WORK_CLAUSE,
     ENGINE_ACCESS,
     ENGINE_DESCRIPTIONS,
@@ -315,11 +317,32 @@ def test_the_steps_are_round_2s_without_the_earlier_work_clause() -> None:
     assert PROTOCOL_STEPS.endswith(
         "If you would have to say a requirement is untested, test it instead."
     )
+    # Round 2's steps but for the clause and ADR-0025's sentence on checks, at the end of step 2.
+    assert PROTOCOL_STEPS.count(f"{CONTROL_CHECKS_ANCHOR} {CONTROL_CHECKS}\n3. Fix") == 1
     assert REPAIR_PROTOCOL.endswith(
-        PROTOCOL_STEPS.replace("environment)", "environment" + EARLIER_WORK_CLAUSE + ")")
+        PROTOCOL_STEPS.replace(f" {CONTROL_CHECKS}", "").replace(
+            "environment)", "environment" + EARLIER_WORK_CLAUSE + ")"
+        )
     )
     with pytest.raises(PromptError):
         protocol_steps(REPAIR_PROTOCOL.replace(EARLIER_WORK_CLAUSE, ""))
+    with pytest.raises(PromptError):
+        protocol_steps(REPAIR_PROTOCOL.replace(CONTROL_CHECKS_ANCHOR, ""))
+
+
+def test_the_record_steps_list_what_was_tried_and_rebuild_a_check_that_passed() -> None:
+    """ADR-0025: what each record step adds, and control's one counterpart."""
+    one, two, three, four = RECORD_STEPS.split("\n")[1:]
+    assert "every fix and every reading of the task the attempts already tried for it" in one
+    assert "the check is wrong, not only the fix: build it again" in two
+    assert "do not submit a fix that an earlier attempt submitted" in three
+    assert "move to another cause only when there is none left" in three
+    assert "in the part your diagnosis blames, change that part first" in four
+    # Both arms are told the same three ways a check can differ.
+    differ = "in what it measures, the inputs it uses, or the conditions it runs under."
+    assert differ in two and CONTROL_CHECKS.endswith(differ)
+    # Control has no record: nothing in its steps points at one.
+    assert "record" not in PROTOCOL_STEPS and "earlier attempt" not in PROTOCOL_STEPS
 
 
 def test_control_prefix_verbatim() -> None:
@@ -332,7 +355,10 @@ def test_control_prefix_verbatim() -> None:
         "write them to /logs/agent/diagnosis.md: each suspected cause, the evidence for it, and "
         "how you will check it.\n"
         "2. List every requirement in the task, each with a check you can run that would fail "
-        "if the requirement were not met. Include inputs other than the ones provided.\n"
+        "if the requirement were not met. Include inputs other than the ones provided. The "
+        "previous attempts most likely ran the first check you would think of, saw it pass, and "
+        "still failed, so that check passing proves little: make each check differ from it in "
+        "what it measures, the inputs it uses, or the conditions it runs under.\n"
         "3. Fix, run the checks, and repeat until they all pass.\n"
         "4. Before finishing, run every check again. If you would have to say a requirement is "
         "untested, test it instead."

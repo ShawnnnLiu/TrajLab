@@ -1,0 +1,1353 @@
+{
+ "budget": 20,
+ "api_key_sources": [
+  "none"
+ ],
+ "curves": [
+  {
+   "task": "wal-recovery-ordering",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [
+    10,
+    11
+   ],
+   "censored_at": [
+    20
+   ],
+   "attempts_run": 41,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 2,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "wal-recovery-ordering",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [
+    2,
+    8,
+    9
+   ],
+   "censored_at": [],
+   "attempts_run": 19,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  }
+ ],
+ "chains": [
+  {
+   "run": "roots4-wr",
+   "task": "wal-recovery-ordering",
+   "root": "wal-recovery-ordering__yTJbbKx",
+   "arm": "control",
+   "counted": 11,
+   "first_pass": 11,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 94,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2286,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 2,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.237,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 3,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 94,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2038,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 4,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2529,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 5,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2207,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 6,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 94,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1918,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 7,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 94,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.198,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 8,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2171,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 9,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2342,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 10,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2342,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 11,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-control-a11",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 97,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2513,
+     "tool_calls": 7
+    }
+   ]
+  },
+  {
+   "run": "roots4-wr",
+   "task": "wal-recovery-ordering",
+   "root": "wal-recovery-ordering__yTJbbKx",
+   "arm": "record-engine",
+   "counted": 9,
+   "first_pass": 9,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2183,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2291,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 93,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2384,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 4,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2155,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 5,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2237,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 6,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 94,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2497,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 7,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2967,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 8,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 96,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3594,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 9,
+     "job": "roots4-wr-wal-recovery-ordering__yTJbbKx-record-engine-a9",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 97,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5663,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 7
+    }
+   ]
+  },
+  {
+   "run": "roots4-wr",
+   "task": "wal-recovery-ordering",
+   "root": "wal-recovery-ordering__Us63h7N",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2142,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 2,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 94,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1945,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 3,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.178,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 4,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2513,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 5,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 94,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2513,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 6,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1852,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 7,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1913,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 8,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 94,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.247,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 9,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1904,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 10,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2764,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 11,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1695,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 12,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 94,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2192,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 13,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2336,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 14,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.231,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 15,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2207,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 16,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2663,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 17,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2576,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 18,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.207,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 19,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.228,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 20,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2028,
+     "tool_calls": 5
+    }
+   ]
+  },
+  {
+   "run": "roots4-wr",
+   "task": "wal-recovery-ordering",
+   "root": "wal-recovery-ordering__Us63h7N",
+   "arm": "record-engine",
+   "counted": 8,
+   "first_pass": 8,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2419,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3451,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 3,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 96,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3472,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 4,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 96,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3461,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 5,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 96,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2442,
+     "tool_calls": 7,
+     "cut_reads": 1,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 6,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 96,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.399,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 7,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 96,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2581,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 8,
+     "job": "roots4-wr-wal-recovery-ordering__Us63h7N-record-engine-a8",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 97,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.43,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    }
+   ]
+  },
+  {
+   "run": "roots4-wr",
+   "task": "wal-recovery-ordering",
+   "root": "wal-recovery-ordering__jQ8pDsF",
+   "arm": "control",
+   "counted": 10,
+   "first_pass": 10,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots4-wr-wal-recovery-ordering__jQ8pDsF-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2053,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 2,
+     "job": "roots4-wr-wal-recovery-ordering__jQ8pDsF-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2291,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 3,
+     "job": "roots4-wr-wal-recovery-ordering__jQ8pDsF-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1596,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 4,
+     "job": "roots4-wr-wal-recovery-ordering__jQ8pDsF-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2254,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 5,
+     "job": "roots4-wr-wal-recovery-ordering__jQ8pDsF-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2397,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 6,
+     "job": "roots4-wr-wal-recovery-ordering__jQ8pDsF-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 96,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2189,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 7,
+     "job": "roots4-wr-wal-recovery-ordering__jQ8pDsF-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2267,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 8,
+     "job": "roots4-wr-wal-recovery-ordering__jQ8pDsF-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 94,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1961,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 9,
+     "job": "roots4-wr-wal-recovery-ordering__jQ8pDsF-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 95,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2505,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 10,
+     "job": "roots4-wr-wal-recovery-ordering__jQ8pDsF-control-a10",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 97,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2799,
+     "tool_calls": 8
+    }
+   ]
+  },
+  {
+   "run": "roots4-wr",
+   "task": "wal-recovery-ordering",
+   "root": "wal-recovery-ordering__jQ8pDsF",
+   "arm": "record-engine",
+   "counted": 2,
+   "first_pass": 2,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots4-wr-wal-recovery-ordering__jQ8pDsF-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 96,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2503,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots4-wr-wal-recovery-ordering__jQ8pDsF-record-engine-a2",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 97,
+     "checks_total": 97,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2056,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    }
+   ]
+  }
+ ]
+}

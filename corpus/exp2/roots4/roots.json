@@ -1,0 +1,135 @@
+{
+  "fin-saccr-rwa": {
+    "median": 24.0,
+    "roots": [
+      "fin-saccr-rwa__gRTfc2w"
+    ],
+    "attempts": [
+      {
+        "trial": "fin-saccr-rwa__2JyFpZC",
+        "score": 24.0,
+        "reward": 1.0,
+        "started_at": "2026-11-17T04:28:24.471780Z",
+        "exception": null
+      },
+      {
+        "trial": "fin-saccr-rwa__6ZoGiqY",
+        "score": 24.0,
+        "reward": 1.0,
+        "started_at": "2026-11-17T04:22:29.820652Z",
+        "exception": null
+      },
+      {
+        "trial": "fin-saccr-rwa__8dZgpQB",
+        "score": 24.0,
+        "reward": 1.0,
+        "started_at": "2026-11-17T01:12:18.799027Z",
+        "exception": null
+      },
+      {
+        "trial": "fin-saccr-rwa__SV6jy7L",
+        "score": 24.0,
+        "reward": 1.0,
+        "started_at": "2026-11-17T02:08:59.835749Z",
+        "exception": null
+      },
+      {
+        "trial": "fin-saccr-rwa__gRTfc2w",
+        "score": 21.0,
+        "reward": 0.0,
+        "started_at": "2026-11-17T02:58:42.154319Z",
+        "exception": null
+      }
+    ]
+  },
+  "wal-recovery-ordering": {
+    "median": 95.0,
+    "roots": [
+      "wal-recovery-ordering__yTJbbKx",
+      "wal-recovery-ordering__Us63h7N",
+      "wal-recovery-ordering__jQ8pDsF"
+    ],
+    "attempts": [
+      {
+        "trial": "wal-recovery-ordering__6rouLXR",
+        "score": 95.0,
+        "reward": 0.0,
+        "started_at": "2026-11-17T04:32:58.439847Z",
+        "exception": null
+      },
+      {
+        "trial": "wal-recovery-ordering__Us63h7N",
+        "score": 95.0,
+        "reward": 0.0,
+        "started_at": "2026-11-17T02:13:11.307207Z",
+        "exception": null
+      },
+      {
+        "trial": "wal-recovery-ordering__cDtYLgN",
+        "score": 95.0,
+        "reward": 0.0,
+        "started_at": "2026-11-17T04:26:20.956139Z",
+        "exception": null
+      },
+      {
+        "trial": "wal-recovery-ordering__jQ8pDsF",
+        "score": 95.0,
+        "reward": 0.0,
+        "started_at": "2026-11-17T03:01:45.771115Z",
+        "exception": null
+      },
+      {
+        "trial": "wal-recovery-ordering__yTJbbKx",
+        "score": 95.0,
+        "reward": 0.0,
+        "started_at": "2026-11-17T01:20:17.449628Z",
+        "exception": null
+      }
+    ]
+  },
+  "layout-config-recreation2": {
+    "median": 8.0,
+    "roots": [
+      "layout-config-recreation2__mX4cMaF",
+      "layout-config-recreation2__oSM85xp",
+      "layout-config-recreation2__EGoEQ8h"
+    ],
+    "attempts": [
+      {
+        "trial": "layout-config-recreation2__BZjnb3r",
+        "score": 9.0,
+        "reward": 1.0,
+        "started_at": "2026-11-17T02:15:14.897814Z",
+        "exception": null
+      },
+      {
+        "trial": "layout-config-recreation2__EGoEQ8h",
+        "score": 8.0,
+        "reward": 0.0,
+        "started_at": "2026-11-17T04:27:11.951241Z",
+        "exception": null
+      },
+      {
+        "trial": "layout-config-recreation2__mX4cMaF",
+        "score": 8.0,
+        "reward": 0.0,
+        "started_at": "2026-11-17T01:25:05.136931Z",
+        "exception": null
+      },
+      {
+        "trial": "layout-config-recreation2__nYm6Uf3",
+        "score": 9.0,
+        "reward": 1.0,
+        "started_at": "2026-11-17T01:12:18.707016Z",
+        "exception": null
+      },
+      {
+        "trial": "layout-config-recreation2__oSM85xp",
+        "score": 8.0,
+        "reward": 0.0,
+        "started_at": "2026-11-17T03:03:45.677856Z",
+        "exception": null
+      }
+    ]
+  }
+}

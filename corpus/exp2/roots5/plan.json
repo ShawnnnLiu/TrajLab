@@ -1,0 +1,6 @@
+{"budget": 10, "arms": ["control", "record-engine"],
+ "label": "none: replication probe of 2026-11-17 under ADR-0025, roots5 (scripts/2026-11-10_exp2_passk_chains.py)",
+ "lanes": [{"run": "roots5-lc", "store": "corpus/stores/layout-config-recreation2-local-v6",
+            "job": "corpus/jobs/tb40-passk-fresh-v4",
+            "trials": ["layout-config-recreation2__mX4cMaF", "layout-config-recreation2__oSM85xp", "layout-config-recreation2__EGoEQ8h"],
+            "config": "configs/harbor/tb40-passk-fresh-v4.json"}]}

@@ -1,0 +1,242 @@
+{
+  "bun-sourcemap-leak": {
+    "median": 27.0,
+    "roots": [
+      "bun-sourcemap-leak__AWGyw3U",
+      "bun-sourcemap-leak__6aw2V5e",
+      "bun-sourcemap-leak__HzphLyv"
+    ],
+    "attempts": [
+      {
+        "trial": "bun-sourcemap-leak__3b6APp6",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T11:03:10.928322Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__6aw2V5e",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T08:45:49.124540Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__6pYzFdn",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T14:25:17.547952Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__AWGyw3U",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T08:28:19.160930Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__HPaohBf",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T12:00:19.447101Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__HzphLyv",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T09:10:33.925734Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__KPNUP4A",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T10:28:59.984718Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__MGmG2ct",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T12:30:40.989294Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__UTp6b44",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T10:11:12.558957Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__WYe5SHr",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T12:15:59.460192Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__YTHEcKG",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T12:45:30.260783Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__YmgRz5E",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T09:35:39.337302Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__dihYCCk",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T13:03:04.789687Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__nveyrbV",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T13:18:55.426398Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__osV2P8R",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T14:37:56.429994Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__oyL2qmV",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T10:47:44.367119Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__tGyT8qH",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T11:31:41.880819Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__uZPCck3",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T13:59:51.458723Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__xRfJA5R",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T13:44:17.128870Z",
+        "exception": null
+      },
+      {
+        "trial": "bun-sourcemap-leak__yRMJeWA",
+        "score": 27.0,
+        "reward": 0.0,
+        "started_at": "2026-11-13T09:57:13.962993Z",
+        "exception": null
+      }
+    ]
+  },
+  "foodstuff-beta-activity": {
+    "median": 10.0,
+    "roots": [
+      "foodstuff-beta-activity__s2hWQjo",
+      "foodstuff-beta-activity__p8WVqXp",
+      "foodstuff-beta-activity__KsVCQH6"
+    ],
+    "attempts": [
+      {
+        "trial": "foodstuff-beta-activity__KsVCQH6",
+        "score": 9.0,
+        "reward": 0.0,
+        "started_at": "2026-11-16T07:31:35.296797Z",
+        "exception": null
+      },
+      {
+        "trial": "foodstuff-beta-activity__mRiQErG",
+        "score": 9.0,
+        "reward": 0.0,
+        "started_at": "2026-11-16T08:16:58.734092Z",
+        "exception": null
+      },
+      {
+        "trial": "foodstuff-beta-activity__p8WVqXp",
+        "score": 10.0,
+        "reward": 0.0,
+        "started_at": "2026-11-16T07:36:19.205298Z",
+        "exception": null
+      },
+      {
+        "trial": "foodstuff-beta-activity__s2hWQjo",
+        "score": 10.0,
+        "reward": 0.0,
+        "started_at": "2026-11-16T06:50:58.058995Z",
+        "exception": null
+      },
+      {
+        "trial": "foodstuff-beta-activity__wrTURgU",
+        "score": 11.0,
+        "reward": 0.0,
+        "started_at": "2026-11-16T07:52:32.617628Z",
+        "exception": null
+      }
+    ]
+  },
+  "pretrain-shard-corruption": {
+    "median": 11.0,
+    "roots": [
+      "pretrain-shard-corruption__AJTvzWe",
+      "pretrain-shard-corruption__THFz4Gk",
+      "pretrain-shard-corruption__ebk7Cyu"
+    ],
+    "attempts": [
+      {
+        "trial": "pretrain-shard-corruption__AJTvzWe",
+        "score": 11.0,
+        "reward": 0.0,
+        "started_at": "2026-11-16T07:33:48.598664Z",
+        "exception": null
+      },
+      {
+        "trial": "pretrain-shard-corruption__JBeuLeX",
+        "score": 7.0,
+        "reward": 0.0,
+        "started_at": "2026-11-16T06:55:31.914119Z",
+        "exception": null
+      },
+      {
+        "trial": "pretrain-shard-corruption__THFz4Gk",
+        "score": 11.0,
+        "reward": 0.0,
+        "started_at": "2026-11-16T07:37:48.699109Z",
+        "exception": null
+      },
+      {
+        "trial": "pretrain-shard-corruption__UGW3fmV",
+        "score": 12.0,
+        "reward": 1.0,
+        "started_at": "2026-11-16T07:54:29.313161Z",
+        "exception": null
+      },
+      {
+        "trial": "pretrain-shard-corruption__ebk7Cyu",
+        "score": 9.0,
+        "reward": 0.0,
+        "started_at": "2026-11-16T06:50:57.965512Z",
+        "exception": null
+      }
+    ]
+  }
+}
