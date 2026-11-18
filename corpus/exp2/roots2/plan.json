@@ -1,0 +1,40 @@
+{
+  "budget": 20,
+  "arms": [
+    "control",
+    "record-engine"
+  ],
+  "label": "none: replication probe of 2026-11-14 under ADR-0025 (scripts/2026-11-10_exp2_passk_chains.py)",
+  "lanes": [
+    {
+      "run": "roots2-cf",
+      "store": "corpus/stores/cargo-flight-dispatch-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v2",
+      "trials": [
+        "cargo-flight-dispatch__bSzbWSE",
+        "cargo-flight-dispatch__bDs5eTh",
+        "cargo-flight-dispatch__mgPKvT9"
+      ]
+    },
+    {
+      "run": "roots2-fi",
+      "store": "corpus/stores/freecad-impeller-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v2",
+      "trials": [
+        "freecad-impeller__ry3EYjH",
+        "freecad-impeller__YuYCMWv",
+        "freecad-impeller__LPimWJZ"
+      ]
+    },
+    {
+      "run": "roots2-fs",
+      "store": "corpus/stores/freecad-spring-clip-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v2",
+      "trials": [
+        "freecad-spring-clip__MowrVSh",
+        "freecad-spring-clip__R8iqvAj",
+        "freecad-spring-clip__GuzeuQx"
+      ]
+    }
+  ]
+}

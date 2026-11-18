@@ -1,0 +1,6 @@
+{"budget": 20, "arms": ["control", "record-engine"],
+ "label": "none: replication probe of 2026-11-18 under ADR-0025, roots6 (scripts/2026-11-10_exp2_passk_chains.py)",
+ "lanes": [{"run": "roots6-av", "store": "corpus/stores/atrx-vep-crispr-local-v6",
+            "job": "corpus/jobs/tb40-passk-fresh-v5",
+            "trials": ["atrx-vep-crispr__V525sES", "atrx-vep-crispr__2rQmNqC", "atrx-vep-crispr__6zUStrp"],
+            "config": "configs/harbor/tb40-passk-fresh-v5.json"}]}

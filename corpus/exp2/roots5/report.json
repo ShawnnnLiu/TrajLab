@@ -1,0 +1,324 @@
+{
+ "budget": 10,
+ "api_key_sources": [
+  "none"
+ ],
+ "curves": [
+  {
+   "task": "layout-config-recreation2",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [
+    1,
+    1,
+    1
+   ],
+   "censored_at": [],
+   "attempts_run": 3,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "layout-config-recreation2",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [
+    1,
+    1,
+    1
+   ],
+   "censored_at": [],
+   "attempts_run": 3,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  }
+ ],
+ "chains": [
+  {
+   "run": "roots5-lc",
+   "task": "layout-config-recreation2",
+   "root": "layout-config-recreation2__mX4cMaF",
+   "arm": "control",
+   "counted": 1,
+   "first_pass": 1,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots5-lc-layout-config-recreation2__mX4cMaF-control-a1",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 76.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 9,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.5453,
+     "tool_calls": 108
+    }
+   ]
+  },
+  {
+   "run": "roots5-lc",
+   "task": "layout-config-recreation2",
+   "root": "layout-config-recreation2__mX4cMaF",
+   "arm": "record-engine",
+   "counted": 1,
+   "first_pass": 1,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots5-lc-layout-config-recreation2__mX4cMaF-record-engine-a1",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 19.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 9,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9495,
+     "tool_calls": 38,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 0
+    }
+   ]
+  },
+  {
+   "run": "roots5-lc",
+   "task": "layout-config-recreation2",
+   "root": "layout-config-recreation2__oSM85xp",
+   "arm": "control",
+   "counted": 1,
+   "first_pass": 1,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots5-lc-layout-config-recreation2__oSM85xp-control-a1",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 91.1,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 9,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.3137,
+     "tool_calls": 66
+    }
+   ]
+  },
+  {
+   "run": "roots5-lc",
+   "task": "layout-config-recreation2",
+   "root": "layout-config-recreation2__oSM85xp",
+   "arm": "record-engine",
+   "counted": 1,
+   "first_pass": 1,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots5-lc-layout-config-recreation2__oSM85xp-record-engine-a1",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 34.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 9,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1649,
+     "tool_calls": 50,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 1,
+     "attempt_filters": 0
+    }
+   ]
+  },
+  {
+   "run": "roots5-lc",
+   "task": "layout-config-recreation2",
+   "root": "layout-config-recreation2__EGoEQ8h",
+   "arm": "control",
+   "counted": 1,
+   "first_pass": 1,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots5-lc-layout-config-recreation2__EGoEQ8h-control-a1",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 37.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 9,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.5145,
+     "tool_calls": 74
+    }
+   ]
+  },
+  {
+   "run": "roots5-lc",
+   "task": "layout-config-recreation2",
+   "root": "layout-config-recreation2__EGoEQ8h",
+   "arm": "record-engine",
+   "counted": 1,
+   "first_pass": 1,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots5-lc-layout-config-recreation2__EGoEQ8h-record-engine-a1",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 33.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 9,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0565,
+     "tool_calls": 51,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 0
+    }
+   ]
+  }
+ ]
+}

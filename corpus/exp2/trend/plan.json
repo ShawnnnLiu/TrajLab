@@ -1,0 +1,105 @@
+{
+  "budget": 20,
+  "arms": [
+    "control",
+    "record-engine"
+  ],
+  "lanes": [
+    {
+      "run": "trend-pp-a",
+      "store": "corpus/stores/production-planning-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v1",
+      "trials": [
+        "production-planning__ukYKBeW"
+      ]
+    },
+    {
+      "run": "trend-vf-a",
+      "store": "corpus/stores/vf2-speedup-networkx-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v1",
+      "trials": [
+        "vf2-speedup-networkx__7bK2c3L"
+      ]
+    },
+    {
+      "run": "trend-gs-a",
+      "store": "corpus/stores/gsea-proteomics-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v1",
+      "trials": [
+        "gsea-proteomics__mwYeuLZ"
+      ]
+    },
+    {
+      "run": "trend-mv-a",
+      "store": "corpus/stores/mvcc-lsm-compaction-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v1",
+      "trials": [
+        "mvcc-lsm-compaction__tBuSNjq"
+      ]
+    },
+    {
+      "run": "trend-pp-b",
+      "store": "corpus/stores/production-planning-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v1",
+      "trials": [
+        "production-planning__ukYKBeW"
+      ]
+    },
+    {
+      "run": "trend-vf-b",
+      "store": "corpus/stores/vf2-speedup-networkx-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v1",
+      "trials": [
+        "vf2-speedup-networkx__7bK2c3L"
+      ]
+    },
+    {
+      "run": "trend-gs-b",
+      "store": "corpus/stores/gsea-proteomics-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v1",
+      "trials": [
+        "gsea-proteomics__mwYeuLZ"
+      ]
+    },
+    {
+      "run": "trend-mv-b",
+      "store": "corpus/stores/mvcc-lsm-compaction-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v1",
+      "trials": [
+        "mvcc-lsm-compaction__tBuSNjq"
+      ]
+    },
+    {
+      "run": "trend-pp-c",
+      "store": "corpus/stores/production-planning-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v1",
+      "trials": [
+        "production-planning__ukYKBeW"
+      ]
+    },
+    {
+      "run": "trend-vf-c",
+      "store": "corpus/stores/vf2-speedup-networkx-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v1",
+      "trials": [
+        "vf2-speedup-networkx__7bK2c3L"
+      ]
+    },
+    {
+      "run": "trend-gs-c",
+      "store": "corpus/stores/gsea-proteomics-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v1",
+      "trials": [
+        "gsea-proteomics__mwYeuLZ"
+      ]
+    },
+    {
+      "run": "trend-mv-c",
+      "store": "corpus/stores/mvcc-lsm-compaction-local-v6",
+      "job": "corpus/jobs/tb40-passk-fresh-v1",
+      "trials": [
+        "mvcc-lsm-compaction__tBuSNjq"
+      ]
+    }
+  ]
+}

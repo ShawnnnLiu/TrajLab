@@ -1,0 +1,1052 @@
+{
+  "corpus_id": "tb40-passk-fresh-v1",
+  "created_at": "2026-11-13T15:01:55.328924Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "f90906e25bb4b2bcbdab4cc8583c021883820b69",
+  "repo_dirty": true,
+  "config_path": "configs/harbor/tb40-passk-fresh-v1.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 20,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 0.5,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "writes_recorded": false,
+  "tasks": [
+    {
+      "name": "terminal-bench/bun-sourcemap-leak",
+      "digest": "sha256:e55ae542f338f50f4468d940c7d7c93a45d34fd418dc6cc5883c1fedc753603a"
+    },
+    {
+      "name": "terminal-bench/freecad-platform-drawing",
+      "digest": "sha256:ed6db89260074bd0db58b064d90977cc4d470843deefecd8a9caf7f21da9a747"
+    },
+    {
+      "name": "terminal-bench/gsea-proteomics",
+      "digest": "sha256:7c0512e617cd4c0a0b595ebfb81258495d7e4a12c003cd0592c1137aa986a85d"
+    },
+    {
+      "name": "terminal-bench/mvcc-lsm-compaction",
+      "digest": "sha256:370406dd79cc164e50b73568de37c34eba1b0e30782d7dc03f87c38c68123137"
+    },
+    {
+      "name": "terminal-bench/production-planning",
+      "digest": "sha256:1958ac51553517b79e3a642ed4f3bd9affb5b42166dcbacaa4c32f4b040edaff"
+    },
+    {
+      "name": "terminal-bench/vf2-speedup-networkx",
+      "digest": "sha256:cdbad1f303f57856199aae757bdbc6363111e8ad60d31db49c61d01706da63ab"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb40-passk-fresh-v1",
+      "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+      "job_config": {
+        "job_name": "tb40-passk-fresh-v1",
+        "jobs_dir": "corpus/jobs",
+        "n_attempts": 20,
+        "agent_timeout_multiplier": 0.5,
+        "n_concurrent_trials": 2,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "sha256:39d9f44b40420cde8fdcc087579c0d72a7e14fa3656d603c3f0d22fb35e27732",
+            "task_names": [
+              "terminal-bench/mvcc-lsm-compaction",
+              "terminal-bench/vf2-speedup-networkx",
+              "terminal-bench/freecad-platform-drawing",
+              "terminal-bench/production-planning",
+              "terminal-bench/gsea-proteomics",
+              "terminal-bench/bun-sourcemap-leak"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "7ed67624-db7d-4983-934e-9c992f94b24f",
+          "trial_name": "bun-sourcemap-leak__3b6APp6",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "c09329af-ca5f-4687-a6d6-9c9479f75bd9"
+        },
+        {
+          "trial_id": "26edd77d-1c8e-4eca-80b5-fb412e900f20",
+          "trial_name": "bun-sourcemap-leak__6aw2V5e",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "90c0cdfb-23e1-4377-baf9-30f8a5f3a3a2"
+        },
+        {
+          "trial_id": "3e43455c-c388-47bf-8ba3-dd4e5196e16e",
+          "trial_name": "bun-sourcemap-leak__6pYzFdn",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "9aeb3313-d272-445d-9b66-04683261b2ad"
+        },
+        {
+          "trial_id": "e591cdc1-650d-454b-a40c-60c05a2f8a87",
+          "trial_name": "bun-sourcemap-leak__AWGyw3U",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "87e8148d-e7d0-4db1-b053-689721ec9b74"
+        },
+        {
+          "trial_id": "70adeac3-b4a1-4c74-ae13-30861f1e0e49",
+          "trial_name": "bun-sourcemap-leak__HPaohBf",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "7b298d59-770b-47cf-8198-755adaca08d1"
+        },
+        {
+          "trial_id": "c895f2b0-747d-40be-813e-70929f5762c3",
+          "trial_name": "bun-sourcemap-leak__HzphLyv",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "61c2fa66-dd70-4a7b-80e8-2f77c09b817d"
+        },
+        {
+          "trial_id": "053c6fa3-7bec-41bd-ad91-d2c616bde6e7",
+          "trial_name": "bun-sourcemap-leak__KPNUP4A",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "d76208f0-eaec-4ac0-8efe-a2d0bdda2220"
+        },
+        {
+          "trial_id": "69629735-28f0-4959-9e6c-bd95a90906f2",
+          "trial_name": "bun-sourcemap-leak__MGmG2ct",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "1b334543-ff39-4f8d-807d-742b1f7d26d8"
+        },
+        {
+          "trial_id": "05964175-1730-4fda-801a-8da122bbb4cd",
+          "trial_name": "bun-sourcemap-leak__UTp6b44",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "39bd832c-71f6-4cb7-988f-505044f38971"
+        },
+        {
+          "trial_id": "c7641475-455a-49fa-a90f-c2157cd6eed0",
+          "trial_name": "bun-sourcemap-leak__WYe5SHr",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "7e147f1f-9f14-4315-9869-89a60bc26fce"
+        },
+        {
+          "trial_id": "5f0eaaf8-287a-4245-9053-7c97043a112e",
+          "trial_name": "bun-sourcemap-leak__YTHEcKG",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "e76d19d3-c4fd-4576-90d4-3118c2185d20"
+        },
+        {
+          "trial_id": "a496d51c-0f48-4bd4-8995-284a155c329c",
+          "trial_name": "bun-sourcemap-leak__YmgRz5E",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "c01d5b6b-51a8-4a48-9d96-3302f7ba8086"
+        },
+        {
+          "trial_id": "32c5bb92-2cb1-4dbe-9ed3-b7d7617ffeb1",
+          "trial_name": "bun-sourcemap-leak__dihYCCk",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "a9199b9f-edf6-422e-be0f-ec6a4b384b9d"
+        },
+        {
+          "trial_id": "005f0738-8035-4ae2-85e5-63f82026065a",
+          "trial_name": "bun-sourcemap-leak__nveyrbV",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "b66926a3-cc9c-4174-bebc-860c32c3b8b6"
+        },
+        {
+          "trial_id": "53e4e724-2961-4140-954f-8e553481820a",
+          "trial_name": "bun-sourcemap-leak__osV2P8R",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "ee145cc3-aa31-4644-acce-9e815ca7a9d5"
+        },
+        {
+          "trial_id": "7a5a337b-4118-4dd1-928b-eabae4f8bbf7",
+          "trial_name": "bun-sourcemap-leak__oyL2qmV",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "8926c6c5-9b4a-47e2-a76a-1d3d386d8144"
+        },
+        {
+          "trial_id": "3ac13b12-9ee9-4ad5-b654-e4b89d90155c",
+          "trial_name": "bun-sourcemap-leak__tGyT8qH",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "3ba86ee0-f918-418f-93a5-a2f9c8a9554c"
+        },
+        {
+          "trial_id": "2b5906ce-abc8-43f5-94c0-f4c349cab952",
+          "trial_name": "bun-sourcemap-leak__uZPCck3",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "e3c756cb-05b4-4276-ac86-108b246b55ea"
+        },
+        {
+          "trial_id": "90ace55c-cbaa-4d3e-a182-c9b434e8978f",
+          "trial_name": "bun-sourcemap-leak__xRfJA5R",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "861c158a-6a19-4e65-b6ee-aeff410341cf"
+        },
+        {
+          "trial_id": "23db5981-8909-45d1-8171-30cf4ba6c71d",
+          "trial_name": "bun-sourcemap-leak__yRMJeWA",
+          "task_name": "terminal-bench/bun-sourcemap-leak",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "92b6949e-a582-4cff-a582-1c16f106edb0"
+        },
+        {
+          "trial_id": "1e4b124c-67f9-490a-baea-f99411176e9a",
+          "trial_name": "freecad-platform-drawing__36vRwbh",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "1750132d-154c-491c-ba4a-d37c901ef3b8"
+        },
+        {
+          "trial_id": "4d421ec9-8fa7-4eb6-8fea-1841bab71b80",
+          "trial_name": "freecad-platform-drawing__859aVcy",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "2b6b37a5-2446-45dc-81e1-57368fda4502"
+        },
+        {
+          "trial_id": "e52166aa-aaa7-412d-bd1c-40095032cac8",
+          "trial_name": "freecad-platform-drawing__AiVSvGR",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "abb5eaec-b553-41d5-894a-ea19dce4fa64"
+        },
+        {
+          "trial_id": "5e1e8b19-26e5-4ded-82a5-6d050f80207d",
+          "trial_name": "freecad-platform-drawing__DQdCAKX",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "d820fdb0-3035-4cd6-aec1-4ef7f3add962"
+        },
+        {
+          "trial_id": "da868a4d-4857-4c60-ac4a-c730dbfd7f4b",
+          "trial_name": "freecad-platform-drawing__JMBfKwX",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "f74586ce-597d-4d0a-bd20-4a6cd963b77e"
+        },
+        {
+          "trial_id": "662fda95-4dea-4c80-a28e-37002a7c6423",
+          "trial_name": "freecad-platform-drawing__KrRJyBV",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "72e0325e-cd7d-4645-b1ea-3c085167e1bd"
+        },
+        {
+          "trial_id": "efd38348-8121-4698-9290-ff075c600f47",
+          "trial_name": "freecad-platform-drawing__SwCrZL9",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "5144b79b-4c88-4713-a0aa-402b15410eec"
+        },
+        {
+          "trial_id": "cfbac25f-97a7-4147-927a-87759867319c",
+          "trial_name": "freecad-platform-drawing__VdSdHRn",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "dec43cd1-8d79-4605-b4c2-8a40cc387ac9"
+        },
+        {
+          "trial_id": "7b7aa2ba-d916-4e85-b261-72137593b5d1",
+          "trial_name": "freecad-platform-drawing__a5SWcHw",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "2885b353-61fa-4c65-90ef-c4cc914612b4"
+        },
+        {
+          "trial_id": "fc815406-cfcc-4867-9a33-091de645da0e",
+          "trial_name": "freecad-platform-drawing__aTFGc7Q",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "6d763abc-27aa-4eeb-8a05-8b9f7aede7d4"
+        },
+        {
+          "trial_id": "a3812362-45f3-465b-8aec-16edf32feb0c",
+          "trial_name": "freecad-platform-drawing__jPrnBp6",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "790e52c0-1150-41bc-a583-9d7d9f3f7941"
+        },
+        {
+          "trial_id": "1332f854-38f3-4184-b445-38aef3078055",
+          "trial_name": "freecad-platform-drawing__mVYjXWS",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "a3318f4c-d6cb-49c7-b8c7-87a09474bae1"
+        },
+        {
+          "trial_id": "1050cc42-4a24-4d7e-b142-a37441d159f5",
+          "trial_name": "freecad-platform-drawing__mpYVJPp",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "fb4203b1-0ae5-4198-83ac-a7b119eed9e5"
+        },
+        {
+          "trial_id": "ec88bc31-8f03-4866-b354-fe3d691b404d",
+          "trial_name": "freecad-platform-drawing__nWGtFqa",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "474941ce-5a23-4998-9591-7a09eac9cf30"
+        },
+        {
+          "trial_id": "2a2ce8b0-5693-4afc-b2d9-1c9ae2c6060a",
+          "trial_name": "freecad-platform-drawing__qpzzg6A",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "0e5eeb62-644a-486a-a75a-ce2a5bd06c60"
+        },
+        {
+          "trial_id": "606d14e6-a3b4-4a6e-96ba-292ddadadc8b",
+          "trial_name": "freecad-platform-drawing__ruZYPzA",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "08d06464-6d2e-4b5d-a6a3-c88090180f26"
+        },
+        {
+          "trial_id": "ee5425bf-55cb-47a0-9af2-c3a949af2e70",
+          "trial_name": "freecad-platform-drawing__sGTtaiL",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "bad2cb37-b057-42ce-b0be-76508506d69e"
+        },
+        {
+          "trial_id": "e431f4cf-3a1d-4c40-9b53-593919476d82",
+          "trial_name": "freecad-platform-drawing__tfJpnoS",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "bf7b68f6-81d5-4bb0-8931-549fbe7c0291"
+        },
+        {
+          "trial_id": "c5f48dec-f2f4-491f-9cb4-7c4029be178d",
+          "trial_name": "freecad-platform-drawing__wbSF5tx",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "f1b57cff-f30d-4e1d-beb2-eeebce591c19"
+        },
+        {
+          "trial_id": "2d78558f-fff8-4d4d-9553-4941eba8e41f",
+          "trial_name": "freecad-platform-drawing__xfDWYac",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "9183316b-8ec7-43b6-996c-f55d42d78f00"
+        },
+        {
+          "trial_id": "cb8fc1ab-6cd1-4a6b-b7d7-3a8ef12ce46c",
+          "trial_name": "gsea-proteomics__4T2wKXG",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "be6987ec-0c1a-4a09-9a34-aede54eeac79"
+        },
+        {
+          "trial_id": "34b6ba79-26ae-48c7-87da-1c2091e2835b",
+          "trial_name": "gsea-proteomics__6S58o32",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "219b6cb0-e322-4e33-ad8d-80485890ac75"
+        },
+        {
+          "trial_id": "109a01bb-e944-4f8c-a0da-25bef380ba76",
+          "trial_name": "gsea-proteomics__7APh9qq",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "6b077af2-3f4e-4c83-ab66-ae0df1958291"
+        },
+        {
+          "trial_id": "49d92151-0370-4c68-be90-fcf1983a9d8b",
+          "trial_name": "gsea-proteomics__H5AEM7t",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "3f2f580c-b880-467a-a4c3-6dd971a8c4dc"
+        },
+        {
+          "trial_id": "594a54aa-05d2-42b7-b3a8-1c2c712d6683",
+          "trial_name": "gsea-proteomics__PGd95pD",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "670401ec-1540-4de6-98ed-6ea45c262b0f"
+        },
+        {
+          "trial_id": "01bb46a7-7134-4000-9f85-de8c28732b8b",
+          "trial_name": "gsea-proteomics__PiiB3sP",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "f55b7879-3e24-4879-9071-f42e01b25cc4"
+        },
+        {
+          "trial_id": "0b202b5f-763b-449c-b6c8-a28cc72eefd6",
+          "trial_name": "gsea-proteomics__R3ru7x3",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "c2430f43-b005-408f-a9d4-156725d34c1a"
+        },
+        {
+          "trial_id": "1b4a52b8-9c04-4c28-8f61-d41c195fa7ef",
+          "trial_name": "gsea-proteomics__Rhraju8",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "21753d08-79a0-4727-830a-bf91ccf11476"
+        },
+        {
+          "trial_id": "6877c1a1-097f-4073-b9eb-7a8971985544",
+          "trial_name": "gsea-proteomics__TqkrCDh",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "639f2af6-a91a-4aef-8908-1a2b62e4fe5c"
+        },
+        {
+          "trial_id": "d45a8807-4e4a-4a1a-b2ee-4cc4e59e29a2",
+          "trial_name": "gsea-proteomics__cHzuaBq",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "894f295a-0f2d-4d5e-adfe-19d00f08b2d3"
+        },
+        {
+          "trial_id": "8fc442c3-8cfe-43ea-9902-9fbf436ef69e",
+          "trial_name": "gsea-proteomics__gfYpAwT",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "ab6ce4f0-ac3a-42b3-821e-ffdc69ea081c"
+        },
+        {
+          "trial_id": "c8347f19-a5e0-4027-a9d0-47e4c886c5df",
+          "trial_name": "gsea-proteomics__mfynyTt",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "654d445b-d24b-49d0-9be5-5815dcd0fee8"
+        },
+        {
+          "trial_id": "ee0370cf-6ee5-4cb8-9a33-dbcd9c51a6a1",
+          "trial_name": "gsea-proteomics__mwYeuLZ",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "9ce2f6e6-68ee-4c73-a67f-771738b586ef"
+        },
+        {
+          "trial_id": "82b79eb3-6f7d-43db-ab2f-b5b980cad002",
+          "trial_name": "gsea-proteomics__oveZXoZ",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "68fe34fc-ffba-40bd-90e1-5803d74cc2fe"
+        },
+        {
+          "trial_id": "caa4faa0-de0a-4016-a529-8cff92334d28",
+          "trial_name": "gsea-proteomics__rYnb6B4",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "fb08ff3c-683f-4452-ade7-a105b9a95939"
+        },
+        {
+          "trial_id": "bebcb641-fc5d-43bd-b083-bc7556e53a41",
+          "trial_name": "gsea-proteomics__tcJyciQ",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "36fe7ac7-171f-4df6-818b-b6ebeec1303a"
+        },
+        {
+          "trial_id": "4806e8d3-104b-40b8-91e9-325c96400314",
+          "trial_name": "gsea-proteomics__uA6S4R3",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "a81f16bc-3a09-46fb-ae28-d01fc0f5c1a7"
+        },
+        {
+          "trial_id": "7df50640-088d-457b-921a-7adcd85998ef",
+          "trial_name": "gsea-proteomics__wE8xkci",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "b8138c6d-b668-4624-b37c-6931cce6912c"
+        },
+        {
+          "trial_id": "e9e740eb-76e7-44c1-9636-d1c98c534736",
+          "trial_name": "gsea-proteomics__zuYHYiH",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "5e851a5c-35dd-498b-98a3-656a984b4228"
+        },
+        {
+          "trial_id": "1b29fac1-f2cb-44b4-b649-2e37c1abfac8",
+          "trial_name": "gsea-proteomics__zxg4Zwu",
+          "task_name": "terminal-bench/gsea-proteomics",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "f7258042-8370-4efd-ba7e-d273813b50ad"
+        },
+        {
+          "trial_id": "edd19921-d5e0-45a3-821d-9407006be78b",
+          "trial_name": "mvcc-lsm-compaction__5qBdvFw",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "a7fed4a7-b513-4639-a93d-1219195f3829"
+        },
+        {
+          "trial_id": "730ad0b9-c903-43ce-b79e-14b5815a4497",
+          "trial_name": "mvcc-lsm-compaction__6JFjaHw",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "3d35a898-2d8a-475b-9221-5ad5ca06fff3"
+        },
+        {
+          "trial_id": "1bbad282-5851-48f6-ae9b-43e02626c299",
+          "trial_name": "mvcc-lsm-compaction__96wDXrh",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "4b80e377-7ec6-499a-91a5-867074b9fd1c"
+        },
+        {
+          "trial_id": "a33671e6-f4ce-4614-b49b-ec2c3ef3148d",
+          "trial_name": "mvcc-lsm-compaction__BCdRtHo",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "d326b1c3-b7f5-48a7-984a-b7ebad282782"
+        },
+        {
+          "trial_id": "2d2a9b59-49e5-4fc0-b9f4-7e23cdfe4b47",
+          "trial_name": "mvcc-lsm-compaction__Bt84hDU",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "093e15f4-d56e-44db-a549-f98a0d3843de"
+        },
+        {
+          "trial_id": "5f6b6867-fd95-46c9-ba5c-c9655223cdf3",
+          "trial_name": "mvcc-lsm-compaction__CoLEoZF",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "58fc960e-ad2d-42ac-9656-2bf3c03ff120"
+        },
+        {
+          "trial_id": "c82def2f-a6c4-4cd1-b0d7-81f49069032d",
+          "trial_name": "mvcc-lsm-compaction__EQJsuHN",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "eda906ee-09eb-4ade-ac4e-cf1f1b3968a3"
+        },
+        {
+          "trial_id": "b058941a-7f6c-4ed0-8790-702253e283ab",
+          "trial_name": "mvcc-lsm-compaction__TJQNifJ",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "2dc6e60f-0f3a-40de-a7bc-a7fd2c0df1b6"
+        },
+        {
+          "trial_id": "3fccf28f-4a0f-43d6-87dd-0cb1f3194ddf",
+          "trial_name": "mvcc-lsm-compaction__ZXoNo8R",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "61303656-faae-4936-8edc-e35e16dde1fc"
+        },
+        {
+          "trial_id": "f0d73507-6b93-40e5-ad9c-229383c93496",
+          "trial_name": "mvcc-lsm-compaction__a9RcqaG",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "e0f6b3bb-872b-40d8-b288-6319e0a68f95"
+        },
+        {
+          "trial_id": "fc1377d7-0f83-4bcd-bcdd-0c3b1b1ccbce",
+          "trial_name": "mvcc-lsm-compaction__eqAaEvg",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "43263350-b8ba-4cb8-8132-2553a3a7dfcf"
+        },
+        {
+          "trial_id": "60828221-b1da-48ce-aad0-f500a5baaf1c",
+          "trial_name": "mvcc-lsm-compaction__gdnfKec",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "45e45bcf-1a78-447f-8cd5-19c9b299d230"
+        },
+        {
+          "trial_id": "c20e67cf-c06e-4017-9b2f-12c1fde5879c",
+          "trial_name": "mvcc-lsm-compaction__hKvzySn",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "7c938523-0460-4ffd-91ab-64304ba82780"
+        },
+        {
+          "trial_id": "ea13cd9a-807b-4d02-890a-0a0a22a9c992",
+          "trial_name": "mvcc-lsm-compaction__i6qD9KY",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "e1484db4-1fe4-4a32-9936-44bfd74782a7"
+        },
+        {
+          "trial_id": "2630af2f-9f6e-4a79-affd-9e162f4fe7be",
+          "trial_name": "mvcc-lsm-compaction__j3KMD7z",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "1b42ace4-ca64-4f2d-adb8-a1bcb05d18ba"
+        },
+        {
+          "trial_id": "8075206d-96b9-4eb8-863c-ee5239ed2043",
+          "trial_name": "mvcc-lsm-compaction__kzQZ7mW",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "32519e75-397b-4d4a-b0be-fed1081ab88c"
+        },
+        {
+          "trial_id": "10ab51a4-4a57-4877-bf9f-fadf42e2d135",
+          "trial_name": "mvcc-lsm-compaction__o9HQzqE",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "93618f9e-ccd8-4cf5-9af2-4f702da6990a"
+        },
+        {
+          "trial_id": "40a44fca-f3b1-4a95-bf84-4cfc353d0532",
+          "trial_name": "mvcc-lsm-compaction__qizHMjs",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "6f47d1c8-3e89-4021-a6d9-03e5813b2bad"
+        },
+        {
+          "trial_id": "5e246808-e1a0-4203-8d65-041180253c61",
+          "trial_name": "mvcc-lsm-compaction__tBuSNjq",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "af537175-5a7f-409e-914d-67ef998d0ab5"
+        },
+        {
+          "trial_id": "951265de-54f2-4105-aab2-3275c3c83aa1",
+          "trial_name": "mvcc-lsm-compaction__yKcebwT",
+          "task_name": "terminal-bench/mvcc-lsm-compaction",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "f49c46c6-3347-4345-971f-a6d759e1b00a"
+        },
+        {
+          "trial_id": "474fe8e8-c981-4e9e-8250-aef7fbdbd655",
+          "trial_name": "production-planning__2TbLNNy",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "53367d47-faa7-46c0-a34f-6f769977efc8"
+        },
+        {
+          "trial_id": "7d5c162c-166c-43e7-9c06-fe9e34d97768",
+          "trial_name": "production-planning__4PpZB7A",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "cb98b75a-d0e1-435a-9469-a95505c9535e"
+        },
+        {
+          "trial_id": "00293f5d-59da-47a8-8aa1-a60b79df7667",
+          "trial_name": "production-planning__4uiXjX6",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "2ceeb043-850f-48fd-acfd-5091e8a0951c"
+        },
+        {
+          "trial_id": "c023e838-1c7a-4d3d-8f14-c22906f105bb",
+          "trial_name": "production-planning__5u778Rq",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "4a8cd9f4-4509-4bf6-8986-a3ca364af527"
+        },
+        {
+          "trial_id": "06a3d5b9-d234-4192-a2b3-017fb6f511e5",
+          "trial_name": "production-planning__6VCtBT2",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "7c761db0-e9a1-461a-922a-1855be51402f"
+        },
+        {
+          "trial_id": "22ab3122-dc63-40b1-8731-a7c8ea5b781a",
+          "trial_name": "production-planning__8iNrwyv",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "860cfa18-35f2-44d0-b3ba-52cfd6cf54a1"
+        },
+        {
+          "trial_id": "4ac2cabb-a8bf-4a92-bba8-ead8eaeb0058",
+          "trial_name": "production-planning__9aASNPk",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "ed25571a-9ea2-450f-bde8-09b10681ad40"
+        },
+        {
+          "trial_id": "f872463e-cbec-4382-9e8b-328be1f5630f",
+          "trial_name": "production-planning__FPfjGC6",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "dbab5ff3-baaf-4523-b5f3-76523ddbea43"
+        },
+        {
+          "trial_id": "83dc0d56-2e39-4fe4-ba63-def9ac7ca4a8",
+          "trial_name": "production-planning__JQFWKvK",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "b0b8c5e5-4122-40bc-bfdd-1ef36e47bd9f"
+        },
+        {
+          "trial_id": "b7fb30a4-197d-4aff-8f5f-18d2bd499946",
+          "trial_name": "production-planning__TyKUEnC",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "af998dc9-5a21-4c6d-8875-b6f7ba9a4825"
+        },
+        {
+          "trial_id": "0641bfc8-4d63-4925-a8df-81564e2c85cc",
+          "trial_name": "production-planning__WrYTmuw",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "aabb58d5-d15e-4526-af3d-d3e4f6949f31"
+        },
+        {
+          "trial_id": "f5134f79-aaf9-4454-9fce-b8d52251d24c",
+          "trial_name": "production-planning__Z8Nk8pw",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "d659fc6c-a4ae-4bcd-bd4b-6f45a1c6c148"
+        },
+        {
+          "trial_id": "c3bb7b80-7c8f-4f10-bd62-0c7b4d3c8e47",
+          "trial_name": "production-planning__av2kHSE",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "c00c5175-7528-4066-8a82-c2a20986d3c5"
+        },
+        {
+          "trial_id": "037f8bfd-1079-46a1-9da7-b5d694ff6aa6",
+          "trial_name": "production-planning__etkHuXY",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "5beaca37-5d8f-4301-9108-c447d533b7f8"
+        },
+        {
+          "trial_id": "3285488c-fe45-4a68-a40d-1b0757c7b7f4",
+          "trial_name": "production-planning__iyfhNUi",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "fba93abb-c331-45eb-86e5-b74011151d54"
+        },
+        {
+          "trial_id": "63bfe38c-db7f-41d9-a6ea-d93635973bd3",
+          "trial_name": "production-planning__mtxhMdx",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "8cd6abfc-58d9-407a-a37e-f29b83491a29"
+        },
+        {
+          "trial_id": "02e797e4-ce9d-48f0-9b48-652f0e48b2e9",
+          "trial_name": "production-planning__pGqb4PM",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "d27d9aa2-f3dd-40ca-a0ff-fb7046539eb5"
+        },
+        {
+          "trial_id": "c9f06bec-0921-40a2-a3b2-9ad6caf3ba60",
+          "trial_name": "production-planning__rbiHRmq",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "d8d7440a-a93a-4b04-a8b9-49479a436cea"
+        },
+        {
+          "trial_id": "92bde4ea-7fb7-4843-839e-e2d02638f32b",
+          "trial_name": "production-planning__ukYKBeW",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "42ab7158-b673-47f7-9817-c5193a5be95c"
+        },
+        {
+          "trial_id": "85e4c2ae-ce49-4cd8-8947-dbe94e2e2203",
+          "trial_name": "production-planning__zRD2qW7",
+          "task_name": "terminal-bench/production-planning",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "e0990b03-6696-4213-acd7-20ab1549385a"
+        },
+        {
+          "trial_id": "dd753a5f-9070-446d-8e95-8805e35fb21e",
+          "trial_name": "vf2-speedup-networkx__46x2Txo",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "3bca962a-56e9-4d36-a6a0-8e595c7df9ce"
+        },
+        {
+          "trial_id": "2474a830-7657-472d-a83b-cbc34a7e0e1a",
+          "trial_name": "vf2-speedup-networkx__4M3FHwY",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "15642677-7ea3-416f-af7f-23e8e31d0922"
+        },
+        {
+          "trial_id": "48c7f0d0-e85d-4e56-94cc-1e30708022ef",
+          "trial_name": "vf2-speedup-networkx__76HvrXA",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "33271031-5816-4803-a9d2-0d673641eef1"
+        },
+        {
+          "trial_id": "f132190c-78d4-4b7e-82df-a072d09152a9",
+          "trial_name": "vf2-speedup-networkx__7bK2c3L",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "d8b8e5b3-1d3f-4227-9ba4-e9eafaee5006"
+        },
+        {
+          "trial_id": "a63cb388-5db1-452a-8d0a-e7d00bbfde50",
+          "trial_name": "vf2-speedup-networkx__7snk2do",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "fad8b76c-b362-4e01-98b8-11c75b305bca"
+        },
+        {
+          "trial_id": "baa48a42-634b-4431-bcaa-77a54f485802",
+          "trial_name": "vf2-speedup-networkx__FcNmwh4",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "683521cd-da9f-4a58-95ae-7f6f38917e0d"
+        },
+        {
+          "trial_id": "9d5b2e3a-8146-4719-9467-99d0d00a194e",
+          "trial_name": "vf2-speedup-networkx__KMY2MHV",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "0da561ce-29d5-4ac3-beb2-84ccb795e553"
+        },
+        {
+          "trial_id": "65c98478-0f8f-45f3-89f3-8cdbdedbb56c",
+          "trial_name": "vf2-speedup-networkx__MkP4MER",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "71bde643-8621-4923-a837-dfd0a400c354"
+        },
+        {
+          "trial_id": "a5585f19-b199-4bdc-a38d-ab79990aa758",
+          "trial_name": "vf2-speedup-networkx__S8k6jYF",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "de514ddc-d691-4806-9df3-183819285244"
+        },
+        {
+          "trial_id": "e86418f9-6a41-4725-8386-d3a3f023ce07",
+          "trial_name": "vf2-speedup-networkx__UGqEJnF",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "fd770c4c-0cdb-4d85-b8fc-54137aaa1de3"
+        },
+        {
+          "trial_id": "48cc3948-943f-45ec-a163-e7b3b9bae184",
+          "trial_name": "vf2-speedup-networkx__ZAEdyi9",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "ca990638-0e94-4c61-bf99-d825c7d88aeb"
+        },
+        {
+          "trial_id": "42bfa3da-4bd0-4684-8503-29c4f2e85b46",
+          "trial_name": "vf2-speedup-networkx__d9ARH87",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "e75742fc-4f2a-451d-a7e4-9bf51a6cd2e2"
+        },
+        {
+          "trial_id": "ac440dfa-9ecc-48fb-b523-ea1c78199181",
+          "trial_name": "vf2-speedup-networkx__qCfdtaF",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "028b6283-7f3e-4808-ab33-d11866539174"
+        },
+        {
+          "trial_id": "f181b618-ac23-45ca-aece-9cc095ced759",
+          "trial_name": "vf2-speedup-networkx__r9cQhYK",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "3f8896d1-de44-4df9-ab5f-5e8e09534f33"
+        },
+        {
+          "trial_id": "36ad31f2-24cd-4bdd-bbe3-d35a7e9175be",
+          "trial_name": "vf2-speedup-networkx__shLBXg2",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "04cf29f7-bcbe-4026-80a5-395107bcae45"
+        },
+        {
+          "trial_id": "afb8b285-f944-4bdb-b4c4-156dffa41aa7",
+          "trial_name": "vf2-speedup-networkx__t4zhCpx",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "dcb25508-e7a0-4e98-9710-0fde64f44f7f"
+        },
+        {
+          "trial_id": "06d0cdab-47c8-498d-b144-e74a635eb1ce",
+          "trial_name": "vf2-speedup-networkx__vqp2AEw",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "158643aa-b375-44a7-83bb-3a3e003b4c20"
+        },
+        {
+          "trial_id": "d10881f0-69fc-4635-a76c-6037cd415662",
+          "trial_name": "vf2-speedup-networkx__wPxzqfQ",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "0db7f147-d044-4eb0-8fb0-819d7786cbc2"
+        },
+        {
+          "trial_id": "48e0fd5b-37ef-4b8c-a713-4ef999418576",
+          "trial_name": "vf2-speedup-networkx__yvvKGcd",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "7100e881-3c3b-440d-8b30-202c142eae50"
+        },
+        {
+          "trial_id": "cd5568df-93bf-4df4-b302-7e36e37b57e7",
+          "trial_name": "vf2-speedup-networkx__zvHoJbi",
+          "task_name": "terminal-bench/vf2-speedup-networkx",
+          "job_id": "7b93a9ea-843a-47ec-9805-eb64375a8cd9",
+          "job_dir": "tb40-passk-fresh-v1",
+          "claude_session_id": "60083baa-b903-4867-9557-43b1ab658c36"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}

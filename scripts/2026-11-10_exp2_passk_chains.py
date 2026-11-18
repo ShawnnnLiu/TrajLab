@@ -105,7 +105,7 @@ def plan(args: argparse.Namespace) -> None:
     if len({lane["run"] for lane in lanes}) != len(lanes):
         raise SystemExit("each lane needs its own run name")
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    out = {"budget": args.budget, "arms": args.arms, "lanes": lanes}
+    out = {"budget": args.budget, "arms": args.arms, "label": args.label, "lanes": lanes}
     args.out.write_text(json.dumps(out, indent=2) + "\n")
     logger.info("%d lanes, N = %d, arms %s in %s", len(lanes), args.budget, args.arms, args.out)
 
@@ -120,7 +120,7 @@ def lane_settings(found: dict[str, Any]) -> list[Exp2Settings]:
             kind="dry-run",
             corpus_job=Path(lane["job"]),
             corpus_store=Path(lane["store"]),
-            corpus_config=CORPUS_CONFIG,
+            corpus_config=Path(lane.get("config", CORPUS_CONFIG)),
             trials=lane["trials"],
             budget=found["budget"],
             arms=found["arms"],
@@ -216,10 +216,11 @@ def run(args: argparse.Namespace) -> None:
         sys.exit("run from the repo root")
     args.chains_root.mkdir(parents=True, exist_ok=True)
     args.jobs_dir.mkdir(parents=True, exist_ok=True)
+    found = json.loads(args.plan.read_text())
     runners = [
         Exp2Runner(
             settings=made,
-            preregistration=PROBE_LABEL,
+            preregistration=found.get("label") or PROBE_LABEL,
             root=args.chains_root,
             jobs_dir=args.jobs_dir,
             manifests_dir=args.chains_root / "_manifests",
@@ -228,11 +229,12 @@ def run(args: argparse.Namespace) -> None:
             max_running=0,
             hold_below_gb=args.hold_below_gb,
             retry_failed_ingests=True,
+            prune_ingested=args.prune_ingested,
             spawn=spawn,
             capture_problem=watcher_only,
             commit_manifests=lambda _: [],
         )
-        for made in lane_settings(json.loads(args.plan.read_text()))
+        for made in lane_settings(found)
     ]
     stop_file = args.plan.with_name(args.plan.name + ".stop")
     stop = threading.Event()
@@ -276,7 +278,8 @@ def graded(trial: Path) -> float | None:
         return float(found.group(1))
     details = trial / "verifier" / "reward_details.json"
     if details.is_file():
-        value = json.loads(details.read_text()).get("combined")
+        scores = json.loads(details.read_text())
+        value = scores.get("combined_raw", scores.get("combined"))
         return float(value) if value is not None else None
     return None
 
@@ -414,6 +417,7 @@ def main() -> None:
     p.add_argument("--budget", type=int, default=20, help="N: retries per chain at most.")
     p.add_argument("--arms", nargs="+", default=["control", "record-engine"])
     p.add_argument("--out", type=Path, required=True)
+    p.add_argument("--label", default=PROBE_LABEL, help="Recorded where a run has its commit.")
     for name, text in (
         ("check", "Check every lane and prompt, without Docker."),
         ("run", "Run the chains."),
@@ -429,6 +433,12 @@ def main() -> None:
             c.add_argument("--max-running", type=int, default=2, help="Attempts at once.")
             c.add_argument("--hold-below-gb", type=float, default=15.0)
             c.add_argument("--poll", type=float, default=20.0, help="Seconds between passes.")
+            c.add_argument(
+                "--prune-ingested",
+                action="store_true",
+                help="Remove a failed attempt's checkpoint images once it is in its chain's "
+                "store (ADR-0022's opt-in).",
+            )
     args = parser.parse_args()
     {"plan": plan, "check": check, "run": run, "report": report}[args.command](args)
 

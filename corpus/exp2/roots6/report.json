@@ -1,0 +1,804 @@
+{
+ "budget": 20,
+ "api_key_sources": [
+  "none"
+ ],
+ "curves": [
+  {
+   "task": "atrx-vep-crispr",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [
+    3,
+    5,
+    10
+   ],
+   "censored_at": [],
+   "attempts_run": 18,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "atrx-vep-crispr",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [
+    1,
+    4,
+    5
+   ],
+   "censored_at": [],
+   "attempts_run": 10,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  }
+ ],
+ "chains": [
+  {
+   "run": "roots6-av",
+   "task": "atrx-vep-crispr",
+   "root": "atrx-vep-crispr__V525sES",
+   "arm": "control",
+   "counted": 3,
+   "first_pass": 3,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots6-av-atrx-vep-crispr__V525sES-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 14,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8213,
+     "tool_calls": 23
+    },
+    {
+     "attempt": 2,
+     "job": "roots6-av-atrx-vep-crispr__V525sES-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 14,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2576,
+     "tool_calls": 31
+    },
+    {
+     "attempt": 3,
+     "job": "roots6-av-atrx-vep-crispr__V525sES-control-a3",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 16,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.822,
+     "tool_calls": 21
+    }
+   ]
+  },
+  {
+   "run": "roots6-av",
+   "task": "atrx-vep-crispr",
+   "root": "atrx-vep-crispr__V525sES",
+   "arm": "record-engine",
+   "counted": 4,
+   "first_pass": 4,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots6-av-atrx-vep-crispr__V525sES-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 15,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3711,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots6-av-atrx-vep-crispr__V525sES-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 15,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.485,
+     "tool_calls": 26,
+     "cut_reads": 0,
+     "queries": 9,
+     "row_capped": 0,
+     "attempt_filters": 7
+    },
+    {
+     "attempt": 3,
+     "job": "roots6-av-atrx-vep-crispr__V525sES-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.5556,
+     "tool_calls": 31,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 4,
+     "job": "roots6-av-atrx-vep-crispr__V525sES-record-engine-a4",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 16,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9621,
+     "tool_calls": 22,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 6
+    }
+   ]
+  },
+  {
+   "run": "roots6-av",
+   "task": "atrx-vep-crispr",
+   "root": "atrx-vep-crispr__2rQmNqC",
+   "arm": "control",
+   "counted": 10,
+   "first_pass": 10,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots6-av-atrx-vep-crispr__2rQmNqC-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2264,
+     "tool_calls": 31
+    },
+    {
+     "attempt": 2,
+     "job": "roots6-av-atrx-vep-crispr__2rQmNqC-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6459,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 3,
+     "job": "roots6-av-atrx-vep-crispr__2rQmNqC-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9876,
+     "tool_calls": 28
+    },
+    {
+     "attempt": 4,
+     "job": "roots6-av-atrx-vep-crispr__2rQmNqC-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 14,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6423,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 5,
+     "job": "roots6-av-atrx-vep-crispr__2rQmNqC-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6329,
+     "tool_calls": 20
+    },
+    {
+     "attempt": 6,
+     "job": "roots6-av-atrx-vep-crispr__2rQmNqC-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 13,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8105,
+     "tool_calls": 29
+    },
+    {
+     "attempt": 7,
+     "job": "roots6-av-atrx-vep-crispr__2rQmNqC-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 13,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9775,
+     "tool_calls": 32
+    },
+    {
+     "attempt": 8,
+     "job": "roots6-av-atrx-vep-crispr__2rQmNqC-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.077,
+     "tool_calls": 35
+    },
+    {
+     "attempt": 9,
+     "job": "roots6-av-atrx-vep-crispr__2rQmNqC-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0127,
+     "tool_calls": 29
+    },
+    {
+     "attempt": 10,
+     "job": "roots6-av-atrx-vep-crispr__2rQmNqC-control-a10",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 16,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0993,
+     "tool_calls": 33
+    }
+   ]
+  },
+  {
+   "run": "roots6-av",
+   "task": "atrx-vep-crispr",
+   "root": "atrx-vep-crispr__2rQmNqC",
+   "arm": "record-engine",
+   "counted": 5,
+   "first_pass": 5,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots6-av-atrx-vep-crispr__2rQmNqC-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5119,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots6-av-atrx-vep-crispr__2rQmNqC-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 15,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6541,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 3,
+     "job": "roots6-av-atrx-vep-crispr__2rQmNqC-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6049,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 4,
+     "job": "roots6-av-atrx-vep-crispr__2rQmNqC-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7821,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 5,
+     "job": "roots6-av-atrx-vep-crispr__2rQmNqC-record-engine-a5",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 16,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5775,
+     "tool_calls": 14,
+     "cut_reads": 1,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 5
+    }
+   ]
+  },
+  {
+   "run": "roots6-av",
+   "task": "atrx-vep-crispr",
+   "root": "atrx-vep-crispr__6zUStrp",
+   "arm": "control",
+   "counted": 5,
+   "first_pass": 5,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots6-av-atrx-vep-crispr__6zUStrp-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9873,
+     "tool_calls": 29
+    },
+    {
+     "attempt": 2,
+     "job": "roots6-av-atrx-vep-crispr__6zUStrp-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 14,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0908,
+     "tool_calls": 37
+    },
+    {
+     "attempt": 3,
+     "job": "roots6-av-atrx-vep-crispr__6zUStrp-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 14,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.125,
+     "tool_calls": 25
+    },
+    {
+     "attempt": 4,
+     "job": "roots6-av-atrx-vep-crispr__6zUStrp-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6756,
+     "tool_calls": 20
+    },
+    {
+     "attempt": 5,
+     "job": "roots6-av-atrx-vep-crispr__6zUStrp-control-a5",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 16,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0693,
+     "tool_calls": 27
+    }
+   ]
+  },
+  {
+   "run": "roots6-av",
+   "task": "atrx-vep-crispr",
+   "root": "atrx-vep-crispr__6zUStrp",
+   "arm": "record-engine",
+   "counted": 1,
+   "first_pass": 1,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots6-av-atrx-vep-crispr__6zUStrp-record-engine-a1",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 16,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8441,
+     "tool_calls": 22,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 0
+    }
+   ]
+  }
+ ]
+}

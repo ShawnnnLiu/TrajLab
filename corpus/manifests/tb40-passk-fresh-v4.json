@@ -1,0 +1,197 @@
+{
+  "corpus_id": "tb40-passk-fresh-v4",
+  "created_at": "2026-11-17T05:22:07.844114Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "f90906e25bb4b2bcbdab4cc8583c021883820b69",
+  "repo_dirty": true,
+  "config_path": "configs/harbor/tb40-passk-fresh-v4.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 5,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 0.5,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "writes_recorded": false,
+  "tasks": [
+    {
+      "name": "terminal-bench/fin-saccr-rwa",
+      "digest": "sha256:bd0ee47169986cfdd4b0ccc98f461382c612e1301dd75f98d1381015eb25398a"
+    },
+    {
+      "name": "terminal-bench/layout-config-recreation2",
+      "digest": "sha256:193312b14b1dcb6ef551efff691cbb708b2032f58879b0b19efe88a2cddc9deb"
+    },
+    {
+      "name": "terminal-bench/wal-recovery-ordering",
+      "digest": "sha256:8eb700419711e0d5eba317b8f6dec41aa3411e03e320e82b8da8070974ff3aae"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb40-passk-fresh-v4",
+      "job_id": "848a9af8-6172-4fc5-8ae7-cd6a66157e0c",
+      "job_config": {
+        "job_name": "tb40-passk-fresh-v4",
+        "jobs_dir": "corpus/jobs",
+        "n_attempts": 5,
+        "agent_timeout_multiplier": 0.5,
+        "n_concurrent_trials": 2,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "sha256:39d9f44b40420cde8fdcc087579c0d72a7e14fa3656d603c3f0d22fb35e27732",
+            "task_names": [
+              "terminal-bench/layout-config-recreation2",
+              "terminal-bench/wal-recovery-ordering",
+              "terminal-bench/fin-saccr-rwa"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "3332a42f-b094-487b-9ddd-8b780d1a842e",
+          "trial_name": "fin-saccr-rwa__2JyFpZC",
+          "task_name": "terminal-bench/fin-saccr-rwa",
+          "job_id": "848a9af8-6172-4fc5-8ae7-cd6a66157e0c",
+          "job_dir": "tb40-passk-fresh-v4",
+          "claude_session_id": "e6f8d757-f488-4aaf-a3c9-af81528505ac"
+        },
+        {
+          "trial_id": "2c208283-eb1f-4d46-b9e3-ea7f4ae6c1c9",
+          "trial_name": "fin-saccr-rwa__6ZoGiqY",
+          "task_name": "terminal-bench/fin-saccr-rwa",
+          "job_id": "848a9af8-6172-4fc5-8ae7-cd6a66157e0c",
+          "job_dir": "tb40-passk-fresh-v4",
+          "claude_session_id": "444eb0c0-403e-476f-9da9-761fb94583f3"
+        },
+        {
+          "trial_id": "e3dafae5-48b6-4033-922a-079b86d0e53c",
+          "trial_name": "fin-saccr-rwa__8dZgpQB",
+          "task_name": "terminal-bench/fin-saccr-rwa",
+          "job_id": "848a9af8-6172-4fc5-8ae7-cd6a66157e0c",
+          "job_dir": "tb40-passk-fresh-v4",
+          "claude_session_id": "dfe99d4d-4a0a-49f5-83ea-91656e033f69"
+        },
+        {
+          "trial_id": "1ae5699b-5360-4f8d-b1bc-bc7d7f6e8477",
+          "trial_name": "fin-saccr-rwa__SV6jy7L",
+          "task_name": "terminal-bench/fin-saccr-rwa",
+          "job_id": "848a9af8-6172-4fc5-8ae7-cd6a66157e0c",
+          "job_dir": "tb40-passk-fresh-v4",
+          "claude_session_id": "3679d513-c0ee-43fc-aa39-f6af1f34defb"
+        },
+        {
+          "trial_id": "bb91c069-b5d2-4b2b-8656-9a1a56d8c3b1",
+          "trial_name": "fin-saccr-rwa__gRTfc2w",
+          "task_name": "terminal-bench/fin-saccr-rwa",
+          "job_id": "848a9af8-6172-4fc5-8ae7-cd6a66157e0c",
+          "job_dir": "tb40-passk-fresh-v4",
+          "claude_session_id": "290fd783-d70e-4637-9042-8033496055ec"
+        },
+        {
+          "trial_id": "5d61784f-d74a-4705-b04b-748452ac93ce",
+          "trial_name": "layout-config-recreation2__BZjnb3r",
+          "task_name": "terminal-bench/layout-config-recreation2",
+          "job_id": "848a9af8-6172-4fc5-8ae7-cd6a66157e0c",
+          "job_dir": "tb40-passk-fresh-v4",
+          "claude_session_id": "f297c6ad-0be4-4a65-9bd0-17a97a710bb1"
+        },
+        {
+          "trial_id": "bcc47644-59b9-4806-92ec-34e5969458a4",
+          "trial_name": "layout-config-recreation2__EGoEQ8h",
+          "task_name": "terminal-bench/layout-config-recreation2",
+          "job_id": "848a9af8-6172-4fc5-8ae7-cd6a66157e0c",
+          "job_dir": "tb40-passk-fresh-v4",
+          "claude_session_id": "f268635c-8ecb-4243-808c-d3c5a7ae9087"
+        },
+        {
+          "trial_id": "8f977133-cd7a-419b-9347-c12d91b613cb",
+          "trial_name": "layout-config-recreation2__mX4cMaF",
+          "task_name": "terminal-bench/layout-config-recreation2",
+          "job_id": "848a9af8-6172-4fc5-8ae7-cd6a66157e0c",
+          "job_dir": "tb40-passk-fresh-v4",
+          "claude_session_id": "6feb3107-0ff9-4d99-b28e-cfef2525e87e"
+        },
+        {
+          "trial_id": "14840a90-6114-41f5-bf1c-062d4ceafa7a",
+          "trial_name": "layout-config-recreation2__nYm6Uf3",
+          "task_name": "terminal-bench/layout-config-recreation2",
+          "job_id": "848a9af8-6172-4fc5-8ae7-cd6a66157e0c",
+          "job_dir": "tb40-passk-fresh-v4",
+          "claude_session_id": "6596c340-2192-4f2c-b0de-c49682ae5577"
+        },
+        {
+          "trial_id": "4ae3b93c-8b7d-4b43-a9f3-a333921feb5f",
+          "trial_name": "layout-config-recreation2__oSM85xp",
+          "task_name": "terminal-bench/layout-config-recreation2",
+          "job_id": "848a9af8-6172-4fc5-8ae7-cd6a66157e0c",
+          "job_dir": "tb40-passk-fresh-v4",
+          "claude_session_id": "cfa7ad06-408a-4603-9bfc-bc726fad2e46"
+        },
+        {
+          "trial_id": "e17c6818-f3dd-44c7-a680-2141ed39d39c",
+          "trial_name": "wal-recovery-ordering__6rouLXR",
+          "task_name": "terminal-bench/wal-recovery-ordering",
+          "job_id": "848a9af8-6172-4fc5-8ae7-cd6a66157e0c",
+          "job_dir": "tb40-passk-fresh-v4",
+          "claude_session_id": "376ca4f2-7aca-48df-ab6f-c6a9ef1ef7c1"
+        },
+        {
+          "trial_id": "753ffb81-85f4-43b5-8af6-835443f1c1e6",
+          "trial_name": "wal-recovery-ordering__Us63h7N",
+          "task_name": "terminal-bench/wal-recovery-ordering",
+          "job_id": "848a9af8-6172-4fc5-8ae7-cd6a66157e0c",
+          "job_dir": "tb40-passk-fresh-v4",
+          "claude_session_id": "a13d0b99-2dfd-4b8c-a0f6-cb9088f349d4"
+        },
+        {
+          "trial_id": "66ba38d1-b05f-4ab5-9a19-c0a1565209d9",
+          "trial_name": "wal-recovery-ordering__cDtYLgN",
+          "task_name": "terminal-bench/wal-recovery-ordering",
+          "job_id": "848a9af8-6172-4fc5-8ae7-cd6a66157e0c",
+          "job_dir": "tb40-passk-fresh-v4",
+          "claude_session_id": "435fa462-b39e-4b9d-91d6-bb4eb9f6026c"
+        },
+        {
+          "trial_id": "e9d9ff05-fcb9-4e25-8a14-aeb4609994ac",
+          "trial_name": "wal-recovery-ordering__jQ8pDsF",
+          "task_name": "terminal-bench/wal-recovery-ordering",
+          "job_id": "848a9af8-6172-4fc5-8ae7-cd6a66157e0c",
+          "job_dir": "tb40-passk-fresh-v4",
+          "claude_session_id": "3cfe89b4-f7a7-4d08-9c20-d77c2e4da619"
+        },
+        {
+          "trial_id": "b947293a-e436-4693-af48-adbc835edb1f",
+          "trial_name": "wal-recovery-ordering__yTJbbKx",
+          "task_name": "terminal-bench/wal-recovery-ordering",
+          "job_id": "848a9af8-6172-4fc5-8ae7-cd6a66157e0c",
+          "job_dir": "tb40-passk-fresh-v4",
+          "claude_session_id": "aaad66be-4324-4ee6-8b91-886025f11ec8"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}

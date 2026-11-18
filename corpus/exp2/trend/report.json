@@ -1,0 +1,5606 @@
+{
+ "budget": 20,
+ "api_key_sources": [
+  "none"
+ ],
+ "curves": [
+  {
+   "task": "gsea-proteomics",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "gsea-proteomics",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [
+    4,
+    7
+   ],
+   "censored_at": [
+    20
+   ],
+   "attempts_run": 31,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 2,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "mvcc-lsm-compaction",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [
+    1,
+    1,
+    17
+   ],
+   "censored_at": [],
+   "attempts_run": 19,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "mvcc-lsm-compaction",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [
+    4,
+    5,
+    6
+   ],
+   "censored_at": [],
+   "attempts_run": 15,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "production-planning",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [
+    2,
+    5,
+    14
+   ],
+   "censored_at": [],
+   "attempts_run": 21,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "production-planning",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [
+    1,
+    1,
+    2
+   ],
+   "censored_at": [],
+   "attempts_run": 4,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "vf2-speedup-networkx",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [
+    6,
+    16,
+    16
+   ],
+   "censored_at": [],
+   "attempts_run": 38,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "vf2-speedup-networkx",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [
+    19,
+    19
+   ],
+   "censored_at": [
+    20
+   ],
+   "attempts_run": 58,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 2,
+     "known": 3
+    }
+   ]
+  }
+ ],
+ "chains": [
+  {
+   "run": "trend-pp-a",
+   "task": "production-planning",
+   "root": "production-planning__ukYKBeW",
+   "arm": "control",
+   "counted": 14,
+   "first_pass": 14,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-pp-a-production-planning__ukYKBeW-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9734,
+     "tool_calls": 23
+    },
+    {
+     "attempt": 2,
+     "job": "trend-pp-a-production-planning__ukYKBeW-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9761,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 3,
+     "job": "trend-pp-a-production-planning__ukYKBeW-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0995,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 4,
+     "job": "trend-pp-a-production-planning__ukYKBeW-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 18,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8862,
+     "tool_calls": 35
+    },
+    {
+     "attempt": 5,
+     "job": "trend-pp-a-production-planning__ukYKBeW-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9358,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 6,
+     "job": "trend-pp-a-production-planning__ukYKBeW-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 30.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.5809,
+     "tool_calls": 36
+    },
+    {
+     "attempt": 7,
+     "job": "trend-pp-a-production-planning__ukYKBeW-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 18,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.3694,
+     "tool_calls": 27
+    },
+    {
+     "attempt": 8,
+     "job": "trend-pp-a-production-planning__ukYKBeW-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 15.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 16,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.6108,
+     "tool_calls": 34
+    },
+    {
+     "attempt": 9,
+     "job": "trend-pp-a-production-planning__ukYKBeW-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.6536,
+     "tool_calls": 30
+    },
+    {
+     "attempt": 10,
+     "job": "trend-pp-a-production-planning__ukYKBeW-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.233,
+     "tool_calls": 24
+    },
+    {
+     "attempt": 11,
+     "job": "trend-pp-a-production-planning__ukYKBeW-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8754,
+     "tool_calls": 37
+    },
+    {
+     "attempt": 12,
+     "job": "trend-pp-a-production-planning__ukYKBeW-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2997,
+     "tool_calls": 29
+    },
+    {
+     "attempt": 13,
+     "job": "trend-pp-a-production-planning__ukYKBeW-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 45.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.0918,
+     "tool_calls": 48
+    },
+    {
+     "attempt": 14,
+     "job": "trend-pp-a-production-planning__ukYKBeW-control-a14",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 17.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 20,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.5561,
+     "tool_calls": 37
+    }
+   ]
+  },
+  {
+   "run": "trend-pp-a",
+   "task": "production-planning",
+   "root": "production-planning__ukYKBeW",
+   "arm": "record-engine",
+   "counted": 2,
+   "first_pass": 2,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-pp-a-production-planning__ukYKBeW-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0439,
+     "tool_calls": 22,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "trend-pp-a-production-planning__ukYKBeW-record-engine-a2",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 20,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8537,
+     "tool_calls": 31,
+     "cut_reads": 0,
+     "queries": 11,
+     "row_capped": 0,
+     "attempt_filters": 7
+    }
+   ]
+  },
+  {
+   "run": "trend-vf-a",
+   "task": "vf2-speedup-networkx",
+   "root": "vf2-speedup-networkx__7bK2c3L",
+   "arm": "control",
+   "counted": 16,
+   "first_pass": 16,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.3,
+     "prompt_delivered": true,
+     "graded": 116.1,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7531,
+     "tool_calls": 23
+    },
+    {
+     "attempt": 2,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.3,
+     "prompt_delivered": true,
+     "graded": 1057.4,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9738,
+     "tool_calls": 23
+    },
+    {
+     "attempt": 3,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 28.0,
+     "prompt_delivered": true,
+     "graded": 3079.3,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.2853,
+     "tool_calls": 49
+    },
+    {
+     "attempt": 4,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 18.7,
+     "prompt_delivered": true,
+     "graded": 175.0,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6713,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 5,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 31.7,
+     "prompt_delivered": true,
+     "graded": 2420.6,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.59,
+     "tool_calls": 56
+    },
+    {
+     "attempt": 6,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": 1122.1,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0128,
+     "tool_calls": 25
+    },
+    {
+     "attempt": 7,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": 1173.2,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.5004,
+     "tool_calls": 33
+    },
+    {
+     "attempt": 8,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 20.0,
+     "prompt_delivered": true,
+     "graded": 2502.7,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.1736,
+     "tool_calls": 48
+    },
+    {
+     "attempt": 9,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 26.0,
+     "prompt_delivered": true,
+     "graded": 1130.5,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.41,
+     "tool_calls": 54
+    },
+    {
+     "attempt": 10,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 17.4,
+     "prompt_delivered": true,
+     "graded": 2313.5,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2504,
+     "tool_calls": 36
+    },
+    {
+     "attempt": 11,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.7,
+     "prompt_delivered": true,
+     "graded": 2187.8,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.7222,
+     "tool_calls": 36
+    },
+    {
+     "attempt": 12,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 18.0,
+     "prompt_delivered": true,
+     "graded": 1361.3,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.0524,
+     "tool_calls": 43
+    },
+    {
+     "attempt": 13,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 22.4,
+     "prompt_delivered": true,
+     "graded": 2028.6,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.355,
+     "tool_calls": 51
+    },
+    {
+     "attempt": 14,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": 170.0,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6397,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 15,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": 579.2,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0682,
+     "tool_calls": 25
+    },
+    {
+     "attempt": 16,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-control-a16",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": 8126.0,
+     "checks_passed": 60,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8086,
+     "tool_calls": 14
+    }
+   ]
+  },
+  {
+   "run": "trend-vf-a",
+   "task": "vf2-speedup-networkx",
+   "root": "vf2-speedup-networkx__7bK2c3L",
+   "arm": "record-engine",
+   "counted": 19,
+   "first_pass": 19,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 23.4,
+     "prompt_delivered": true,
+     "graded": 2098.4,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.0073,
+     "tool_calls": 51,
+     "cut_reads": 0,
+     "queries": 11,
+     "row_capped": 1,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": 1972.6,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4786,
+     "tool_calls": 17,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 1,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 3,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": 2243.1,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5912,
+     "tool_calls": 20,
+     "cut_reads": 1,
+     "queries": 8,
+     "row_capped": 1,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 4,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": 2164.3,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8234,
+     "tool_calls": 26,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 1,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 5,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": 2282.5,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5431,
+     "tool_calls": 19,
+     "cut_reads": 0,
+     "queries": 12,
+     "row_capped": 0,
+     "attempt_filters": 10
+    },
+    {
+     "attempt": 6,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": 2165.0,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5977,
+     "tool_calls": 24,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 7,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": 2093.4,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4844,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 8,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": 2079.0,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4614,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 9,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": 2221.8,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5239,
+     "tool_calls": 19,
+     "cut_reads": 0,
+     "queries": 10,
+     "row_capped": 2,
+     "attempt_filters": 9
+    },
+    {
+     "attempt": 10,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": 2102.9,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3964,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 1,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 11,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": 2673.1,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8721,
+     "tool_calls": 29,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 12,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": 2641.7,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4966,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 1,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 13,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 17.4,
+     "prompt_delivered": true,
+     "graded": 2850.2,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2362,
+     "tool_calls": 34,
+     "cut_reads": 0,
+     "queries": 11,
+     "row_capped": 2,
+     "attempt_filters": 10
+    },
+    {
+     "attempt": 14,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 15.0,
+     "prompt_delivered": true,
+     "graded": 2548.5,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2461,
+     "tool_calls": 30,
+     "cut_reads": 0,
+     "queries": 12,
+     "row_capped": 1,
+     "attempt_filters": 10
+    },
+    {
+     "attempt": 15,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 46.1,
+     "prompt_delivered": true,
+     "graded": 2812.4,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.7742,
+     "tool_calls": 68,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 1,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 16,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.0,
+     "prompt_delivered": true,
+     "graded": 794.7,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0468,
+     "tool_calls": 22,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 1,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 17,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 28.7,
+     "prompt_delivered": true,
+     "graded": 1830.2,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.8265,
+     "tool_calls": 68,
+     "cut_reads": 0,
+     "queries": 12,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 18,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.3,
+     "prompt_delivered": true,
+     "graded": 1920.8,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9334,
+     "tool_calls": 29,
+     "cut_reads": 0,
+     "queries": 21,
+     "row_capped": 0,
+     "attempt_filters": 18
+    },
+    {
+     "attempt": 19,
+     "job": "trend-vf-a-vf2-speedup-networkx__7bK2c3L-record-engine-a19",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 37.1,
+     "prompt_delivered": true,
+     "graded": 10319.9,
+     "checks_passed": 60,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.6289,
+     "tool_calls": 75,
+     "cut_reads": 0,
+     "queries": 13,
+     "row_capped": 0,
+     "attempt_filters": 11
+    }
+   ]
+  },
+  {
+   "run": "trend-gs-a",
+   "task": "gsea-proteomics",
+   "root": "gsea-proteomics__mwYeuLZ",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3177,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 2,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3562,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 3,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4691,
+     "tool_calls": 24
+    },
+    {
+     "attempt": 4,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3791,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 5,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4862,
+     "tool_calls": 25
+    },
+    {
+     "attempt": 6,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2856,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 7,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3193,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 8,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.405,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 9,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 15,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3654,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 10,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4195,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 11,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 15,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3578,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 12,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3269,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 13,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3837,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 14,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4137,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 15,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3558,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 16,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4186,
+     "tool_calls": 22
+    },
+    {
+     "attempt": 17,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 22.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.532,
+     "tool_calls": 28
+    },
+    {
+     "attempt": 18,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3585,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 19,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4266,
+     "tool_calls": 23
+    },
+    {
+     "attempt": 20,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3949,
+     "tool_calls": 19
+    }
+   ]
+  },
+  {
+   "run": "trend-gs-a",
+   "task": "gsea-proteomics",
+   "root": "gsea-proteomics__mwYeuLZ",
+   "arm": "record-engine",
+   "counted": 7,
+   "first_pass": 7,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.16,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3725,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.323,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 4,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 16.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 15,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5445,
+     "tool_calls": 21,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 5,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.425,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 6,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3344,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 7,
+     "job": "trend-gs-a-gsea-proteomics__mwYeuLZ-record-engine-a7",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 16,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4127,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    }
+   ]
+  },
+  {
+   "run": "trend-mv-a",
+   "task": "mvcc-lsm-compaction",
+   "root": "mvcc-lsm-compaction__tBuSNjq",
+   "arm": "control",
+   "counted": 1,
+   "first_pass": 1,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-mv-a-mvcc-lsm-compaction__tBuSNjq-control-a1",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 15,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1203,
+     "tool_calls": 3
+    }
+   ]
+  },
+  {
+   "run": "trend-mv-a",
+   "task": "mvcc-lsm-compaction",
+   "root": "mvcc-lsm-compaction__tBuSNjq",
+   "arm": "record-engine",
+   "counted": 6,
+   "first_pass": 6,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-mv-a-mvcc-lsm-compaction__tBuSNjq-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2259,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "trend-mv-a-mvcc-lsm-compaction__tBuSNjq-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2343,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 3,
+     "job": "trend-mv-a-mvcc-lsm-compaction__tBuSNjq-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1521,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 4,
+     "job": "trend-mv-a-mvcc-lsm-compaction__tBuSNjq-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1784,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 5,
+     "job": "trend-mv-a-mvcc-lsm-compaction__tBuSNjq-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1906,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 6,
+     "job": "trend-mv-a-mvcc-lsm-compaction__tBuSNjq-record-engine-a6",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 15,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4399,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    }
+   ]
+  },
+  {
+   "run": "trend-pp-b",
+   "task": "production-planning",
+   "root": "production-planning__ukYKBeW",
+   "arm": "control",
+   "counted": 2,
+   "first_pass": 2,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-pp-b-production-planning__ukYKBeW-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 15.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 17,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.6811,
+     "tool_calls": 35
+    },
+    {
+     "attempt": 2,
+     "job": "trend-pp-b-production-planning__ukYKBeW-control-a2",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 31.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 20,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.9716,
+     "tool_calls": 44
+    }
+   ]
+  },
+  {
+   "run": "trend-pp-b",
+   "task": "production-planning",
+   "root": "production-planning__ukYKBeW",
+   "arm": "record-engine",
+   "counted": 1,
+   "first_pass": 1,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-pp-b-production-planning__ukYKBeW-record-engine-a1",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 20,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8916,
+     "tool_calls": 23,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    }
+   ]
+  },
+  {
+   "run": "trend-vf-b",
+   "task": "vf2-speedup-networkx",
+   "root": "vf2-speedup-networkx__7bK2c3L",
+   "arm": "control",
+   "counted": 6,
+   "first_pass": 6,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 15.0,
+     "prompt_delivered": true,
+     "graded": 1876.6,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1892,
+     "tool_calls": 28
+    },
+    {
+     "attempt": 2,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 23.0,
+     "prompt_delivered": true,
+     "graded": 1835.7,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.2906,
+     "tool_calls": 47
+    },
+    {
+     "attempt": 3,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": 154.1,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4911,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 4,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.3,
+     "prompt_delivered": true,
+     "graded": 2497.4,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1229,
+     "tool_calls": 29
+    },
+    {
+     "attempt": 5,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.3,
+     "prompt_delivered": true,
+     "graded": 58.9,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.021,
+     "tool_calls": 27
+    },
+    {
+     "attempt": 6,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-control-a6",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 26.4,
+     "prompt_delivered": true,
+     "graded": 24591.2,
+     "checks_passed": 60,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.0726,
+     "tool_calls": 47
+    }
+   ]
+  },
+  {
+   "run": "trend-vf-b",
+   "task": "vf2-speedup-networkx",
+   "root": "vf2-speedup-networkx__7bK2c3L",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": 1769.1,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9812,
+     "tool_calls": 36,
+     "cut_reads": 0,
+     "queries": 11,
+     "row_capped": 1,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": 1793.9,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3976,
+     "tool_calls": 18,
+     "cut_reads": 0,
+     "queries": 10,
+     "row_capped": 1,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 3,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 17.4,
+     "prompt_delivered": true,
+     "graded": 2602.5,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.919,
+     "tool_calls": 33,
+     "cut_reads": 1,
+     "queries": 9,
+     "row_capped": 2,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 4,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": 3880.4,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1248,
+     "tool_calls": 33,
+     "cut_reads": 0,
+     "queries": 10,
+     "row_capped": 1,
+     "attempt_filters": 7
+    },
+    {
+     "attempt": 5,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.0,
+     "prompt_delivered": true,
+     "graded": 3865.2,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6499,
+     "tool_calls": 28,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 6,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.3,
+     "prompt_delivered": true,
+     "graded": 3447.7,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8783,
+     "tool_calls": 30,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 7,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": 3223.4,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3971,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 8,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": 3171.3,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7643,
+     "tool_calls": 26,
+     "cut_reads": 0,
+     "queries": 9,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 9,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": 3157.9,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7689,
+     "tool_calls": 26,
+     "cut_reads": 0,
+     "queries": 9,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 10,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": 3199.6,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5744,
+     "tool_calls": 17,
+     "cut_reads": 0,
+     "queries": 10,
+     "row_capped": 0,
+     "attempt_filters": 8
+    },
+    {
+     "attempt": 11,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": 2533.0,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9124,
+     "tool_calls": 24,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 12,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": 2713.3,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6338,
+     "tool_calls": 21,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 13,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": 2591.6,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3478,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 14,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": 2575.5,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4797,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 15,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 43.7,
+     "prompt_delivered": true,
+     "graded": 3169.2,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.721,
+     "tool_calls": 68,
+     "cut_reads": 1,
+     "queries": 6,
+     "row_capped": 1,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 16,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 17.4,
+     "prompt_delivered": true,
+     "graded": 2057.1,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1029,
+     "tool_calls": 36,
+     "cut_reads": 0,
+     "queries": 12,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 17,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 33.7,
+     "prompt_delivered": true,
+     "graded": 4365.8,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 3.155,
+     "tool_calls": 87,
+     "cut_reads": 0,
+     "queries": 10,
+     "row_capped": 0,
+     "attempt_filters": 8
+    },
+    {
+     "attempt": 18,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": 4289.8,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5572,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 12,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 19,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 19.0,
+     "prompt_delivered": true,
+     "graded": 4258.9,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.3658,
+     "tool_calls": 35,
+     "cut_reads": 0,
+     "queries": 25,
+     "row_capped": 0,
+     "attempt_filters": 9
+    },
+    {
+     "attempt": 20,
+     "job": "trend-vf-b-vf2-speedup-networkx__7bK2c3L-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.0,
+     "prompt_delivered": true,
+     "graded": 4433.6,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7598,
+     "tool_calls": 25,
+     "cut_reads": 2,
+     "queries": 12,
+     "row_capped": 0,
+     "attempt_filters": 5
+    }
+   ]
+  },
+  {
+   "run": "trend-gs-b",
+   "task": "gsea-proteomics",
+   "root": "gsea-proteomics__mwYeuLZ",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4038,
+     "tool_calls": 25
+    },
+    {
+     "attempt": 2,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3285,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 3,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3237,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 4,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2881,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 5,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3182,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 6,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 15,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3073,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 7,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.383,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 8,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3378,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 9,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3989,
+     "tool_calls": 22
+    },
+    {
+     "attempt": 10,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3839,
+     "tool_calls": 22
+    },
+    {
+     "attempt": 11,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2333,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 12,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2964,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 13,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4004,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 14,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4306,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 15,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3412,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 16,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3069,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 17,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.308,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 18,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3062,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 19,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3672,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 20,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3907,
+     "tool_calls": 20
+    }
+   ]
+  },
+  {
+   "run": "trend-gs-b",
+   "task": "gsea-proteomics",
+   "root": "gsea-proteomics__mwYeuLZ",
+   "arm": "record-engine",
+   "counted": 4,
+   "first_pass": 4,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1521,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3205,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 3,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2862,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 4,
+     "job": "trend-gs-b-gsea-proteomics__mwYeuLZ-record-engine-a4",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 16,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2615,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    }
+   ]
+  },
+  {
+   "run": "trend-mv-b",
+   "task": "mvcc-lsm-compaction",
+   "root": "mvcc-lsm-compaction__tBuSNjq",
+   "arm": "control",
+   "counted": 1,
+   "first_pass": 1,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-mv-b-mvcc-lsm-compaction__tBuSNjq-control-a1",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 15,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1433,
+     "tool_calls": 6
+    }
+   ]
+  },
+  {
+   "run": "trend-mv-b",
+   "task": "mvcc-lsm-compaction",
+   "root": "mvcc-lsm-compaction__tBuSNjq",
+   "arm": "record-engine",
+   "counted": 5,
+   "first_pass": 5,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-mv-b-mvcc-lsm-compaction__tBuSNjq-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1115,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "trend-mv-b-mvcc-lsm-compaction__tBuSNjq-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1453,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "trend-mv-b-mvcc-lsm-compaction__tBuSNjq-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1559,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 4,
+     "job": "trend-mv-b-mvcc-lsm-compaction__tBuSNjq-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3186,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 5,
+     "job": "trend-mv-b-mvcc-lsm-compaction__tBuSNjq-record-engine-a5",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 15,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2121,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    }
+   ]
+  },
+  {
+   "run": "trend-pp-c",
+   "task": "production-planning",
+   "root": "production-planning__ukYKBeW",
+   "arm": "control",
+   "counted": 5,
+   "first_pass": 5,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-pp-c-production-planning__ukYKBeW-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2156,
+     "tool_calls": 30
+    },
+    {
+     "attempt": 2,
+     "job": "trend-pp-c-production-planning__ukYKBeW-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 24.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 18,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8359,
+     "tool_calls": 37
+    },
+    {
+     "attempt": 3,
+     "job": "trend-pp-c-production-planning__ukYKBeW-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 18,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8514,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 4,
+     "job": "trend-pp-c-production-planning__ukYKBeW-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1695,
+     "tool_calls": 24
+    },
+    {
+     "attempt": 5,
+     "job": "trend-pp-c-production-planning__ukYKBeW-control-a5",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 20,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2039,
+     "tool_calls": 25
+    }
+   ]
+  },
+  {
+   "run": "trend-pp-c",
+   "task": "production-planning",
+   "root": "production-planning__ukYKBeW",
+   "arm": "record-engine",
+   "counted": 1,
+   "first_pass": 1,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-pp-c-production-planning__ukYKBeW-record-engine-a1",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 20,
+     "checks_total": 20,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7597,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 0
+    }
+   ]
+  },
+  {
+   "run": "trend-vf-c",
+   "task": "vf2-speedup-networkx",
+   "root": "vf2-speedup-networkx__7bK2c3L",
+   "arm": "control",
+   "counted": 16,
+   "first_pass": 16,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.4,
+     "prompt_delivered": true,
+     "graded": 1949.6,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.3035,
+     "tool_calls": 31
+    },
+    {
+     "attempt": 2,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": 108.6,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6193,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 3,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.3,
+     "prompt_delivered": true,
+     "graded": 1818.7,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2629,
+     "tool_calls": 27
+    },
+    {
+     "attempt": 4,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": 2001.3,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8535,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 5,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 19.7,
+     "prompt_delivered": true,
+     "graded": 2281.0,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2146,
+     "tool_calls": 31
+    },
+    {
+     "attempt": 6,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": 134.5,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5036,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 7,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 17.0,
+     "prompt_delivered": true,
+     "graded": 2151.5,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2679,
+     "tool_calls": 34
+    },
+    {
+     "attempt": 8,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 22.0,
+     "prompt_delivered": true,
+     "graded": 2506.6,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.6914,
+     "tool_calls": 49
+    },
+    {
+     "attempt": 9,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": 158.9,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9701,
+     "tool_calls": 29
+    },
+    {
+     "attempt": 10,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.0,
+     "prompt_delivered": true,
+     "graded": 765.8,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1849,
+     "tool_calls": 29
+    },
+    {
+     "attempt": 11,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": 107.8,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.071,
+     "tool_calls": 32
+    },
+    {
+     "attempt": 12,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 25.0,
+     "prompt_delivered": true,
+     "graded": 2413.6,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.892,
+     "tool_calls": 61
+    },
+    {
+     "attempt": 13,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": 115.1,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7901,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 14,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 21.4,
+     "prompt_delivered": true,
+     "graded": 3319.1,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.1262,
+     "tool_calls": 43
+    },
+    {
+     "attempt": 15,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": 4248.3,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7701,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 16,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-control-a16",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": 32814.5,
+     "checks_passed": 60,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.056,
+     "tool_calls": 19
+    }
+   ]
+  },
+  {
+   "run": "trend-vf-c",
+   "task": "vf2-speedup-networkx",
+   "root": "vf2-speedup-networkx__7bK2c3L",
+   "arm": "record-engine",
+   "counted": 19,
+   "first_pass": 19,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": 1744.7,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8723,
+     "tool_calls": 19,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 1,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 22.7,
+     "prompt_delivered": true,
+     "graded": 1944.3,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.6696,
+     "tool_calls": 53,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 1,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 3,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": 2008.8,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7025,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 1,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 4,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 19.7,
+     "prompt_delivered": true,
+     "graded": 4037.6,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8356,
+     "tool_calls": 42,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 1,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 5,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": 4313.4,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0172,
+     "tool_calls": 34,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 1,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 6,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": 4331.2,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5938,
+     "tool_calls": 23,
+     "cut_reads": 0,
+     "queries": 12,
+     "row_capped": 0,
+     "attempt_filters": 8
+    },
+    {
+     "attempt": 7,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 22.4,
+     "prompt_delivered": true,
+     "graded": 3811.0,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6973,
+     "tool_calls": 26,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 8,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 17.0,
+     "prompt_delivered": true,
+     "graded": 4514.9,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9358,
+     "tool_calls": 32,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 9,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 33.7,
+     "prompt_delivered": true,
+     "graded": 4163.8,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.6562,
+     "tool_calls": 59,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 1,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 10,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": 4645.9,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3148,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 11,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 23.0,
+     "prompt_delivered": true,
+     "graded": 4366.3,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9503,
+     "tool_calls": 37,
+     "cut_reads": 0,
+     "queries": 12,
+     "row_capped": 0,
+     "attempt_filters": 9
+    },
+    {
+     "attempt": 12,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 15.7,
+     "prompt_delivered": true,
+     "graded": 3574.9,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8395,
+     "tool_calls": 47,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 13,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.7,
+     "prompt_delivered": true,
+     "graded": 3473.6,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.554,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 12,
+     "row_capped": 1,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 14,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 15.4,
+     "prompt_delivered": true,
+     "graded": 3245.0,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.878,
+     "tool_calls": 31,
+     "cut_reads": 0,
+     "queries": 11,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 15,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": 3241.3,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.664,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 11,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 16,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": 3245.1,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7516,
+     "tool_calls": 19,
+     "cut_reads": 0,
+     "queries": 12,
+     "row_capped": 2,
+     "attempt_filters": 9
+    },
+    {
+     "attempt": 17,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.7,
+     "prompt_delivered": true,
+     "graded": 3311.4,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0944,
+     "tool_calls": 39,
+     "cut_reads": 0,
+     "queries": 19,
+     "row_capped": 0,
+     "attempt_filters": 16
+    },
+    {
+     "attempt": 18,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 17.0,
+     "prompt_delivered": true,
+     "graded": 3922.8,
+     "checks_passed": 59,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.7914,
+     "tool_calls": 38,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 19,
+     "job": "trend-vf-c-vf2-speedup-networkx__7bK2c3L-record-engine-a19",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 18.4,
+     "prompt_delivered": true,
+     "graded": 6696.7,
+     "checks_passed": 60,
+     "checks_total": 60,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.9776,
+     "tool_calls": 48,
+     "cut_reads": 0,
+     "queries": 13,
+     "row_capped": 4,
+     "attempt_filters": 4
+    }
+   ]
+  },
+  {
+   "run": "trend-gs-c",
+   "task": "gsea-proteomics",
+   "root": "gsea-proteomics__mwYeuLZ",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2917,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 2,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.435,
+     "tool_calls": 22
+    },
+    {
+     "attempt": 3,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3052,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 4,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3347,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 5,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3306,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 6,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3325,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 7,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3877,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 8,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3357,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 9,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3957,
+     "tool_calls": 20
+    },
+    {
+     "attempt": 10,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2337,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 11,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2776,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 12,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 15,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3551,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 13,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3394,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 14,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2839,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 15,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2921,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 16,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3492,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 17,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3545,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 18,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3249,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 19,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 15,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4939,
+     "tool_calls": 25
+    },
+    {
+     "attempt": 20,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3321,
+     "tool_calls": 15
+    }
+   ]
+  },
+  {
+   "run": "trend-gs-c",
+   "task": "gsea-proteomics",
+   "root": "gsea-proteomics__mwYeuLZ",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [
+    "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a19: infra (ApiRateLimitError)"
+   ],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2161,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2855,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 3,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 15,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.288,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 4,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6689,
+     "tool_calls": 24,
+     "cut_reads": 1,
+     "queries": 9,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 5,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 21.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4335,
+     "tool_calls": 14,
+     "cut_reads": 1,
+     "queries": 6,
+     "row_capped": 1,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 6,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 20.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4531,
+     "tool_calls": 18,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 7,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3433,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 8,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3712,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 9,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.355,
+     "tool_calls": 10,
+     "cut_reads": 1,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 10,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 25.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6565,
+     "tool_calls": 18,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 11,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4454,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 12,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5126,
+     "tool_calls": 19,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 13,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4596,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 14,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3941,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 15,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3601,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 16,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3783,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 17,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 24.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4934,
+     "tool_calls": 16,
+     "cut_reads": 1,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 18,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 20.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7065,
+     "tool_calls": 22,
+     "cut_reads": 1,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 19,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a19-r1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5037,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 20,
+     "job": "trend-gs-c-gsea-proteomics__mwYeuLZ-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 16,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4243,
+     "tool_calls": 12,
+     "cut_reads": 1,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 1
+    }
+   ]
+  },
+  {
+   "run": "trend-mv-c",
+   "task": "mvcc-lsm-compaction",
+   "root": "mvcc-lsm-compaction__tBuSNjq",
+   "arm": "control",
+   "counted": 17,
+   "first_pass": 17,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1259,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 2,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1762,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 3,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1679,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 4,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1078,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 5,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.117,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 6,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1275,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 7,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1164,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 8,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1481,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 9,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1648,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 10,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.137,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 11,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.109,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 12,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1278,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 13,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1361,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 14,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1146,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 15,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1134,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 16,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1447,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 17,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-control-a17",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 15,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1525,
+     "tool_calls": 5
+    }
+   ]
+  },
+  {
+   "run": "trend-mv-c",
+   "task": "mvcc-lsm-compaction",
+   "root": "mvcc-lsm-compaction__tBuSNjq",
+   "arm": "record-engine",
+   "counted": 4,
+   "first_pass": 4,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1349,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1116,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2075,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 4,
+     "job": "trend-mv-c-mvcc-lsm-compaction__tBuSNjq-record-engine-a4",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 15,
+     "checks_total": 15,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2961,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    }
+   ]
+  }
+ ]
+}

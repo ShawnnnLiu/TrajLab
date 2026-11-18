@@ -1,0 +1,197 @@
+{
+  "corpus_id": "tb40-passk-fresh-v2",
+  "created_at": "2026-11-14T20:15:02.569598Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "f90906e25bb4b2bcbdab4cc8583c021883820b69",
+  "repo_dirty": true,
+  "config_path": "configs/harbor/tb40-passk-fresh-v2.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 5,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 0.5,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "writes_recorded": false,
+  "tasks": [
+    {
+      "name": "terminal-bench/cargo-flight-dispatch",
+      "digest": "sha256:18a1c2670ce4be0e6752f48ed6c750281d7f97db025f5e74edc6c8728f62f5b5"
+    },
+    {
+      "name": "terminal-bench/freecad-impeller",
+      "digest": "sha256:40d322e979d30dd53c0a9330445b8799cf5c02099b0718a3b3ad15231b366dba"
+    },
+    {
+      "name": "terminal-bench/freecad-spring-clip",
+      "digest": "sha256:c3110552902a44e17326df0a87083eb6028068cfbc7aa47461c7f2c0aa528bab"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb40-passk-fresh-v2",
+      "job_id": "af70b744-64ee-4f9c-a248-fc89b754397e",
+      "job_config": {
+        "job_name": "tb40-passk-fresh-v2",
+        "jobs_dir": "corpus/jobs",
+        "n_attempts": 5,
+        "agent_timeout_multiplier": 0.5,
+        "n_concurrent_trials": 2,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "sha256:39d9f44b40420cde8fdcc087579c0d72a7e14fa3656d603c3f0d22fb35e27732",
+            "task_names": [
+              "terminal-bench/cargo-flight-dispatch",
+              "terminal-bench/freecad-impeller",
+              "terminal-bench/freecad-spring-clip"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "9aab3654-924a-4369-8adb-6fd8f662a96d",
+          "trial_name": "cargo-flight-dispatch__CKnNbe6",
+          "task_name": "terminal-bench/cargo-flight-dispatch",
+          "job_id": "af70b744-64ee-4f9c-a248-fc89b754397e",
+          "job_dir": "tb40-passk-fresh-v2",
+          "claude_session_id": "424b1fca-14b8-4706-9d60-65d95f9f979a"
+        },
+        {
+          "trial_id": "2e4e3f36-d112-4ace-8e6a-4cf878292216",
+          "trial_name": "cargo-flight-dispatch__bDs5eTh",
+          "task_name": "terminal-bench/cargo-flight-dispatch",
+          "job_id": "af70b744-64ee-4f9c-a248-fc89b754397e",
+          "job_dir": "tb40-passk-fresh-v2",
+          "claude_session_id": "6b332878-0391-4704-a4c1-5373d2de734b"
+        },
+        {
+          "trial_id": "bc7a2559-de53-485e-a627-1d51ff2a4cee",
+          "trial_name": "cargo-flight-dispatch__bSzbWSE",
+          "task_name": "terminal-bench/cargo-flight-dispatch",
+          "job_id": "af70b744-64ee-4f9c-a248-fc89b754397e",
+          "job_dir": "tb40-passk-fresh-v2",
+          "claude_session_id": "8f2caacd-aa45-4771-b078-4fe44724b4bb"
+        },
+        {
+          "trial_id": "1cba0a8e-78e3-4388-b863-4fc11ca597c2",
+          "trial_name": "cargo-flight-dispatch__mgPKvT9",
+          "task_name": "terminal-bench/cargo-flight-dispatch",
+          "job_id": "af70b744-64ee-4f9c-a248-fc89b754397e",
+          "job_dir": "tb40-passk-fresh-v2",
+          "claude_session_id": "689dd32d-26f9-4a82-a8b3-ca66a9fb3713"
+        },
+        {
+          "trial_id": "f51ce1a7-a42f-4535-a7ed-65d6815f2ecc",
+          "trial_name": "cargo-flight-dispatch__oxbCPro",
+          "task_name": "terminal-bench/cargo-flight-dispatch",
+          "job_id": "af70b744-64ee-4f9c-a248-fc89b754397e",
+          "job_dir": "tb40-passk-fresh-v2",
+          "claude_session_id": "086eb36d-e614-4f85-961e-6fbd67d4f01f"
+        },
+        {
+          "trial_id": "0de13d36-4553-4c3f-9149-162067a9ca4b",
+          "trial_name": "freecad-impeller__6c5oDNt",
+          "task_name": "terminal-bench/freecad-impeller",
+          "job_id": "af70b744-64ee-4f9c-a248-fc89b754397e",
+          "job_dir": "tb40-passk-fresh-v2",
+          "claude_session_id": "2a90b7be-73e1-46e1-951e-c7b55bf7e344"
+        },
+        {
+          "trial_id": "f6d99e92-df5f-4428-b531-36e5177e1e1c",
+          "trial_name": "freecad-impeller__LPimWJZ",
+          "task_name": "terminal-bench/freecad-impeller",
+          "job_id": "af70b744-64ee-4f9c-a248-fc89b754397e",
+          "job_dir": "tb40-passk-fresh-v2",
+          "claude_session_id": "b2c3b185-c1c8-49a5-b8f8-955a94e56df5"
+        },
+        {
+          "trial_id": "eabcb679-5555-4f99-9a7b-d1936657b664",
+          "trial_name": "freecad-impeller__Sc4uMRS",
+          "task_name": "terminal-bench/freecad-impeller",
+          "job_id": "af70b744-64ee-4f9c-a248-fc89b754397e",
+          "job_dir": "tb40-passk-fresh-v2",
+          "claude_session_id": "65f1819f-2c99-426b-b7b8-e71396a8505b"
+        },
+        {
+          "trial_id": "66d0f99b-a9e5-4714-81f0-444e276785b7",
+          "trial_name": "freecad-impeller__YuYCMWv",
+          "task_name": "terminal-bench/freecad-impeller",
+          "job_id": "af70b744-64ee-4f9c-a248-fc89b754397e",
+          "job_dir": "tb40-passk-fresh-v2",
+          "claude_session_id": "20573e66-17a9-4a99-bb83-acb92882888f"
+        },
+        {
+          "trial_id": "b665b0e5-9f4e-4827-98ae-a864aa228748",
+          "trial_name": "freecad-impeller__ry3EYjH",
+          "task_name": "terminal-bench/freecad-impeller",
+          "job_id": "af70b744-64ee-4f9c-a248-fc89b754397e",
+          "job_dir": "tb40-passk-fresh-v2",
+          "claude_session_id": "feb42c75-228a-47ad-8bc5-717f598995ca"
+        },
+        {
+          "trial_id": "1b6d7d54-5fe5-4288-835b-8fe303e2da40",
+          "trial_name": "freecad-spring-clip__GuzeuQx",
+          "task_name": "terminal-bench/freecad-spring-clip",
+          "job_id": "af70b744-64ee-4f9c-a248-fc89b754397e",
+          "job_dir": "tb40-passk-fresh-v2",
+          "claude_session_id": "2b64c839-ad61-4182-942d-1fd1bc7b98df"
+        },
+        {
+          "trial_id": "9981014c-7d39-46d9-a426-f2af3914c6fc",
+          "trial_name": "freecad-spring-clip__MowrVSh",
+          "task_name": "terminal-bench/freecad-spring-clip",
+          "job_id": "af70b744-64ee-4f9c-a248-fc89b754397e",
+          "job_dir": "tb40-passk-fresh-v2",
+          "claude_session_id": "512e18fa-1b07-4ebc-aa8c-b5a5ea5e4d03"
+        },
+        {
+          "trial_id": "2d53bb84-4fd6-4aed-b652-fc9356004150",
+          "trial_name": "freecad-spring-clip__R8iqvAj",
+          "task_name": "terminal-bench/freecad-spring-clip",
+          "job_id": "af70b744-64ee-4f9c-a248-fc89b754397e",
+          "job_dir": "tb40-passk-fresh-v2",
+          "claude_session_id": "a7eccd4e-0be6-4c19-a216-9544473e4e79"
+        },
+        {
+          "trial_id": "4930c6f4-f4d0-403e-99bc-a3b22f087c7a",
+          "trial_name": "freecad-spring-clip__TXAxyc2",
+          "task_name": "terminal-bench/freecad-spring-clip",
+          "job_id": "af70b744-64ee-4f9c-a248-fc89b754397e",
+          "job_dir": "tb40-passk-fresh-v2",
+          "claude_session_id": "099e3978-3ad7-4efb-87b1-7d8ad6a9cbd6"
+        },
+        {
+          "trial_id": "39dd840b-c08e-4d27-a68f-f8b40bf60568",
+          "trial_name": "freecad-spring-clip__bp59Hvo",
+          "task_name": "terminal-bench/freecad-spring-clip",
+          "job_id": "af70b744-64ee-4f9c-a248-fc89b754397e",
+          "job_dir": "tb40-passk-fresh-v2",
+          "claude_session_id": "4e44b0f5-3fd5-4cee-952a-709f87842f6c"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}

@@ -1,0 +1,86 @@
+{
+  "totals": {
+    "atrx-vep-crispr/control": {
+      "attempts": 18,
+      "repeats": 5,
+      "same_answer": 0
+    },
+    "atrx-vep-crispr/record-engine": {
+      "attempts": 10,
+      "repeats": 1,
+      "same_answer": 0
+    }
+  },
+  "chains": [
+    {
+      "task": "atrx-vep-crispr",
+      "root": "atrx-vep-crispr__V525sES",
+      "arm": "control",
+      "repeats": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "task": "atrx-vep-crispr",
+      "root": "atrx-vep-crispr__V525sES",
+      "arm": "record-engine",
+      "repeats": [
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "task": "atrx-vep-crispr",
+      "root": "atrx-vep-crispr__2rQmNqC",
+      "arm": "control",
+      "repeats": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "task": "atrx-vep-crispr",
+      "root": "atrx-vep-crispr__2rQmNqC",
+      "arm": "record-engine",
+      "repeats": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "task": "atrx-vep-crispr",
+      "root": "atrx-vep-crispr__6zUStrp",
+      "arm": "control",
+      "repeats": [
+        0,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "task": "atrx-vep-crispr",
+      "root": "atrx-vep-crispr__6zUStrp",
+      "arm": "record-engine",
+      "repeats": [
+        0
+      ]
+    }
+  ]
+}

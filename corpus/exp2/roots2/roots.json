@@ -1,0 +1,137 @@
+{
+  "cargo-flight-dispatch": {
+    "median": 19.0,
+    "roots": [
+      "cargo-flight-dispatch__bSzbWSE",
+      "cargo-flight-dispatch__bDs5eTh",
+      "cargo-flight-dispatch__mgPKvT9"
+    ],
+    "attempts": [
+      {
+        "trial": "cargo-flight-dispatch__CKnNbe6",
+        "score": 22.0,
+        "reward": 0.0,
+        "started_at": "2026-11-14T19:11:45.984272Z",
+        "exception": null
+      },
+      {
+        "trial": "cargo-flight-dispatch__bDs5eTh",
+        "score": 19.0,
+        "reward": 0.0,
+        "started_at": "2026-11-14T19:31:26.001847Z",
+        "exception": null
+      },
+      {
+        "trial": "cargo-flight-dispatch__bSzbWSE",
+        "score": 19.0,
+        "reward": 0.0,
+        "started_at": "2026-11-14T19:21:06.023291Z",
+        "exception": null
+      },
+      {
+        "trial": "cargo-flight-dispatch__mgPKvT9",
+        "score": 19.0,
+        "reward": 0.0,
+        "started_at": "2026-11-14T20:04:06.099005Z",
+        "exception": null
+      },
+      {
+        "trial": "cargo-flight-dispatch__oxbCPro",
+        "score": 23.0,
+        "reward": 0.0,
+        "started_at": "2026-11-14T19:48:55.387362Z",
+        "exception": null
+      }
+    ]
+  },
+  "freecad-impeller": {
+    "median": 0.06385979596571176,
+    "roots": [
+      "freecad-impeller__ry3EYjH",
+      "freecad-impeller__YuYCMWv",
+      "freecad-impeller__LPimWJZ"
+    ],
+    "attempts": [
+      {
+        "trial": "freecad-impeller__6c5oDNt",
+        "score": 0.0638597519028966,
+        "reward": 0.0,
+        "started_at": "2026-11-14T19:33:28.592947Z",
+        "exception": null
+      },
+      {
+        "trial": "freecad-impeller__LPimWJZ",
+        "score": 0.0638597519028966,
+        "reward": 0.0,
+        "started_at": "2026-11-14T19:23:14.333349Z",
+        "exception": null
+      },
+      {
+        "trial": "freecad-impeller__Sc4uMRS",
+        "score": 0.11759516124306754,
+        "reward": 0.0,
+        "started_at": "2026-11-14T20:06:10.768523Z",
+        "exception": null
+      },
+      {
+        "trial": "freecad-impeller__YuYCMWv",
+        "score": 0.06385979596571181,
+        "reward": 0.0,
+        "started_at": "2026-11-14T19:51:01.729155Z",
+        "exception": null
+      },
+      {
+        "trial": "freecad-impeller__ry3EYjH",
+        "score": 0.06385979596571176,
+        "reward": 0.0,
+        "started_at": "2026-11-14T19:11:46.064175Z",
+        "exception": null
+      }
+    ]
+  },
+  "freecad-spring-clip": {
+    "median": 0.14988853412270634,
+    "roots": [
+      "freecad-spring-clip__MowrVSh",
+      "freecad-spring-clip__R8iqvAj",
+      "freecad-spring-clip__GuzeuQx"
+    ],
+    "attempts": [
+      {
+        "trial": "freecad-spring-clip__GuzeuQx",
+        "score": 0.12206422306327437,
+        "reward": 0.0,
+        "started_at": "2026-11-14T19:29:02.971935Z",
+        "exception": null
+      },
+      {
+        "trial": "freecad-spring-clip__MowrVSh",
+        "score": 0.14988853412270634,
+        "reward": 0.0,
+        "started_at": "2026-11-14T20:02:44.912162Z",
+        "exception": null
+      },
+      {
+        "trial": "freecad-spring-clip__R8iqvAj",
+        "score": 0.16165342694578616,
+        "reward": 0.0,
+        "started_at": "2026-11-14T20:08:19.634242Z",
+        "exception": null
+      },
+      {
+        "trial": "freecad-spring-clip__TXAxyc2",
+        "score": 0.07459658519519154,
+        "reward": 0.0,
+        "started_at": "2026-11-14T19:42:45.862489Z",
+        "exception": null
+      },
+      {
+        "trial": "freecad-spring-clip__bp59Hvo",
+        "score": 0.18889279013684102,
+        "reward": 0.0,
+        "started_at": "2026-11-14T19:16:23.815700Z",
+        "exception": null
+      }
+    ]
+  }
+}

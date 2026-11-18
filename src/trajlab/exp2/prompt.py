@@ -6,7 +6,8 @@ the loop passes everything before the instruction as the agent's `repair_note` (
 `render` is the whole prompt, which the loop checks against the attempt's trajectory once it has
 run.
 
-- `control` gets round 2's four protocol steps (`PROTOCOL_STEPS`), as in `tb40-exp2`.
+- `control` gets round 2's four protocol steps (`PROTOCOL_STEPS`), as in `tb40-exp2`, with one
+  sentence on checks added to step 2 (`CONTROL_CHECKS`, ADR-0025).
 - The two record arms get one text (ADR-0024): what the record holds (`RECORD_INTRO`), how to
   reach it (the arm's only own paragraph: `ENGINE_ACCESS` or `FILES_ACCESS`, each ending with how
   to read a long value past the shell's output cap, `OUTPUT_CAP`), protocol steps that work from
@@ -14,7 +15,10 @@ run.
   guide to the tables (`TABLE_GUIDE`), and five questions (`QUESTIONS`), each answered for
   record-engine by ready queries and for record-files by the files that hold the answer. The
   diagnosis answers the first four, which include what each attempt wrote into its files, as
-  diffs holding the whole file (the amendment of 2026-11-04). The tables' full descriptions are
+  diffs holding the whole file (the amendment of 2026-11-04). ADR-0025 adds to the steps: the
+  diagnosis lists what was already tried for each cause, a check that passed in attempts that
+  failed is built again, and a fix an earlier attempt submitted is not submitted again. The
+  tables' full descriptions are
   one query away in record-engine (the store's comments,
   `trajlab.store.describe.comment_statements`) and one file away in record-files (the bundle's
   README, the same text).
@@ -45,15 +49,30 @@ class PromptError(ValueError):
     """The retry prompt cannot be rendered as ADR-0016 and ADR-0024 define it."""
 
 
+# ADR-0025 item 4: control's counterpart of the record arms' rebuilt check. Control has no record
+# of what the earlier attempts ran, so it is told what they most likely ran.
+CONTROL_CHECKS_ANCHOR = "Include inputs other than the ones provided."
+CONTROL_CHECKS = (
+    "The previous attempts most likely ran the first check you would think of, saw it pass, and "
+    "still failed, so that check passing proves little: make each check differ from it in what "
+    "it measures, the inputs it uses, or the conditions it runs under."
+)
+
+
 def protocol_steps(protocol: str = REPAIR_PROTOCOL) -> str:
     """Round 2's protocol without its first paragraph (round 1's note, which `NOTE` replaces)
-    and without the clause about earlier work: "Work in this order:" and the four steps."""
+    and without the clause about earlier work: "Work in this order:" and the four steps, with
+    `CONTROL_CHECKS` at the end of step 2."""
     _, sep, steps = protocol.partition("\n\n")
     if not sep or not steps.startswith("Work in this order:"):
         raise PromptError("REPAIR_PROTOCOL no longer has its note, then its steps")
     if steps.count(EARLIER_WORK_CLAUSE) != 1:
         raise PromptError(f"REPAIR_PROTOCOL's step 1 no longer holds {EARLIER_WORK_CLAUSE!r}")
-    return steps.replace(EARLIER_WORK_CLAUSE, "")
+    if steps.count(CONTROL_CHECKS_ANCHOR) != 1:
+        raise PromptError(f"REPAIR_PROTOCOL's step 2 no longer holds {CONTROL_CHECKS_ANCHOR!r}")
+    return steps.replace(EARLIER_WORK_CLAUSE, "").replace(
+        CONTROL_CHECKS_ANCHOR, f"{CONTROL_CHECKS_ANCHOR} {CONTROL_CHECKS}"
+    )
 
 
 # control's steps.
@@ -98,16 +117,22 @@ Work in this order:
 1. Diagnose from the record, before anything else. Answer questions 1 to 4 below from the \
 record, read the calls and files they point to, and work out the most likely reasons the \
 previous attempts failed. Before you change any file, write them to {DIAGNOSIS_PATH}: each \
-suspected cause, the evidence for it (the attempt and step_idx), and how you will check it.
+suspected cause, the evidence for it (the attempt and step_idx), every fix and every reading \
+of the task the attempts already tried for it and what came of each, and how you will check it.
 2. List every requirement in the task, each with a check you can run that would fail if the \
 requirement were not met. Whatever checks the failed attempts ran (question 2), they did not \
 catch why the attempt failed, so those checks passing proves little: add checks for the cases \
-they did not cover, including inputs other than the ones provided.
+they did not cover, including inputs other than the ones provided. If attempts ran the same \
+check, saw it pass, and still failed, the check is wrong, not only the fix: build it again so \
+that it differs in what it measures, the inputs it uses, or the conditions it runs under.
 3. Fix, run the checks, and repeat until they all pass. Before you try an approach, look up \
-whether an earlier attempt tried it and what came of it.
+whether an earlier attempt tried it and what came of it: do not submit a fix that an earlier \
+attempt submitted. Stay with a suspected cause while there is a fix or a reading of the task \
+for it that no attempt has tried, and move to another cause only when there is none left.
 4. Before finishing, run every check again, and compare your deliverables with the failed \
-attempts' versions (question 3): a result that matches a failed one fails again. If you would \
-have to say a requirement is untested, test it instead."""
+attempts' versions (question 3): a result that matches a failed one fails again, so if yours \
+matches one in the part your diagnosis blames, change that part first. If you would have to \
+say a requirement is untested, test it instead."""
 CLAIMS = (
     "Every attempt in the record FAILED, so treat what it concluded as a claim to check, not as "
     "a fact: a requirement it called impossible, a reading of the task it settled on, a check it "

@@ -1,0 +1,6042 @@
+{
+ "budget": 20,
+ "api_key_sources": [
+  "none"
+ ],
+ "curves": [
+  {
+   "task": "cargo-flight-dispatch",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "cargo-flight-dispatch",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [
+    3,
+    7,
+    10
+   ],
+   "censored_at": [],
+   "attempts_run": 20,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "freecad-impeller",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "freecad-impeller",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "freecad-spring-clip",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [
+    15
+   ],
+   "censored_at": [
+    20,
+    20
+   ],
+   "attempts_run": 55,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 1,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "freecad-spring-clip",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [
+    19
+   ],
+   "censored_at": [
+    20,
+    20
+   ],
+   "attempts_run": 59,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 1,
+     "known": 3
+    }
+   ]
+  }
+ ],
+ "chains": [
+  {
+   "run": "roots2-cf",
+   "task": "cargo-flight-dispatch",
+   "root": "cargo-flight-dispatch__bSzbWSE",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2726,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2253,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2188,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 22,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3533,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2782,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2217,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2752,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 8,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2763,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 9,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2984,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 10,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2423,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 11,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 22,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.368,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 12,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1988,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 13,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2511,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 14,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1883,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 15,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2335,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 16,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.28,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 17,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2655,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 18,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2861,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 19,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2349,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 20,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2336,
+     "tool_calls": 6
+    }
+   ]
+  },
+  {
+   "run": "roots2-cf",
+   "task": "cargo-flight-dispatch",
+   "root": "cargo-flight-dispatch__bSzbWSE",
+   "arm": "record-engine",
+   "counted": 10,
+   "first_pass": 10,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 21,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.269,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 23,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3254,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 22,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3825,
+     "tool_calls": 10,
+     "cut_reads": 1,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 24,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4171,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 21,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7699,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 10,
+     "row_capped": 0,
+     "attempt_filters": 7
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 22,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.705,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 24,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8799,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 8,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 24,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7078,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 11,
+     "row_capped": 0,
+     "attempt_filters": 8
+    },
+    {
+     "attempt": 9,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 24,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0977,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 10,
+     "job": "roots2-cf-cargo-flight-dispatch__bSzbWSE-record-engine-a10",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7519,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    }
+   ]
+  },
+  {
+   "run": "roots2-cf",
+   "task": "cargo-flight-dispatch",
+   "root": "cargo-flight-dispatch__bDs5eTh",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2105,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2344,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2077,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 22,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2421,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 21,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2866,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2599,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 25,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2654,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 8,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2977,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 9,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2161,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 10,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2072,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 11,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3447,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 12,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2809,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 13,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2412,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 14,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.236,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 15,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2538,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 16,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2314,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 17,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2536,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 18,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2343,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 19,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2397,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 20,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2248,
+     "tool_calls": 6
+    }
+   ]
+  },
+  {
+   "run": "roots2-cf",
+   "task": "cargo-flight-dispatch",
+   "root": "cargo-flight-dispatch__bDs5eTh",
+   "arm": "record-engine",
+   "counted": 7,
+   "first_pass": 7,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 22,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3173,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 22,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2447,
+     "tool_calls": 6,
+     "cut_reads": 1,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 24,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3736,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 21,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9147,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 20,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4147,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 25,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6344,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-cf-cargo-flight-dispatch__bDs5eTh-record-engine-a7",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7101,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    }
+   ]
+  },
+  {
+   "run": "roots2-cf",
+   "task": "cargo-flight-dispatch",
+   "root": "cargo-flight-dispatch__mgPKvT9",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 25,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2334,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2686,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2135,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3083,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1887,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1853,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.226,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 8,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2487,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 9,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2437,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 10,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2245,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 11,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3459,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 12,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2949,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 13,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2151,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 14,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2417,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 15,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.265,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 16,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 25,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2209,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 17,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.196,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 18,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2713,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 19,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2008,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 20,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 19,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.228,
+     "tool_calls": 5
+    }
+   ]
+  },
+  {
+   "run": "roots2-cf",
+   "task": "cargo-flight-dispatch",
+   "root": "cargo-flight-dispatch__mgPKvT9",
+   "arm": "record-engine",
+   "counted": 3,
+   "first_pass": 3,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 22,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3409,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 25,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3025,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-cf-cargo-flight-dispatch__mgPKvT9-record-engine-a3",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 27,
+     "checks_total": 27,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6003,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    }
+   ]
+  },
+  {
+   "run": "roots2-fi",
+   "task": "freecad-impeller",
+   "root": "freecad-impeller__ry3EYjH",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571176,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2791,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": 0.063859795966522,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2566,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571176,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3617,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": 0.06385984587987173,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1895,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": 0.16656249486753302,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2645,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 17.4,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571176,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4317,
+     "tool_calls": 24
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": 0.06385975190288516,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3549,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 8,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": 0.16656249486804495,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2976,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 9,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571181,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1987,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 10,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": 0.0638597519028966,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2366,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 11,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.0,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571181,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3004,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 12,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.4,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571176,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3987,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 13,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": 0.06425588267050249,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.324,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 14,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 15.0,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571176,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4606,
+     "tool_calls": 36
+    },
+    {
+     "attempt": 15,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571176,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4139,
+     "tool_calls": 26
+    },
+    {
+     "attempt": 16,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.4,
+     "prompt_delivered": true,
+     "graded": 0.0638597519028966,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2811,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 17,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 21.4,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571176,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3122,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 18,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.4,
+     "prompt_delivered": true,
+     "graded": 0.0640353179495201,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2736,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 19,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 20.7,
+     "prompt_delivered": true,
+     "graded": 0.0638597519028966,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4308,
+     "tool_calls": 24
+    },
+    {
+     "attempt": 20,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 15.0,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571181,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2598,
+     "tool_calls": 12
+    }
+   ]
+  },
+  {
+   "run": "roots2-fi",
+   "task": "freecad-impeller",
+   "root": "freecad-impeller__ry3EYjH",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": 0.06425588267050249,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1677,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": 0.02553886696080968,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1379,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": 0.06425588267050249,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1513,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": 0.057345154630914365,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2602,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": 0.057345154630914455,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2718,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": 0.03490134363390138,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2272,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": 0.11246193610126709,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4419,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 8,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": 0.11246193608259519,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2913,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 9,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": 0.10871832199649066,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2396,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 10,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": 0.11246193610146134,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3786,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 11,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": 0.23155430717929879,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2996,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 12,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": 0.03452560168545315,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2985,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 13,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": 0.1711892653186678,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2759,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 14,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": 0.1711892653186678,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2811,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 15,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": 0.1400838519680894,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3543,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 16,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": 0.07687866272121548,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3092,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 17,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.4,
+     "prompt_delivered": true,
+     "graded": 0.06425588267052955,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.403,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 18,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": 0.0640353179495201,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2512,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 19,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": 0.0640353179495201,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3509,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 20,
+     "job": "roots2-fi-freecad-impeller__ry3EYjH-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": 0.06369895135231095,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.363,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    }
+   ]
+  },
+  {
+   "run": "roots2-fi",
+   "task": "freecad-impeller",
+   "root": "freecad-impeller__YuYCMWv",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": 0.24167262339416315,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2208,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 17.4,
+     "prompt_delivered": true,
+     "graded": 0.0638597519028966,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.449,
+     "tool_calls": 26
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": 0.06385979597075242,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3902,
+     "tool_calls": 20
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": 0.06385975190245577,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3359,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": 0.0638597519028966,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2873,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": 0.0638597519028966,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3106,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": 0.0654673637468992,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2936,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 8,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": 0.06385984587987173,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3068,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 9,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571176,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2694,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 10,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571176,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2547,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 11,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": 0.0638597519028966,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2591,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 12,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571181,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2854,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 13,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": 0.11759520514252562,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3492,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 14,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": 0.0638597519028966,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2824,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 15,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": 0.0638597519028966,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2316,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 16,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": 0.06456575329171207,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1595,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 17,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571176,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2499,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 18,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.4,
+     "prompt_delivered": true,
+     "graded": 0.0638597519028966,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2899,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 19,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": 0.06456575329175461,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1948,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 20,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.3,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571181,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3685,
+     "tool_calls": 19
+    }
+   ]
+  },
+  {
+   "run": "roots2-fi",
+   "task": "freecad-impeller",
+   "root": "freecad-impeller__YuYCMWv",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": 0.07826054294121157,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1704,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": 0.11759520289109669,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2238,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": 0.11759520289109669,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1737,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": 0.11759520289109669,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2455,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": 0.020330919536177626,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3064,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": 0.11759520289109669,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4429,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.11759520289109669,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.159,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 8,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": 0.03756763694729589,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4317,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 9,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": 0.11884840175039679,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2893,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 10,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": 0.11759520289109669,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3113,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 11,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": 0.11759519720441629,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3032,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 12,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": 0.02033091953617769,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5424,
+     "tool_calls": 19,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 13,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": 0.06746392909196595,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4936,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 9,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 14,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": 0.06746392909196595,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3786,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 15,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571181,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2757,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 16,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571181,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.236,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 17,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": 0.020330919536177626,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3049,
+     "tool_calls": 9,
+     "cut_reads": 1,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 18,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": 0.02001461882793099,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4322,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 19,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": 0.06462845697643989,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4845,
+     "tool_calls": 17,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 20,
+     "job": "roots2-fi-freecad-impeller__YuYCMWv-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": 0.07605274481307946,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5598,
+     "tool_calls": 18,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    }
+   ]
+  },
+  {
+   "run": "roots2-fi",
+   "task": "freecad-impeller",
+   "root": "freecad-impeller__LPimWJZ",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": 0.0638597519028966,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2404,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": 0.0638597519028966,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3355,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": 0.07115388475875292,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3325,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 20.7,
+     "prompt_delivered": true,
+     "graded": 0.0640353179495493,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2696,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571176,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2238,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": 0.16656249486753202,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2282,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": 0.11759520514252562,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3296,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 8,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": 0.16656249486753202,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1865,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 9,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": 0.16656249486753202,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2594,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 10,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": 0.06385979657335535,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3027,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 11,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571176,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3795,
+     "tool_calls": 23
+    },
+    {
+     "attempt": 12,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": 0.0638597519028966,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.245,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 13,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571176,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2857,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 14,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": 0.06425588267052955,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.335,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 15,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": 0.16656249486753302,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2125,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 16,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": 0.0638597519028966,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2135,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 17,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571181,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1855,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 18,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.4,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571181,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3371,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 19,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": 0.06385975190245577,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3646,
+     "tool_calls": 23
+    },
+    {
+     "attempt": 20,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": 0.06385979596571176,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3463,
+     "tool_calls": 22
+    }
+   ]
+  },
+  {
+   "run": "roots2-fi",
+   "task": "freecad-impeller",
+   "root": "freecad-impeller__LPimWJZ",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": 0.0782604819761902,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1589,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.0782604819761902,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1366,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": 0.11759516124306754,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1794,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": 0.07115388475875284,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2391,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": 0.057645081336665266,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.257,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": 0.057645081336665266,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1936,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": 0.07006106928167309,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3158,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 8,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": 0.0700610692816731,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3424,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 9,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": 0.0700610692816731,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2576,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 10,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": 0.07006106928167309,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2101,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 11,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": 0.0700620411215014,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2534,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 12,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.0,
+     "prompt_delivered": true,
+     "graded": 0.0700620411215014,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3672,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 13,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": 0.06255900773093445,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2876,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 14,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": 0.06255900773093445,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1691,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 15,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": 0.07006106928167309,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2611,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 7
+    },
+    {
+     "attempt": 16,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": 0.0700610692816731,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1562,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 17,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": 0.07006106928167309,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2935,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 18,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": 0.0700610692816731,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3478,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 19,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": 0.07006106928167309,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3667,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 20,
+     "job": "roots2-fi-freecad-impeller__LPimWJZ-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": 0.07006106928167309,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.285,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    }
+   ]
+  },
+  {
+   "run": "roots2-fs",
+   "task": "freecad-spring-clip",
+   "root": "freecad-spring-clip__MowrVSh",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": 0.4363581165933552,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5966,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 16.0,
+     "prompt_delivered": true,
+     "graded": 0.06407187094715672,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0915,
+     "tool_calls": 20
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.7,
+     "prompt_delivered": true,
+     "graded": 0.05516194242108092,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6552,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 25.7,
+     "prompt_delivered": true,
+     "graded": 0.15769004487702412,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0024,
+     "tool_calls": 36
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": 0.1288398795713983,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4781,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 28.4,
+     "prompt_delivered": true,
+     "graded": 0.051331837149589735,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.0294,
+     "tool_calls": 44
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": 0.10220700004497105,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7702,
+     "tool_calls": 25
+    },
+    {
+     "attempt": 8,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 28.0,
+     "prompt_delivered": true,
+     "graded": 0.1553304178415852,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2597,
+     "tool_calls": 36
+    },
+    {
+     "attempt": 9,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": 0.09086450016981007,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5259,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 10,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 15.0,
+     "prompt_delivered": true,
+     "graded": 0.05462254472525452,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8533,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 11,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": 0.44001147242903244,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9011,
+     "tool_calls": 27
+    },
+    {
+     "attempt": 12,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 16.4,
+     "prompt_delivered": true,
+     "graded": 0.055784137286003635,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6727,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 13,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 28.0,
+     "prompt_delivered": true,
+     "graded": 0.30653946925687087,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2426,
+     "tool_calls": 37
+    },
+    {
+     "attempt": 14,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 16.4,
+     "prompt_delivered": true,
+     "graded": 0.08451036146799078,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9466,
+     "tool_calls": 24
+    },
+    {
+     "attempt": 15,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": 0.06532009689699875,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4729,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 16,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": 0.13206752883698067,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.681,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 17,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.0,
+     "prompt_delivered": true,
+     "graded": 0.18983976438717598,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7511,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 18,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 25.4,
+     "prompt_delivered": true,
+     "graded": 0.11778825916161524,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2323,
+     "tool_calls": 30
+    },
+    {
+     "attempt": 19,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.7,
+     "prompt_delivered": true,
+     "graded": 0.07010778503328986,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8279,
+     "tool_calls": 26
+    },
+    {
+     "attempt": 20,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 28.4,
+     "prompt_delivered": true,
+     "graded": 0.10777079209493237,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.7022,
+     "tool_calls": 42
+    }
+   ]
+  },
+  {
+   "run": "roots2-fs",
+   "task": "freecad-spring-clip",
+   "root": "freecad-spring-clip__MowrVSh",
+   "arm": "record-engine",
+   "counted": 19,
+   "first_pass": 19,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": 0.03957224823602328,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2207,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": 0.06757848433778357,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2906,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": 0.06757848433778357,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3305,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.0,
+     "prompt_delivered": true,
+     "graded": 0.06757848433778357,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8527,
+     "tool_calls": 24,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.7,
+     "prompt_delivered": true,
+     "graded": 0.1782575281830772,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7857,
+     "tool_calls": 22,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 16.0,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307716,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8752,
+     "tool_calls": 33,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307736,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0564,
+     "tool_calls": 23,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 8,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.0,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307736,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7066,
+     "tool_calls": 18,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 9,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.3,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307694,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9221,
+     "tool_calls": 21,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 10,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307716,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4484,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 11,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307716,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3236,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 12,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 27.7,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307736,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.3755,
+     "tool_calls": 41,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 13,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307736,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4593,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 14,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": 0.010816533121298481,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6932,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 15,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 20.4,
+     "prompt_delivered": true,
+     "graded": 0.43635811659335544,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.3285,
+     "tool_calls": 32,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 16,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 25.0,
+     "prompt_delivered": true,
+     "graded": 0.43635811659335544,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7811,
+     "tool_calls": 18,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 17,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": 0.43635811659335544,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8075,
+     "tool_calls": 22,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 18,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 22.7,
+     "prompt_delivered": true,
+     "graded": 0.1782575281830778,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.7879,
+     "tool_calls": 33,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 19,
+     "job": "roots2-fs-freecad-spring-clip__MowrVSh-record-engine-a19",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 27.1,
+     "prompt_delivered": true,
+     "graded": 1.0,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.3326,
+     "tool_calls": 39,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 4
+    }
+   ]
+  },
+  {
+   "run": "roots2-fs",
+   "task": "freecad-spring-clip",
+   "root": "freecad-spring-clip__R8iqvAj",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 17.0,
+     "prompt_delivered": true,
+     "graded": 0.05699500678520193,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.229,
+     "tool_calls": 26
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.0,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747894,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7692,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 15.4,
+     "prompt_delivered": true,
+     "graded": 0.09115496504222077,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1613,
+     "tool_calls": 25
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": 0.16824198876518726,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5588,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 19.4,
+     "prompt_delivered": true,
+     "graded": 0.09605571735013524,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.5984,
+     "tool_calls": 28
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": 0.05677926127001915,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6751,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 18.0,
+     "prompt_delivered": true,
+     "graded": 0.16208728809580067,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.3151,
+     "tool_calls": 31
+    },
+    {
+     "attempt": 8,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 18.0,
+     "prompt_delivered": true,
+     "graded": 0.04573604900733973,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2337,
+     "tool_calls": 30
+    },
+    {
+     "attempt": 9,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.4,
+     "prompt_delivered": true,
+     "graded": 0.19517397081889235,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0356,
+     "tool_calls": 25
+    },
+    {
+     "attempt": 10,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 24.4,
+     "prompt_delivered": true,
+     "graded": 0.06640157126932039,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.4272,
+     "tool_calls": 37
+    },
+    {
+     "attempt": 11,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.4,
+     "prompt_delivered": true,
+     "graded": 0.22039909963713727,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.011,
+     "tool_calls": 23
+    },
+    {
+     "attempt": 12,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.4,
+     "prompt_delivered": true,
+     "graded": 0.23314357717733714,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9344,
+     "tool_calls": 26
+    },
+    {
+     "attempt": 13,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": 0.05539288199076022,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7127,
+     "tool_calls": 22
+    },
+    {
+     "attempt": 14,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 21.7,
+     "prompt_delivered": true,
+     "graded": 0.2260688498358222,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.3748,
+     "tool_calls": 42
+    },
+    {
+     "attempt": 15,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307752,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5853,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 16,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.7,
+     "prompt_delivered": true,
+     "graded": 0.18033190500180846,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.945,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 17,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": 0.19305329178187036,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5399,
+     "tool_calls": 20
+    },
+    {
+     "attempt": 18,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.4,
+     "prompt_delivered": true,
+     "graded": 0.27766397321564207,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7528,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 19,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 19.7,
+     "prompt_delivered": true,
+     "graded": 0.08589046712561563,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1327,
+     "tool_calls": 33
+    },
+    {
+     "attempt": 20,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.7,
+     "prompt_delivered": true,
+     "graded": 0.07249636007904743,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7147,
+     "tool_calls": 17
+    }
+   ]
+  },
+  {
+   "run": "roots2-fs",
+   "task": "freecad-spring-clip",
+   "root": "freecad-spring-clip__R8iqvAj",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": 0.16165342694578616,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3729,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": 0.11690995868929346,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3149,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": 0.08265556099889433,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5585,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": 0.09749581727460482,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3868,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.0,
+     "prompt_delivered": true,
+     "graded": 0.09749581727460506,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7186,
+     "tool_calls": 25,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": 0.14580721411889047,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4849,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": 0.1822500577559799,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4699,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 8,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": 0.22428664366475737,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2947,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 9,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": 0.10974292673500123,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3814,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 10,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": 0.07210673713146448,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5026,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 11,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307752,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8894,
+     "tool_calls": 21,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 12,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307752,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3454,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 13,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307752,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4391,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 14,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.3,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307752,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8097,
+     "tool_calls": 22,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 15,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307752,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4402,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 16,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 41.4,
+     "prompt_delivered": true,
+     "graded": 0.4363581165933535,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8001,
+     "tool_calls": 35,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 17,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307697,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.356,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 18,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 54.7,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307697,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.9948,
+     "tool_calls": 46,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 19,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307697,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 20,
+     "job": "roots2-fs-freecad-spring-clip__R8iqvAj-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": 0.17825752818307697,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.272,
+     "tool_calls": 8,
+     "cut_reads": 1,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 5
+    }
+   ]
+  },
+  {
+   "run": "roots2-fs",
+   "task": "freecad-spring-clip",
+   "root": "freecad-spring-clip__GuzeuQx",
+   "arm": "control",
+   "counted": 15,
+   "first_pass": 15,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 16.4,
+     "prompt_delivered": true,
+     "graded": 0.21945204658744646,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1094,
+     "tool_calls": 31
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": 0.12368854330926002,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3872,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": 0.08086320967094493,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6048,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 18.4,
+     "prompt_delivered": true,
+     "graded": 0.2391114546896832,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.456,
+     "tool_calls": 31
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747889,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4421,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.7,
+     "prompt_delivered": true,
+     "graded": 0.1782575281830776,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9495,
+     "tool_calls": 27
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.7,
+     "prompt_delivered": true,
+     "graded": 0.06640157126932052,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9507,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 8,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.3,
+     "prompt_delivered": true,
+     "graded": 0.07245052016614988,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9989,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 9,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.7,
+     "prompt_delivered": true,
+     "graded": 0.0447286621352353,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9753,
+     "tool_calls": 28
+    },
+    {
+     "attempt": 10,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": 0.15599367417478976,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7767,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 11,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.4,
+     "prompt_delivered": true,
+     "graded": 0.1354296595453096,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9754,
+     "tool_calls": 33
+    },
+    {
+     "attempt": 12,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.3,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747906,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6177,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 13,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.4,
+     "prompt_delivered": true,
+     "graded": 0.09169731332959509,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9993,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 14,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": 0.08720068049222578,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4951,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 15,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-control-a15",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": 0.6449323295241366,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5247,
+     "tool_calls": 12
+    }
+   ]
+  },
+  {
+   "run": "roots2-fs",
+   "task": "freecad-spring-clip",
+   "root": "freecad-spring-clip__GuzeuQx",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.7,
+     "prompt_delivered": true,
+     "graded": 0.12206422306327437,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7402,
+     "tool_calls": 17,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747892,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.299,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 3,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747892,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1513,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 4,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747892,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5615,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 5,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747892,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8649,
+     "tool_calls": 17,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 6,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747892,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.274,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 7,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747892,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3897,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 8,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747892,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6869,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 9,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747892,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3357,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 1,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 10,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 22.4,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747892,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.6587,
+     "tool_calls": 30,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 11,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747892,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5041,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 12,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.4,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747892,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9519,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 13,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": 0.10901873972869659,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5236,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 14,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747892,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9028,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 15,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747892,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5258,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 16,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747892,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3959,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 17,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747892,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2658,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 18,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": 0.1559936741747892,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6291,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 19,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 21.4,
+     "prompt_delivered": true,
+     "graded": 0.15387374493375802,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.777,
+     "tool_calls": 31,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 20,
+     "job": "roots2-fs-freecad-spring-clip__GuzeuQx-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": 0.01081123513529035,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.386,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 5
+    }
+   ]
+  }
+ ]
+}

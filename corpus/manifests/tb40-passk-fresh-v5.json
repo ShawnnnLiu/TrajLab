@@ -1,0 +1,152 @@
+{
+  "corpus_id": "tb40-passk-fresh-v5",
+  "created_at": "2026-11-18T05:01:31.924847Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "f90906e25bb4b2bcbdab4cc8583c021883820b69",
+  "repo_dirty": true,
+  "config_path": "configs/harbor/tb40-passk-fresh-v5.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 5,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 0.5,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "writes_recorded": false,
+  "tasks": [
+    {
+      "name": "terminal-bench/atrx-vep-crispr",
+      "digest": "sha256:4ebe9e13de8cbd39ee2f9e14a9d7b1233c047ae43fba238ebc6274465697be3a"
+    },
+    {
+      "name": "terminal-bench/embedding-drift-monitor",
+      "digest": "sha256:6907ffce9ad5c8a8b41fe9c0a076a9aeb9754a2f8083c52f9aede5481a4f4c59"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb40-passk-fresh-v5",
+      "job_id": "a5d4641e-850f-43a9-8ff9-4ce1634f2f21",
+      "job_config": {
+        "job_name": "tb40-passk-fresh-v5",
+        "jobs_dir": "corpus/jobs",
+        "n_attempts": 5,
+        "agent_timeout_multiplier": 0.5,
+        "n_concurrent_trials": 2,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "sha256:39d9f44b40420cde8fdcc087579c0d72a7e14fa3656d603c3f0d22fb35e27732",
+            "task_names": [
+              "terminal-bench/atrx-vep-crispr",
+              "terminal-bench/embedding-drift-monitor"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "aed8265e-7d01-482c-87ab-fbe79ed3df4d",
+          "trial_name": "atrx-vep-crispr__2rQmNqC",
+          "task_name": "terminal-bench/atrx-vep-crispr",
+          "job_id": "a5d4641e-850f-43a9-8ff9-4ce1634f2f21",
+          "job_dir": "tb40-passk-fresh-v5",
+          "claude_session_id": "7207c9b5-f16f-479d-93c7-ccbf9a273635"
+        },
+        {
+          "trial_id": "7e354148-83cc-4e9d-a924-1db2816c65f3",
+          "trial_name": "atrx-vep-crispr__6zUStrp",
+          "task_name": "terminal-bench/atrx-vep-crispr",
+          "job_id": "a5d4641e-850f-43a9-8ff9-4ce1634f2f21",
+          "job_dir": "tb40-passk-fresh-v5",
+          "claude_session_id": "0fd9daa9-daf1-4c34-9351-279204fdfcf7"
+        },
+        {
+          "trial_id": "8e80b27c-0106-4cb7-9c65-6f191509f5d9",
+          "trial_name": "atrx-vep-crispr__FnXuYNp",
+          "task_name": "terminal-bench/atrx-vep-crispr",
+          "job_id": "a5d4641e-850f-43a9-8ff9-4ce1634f2f21",
+          "job_dir": "tb40-passk-fresh-v5",
+          "claude_session_id": "634bc32a-6ca0-4a53-98a9-a3dd32da09d4"
+        },
+        {
+          "trial_id": "df0b8c6c-e1d7-4a0b-97d6-b72ff6197eda",
+          "trial_name": "atrx-vep-crispr__MiZk9Qc",
+          "task_name": "terminal-bench/atrx-vep-crispr",
+          "job_id": "a5d4641e-850f-43a9-8ff9-4ce1634f2f21",
+          "job_dir": "tb40-passk-fresh-v5",
+          "claude_session_id": "d37c61b7-610e-4f12-81bf-2aee3ae68135"
+        },
+        {
+          "trial_id": "8f56e904-3345-4ab7-8ab0-d0c1f51e94ae",
+          "trial_name": "atrx-vep-crispr__V525sES",
+          "task_name": "terminal-bench/atrx-vep-crispr",
+          "job_id": "a5d4641e-850f-43a9-8ff9-4ce1634f2f21",
+          "job_dir": "tb40-passk-fresh-v5",
+          "claude_session_id": "30143c8b-35d3-4cdf-88aa-b479b7dc95c1"
+        },
+        {
+          "trial_id": "a0de5f3e-fe16-4454-803a-6d8426344258",
+          "trial_name": "embedding-drift-monitor__29MLQm8",
+          "task_name": "terminal-bench/embedding-drift-monitor",
+          "job_id": "a5d4641e-850f-43a9-8ff9-4ce1634f2f21",
+          "job_dir": "tb40-passk-fresh-v5",
+          "claude_session_id": "0a8c7648-a1fa-4520-a0b8-eabd88b1e661"
+        },
+        {
+          "trial_id": "1a465286-254d-4765-92e3-e1935b32245f",
+          "trial_name": "embedding-drift-monitor__7oStctu",
+          "task_name": "terminal-bench/embedding-drift-monitor",
+          "job_id": "a5d4641e-850f-43a9-8ff9-4ce1634f2f21",
+          "job_dir": "tb40-passk-fresh-v5",
+          "claude_session_id": "5a45d185-0d23-4f73-b3c1-ff9e3ebf26ca"
+        },
+        {
+          "trial_id": "650241f3-9fb1-4e1b-974b-8abede685bfc",
+          "trial_name": "embedding-drift-monitor__NgUQvrz",
+          "task_name": "terminal-bench/embedding-drift-monitor",
+          "job_id": "a5d4641e-850f-43a9-8ff9-4ce1634f2f21",
+          "job_dir": "tb40-passk-fresh-v5",
+          "claude_session_id": "9e12cd4a-4c54-4b28-b36c-2ea2174d9bf8"
+        },
+        {
+          "trial_id": "d0fad502-e654-41b0-b342-55d17c1f2a0c",
+          "trial_name": "embedding-drift-monitor__XoD9NCD",
+          "task_name": "terminal-bench/embedding-drift-monitor",
+          "job_id": "a5d4641e-850f-43a9-8ff9-4ce1634f2f21",
+          "job_dir": "tb40-passk-fresh-v5",
+          "claude_session_id": "8f179850-0540-40e6-ab70-c5b6fa60e37a"
+        },
+        {
+          "trial_id": "910434cf-0fb9-47e0-b25e-0787adb3ccd6",
+          "trial_name": "embedding-drift-monitor__d8SspGi",
+          "task_name": "terminal-bench/embedding-drift-monitor",
+          "job_id": "a5d4641e-850f-43a9-8ff9-4ce1634f2f21",
+          "job_dir": "tb40-passk-fresh-v5",
+          "claude_session_id": "50ef68b9-37de-4bcb-8326-cdcfdba3ec66"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}
