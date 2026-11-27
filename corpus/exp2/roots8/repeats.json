@@ -1,0 +1,178 @@
+{
+  "totals": {
+    "music-harmony/control": {
+      "attempts": 60,
+      "repeats": 60,
+      "same_answer": 0
+    },
+    "music-harmony/record-engine": {
+      "attempts": 60,
+      "repeats": 60,
+      "same_answer": 0
+    }
+  },
+  "chains": [
+    {
+      "task": "music-harmony",
+      "root": "music-harmony__SizoS6i",
+      "arm": "control",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "music-harmony",
+      "root": "music-harmony__SizoS6i",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "music-harmony",
+      "root": "music-harmony__oJi53ze",
+      "arm": "control",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "music-harmony",
+      "root": "music-harmony__oJi53ze",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "music-harmony",
+      "root": "music-harmony__5gSg2ge",
+      "arm": "control",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "music-harmony",
+      "root": "music-harmony__5gSg2ge",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  ]
+}

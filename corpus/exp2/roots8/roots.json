@@ -1,0 +1,180 @@
+{
+  "retro-console-soc": {
+    "median": 8.0,
+    "roots": [
+      "retro-console-soc__Cj3MVBF"
+    ],
+    "attempts": [
+      {
+        "trial": "retro-console-soc__Cj3MVBF",
+        "score": 7.0,
+        "reward": 0.0,
+        "started_at": "2026-11-23T18:50:02.532018Z",
+        "exception": null
+      },
+      {
+        "trial": "retro-console-soc__KDpUQdR",
+        "score": 8.0,
+        "reward": 1.0,
+        "started_at": "2026-11-23T19:38:04.923969Z",
+        "exception": null
+      },
+      {
+        "trial": "retro-console-soc__PPTc8kb",
+        "score": 8.0,
+        "reward": 1.0,
+        "started_at": "2026-11-23T22:51:39.972464Z",
+        "exception": null
+      },
+      {
+        "trial": "retro-console-soc__fHjpEF2",
+        "score": 8.0,
+        "reward": 1.0,
+        "started_at": "2026-11-23T21:42:33.142368Z",
+        "exception": null
+      },
+      {
+        "trial": "retro-console-soc__wo6zFDF",
+        "score": 8.0,
+        "reward": 1.0,
+        "started_at": "2026-11-23T21:18:47.781748Z",
+        "exception": null
+      }
+    ]
+  },
+  "sglang-qwen-burst": {
+    "median": 3.0,
+    "roots": [
+      "sglang-qwen-burst__asPk3KY",
+      "sglang-qwen-burst__XpfqCNn",
+      "sglang-qwen-burst__xasQsTB"
+    ],
+    "attempts": [
+      {
+        "trial": "sglang-qwen-burst__P5fdMk8",
+        "score": 1.0,
+        "reward": 0.0,
+        "started_at": "2026-11-23T21:34:06.160627Z",
+        "exception": null
+      },
+      {
+        "trial": "sglang-qwen-burst__XpfqCNn",
+        "score": 3.0,
+        "reward": 0.0,
+        "started_at": "2026-11-23T19:59:46.790969Z",
+        "exception": null
+      },
+      {
+        "trial": "sglang-qwen-burst__asPk3KY",
+        "score": 3.0,
+        "reward": 0.0,
+        "started_at": "2026-11-23T19:17:23.732555Z",
+        "exception": null
+      },
+      {
+        "trial": "sglang-qwen-burst__oSarF2E",
+        "score": 1.0,
+        "reward": 0.0,
+        "started_at": "2026-11-23T22:00:52.506536Z",
+        "exception": "ApiRateLimitError"
+      },
+      {
+        "trial": "sglang-qwen-burst__xasQsTB",
+        "score": 3.0,
+        "reward": 0.0,
+        "started_at": "2026-11-23T23:08:59.205883Z",
+        "exception": null
+      }
+    ]
+  },
+  "rs-archive-clone": {
+    "median": 57.0,
+    "roots": [
+      "rs-archive-clone__RJcxVUu",
+      "rs-archive-clone__m8PMZrV"
+    ],
+    "attempts": [
+      {
+        "trial": "rs-archive-clone__QFVMAyb",
+        "score": 57.0,
+        "reward": 1.0,
+        "started_at": "2026-11-23T18:34:56.986492Z",
+        "exception": null
+      },
+      {
+        "trial": "rs-archive-clone__RJcxVUu",
+        "score": 54.0,
+        "reward": 0.0,
+        "started_at": "2026-11-23T21:41:24.202951Z",
+        "exception": null
+      },
+      {
+        "trial": "rs-archive-clone__VQzdQh5",
+        "score": 57.0,
+        "reward": 1.0,
+        "started_at": "2026-11-23T22:46:11.877712Z",
+        "exception": null
+      },
+      {
+        "trial": "rs-archive-clone__m8PMZrV",
+        "score": 46.0,
+        "reward": 0.0,
+        "started_at": "2026-11-23T19:28:19.306536Z",
+        "exception": null
+      },
+      {
+        "trial": "rs-archive-clone__tYd7zeF",
+        "score": 57.0,
+        "reward": 1.0,
+        "started_at": "2026-11-23T20:22:33.850561Z",
+        "exception": null
+      }
+    ]
+  },
+  "music-harmony": {
+    "median": 10.0,
+    "roots": [
+      "music-harmony__SizoS6i",
+      "music-harmony__oJi53ze",
+      "music-harmony__5gSg2ge"
+    ],
+    "attempts": [
+      {
+        "trial": "music-harmony__5gSg2ge",
+        "score": 10.0,
+        "reward": 0.0,
+        "started_at": "2026-11-23T22:40:26.535114Z",
+        "exception": null
+      },
+      {
+        "trial": "music-harmony__JRZYQKQ",
+        "score": 11.0,
+        "reward": 0.0,
+        "started_at": "2026-11-23T18:31:46.199545Z",
+        "exception": null
+      },
+      {
+        "trial": "music-harmony__MrsXxG3",
+        "score": 8.0,
+        "reward": 0.0,
+        "started_at": "2026-11-23T19:23:52.029484Z",
+        "exception": null
+      },
+      {
+        "trial": "music-harmony__SizoS6i",
+        "score": 10.0,
+        "reward": 0.0,
+        "started_at": "2026-11-23T20:20:20.758409Z",
+        "exception": null
+      },
+      {
+        "trial": "music-harmony__oJi53ze",
+        "score": 10.0,
+        "reward": 0.0,
+        "started_at": "2026-11-23T21:37:23.401144Z",
+        "exception": null
+      }
+    ],
+    "note": "score = rules passed of 13 in the verifier's table, computed by hand on 2026-11-23; the roots script cannot score this verifier"
+  }
+}

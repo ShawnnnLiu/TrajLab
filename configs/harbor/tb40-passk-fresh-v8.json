@@ -1,0 +1,35 @@
+{
+  "job_name": "tb40-passk-fresh-v8",
+  "jobs_dir": "corpus/jobs",
+  "n_attempts": 5,
+  "n_concurrent_trials": 2,
+  "agent_timeout_multiplier": 0.5,
+  "agents": [
+    {
+      "name": "claude-code",
+      "model_name": "anthropic/claude-sonnet-5-5",
+      "kwargs": {
+        "reasoning_effort": "medium",
+        "version": "2.1.278",
+        "config": "configs/claude-code/settings.hooks.json"
+      }
+    }
+  ],
+  "datasets": [
+    {
+      "name": "terminal-bench/terminal-bench",
+      "ref": "4.0.0",
+      "task_names": [
+        "terminal-bench/sound-change-cascade",
+        "terminal-bench/batched-eval-parity",
+        "terminal-bench/risk-scorer-replay",
+        "terminal-bench/vpp-loss-divergence",
+        "terminal-bench/vba-userform-port",
+        "terminal-bench/mp-checkpoint-consolidation"
+      ]
+    }
+  ],
+  "environment": {
+    "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+  }
+}

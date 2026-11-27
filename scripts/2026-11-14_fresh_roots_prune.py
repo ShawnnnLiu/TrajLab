@@ -37,6 +37,7 @@ from trajlab.contracts import CheckpointRecord
 
 logger = logging.getLogger("fresh_roots_prune")
 SUMMARY = re.compile(r"=+ (?:(\d+) failed, )?(\d+) passed.* in [\d.]+s")
+BRACKET = re.compile(r"^\[(PASS|FAIL)\] \w+", re.MULTILINE)
 REASON = "fresh attempt that is not a root (owner's word 2026-11-14, replication after ADR-0025)"
 
 
@@ -48,13 +49,16 @@ def graded(trial: Path) -> float | None:
         value = found.get("combined_raw", found.get("combined"))
         return float(value) if value is not None else None
     stdout = trial / "verifier" / "test-stdout.txt"
-    if stdout.is_file() and (found := SUMMARY.search(stdout.read_text(errors="replace"))):
+    text = stdout.read_text(errors="replace") if stdout.is_file() else ""
+    if found := SUMMARY.search(text):
         return float(found.group(2))
     ctrf = trial / "verifier" / "ctrf.json"
     if ctrf.is_file():
         summary = json.loads(ctrf.read_text()).get("results", {}).get("summary", {})
         if "passed" in summary:
             return float(summary["passed"])
+    if marks := BRACKET.findall(text):  # a verifier that prints `[PASS] name` / `[FAIL] name`
+        return float(marks.count("PASS"))
     return None
 
 

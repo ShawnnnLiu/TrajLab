@@ -1,0 +1,354 @@
+{
+  "photonic-waveguide-routing": {
+    "median": 14.0,
+    "roots": [],
+    "attempts": [
+      {
+        "trial": "photonic-waveguide-routing__7s4azsc",
+        "score": 14.0,
+        "reward": 1.0,
+        "started_at": "2026-11-19T17:54:36.093077Z",
+        "exception": null
+      },
+      {
+        "trial": "photonic-waveguide-routing__JAupFjN",
+        "score": 14.0,
+        "reward": 1.0,
+        "started_at": "2026-11-19T19:38:01.236821Z",
+        "exception": null
+      },
+      {
+        "trial": "photonic-waveguide-routing__UJdS6od",
+        "score": 14.0,
+        "reward": 1.0,
+        "started_at": "2026-11-19T21:06:20.171182Z",
+        "exception": null
+      },
+      {
+        "trial": "photonic-waveguide-routing__eKHu6ek",
+        "score": 14.0,
+        "reward": 1.0,
+        "started_at": "2026-11-19T20:29:31.460308Z",
+        "exception": null
+      },
+      {
+        "trial": "photonic-waveguide-routing__kMHB8jT",
+        "score": 14.0,
+        "reward": 1.0,
+        "started_at": "2026-11-19T18:30:55.520823Z",
+        "exception": null
+      }
+    ]
+  },
+  "glycan-ms2-elucidation": {
+    "median": 11.0,
+    "roots": [
+      "glycan-ms2-elucidation__JVwvGia",
+      "glycan-ms2-elucidation__XB4j2N9",
+      "glycan-ms2-elucidation__QFgYyYb"
+    ],
+    "attempts": [
+      {
+        "trial": "glycan-ms2-elucidation__JVwvGia",
+        "score": 11.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T17:54:36.157001Z",
+        "exception": null
+      },
+      {
+        "trial": "glycan-ms2-elucidation__QFgYyYb",
+        "score": 11.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T19:54:22.277241Z",
+        "exception": null
+      },
+      {
+        "trial": "glycan-ms2-elucidation__Uz7tj3x",
+        "score": 11.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T20:32:54.981018Z",
+        "exception": null
+      },
+      {
+        "trial": "glycan-ms2-elucidation__WzvMfg8",
+        "score": 11.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T21:20:43.624959Z",
+        "exception": null
+      },
+      {
+        "trial": "glycan-ms2-elucidation__XB4j2N9",
+        "score": 11.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T18:50:13.152820Z",
+        "exception": null
+      }
+    ]
+  },
+  "session-window-debug": {
+    "median": 6.0,
+    "roots": [
+      "session-window-debug__j4cBxiA",
+      "session-window-debug__84Hnz27",
+      "session-window-debug__WK4kBtU"
+    ],
+    "attempts": [
+      {
+        "trial": "session-window-debug__84Hnz27",
+        "score": 6.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T20:34:09.065994Z",
+        "exception": null
+      },
+      {
+        "trial": "session-window-debug__9auvYXd",
+        "score": 4.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T19:55:57.472798Z",
+        "exception": null
+      },
+      {
+        "trial": "session-window-debug__JYkjpGi",
+        "score": 5.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T18:52:01.786422Z",
+        "exception": null
+      },
+      {
+        "trial": "session-window-debug__WK4kBtU",
+        "score": 6.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T21:22:40.498788Z",
+        "exception": null
+      },
+      {
+        "trial": "session-window-debug__j4cBxiA",
+        "score": 6.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T17:58:34.772653Z",
+        "exception": null
+      }
+    ]
+  },
+  "data-anonymization": {
+    "median": 6.0,
+    "roots": [
+      "data-anonymization__SpAhXfF",
+      "data-anonymization__53PP7aA",
+      "data-anonymization__WoqJm7u"
+    ],
+    "attempts": [
+      {
+        "trial": "data-anonymization__53PP7aA",
+        "score": 6.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T19:57:20.060769Z",
+        "exception": null
+      },
+      {
+        "trial": "data-anonymization__L7EYMiv",
+        "score": 6.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T21:22:56.945205Z",
+        "exception": null
+      },
+      {
+        "trial": "data-anonymization__SpAhXfF",
+        "score": 6.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T18:53:13.578385Z",
+        "exception": null
+      },
+      {
+        "trial": "data-anonymization__WoqJm7u",
+        "score": 6.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T20:35:33.069270Z",
+        "exception": null
+      },
+      {
+        "trial": "data-anonymization__m9EpvYm",
+        "score": 5.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T18:01:58.586079Z",
+        "exception": null
+      }
+    ]
+  },
+  "telecom-entity-resolution": {
+    "median": 10.0,
+    "roots": [
+      "telecom-entity-resolution__XamDthV"
+    ],
+    "attempts": [
+      {
+        "trial": "telecom-entity-resolution__7GmJyJW",
+        "score": 10.0,
+        "reward": 1.0,
+        "started_at": "2026-11-19T20:00:55.479406Z",
+        "exception": null
+      },
+      {
+        "trial": "telecom-entity-resolution__TPn4C3i",
+        "score": 10.0,
+        "reward": 1.0,
+        "started_at": "2026-11-19T18:11:42.515193Z",
+        "exception": null
+      },
+      {
+        "trial": "telecom-entity-resolution__XamDthV",
+        "score": 8.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T21:24:13.604781Z",
+        "exception": null
+      },
+      {
+        "trial": "telecom-entity-resolution__YwcfZm2",
+        "score": 10.0,
+        "reward": 1.0,
+        "started_at": "2026-11-19T20:47:17.191730Z",
+        "exception": null
+      },
+      {
+        "trial": "telecom-entity-resolution__hopeKHW",
+        "score": 10.0,
+        "reward": 1.0,
+        "started_at": "2026-11-19T19:10:18.566231Z",
+        "exception": null
+      }
+    ]
+  },
+  "ontology-kg-querying": {
+    "median": 9.0,
+    "roots": [
+      "ontology-kg-querying__CPLteYG",
+      "ontology-kg-querying__5AzQrFB",
+      "ontology-kg-querying__8Fzx57H"
+    ],
+    "attempts": [
+      {
+        "trial": "ontology-kg-querying__5AzQrFB",
+        "score": 9.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T20:10:31.373755Z",
+        "exception": null
+      },
+      {
+        "trial": "ontology-kg-querying__8Fzx57H",
+        "score": 9.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T20:50:02.911590Z",
+        "exception": null
+      },
+      {
+        "trial": "ontology-kg-querying__CPLteYG",
+        "score": 9.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T19:29:53.128091Z",
+        "exception": null
+      },
+      {
+        "trial": "ontology-kg-querying__K4VgqZy",
+        "score": 11.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T18:20:32.952954Z",
+        "exception": null
+      },
+      {
+        "trial": "ontology-kg-querying__pnHD3VT",
+        "score": 9.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T21:36:45.462759Z",
+        "exception": null
+      }
+    ]
+  },
+  "freecad-platform-drawing": {
+    "median": 0.5263,
+    "roots": [
+      "freecad-platform-drawing__GNv7SLw",
+      "freecad-platform-drawing__QchNvkk",
+      "freecad-platform-drawing__59ZCEyD"
+    ],
+    "attempts": [
+      {
+        "trial": "freecad-platform-drawing__59ZCEyD",
+        "score": 0.5789,
+        "reward": 0.0,
+        "started_at": "2026-11-19T20:15:56.805890Z",
+        "exception": null
+      },
+      {
+        "trial": "freecad-platform-drawing__GNv7SLw",
+        "score": 0.5263,
+        "reward": 0.0,
+        "started_at": "2026-11-19T19:35:19.422962Z",
+        "exception": null
+      },
+      {
+        "trial": "freecad-platform-drawing__HoEhrdY",
+        "score": 0.4737,
+        "reward": 0.0,
+        "started_at": "2026-11-19T21:40:57.834210Z",
+        "exception": null
+      },
+      {
+        "trial": "freecad-platform-drawing__QchNvkk",
+        "score": 0.5263,
+        "reward": 0.0,
+        "started_at": "2026-11-19T20:55:32.361086Z",
+        "exception": null
+      },
+      {
+        "trial": "freecad-platform-drawing__TY2Fqtn",
+        "score": 0.6230111246007435,
+        "reward": 0.0,
+        "started_at": "2026-11-19T18:23:57.322460Z",
+        "exception": null
+      }
+    ]
+  },
+  "hof-topology-interpenetration": {
+    "median": 38.0,
+    "roots": [
+      "hof-topology-interpenetration__Q5NM3GT"
+    ],
+    "attempts": [
+      {
+        "trial": "hof-topology-interpenetration__3UCyhfP",
+        "score": 38.0,
+        "reward": 1.0,
+        "started_at": "2026-11-19T18:27:47.704791Z",
+        "exception": null
+      },
+      {
+        "trial": "hof-topology-interpenetration__KVjS8i4",
+        "score": 38.0,
+        "reward": 1.0,
+        "started_at": "2026-11-19T19:37:38.275477Z",
+        "exception": null
+      },
+      {
+        "trial": "hof-topology-interpenetration__MW6g685",
+        "score": 38.0,
+        "reward": 1.0,
+        "started_at": "2026-11-19T20:18:51.502831Z",
+        "exception": null
+      },
+      {
+        "trial": "hof-topology-interpenetration__PLvfU58",
+        "score": 38.0,
+        "reward": 1.0,
+        "started_at": "2026-11-19T20:58:17.615110Z",
+        "exception": null
+      },
+      {
+        "trial": "hof-topology-interpenetration__Q5NM3GT",
+        "score": 35.0,
+        "reward": 0.0,
+        "started_at": "2026-11-19T21:42:24.886427Z",
+        "exception": null
+      }
+    ]
+  }
+}

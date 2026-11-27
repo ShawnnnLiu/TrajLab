@@ -1,0 +1,287 @@
+{
+  "corpus_id": "tb40-passk-fresh-v7",
+  "created_at": "2026-11-24T00:27:41.907752Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "6e5acbb6a5c087028686f8bb4e3f77ccb246470c",
+  "repo_dirty": true,
+  "config_path": "configs/harbor/tb40-passk-fresh-v7.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 5,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 0.5,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "writes_recorded": false,
+  "tasks": [
+    {
+      "name": "terminal-bench/music-harmony",
+      "digest": "sha256:f32afbf135cbd3c622ee687ba032abe61cab85a33b5243ee5cbbde82557f3ed1"
+    },
+    {
+      "name": "terminal-bench/react-lead-form",
+      "digest": "sha256:790af6a6308be694896fa5258c3f3c1b536dfa75acdb9936799a4344a3e4573b"
+    },
+    {
+      "name": "terminal-bench/retro-console-soc",
+      "digest": "sha256:2b43b109ac633a4740364a3942df1195a8ae6ebfdae93b6a53e1ade8a6ffcf9e"
+    },
+    {
+      "name": "terminal-bench/rs-archive-clone",
+      "digest": "sha256:a6e74dbc5290e535872d70d5a9f52b97ca040d520a7b5f11a6f5b14013c4da85"
+    },
+    {
+      "name": "terminal-bench/sglang-qwen-burst",
+      "digest": "sha256:32bdf75983144af64a855c3711df1136cd347219b05bf5ef3b839375b1f82941"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb40-passk-fresh-v7",
+      "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+      "job_config": {
+        "job_name": "tb40-passk-fresh-v7",
+        "jobs_dir": "corpus/jobs",
+        "n_attempts": 5,
+        "agent_timeout_multiplier": 0.5,
+        "n_concurrent_trials": 2,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "sha256:39d9f44b40420cde8fdcc087579c0d72a7e14fa3656d603c3f0d22fb35e27732",
+            "task_names": [
+              "terminal-bench/rs-archive-clone",
+              "terminal-bench/react-lead-form",
+              "terminal-bench/music-harmony",
+              "terminal-bench/sglang-qwen-burst",
+              "terminal-bench/retro-console-soc"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "b7902023-51c9-4633-b703-c06f4407b9e8",
+          "trial_name": "music-harmony__5gSg2ge",
+          "task_name": "terminal-bench/music-harmony",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "f95c2a4f-2989-4925-8a83-4a372e12a124"
+        },
+        {
+          "trial_id": "61cddb3b-d81a-4dfe-bef2-201c28d496c6",
+          "trial_name": "music-harmony__JRZYQKQ",
+          "task_name": "terminal-bench/music-harmony",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "06cde16a-a199-4e2c-80c1-100a1d37fb1c"
+        },
+        {
+          "trial_id": "ca2562f5-82e8-4e45-a679-f78eab86756e",
+          "trial_name": "music-harmony__MrsXxG3",
+          "task_name": "terminal-bench/music-harmony",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "bb4e3668-b89c-466e-9f0d-6ed3522beb09"
+        },
+        {
+          "trial_id": "7addd8b7-0d04-4269-8408-055e85e376bc",
+          "trial_name": "music-harmony__SizoS6i",
+          "task_name": "terminal-bench/music-harmony",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "ba7eb88e-e62c-4ef2-821f-793b6fb6cfb7"
+        },
+        {
+          "trial_id": "6344d14c-2c88-40cd-82a3-e07ab87bede1",
+          "trial_name": "music-harmony__oJi53ze",
+          "task_name": "terminal-bench/music-harmony",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "efaa0081-c09e-4dba-8ff3-66882c6430a6"
+        },
+        {
+          "trial_id": "ae29cfb3-dc9e-48f7-9521-5e73376996cc",
+          "trial_name": "react-lead-form__7e2R3Z4",
+          "task_name": "terminal-bench/react-lead-form",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "f09f4987-c700-4732-b577-dc53d58a1533"
+        },
+        {
+          "trial_id": "36fecb41-22d0-497e-a11f-03b11ec90c70",
+          "trial_name": "react-lead-form__bkxKyNB",
+          "task_name": "terminal-bench/react-lead-form",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "fb3f0241-aefe-4a87-baf8-60778dbdb58c"
+        },
+        {
+          "trial_id": "b230ca60-4b32-494d-8f68-26b01bfa9dc8",
+          "trial_name": "react-lead-form__mRNjwCa",
+          "task_name": "terminal-bench/react-lead-form",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "a4137e4b-8de3-4eb1-b266-a5389c6591ad"
+        },
+        {
+          "trial_id": "d5768f5a-88ad-4a57-a5df-d22321388348",
+          "trial_name": "react-lead-form__xWD5i7f",
+          "task_name": "terminal-bench/react-lead-form",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "2cf8dd2b-7716-4919-84f6-bbc18f25ecce"
+        },
+        {
+          "trial_id": "f94e6a19-0035-4284-9bc5-be3fa48167e8",
+          "trial_name": "react-lead-form__xdrBQLN",
+          "task_name": "terminal-bench/react-lead-form",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "fbba0ccb-7dd8-4bcf-a1bb-4b7de7c08ef7"
+        },
+        {
+          "trial_id": "37b8a0a0-d0a1-4cf3-806e-6340941fea64",
+          "trial_name": "retro-console-soc__Cj3MVBF",
+          "task_name": "terminal-bench/retro-console-soc",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "900e02c3-a0d0-4260-bc69-4aa4783a69f4"
+        },
+        {
+          "trial_id": "7e40d70c-8b50-41d0-8777-74c9ef7e29f0",
+          "trial_name": "retro-console-soc__KDpUQdR",
+          "task_name": "terminal-bench/retro-console-soc",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "1fcef82f-bfe2-449d-a12c-a0f5e764e2d2"
+        },
+        {
+          "trial_id": "09ad2b83-f75c-4b80-a224-8992bed443ac",
+          "trial_name": "retro-console-soc__PPTc8kb",
+          "task_name": "terminal-bench/retro-console-soc",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "7b6d7481-f573-4904-a7a6-27855582a7e2"
+        },
+        {
+          "trial_id": "6364fd43-4d0e-4985-88ab-c82566be2f8a",
+          "trial_name": "retro-console-soc__fHjpEF2",
+          "task_name": "terminal-bench/retro-console-soc",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "28f3b9d8-c396-4180-88a0-d5bdaefbaa70"
+        },
+        {
+          "trial_id": "66920ea1-8e8c-4d7b-934a-e567733eeb9a",
+          "trial_name": "retro-console-soc__wo6zFDF",
+          "task_name": "terminal-bench/retro-console-soc",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "843421a9-51ea-4984-8347-7781dbc81e87"
+        },
+        {
+          "trial_id": "e01b7d6b-0d37-4343-9afd-f00f10e590f2",
+          "trial_name": "rs-archive-clone__QFVMAyb",
+          "task_name": "terminal-bench/rs-archive-clone",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "7c86651d-4832-44e3-921a-1ea44349b418"
+        },
+        {
+          "trial_id": "08a65811-15a5-4f0e-909d-9f515a94fce5",
+          "trial_name": "rs-archive-clone__RJcxVUu",
+          "task_name": "terminal-bench/rs-archive-clone",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "23037e24-d5fd-481c-832e-f59a8d63226b"
+        },
+        {
+          "trial_id": "9758c211-ee0b-4c0a-9e8a-1a658eab9464",
+          "trial_name": "rs-archive-clone__VQzdQh5",
+          "task_name": "terminal-bench/rs-archive-clone",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "71a05c08-cad7-4ede-b550-c609d7363440"
+        },
+        {
+          "trial_id": "de131dd7-76eb-47b8-9487-0f68fe915ecf",
+          "trial_name": "rs-archive-clone__m8PMZrV",
+          "task_name": "terminal-bench/rs-archive-clone",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "e97764fa-c95b-4c09-a3a7-01613b1c9184"
+        },
+        {
+          "trial_id": "f5167c87-3e4e-4c29-8432-845cc2bb642d",
+          "trial_name": "rs-archive-clone__tYd7zeF",
+          "task_name": "terminal-bench/rs-archive-clone",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "6f0b0b77-a11f-436d-ada5-1d3d1391e741"
+        },
+        {
+          "trial_id": "1f18e87f-f561-4c2b-80ed-d1f0931806f7",
+          "trial_name": "sglang-qwen-burst__P5fdMk8",
+          "task_name": "terminal-bench/sglang-qwen-burst",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "4aad7264-0774-4618-ab58-2d8bea7dd9f2"
+        },
+        {
+          "trial_id": "a5754643-2790-4ec7-9c70-19dd3210681f",
+          "trial_name": "sglang-qwen-burst__XpfqCNn",
+          "task_name": "terminal-bench/sglang-qwen-burst",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "a20e0f63-7998-448e-b9f5-5eabd85fc52c"
+        },
+        {
+          "trial_id": "0dab6148-7137-49b4-8682-92232ab3be10",
+          "trial_name": "sglang-qwen-burst__asPk3KY",
+          "task_name": "terminal-bench/sglang-qwen-burst",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "c07ff745-3f29-408e-862f-afe911aa3b97"
+        },
+        {
+          "trial_id": "64ecbbd3-1618-4681-97ef-8e9646a7471a",
+          "trial_name": "sglang-qwen-burst__oSarF2E",
+          "task_name": "terminal-bench/sglang-qwen-burst",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "9d3e5d02-8c4f-4262-8ff9-2d9b35cdcf24"
+        },
+        {
+          "trial_id": "e3158590-af84-4b54-a887-f33c9e617c80",
+          "trial_name": "sglang-qwen-burst__xasQsTB",
+          "task_name": "terminal-bench/sglang-qwen-burst",
+          "job_id": "342f13c7-dae2-411a-9df1-551e1c7999a7",
+          "job_dir": "tb40-passk-fresh-v7",
+          "claude_session_id": "2227267e-e781-4dfa-8262-4f53715a5e77"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}

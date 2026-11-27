@@ -1,0 +1,6728 @@
+{
+ "budget": 20,
+ "api_key_sources": [
+  "none"
+ ],
+ "curves": [
+  {
+   "task": "ks-solver-cpp",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "ks-solver-cpp",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "protein-autointerp-disulfide",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "protein-autointerp-disulfide",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "roy-polymorph-cn",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "roy-polymorph-cn",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [
+    4,
+    6,
+    16
+   ],
+   "censored_at": [],
+   "attempts_run": 26,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  }
+ ],
+ "chains": [
+  {
+   "run": "roots9-ks",
+   "task": "ks-solver-cpp",
+   "root": "ks-solver-cpp__CPHZMDf",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 25.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6425,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4984,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5724,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 24.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5993,
+     "tool_calls": 22
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 23.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7063,
+     "tool_calls": 22
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 17.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4786,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 7,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2688,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 8,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 18.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8995,
+     "tool_calls": 28
+    },
+    {
+     "attempt": 9,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3912,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 10,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5747,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 11,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4682,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 12,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.381,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 13,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 17.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7234,
+     "tool_calls": 20
+    },
+    {
+     "attempt": 14,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6276,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 15,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3996,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 16,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5916,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 17,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6688,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 18,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5354,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 19,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2612,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 20,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4223,
+     "tool_calls": 14
+    }
+   ]
+  },
+  {
+   "run": "roots9-ks",
+   "task": "ks-solver-cpp",
+   "root": "ks-solver-cpp__CPHZMDf",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.6,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3536,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4233,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2196,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4253,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3442,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.381,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 7,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4726,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 9,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 8,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 20.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8024,
+     "tool_calls": 25,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 9,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6179,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 10,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1998,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 11,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 22.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2609,
+     "tool_calls": 21,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 12,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.6391,
+     "tool_calls": 28,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 13,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4321,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 14,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.695,
+     "tool_calls": 18,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 15,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6775,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 16,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7082,
+     "tool_calls": 17,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 17,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 32.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.6498,
+     "tool_calls": 54,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 18,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9136,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 19,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9824,
+     "tool_calls": 26,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 20,
+     "job": "roots9-ks-ks-solver-cpp__CPHZMDf-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1513,
+     "tool_calls": 28,
+     "cut_reads": 1,
+     "queries": 10,
+     "row_capped": 0,
+     "attempt_filters": 6
+    }
+   ]
+  },
+  {
+   "run": "roots9-ks",
+   "task": "ks-solver-cpp",
+   "root": "ks-solver-cpp__oqGHJ9g",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 23.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8525,
+     "tool_calls": 25
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4109,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 32.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8918,
+     "tool_calls": 28
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4005,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 28.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2626,
+     "tool_calls": 27
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.6,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1015,
+     "tool_calls": 27
+    },
+    {
+     "attempt": 7,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4444,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 8,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2562,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 9,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4388,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 10,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7709,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 11,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4286,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 12,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3179,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 13,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 21.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7041,
+     "tool_calls": 25
+    },
+    {
+     "attempt": 14,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.3238,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 15,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 26.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1673,
+     "tool_calls": 28
+    },
+    {
+     "attempt": 16,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2923,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 17,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 25.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.802,
+     "tool_calls": 25
+    },
+    {
+     "attempt": 18,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3358,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 19,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2987,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 20,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4344,
+     "tool_calls": 18
+    }
+   ]
+  },
+  {
+   "run": "roots9-ks",
+   "task": "ks-solver-cpp",
+   "root": "ks-solver-cpp__oqGHJ9g",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2884,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2922,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.309,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3522,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.374,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8052,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 7,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6381,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 8,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4818,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 9,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6405,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 10,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6842,
+     "tool_calls": 19,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 11,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4327,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 12,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4399,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 13,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.059,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 14,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2981,
+     "tool_calls": 30,
+     "cut_reads": 0,
+     "queries": 10,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 15,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 17.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8979,
+     "tool_calls": 21,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 16,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.5134,
+     "tool_calls": 30,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 17,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2429,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 18,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 27.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.3526,
+     "tool_calls": 38,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 19,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0034,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 10,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 20,
+     "job": "roots9-ks-ks-solver-cpp__oqGHJ9g-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 16.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2765,
+     "tool_calls": 26,
+     "cut_reads": 1,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 4
+    }
+   ]
+  },
+  {
+   "run": "roots9-ks",
+   "task": "ks-solver-cpp",
+   "root": "ks-solver-cpp__ypCKqEA",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5169,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3698,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3289,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2467,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2665,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 16.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5875,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 7,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3334,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 8,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.565,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 9,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7902,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 10,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6089,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 11,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4019,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 12,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3967,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 13,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5036,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 14,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6662,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 15,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4669,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 16,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5998,
+     "tool_calls": 23
+    },
+    {
+     "attempt": 17,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7723,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 18,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 16.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4425,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 19,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 16.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4109,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 20,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5313,
+     "tool_calls": 14
+    }
+   ]
+  },
+  {
+   "run": "roots9-ks",
+   "task": "ks-solver-cpp",
+   "root": "ks-solver-cpp__ypCKqEA",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1784,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3608,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5223,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.522,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3364,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 18.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9113,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 7,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7483,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 8,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.38,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 9,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7419,
+     "tool_calls": 19,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 10,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 23.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.3428,
+     "tool_calls": 34,
+     "cut_reads": 0,
+     "queries": 15,
+     "row_capped": 0,
+     "attempt_filters": 14
+    },
+    {
+     "attempt": 11,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 16.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.4875,
+     "tool_calls": 30,
+     "cut_reads": 0,
+     "queries": 10,
+     "row_capped": 0,
+     "attempt_filters": 9
+    },
+    {
+     "attempt": 12,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1839,
+     "tool_calls": 36,
+     "cut_reads": 0,
+     "queries": 11,
+     "row_capped": 0,
+     "attempt_filters": 10
+    },
+    {
+     "attempt": 13,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8202,
+     "tool_calls": 22,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 14,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 23.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8753,
+     "tool_calls": 43,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 15,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8554,
+     "tool_calls": 17,
+     "cut_reads": 0,
+     "queries": 13,
+     "row_capped": 0,
+     "attempt_filters": 10
+    },
+    {
+     "attempt": 16,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1573,
+     "tool_calls": 24,
+     "cut_reads": 0,
+     "queries": 11,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 17,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9719,
+     "tool_calls": 18,
+     "cut_reads": 0,
+     "queries": 24,
+     "row_capped": 0,
+     "attempt_filters": 21
+    },
+    {
+     "attempt": 18,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0613,
+     "tool_calls": 26,
+     "cut_reads": 0,
+     "queries": 15,
+     "row_capped": 0,
+     "attempt_filters": 10
+    },
+    {
+     "attempt": 19,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 17.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.5481,
+     "tool_calls": 28,
+     "cut_reads": 0,
+     "queries": 17,
+     "row_capped": 1,
+     "attempt_filters": 10
+    },
+    {
+     "attempt": 20,
+     "job": "roots9-ks-ks-solver-cpp__ypCKqEA-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7053,
+     "tool_calls": 14,
+     "cut_reads": 1,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    }
+   ]
+  },
+  {
+   "run": "roots9-pa",
+   "task": "protein-autointerp-disulfide",
+   "root": "protein-autointerp-disulfide__r7QAAxh",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1255,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1494,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.094,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1021,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0974,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0977,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 7,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0811,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 8,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1168,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 9,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0879,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 10,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1293,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 11,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0847,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 12,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.093,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 13,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0912,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 14,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0886,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 15,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1041,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 16,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0964,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 17,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1011,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 18,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0892,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 19,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0829,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 20,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1003,
+     "tool_calls": 4
+    }
+   ]
+  },
+  {
+   "run": "roots9-pa",
+   "task": "protein-autointerp-disulfide",
+   "root": "protein-autointerp-disulfide__r7QAAxh",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1029,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1226,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1154,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1375,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.119,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2474,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 7,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2419,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 8,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.217,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 9,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.234,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 10,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2203,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 11,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2251,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 12,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1923,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 13,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3288,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 14,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1741,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 15,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2184,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 16,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2496,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 17,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2206,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 18,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3355,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 19,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2802,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 20,
+     "job": "roots9-pa-protein-autointerp-disulfide__r7QAAxh-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2554,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 1
+    }
+   ]
+  },
+  {
+   "run": "roots9-pa",
+   "task": "protein-autointerp-disulfide",
+   "root": "protein-autointerp-disulfide__adqagCc",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0847,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0663,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0687,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.086,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0776,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0831,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 7,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0726,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 8,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0691,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 9,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.083,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 10,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.078,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 11,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.065,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 12,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0927,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 13,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1124,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 14,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0672,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 15,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0831,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 16,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0671,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 17,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1148,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 18,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0985,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 19,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0763,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 20,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.078,
+     "tool_calls": 3
+    }
+   ]
+  },
+  {
+   "run": "roots9-pa",
+   "task": "protein-autointerp-disulfide",
+   "root": "protein-autointerp-disulfide__adqagCc",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.078,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0818,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0743,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1798,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1203,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1168,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 7,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1485,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 8,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2006,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 9,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1608,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 10,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1511,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 11,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1821,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 12,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1576,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 13,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2541,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 14,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1802,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 15,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2667,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 16,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1663,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 17,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2299,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 18,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2042,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 19,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2633,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 20,
+     "job": "roots9-pa-protein-autointerp-disulfide__adqagCc-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1682,
+     "tool_calls": 6,
+     "cut_reads": 1,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 0
+    }
+   ]
+  },
+  {
+   "run": "roots9-pa",
+   "task": "protein-autointerp-disulfide",
+   "root": "protein-autointerp-disulfide__DU6evhJ",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0786,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0699,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0835,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0768,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0884,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0844,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 7,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1254,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 8,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0551,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 9,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0681,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 10,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0591,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 11,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0685,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 12,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0772,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 13,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0884,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 14,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0742,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 15,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0592,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 16,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1238,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 17,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0702,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 18,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0748,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 19,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0624,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 20,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0729,
+     "tool_calls": 4
+    }
+   ]
+  },
+  {
+   "run": "roots9-pa",
+   "task": "protein-autointerp-disulfide",
+   "root": "protein-autointerp-disulfide__DU6evhJ",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0778,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.071,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0883,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.176,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1389,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1284,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 7,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1858,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 8,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2426,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 9,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1683,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 10,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.27,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 11,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2741,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 12,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2785,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 13,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1679,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 14,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2307,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 15,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.199,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 16,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2328,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 17,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1427,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 18,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2273,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 19,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3066,
+     "tool_calls": 6,
+     "cut_reads": 1,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 20,
+     "job": "roots9-pa-protein-autointerp-disulfide__DU6evhJ-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 1,
+     "checks_total": 2,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2808,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    }
+   ]
+  },
+  {
+   "run": "roots9-rp",
+   "task": "roy-polymorph-cn",
+   "root": "roy-polymorph-cn__zzzengg",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1099,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0975,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1177,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0965,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0973,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0943,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 7,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1053,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 8,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1036,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 9,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1193,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 10,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0978,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 11,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1002,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 12,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.11,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 13,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0921,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 14,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1248,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 15,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1044,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 16,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0994,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 17,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1139,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 18,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.095,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 19,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1015,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 20,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1342,
+     "tool_calls": 4
+    }
+   ]
+  },
+  {
+   "run": "roots9-rp",
+   "task": "roy-polymorph-cn",
+   "root": "roy-polymorph-cn__zzzengg",
+   "arm": "record-engine",
+   "counted": 4,
+   "first_pass": 4,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1105,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1237,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1048,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-rp-roy-polymorph-cn__zzzengg-record-engine-a4",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 3,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1593,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    }
+   ]
+  },
+  {
+   "run": "roots9-rp",
+   "task": "roy-polymorph-cn",
+   "root": "roy-polymorph-cn__aFCWLMP",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0772,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0896,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0917,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1023,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0763,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0654,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 7,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0887,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 8,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0884,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 9,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.115,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 10,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0855,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 11,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1006,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 12,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1235,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 13,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0982,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 14,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1074,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 15,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.198,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 16,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1171,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 17,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.075,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 18,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0919,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 19,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0917,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 20,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1652,
+     "tool_calls": 11
+    }
+   ]
+  },
+  {
+   "run": "roots9-rp",
+   "task": "roy-polymorph-cn",
+   "root": "roy-polymorph-cn__aFCWLMP",
+   "arm": "record-engine",
+   "counted": 16,
+   "first_pass": 16,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1049,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0848,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1128,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1166,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2026,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1459,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 7,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.154,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 8,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.191,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 9,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2277,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 10,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.248,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 11,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1743,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 12,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2232,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 13,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2386,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 14,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2528,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 15,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1789,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 16,
+     "job": "roots9-rp-roy-polymorph-cn__aFCWLMP-record-engine-a16",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 3,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1469,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    }
+   ]
+  },
+  {
+   "run": "roots9-rp",
+   "task": "roy-polymorph-cn",
+   "root": "roy-polymorph-cn__xxZ4Ufq",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0802,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0869,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1119,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0751,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0805,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0993,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 7,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1177,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 8,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.076,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 9,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0919,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 10,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0718,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 11,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1296,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 12,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0779,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 13,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1389,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 14,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0712,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 15,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1071,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 16,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0928,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 17,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1045,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 18,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.079,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 19,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0991,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 20,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1224,
+     "tool_calls": 7
+    }
+   ]
+  },
+  {
+   "run": "roots9-rp",
+   "task": "roy-polymorph-cn",
+   "root": "roy-polymorph-cn__xxZ4Ufq",
+   "arm": "record-engine",
+   "counted": 6,
+   "first_pass": 6,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.095,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1289,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1027,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 4,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0844,
+     "tool_calls": 3,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 5,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 2,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1059,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 6,
+     "job": "roots9-rp-roy-polymorph-cn__xxZ4Ufq-record-engine-a6",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 3,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1581,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    }
+   ]
+  }
+ ]
+}

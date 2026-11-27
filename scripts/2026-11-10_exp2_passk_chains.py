@@ -84,6 +84,8 @@ PRIMARY = "record-engine against control: attempts to a first pass, censored at 
 TEST = "none fixed: a descriptive probe (solved-by-k per arm and attempts to a first pass)"
 STATUS_FILENAME = "status.json"
 SPEEDUP = re.compile(r"Geomean speedup:\s*([\d.]+)x")
+BRACKET_MARK = re.compile(r"^\[(PASS|FAIL)\] \w+", re.MULTILINE)
+TABLE_MARK = re.compile(r"^  \S.*?\s{2,}(PASS|FAIL)\s{2,}\S+\s*$", re.MULTILINE)
 ATTEMPT_FILTER = re.compile(r"attempt_idx\s*(=|<|>|in\b|between\b)", re.IGNORECASE)
 API_KEY_SOURCE = re.compile(r'"apiKeySource":"([^"]*)"')
 CUT_MARK = "Output too large"
@@ -284,6 +286,19 @@ def graded(trial: Path) -> float | None:
     return None
 
 
+def plain_marks(trial: Path) -> list[str]:
+    """PASS/FAIL marks of a verifier that writes no `ctrf.json`.
+
+    Either `[PASS] name` / `[FAIL] name` lines (ks-solver-cpp) or the rows of a rule table,
+    `  rule name   PASS|FAIL   violations` (music-harmony).
+    """
+    stdout = trial / "verifier" / "test-stdout.txt"
+    if not stdout.is_file():
+        return []
+    text = stdout.read_text(errors="replace")
+    return BRACKET_MARK.findall(text) or TABLE_MARK.findall(text)
+
+
 def attempt_row(attempt: AttemptResult, jobs_dir: Path) -> dict[str, Any]:
     row: dict[str, Any] = {
         "attempt": attempt.attempt_idx,
@@ -302,6 +317,9 @@ def attempt_row(attempt: AttemptResult, jobs_dir: Path) -> dict[str, Any]:
         tests = json.loads(ctrf.read_text())["results"]["tests"]
         row["checks_passed"] = sum(test["status"] == "passed" for test in tests)
         row["checks_total"] = len(tests)
+    elif marks := plain_marks(trial):
+        row["checks_passed"] = marks.count("PASS")
+        row["checks_total"] = len(marks)
     stream = trial / "agent" / "claude-code.txt"
     if stream.is_file():
         sources = set(API_KEY_SOURCE.findall(stream.read_text(errors="replace")))

@@ -1,0 +1,43 @@
+{
+ "budget": 20,
+ "arms": [
+  "control",
+  "record-engine"
+ ],
+ "label": "none: short-task screen probe of 2026-11-25 under ADR-0025, roots9 (scripts/2026-11-10_exp2_passk_chains.py)",
+ "lanes": [
+  {
+   "run": "roots9-ks",
+   "store": "corpus/stores/ks-solver-cpp-local-v6",
+   "job": "corpus/jobs/tb40-passk-fresh-v9",
+   "trials": [
+    "ks-solver-cpp__CPHZMDf",
+    "ks-solver-cpp__oqGHJ9g",
+    "ks-solver-cpp__ypCKqEA"
+   ],
+   "config": "configs/harbor/tb40-passk-fresh-v9.json"
+  },
+  {
+   "run": "roots9-pa",
+   "store": "corpus/stores/protein-autointerp-disulfide-local-v6",
+   "job": "corpus/jobs/tb40-passk-fresh-v9",
+   "trials": [
+    "protein-autointerp-disulfide__r7QAAxh",
+    "protein-autointerp-disulfide__adqagCc",
+    "protein-autointerp-disulfide__DU6evhJ"
+   ],
+   "config": "configs/harbor/tb40-passk-fresh-v9.json"
+  },
+  {
+   "run": "roots9-rp",
+   "store": "corpus/stores/roy-polymorph-cn-local-v6",
+   "job": "corpus/jobs/tb40-passk-fresh-v9",
+   "trials": [
+    "roy-polymorph-cn__zzzengg",
+    "roy-polymorph-cn__aFCWLMP",
+    "roy-polymorph-cn__xxZ4Ufq"
+   ],
+   "config": "configs/harbor/tb40-passk-fresh-v9.json"
+  }
+ ]
+}

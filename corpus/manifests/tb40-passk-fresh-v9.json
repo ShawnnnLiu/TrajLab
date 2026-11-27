@@ -1,0 +1,377 @@
+{
+  "corpus_id": "tb40-passk-fresh-v9",
+  "created_at": "2026-11-25T12:37:19.293110Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "6e5acbb6a5c087028686f8bb4e3f77ccb246470c",
+  "repo_dirty": true,
+  "config_path": "configs/harbor/tb40-passk-fresh-v9.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 5,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 0.5,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "writes_recorded": false,
+  "tasks": [
+    {
+      "name": "terminal-bench/biped-contact-dynamics",
+      "digest": "sha256:7d9120179572cbb6511108fcfa1e76e6bc1bb56f2cace8e606d4ccded15cb4c4"
+    },
+    {
+      "name": "terminal-bench/coq-block-bound",
+      "digest": "sha256:4e2a6b608b18eeda1e18996efa115fec3573d90d4f798406b073b078fea52c89"
+    },
+    {
+      "name": "terminal-bench/ks-solver-cpp",
+      "digest": "sha256:d4eef6bb296028e57be0abb4b19dab71cf04b807cbe22fad4bc64174f9380cc0"
+    },
+    {
+      "name": "terminal-bench/protein-autointerp-disulfide",
+      "digest": "sha256:6b70d5b8b2ed87b10cd58461c58981d4296f504eda0869c63cd6b0fb2b9edfb9"
+    },
+    {
+      "name": "terminal-bench/risk-scorer-replay",
+      "digest": "sha256:3645f552b5485633a67027130c9d471eb1a364f1451b6ada140bacd148f9cd87"
+    },
+    {
+      "name": "terminal-bench/roy-polymorph-cn",
+      "digest": "sha256:012e714e79b4ff4f0d36eeb8fa2b6fa3be1043a71af880af8a71f61487669dfc"
+    },
+    {
+      "name": "terminal-bench/sound-change-cascade",
+      "digest": "sha256:6214ceb80aaa657d72658a6f39a44fa11ea51f443822b6a1212eef1ba65bf91d"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb40-passk-fresh-v9",
+      "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+      "job_config": {
+        "job_name": "tb40-passk-fresh-v9",
+        "jobs_dir": "corpus/jobs",
+        "n_attempts": 5,
+        "agent_timeout_multiplier": 0.5,
+        "n_concurrent_trials": 2,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "sha256:39d9f44b40420cde8fdcc087579c0d72a7e14fa3656d603c3f0d22fb35e27732",
+            "task_names": [
+              "terminal-bench/risk-scorer-replay",
+              "terminal-bench/sound-change-cascade",
+              "terminal-bench/coq-block-bound",
+              "terminal-bench/roy-polymorph-cn",
+              "terminal-bench/ks-solver-cpp",
+              "terminal-bench/protein-autointerp-disulfide",
+              "terminal-bench/biped-contact-dynamics"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "9f3b2745-6714-418d-9427-3bf958dd3f67",
+          "trial_name": "biped-contact-dynamics__6DEuKzM",
+          "task_name": "terminal-bench/biped-contact-dynamics",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "6c83d1bb-137c-4d45-8b76-9b6ed3d0af60"
+        },
+        {
+          "trial_id": "ebcf352f-7ce0-4339-97d3-bfd9b7a3e9e3",
+          "trial_name": "biped-contact-dynamics__CRPSoZY",
+          "task_name": "terminal-bench/biped-contact-dynamics",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "43112ee8-aa68-4bfb-a6b6-4c984c40b770"
+        },
+        {
+          "trial_id": "1fca6676-30f7-4907-8bc4-4d9d549d9e4a",
+          "trial_name": "biped-contact-dynamics__XUwdRjt",
+          "task_name": "terminal-bench/biped-contact-dynamics",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "ed37f49c-dcdb-4810-8fb8-75f3630e2b95"
+        },
+        {
+          "trial_id": "f40b34a0-b57b-4e0b-a563-e1b0007e5c15",
+          "trial_name": "biped-contact-dynamics__unsywZs",
+          "task_name": "terminal-bench/biped-contact-dynamics",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "0cfdbb10-63e3-4ae5-85f2-bcbdb04e9ff9"
+        },
+        {
+          "trial_id": "f26a3477-98cf-431e-8ae2-12e3c519d716",
+          "trial_name": "biped-contact-dynamics__vmyudzm",
+          "task_name": "terminal-bench/biped-contact-dynamics",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "2409556a-fa67-4725-8409-ad44ddd3e980"
+        },
+        {
+          "trial_id": "b5b7e150-31d6-4cef-be5d-7d8b71f5faef",
+          "trial_name": "coq-block-bound__Cxe7Hty",
+          "task_name": "terminal-bench/coq-block-bound",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "a1132787-0895-47ee-8577-3e001ce23ee9"
+        },
+        {
+          "trial_id": "8dcef68d-b0d6-4b73-8778-20b9dd713cdd",
+          "trial_name": "coq-block-bound__VHqKeue",
+          "task_name": "terminal-bench/coq-block-bound",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "0025ddef-a52a-45e3-88da-4c0b2e8d53f9"
+        },
+        {
+          "trial_id": "5f00eec7-0fa5-4e2f-821d-9dd466c80e4d",
+          "trial_name": "coq-block-bound__Ym5nwg5",
+          "task_name": "terminal-bench/coq-block-bound",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "3eb8cc93-2439-4454-abda-c6859deb297f"
+        },
+        {
+          "trial_id": "2f0fb51b-9051-4a06-b30e-ab91b741bb72",
+          "trial_name": "coq-block-bound__fkxja7X",
+          "task_name": "terminal-bench/coq-block-bound",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "32830ee8-9ee1-4159-ba60-fefa5ba1b578"
+        },
+        {
+          "trial_id": "98c7b82c-3d1e-4ced-81d1-2bcafe077721",
+          "trial_name": "coq-block-bound__qdX4Cy5",
+          "task_name": "terminal-bench/coq-block-bound",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "844b8784-8590-4383-904d-222e27154ea5"
+        },
+        {
+          "trial_id": "5e1abce0-65b6-4b64-9ded-dd6dd8b64967",
+          "trial_name": "ks-solver-cpp__CPHZMDf",
+          "task_name": "terminal-bench/ks-solver-cpp",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "480465f9-52ef-4b93-b63c-2e65e9d26eb6"
+        },
+        {
+          "trial_id": "66876161-d5d1-4ca6-b99d-a694d792dadc",
+          "trial_name": "ks-solver-cpp__ZPYPm2P",
+          "task_name": "terminal-bench/ks-solver-cpp",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "61c5b89b-9e78-4eb7-951a-2f11cab74186"
+        },
+        {
+          "trial_id": "8fd65b7e-6c69-4dde-aa1c-7a8ede3387f5",
+          "trial_name": "ks-solver-cpp__oqGHJ9g",
+          "task_name": "terminal-bench/ks-solver-cpp",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "5a48152b-f7a7-44cd-a590-66e65d714493"
+        },
+        {
+          "trial_id": "1ba391cf-a16e-4928-a4ee-c5f9a1ee8ce6",
+          "trial_name": "ks-solver-cpp__pJo6FG6",
+          "task_name": "terminal-bench/ks-solver-cpp",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "33432d2f-b203-46df-8209-5690ad63a61a"
+        },
+        {
+          "trial_id": "799eb1a7-7902-4f2f-89de-579e09bf42ef",
+          "trial_name": "ks-solver-cpp__ypCKqEA",
+          "task_name": "terminal-bench/ks-solver-cpp",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "3d01641f-dce5-4c7c-b055-cc538fb35942"
+        },
+        {
+          "trial_id": "7559f273-6fc7-4780-bf32-b2f359957876",
+          "trial_name": "protein-autointerp-disulfide__DU6evhJ",
+          "task_name": "terminal-bench/protein-autointerp-disulfide",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "0866dcc3-f969-46c8-bd29-6c39dd20608e"
+        },
+        {
+          "trial_id": "ad7a68ae-659c-4f61-8448-f69b5ea4139a",
+          "trial_name": "protein-autointerp-disulfide__adqagCc",
+          "task_name": "terminal-bench/protein-autointerp-disulfide",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "4da17aa2-2ff3-4109-9faf-f5999ded088c"
+        },
+        {
+          "trial_id": "a23f9740-c64f-4817-915b-5b59b895862d",
+          "trial_name": "protein-autointerp-disulfide__r7QAAxh",
+          "task_name": "terminal-bench/protein-autointerp-disulfide",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "1fbbba72-ad6b-489f-96b5-e650fc4482e9"
+        },
+        {
+          "trial_id": "80c328cf-f309-4314-9a93-37f082e2ebcf",
+          "trial_name": "protein-autointerp-disulfide__vvQRnqh",
+          "task_name": "terminal-bench/protein-autointerp-disulfide",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "48640eef-5483-4d2c-9203-24bedf036cbf"
+        },
+        {
+          "trial_id": "818b6af4-6e39-4125-bf67-dd8a0559c99b",
+          "trial_name": "protein-autointerp-disulfide__zzTji5m",
+          "task_name": "terminal-bench/protein-autointerp-disulfide",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "03a9becd-1860-453f-9994-7166f8824c04"
+        },
+        {
+          "trial_id": "4d829caf-82b6-4795-b223-7e3cc878a2b7",
+          "trial_name": "risk-scorer-replay__JDZH3it",
+          "task_name": "terminal-bench/risk-scorer-replay",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "ced9cc3d-2167-4c04-8840-671dcfb8ea17"
+        },
+        {
+          "trial_id": "90d5fc33-0a6b-4929-9623-7622448ee16b",
+          "trial_name": "risk-scorer-replay__QxAPm2p",
+          "task_name": "terminal-bench/risk-scorer-replay",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "1b2cbf67-3a17-4e04-8007-bf4cc28d9689"
+        },
+        {
+          "trial_id": "e65b4e8c-be08-4254-bcfb-171fe315eccf",
+          "trial_name": "risk-scorer-replay__SdedfAt",
+          "task_name": "terminal-bench/risk-scorer-replay",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "00a28a67-5207-4b23-8d8d-eea05013b6ed"
+        },
+        {
+          "trial_id": "4693561c-30df-423a-93b9-06379f7ac304",
+          "trial_name": "risk-scorer-replay__aRT9hgT",
+          "task_name": "terminal-bench/risk-scorer-replay",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "34f87c31-c7f3-47ce-8d16-c0a1c02c4587"
+        },
+        {
+          "trial_id": "e279983e-68b5-4d35-9480-65efb56fcf6d",
+          "trial_name": "risk-scorer-replay__tvtM5Mj",
+          "task_name": "terminal-bench/risk-scorer-replay",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "3a1deef4-4d5a-4a98-ace8-4490b8b9d53f"
+        },
+        {
+          "trial_id": "6bcc7e84-d5be-4605-9b67-a6e74abff481",
+          "trial_name": "roy-polymorph-cn__aFCWLMP",
+          "task_name": "terminal-bench/roy-polymorph-cn",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "5af0082c-cd81-471c-9542-77ad098f7480"
+        },
+        {
+          "trial_id": "869e6ed0-1649-4510-9186-ef10cec7a47c",
+          "trial_name": "roy-polymorph-cn__dU7RwMc",
+          "task_name": "terminal-bench/roy-polymorph-cn",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "11a2f16d-4ad9-4cf4-9e52-56e71118ee03"
+        },
+        {
+          "trial_id": "331a54f7-232c-4d72-aa97-cf180ef9b33d",
+          "trial_name": "roy-polymorph-cn__rK6KV6i",
+          "task_name": "terminal-bench/roy-polymorph-cn",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "f8e9632e-f202-43c0-9fb5-4786e5a88ad6"
+        },
+        {
+          "trial_id": "796f5097-5593-4e98-b70f-7f6b451f4767",
+          "trial_name": "roy-polymorph-cn__xxZ4Ufq",
+          "task_name": "terminal-bench/roy-polymorph-cn",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "f81b7e96-57bd-48a5-b7dc-ccc196a58933"
+        },
+        {
+          "trial_id": "f0d7fc9c-7987-47e9-881f-ca844648e1c1",
+          "trial_name": "roy-polymorph-cn__zzzengg",
+          "task_name": "terminal-bench/roy-polymorph-cn",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "bb17d1d8-aabb-49fe-8ec3-4fb23987ae47"
+        },
+        {
+          "trial_id": "f94de545-af72-42df-a9cc-adcf70b1f9e8",
+          "trial_name": "sound-change-cascade__TssEF6H",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "7ef735fd-78b1-451b-8a67-81dbe65bcece"
+        },
+        {
+          "trial_id": "716756a7-0a80-46b5-b8fd-69985bc028ba",
+          "trial_name": "sound-change-cascade__VRmZMcw",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "64d9d94f-7152-43da-908f-7e1a59561bfa"
+        },
+        {
+          "trial_id": "40c3b99d-5874-4ec7-b2cc-b61addcc063b",
+          "trial_name": "sound-change-cascade__YEEwxHu",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "4996805a-b0df-4de6-9f3f-6bbaca729dda"
+        },
+        {
+          "trial_id": "dd5fb3a0-8ac1-483a-b7d6-a301f80e091d",
+          "trial_name": "sound-change-cascade__hSoskC2",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "06001ea5-cf52-4303-a4e1-920fed73bd94"
+        },
+        {
+          "trial_id": "8b07fa6c-f457-4f28-99d9-63fbd1b392b9",
+          "trial_name": "sound-change-cascade__raUKDpm",
+          "task_name": "terminal-bench/sound-change-cascade",
+          "job_id": "3eb7ec67-093a-4339-a787-640b1fb8b66a",
+          "job_dir": "tb40-passk-fresh-v9",
+          "claude_session_id": "b4eec052-2d91-440f-ab84-c12a93a21c8b"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}
