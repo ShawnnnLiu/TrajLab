@@ -1,0 +1,32 @@
+{
+ "budget": 20,
+ "arms": [
+  "control",
+  "record-engine"
+ ],
+ "label": "none: short-task screen probe of 2026-11-23 under ADR-0025, roots8 (scripts/2026-11-10_exp2_passk_chains.py)",
+ "lanes": [
+  {
+   "run": "roots8-mh",
+   "store": "corpus/stores/music-harmony-local-v6",
+   "job": "corpus/jobs/tb40-passk-fresh-v7",
+   "trials": [
+    "music-harmony__SizoS6i",
+    "music-harmony__oJi53ze",
+    "music-harmony__5gSg2ge"
+   ],
+   "config": "configs/harbor/tb40-passk-fresh-v7.json"
+  },
+  {
+   "run": "roots8-sq",
+   "store": "corpus/stores/sglang-qwen-burst-local-v6",
+   "job": "corpus/jobs/tb40-passk-fresh-v7",
+   "trials": [
+    "sglang-qwen-burst__asPk3KY",
+    "sglang-qwen-burst__XpfqCNn",
+    "sglang-qwen-burst__xasQsTB"
+   ],
+   "config": "configs/harbor/tb40-passk-fresh-v7.json"
+  }
+ ]
+}

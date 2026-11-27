@@ -1,0 +1,54 @@
+{
+ "budget": 20,
+ "arms": [
+  "control",
+  "record-engine"
+ ],
+ "label": "none: short-task screen probe of 2026-11-19 under ADR-0025, roots7 (scripts/2026-11-10_exp2_passk_chains.py)",
+ "lanes": [
+  {
+   "run": "roots7-fp",
+   "store": "corpus/stores/freecad-platform-drawing-local-v6",
+   "job": "corpus/jobs/tb40-passk-fresh-v6",
+   "trials": [
+    "freecad-platform-drawing__GNv7SLw",
+    "freecad-platform-drawing__QchNvkk",
+    "freecad-platform-drawing__59ZCEyD"
+   ],
+   "config": "configs/harbor/tb40-passk-fresh-v6.json"
+  },
+  {
+   "run": "roots7-gm",
+   "store": "corpus/stores/glycan-ms2-elucidation-local-v6",
+   "job": "corpus/jobs/tb40-passk-fresh-v6",
+   "trials": [
+    "glycan-ms2-elucidation__JVwvGia",
+    "glycan-ms2-elucidation__XB4j2N9",
+    "glycan-ms2-elucidation__QFgYyYb"
+   ],
+   "config": "configs/harbor/tb40-passk-fresh-v6.json"
+  },
+  {
+   "run": "roots7-ok",
+   "store": "corpus/stores/ontology-kg-querying-local-v6",
+   "job": "corpus/jobs/tb40-passk-fresh-v6",
+   "trials": [
+    "ontology-kg-querying__CPLteYG",
+    "ontology-kg-querying__5AzQrFB",
+    "ontology-kg-querying__8Fzx57H"
+   ],
+   "config": "configs/harbor/tb40-passk-fresh-v6.json"
+  },
+  {
+   "run": "roots7-sw",
+   "store": "corpus/stores/session-window-debug-local-v6",
+   "job": "corpus/jobs/tb40-passk-fresh-v6",
+   "trials": [
+    "session-window-debug__j4cBxiA",
+    "session-window-debug__84Hnz27",
+    "session-window-debug__WK4kBtU"
+   ],
+   "config": "configs/harbor/tb40-passk-fresh-v6.json"
+  }
+ ]
+}

@@ -1,0 +1,422 @@
+{
+  "corpus_id": "tb40-passk-fresh-v6",
+  "created_at": "2026-11-19T22:16:57.678876Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "6e5acbb6a5c087028686f8bb4e3f77ccb246470c",
+  "repo_dirty": true,
+  "config_path": "configs/harbor/tb40-passk-fresh-v6.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 5,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 0.5,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "writes_recorded": false,
+  "tasks": [
+    {
+      "name": "terminal-bench/data-anonymization",
+      "digest": "sha256:dec4261252665cf2981783df104ea10c901dcab3720b27b4bf8909a059713f08"
+    },
+    {
+      "name": "terminal-bench/freecad-platform-drawing",
+      "digest": "sha256:ed6db89260074bd0db58b064d90977cc4d470843deefecd8a9caf7f21da9a747"
+    },
+    {
+      "name": "terminal-bench/glycan-ms2-elucidation",
+      "digest": "sha256:80bf0ef924d6ba9a4323172f5a13df1734609914ddd086deef2da0288e9c560d"
+    },
+    {
+      "name": "terminal-bench/hof-topology-interpenetration",
+      "digest": "sha256:2534e62c5ab3c8592f4e0de3dee14ff07a5c1c9434164e7f80e2f564273de014"
+    },
+    {
+      "name": "terminal-bench/ontology-kg-querying",
+      "digest": "sha256:3149354c3fdc71ee698752c294cd9b020a908ab01280f7494513e69708f8833c"
+    },
+    {
+      "name": "terminal-bench/photonic-waveguide-routing",
+      "digest": "sha256:31cd14c817cd8b05f7fce5492bf8c44777b6bfc7c0e0057e482d18164d28423e"
+    },
+    {
+      "name": "terminal-bench/session-window-debug",
+      "digest": "sha256:f7e05e0d4c0e90d7050445fd158db514158272c50aafa1b2446ef3f68bd01182"
+    },
+    {
+      "name": "terminal-bench/telecom-entity-resolution",
+      "digest": "sha256:f818fa0aabaa916c35966e67e611e06d2bed372555d4f16b0e147726d382d1ad"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb40-passk-fresh-v6",
+      "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+      "job_config": {
+        "job_name": "tb40-passk-fresh-v6",
+        "jobs_dir": "corpus/jobs",
+        "n_attempts": 5,
+        "agent_timeout_multiplier": 0.5,
+        "n_concurrent_trials": 2,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "sha256:39d9f44b40420cde8fdcc087579c0d72a7e14fa3656d603c3f0d22fb35e27732",
+            "task_names": [
+              "terminal-bench/freecad-platform-drawing",
+              "terminal-bench/photonic-waveguide-routing",
+              "terminal-bench/session-window-debug",
+              "terminal-bench/glycan-ms2-elucidation",
+              "terminal-bench/hof-topology-interpenetration",
+              "terminal-bench/data-anonymization",
+              "terminal-bench/ontology-kg-querying",
+              "terminal-bench/telecom-entity-resolution"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "875c0083-3043-4a52-98b1-e801b527458c",
+          "trial_name": "data-anonymization__53PP7aA",
+          "task_name": "terminal-bench/data-anonymization",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "a947486d-0dc9-403f-8ae9-97e57ef6dd0b"
+        },
+        {
+          "trial_id": "b0401c2b-23e6-4ee0-94ca-c1eac6abaf24",
+          "trial_name": "data-anonymization__L7EYMiv",
+          "task_name": "terminal-bench/data-anonymization",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "7f4cdde2-a9f0-4061-a9f4-f7ec30df5941"
+        },
+        {
+          "trial_id": "0d8bb973-43e3-43bf-96ab-720d837a3f36",
+          "trial_name": "data-anonymization__SpAhXfF",
+          "task_name": "terminal-bench/data-anonymization",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "638626e4-ad09-4d9d-9f44-f29870af5d28"
+        },
+        {
+          "trial_id": "f40de1bf-6715-4994-a248-6bdd2c04e138",
+          "trial_name": "data-anonymization__WoqJm7u",
+          "task_name": "terminal-bench/data-anonymization",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "e95db3d5-18a4-47ee-b71b-ea0e392970c0"
+        },
+        {
+          "trial_id": "8c595290-a52d-4ee1-a0d6-e0fa15ba7a82",
+          "trial_name": "data-anonymization__m9EpvYm",
+          "task_name": "terminal-bench/data-anonymization",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "24ed19ad-6ed0-4d88-9b89-19bbf665a965"
+        },
+        {
+          "trial_id": "d8e3345a-a9c1-4514-92c4-327f0f5cf6cc",
+          "trial_name": "freecad-platform-drawing__59ZCEyD",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "0bd545f0-b789-47c3-ac6e-4ed36308ba38"
+        },
+        {
+          "trial_id": "efb7a52b-e751-4b1f-9c04-755e1012d26f",
+          "trial_name": "freecad-platform-drawing__GNv7SLw",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "fed74e3a-4309-4d45-a40b-764186082ebc"
+        },
+        {
+          "trial_id": "410d0056-103f-48d6-937d-887ce7430b40",
+          "trial_name": "freecad-platform-drawing__HoEhrdY",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "a53d6551-bfe4-4f30-a636-02c727198ec5"
+        },
+        {
+          "trial_id": "891ffb61-8565-448f-a605-a11a14af8a38",
+          "trial_name": "freecad-platform-drawing__QchNvkk",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "14c0d1f9-914d-4770-b622-cb81d0233a0b"
+        },
+        {
+          "trial_id": "74514682-18ef-491b-b948-4ccb1f558b79",
+          "trial_name": "freecad-platform-drawing__TY2Fqtn",
+          "task_name": "terminal-bench/freecad-platform-drawing",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "0e25887f-f1c0-49d7-a3d2-bd8d9bb02a67"
+        },
+        {
+          "trial_id": "65cab802-e495-413f-819a-ec7149f6a6cc",
+          "trial_name": "glycan-ms2-elucidation__JVwvGia",
+          "task_name": "terminal-bench/glycan-ms2-elucidation",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "a6d17dd9-0e38-4d11-94c2-40f14a7ebac7"
+        },
+        {
+          "trial_id": "0e5dcdc5-15ae-4903-8a37-f043ed727578",
+          "trial_name": "glycan-ms2-elucidation__QFgYyYb",
+          "task_name": "terminal-bench/glycan-ms2-elucidation",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "ded1a597-48ee-4a48-9fc8-e70197c09b0d"
+        },
+        {
+          "trial_id": "6cc4259b-0443-46c1-9e2d-cd6c409021d2",
+          "trial_name": "glycan-ms2-elucidation__Uz7tj3x",
+          "task_name": "terminal-bench/glycan-ms2-elucidation",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "672db00f-c744-492c-8f31-180aae24fa90"
+        },
+        {
+          "trial_id": "b621b16b-881f-4971-8fb1-9ebf7ae82a6f",
+          "trial_name": "glycan-ms2-elucidation__WzvMfg8",
+          "task_name": "terminal-bench/glycan-ms2-elucidation",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "4733d020-8f8d-46ef-809c-af94f39ea2b9"
+        },
+        {
+          "trial_id": "ad01925b-c45f-4b74-8d04-c353f7159507",
+          "trial_name": "glycan-ms2-elucidation__XB4j2N9",
+          "task_name": "terminal-bench/glycan-ms2-elucidation",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "198c82cb-3329-4a7b-a319-daac924cc803"
+        },
+        {
+          "trial_id": "a0d2096e-b6bd-4aad-971d-41458b7d9720",
+          "trial_name": "hof-topology-interpenetration__3UCyhfP",
+          "task_name": "terminal-bench/hof-topology-interpenetration",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "3908acf8-9405-4cb0-a9bc-cbccb507199b"
+        },
+        {
+          "trial_id": "5b8b8613-8690-4e16-ab7b-a296b690f612",
+          "trial_name": "hof-topology-interpenetration__KVjS8i4",
+          "task_name": "terminal-bench/hof-topology-interpenetration",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "273b995d-ad58-4e34-8a9c-5a64c0aeedde"
+        },
+        {
+          "trial_id": "a2034d71-12dd-4ae0-81e6-87ba70804d91",
+          "trial_name": "hof-topology-interpenetration__MW6g685",
+          "task_name": "terminal-bench/hof-topology-interpenetration",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "8264d4e1-eab7-47ef-8b34-100226a4d30b"
+        },
+        {
+          "trial_id": "0859165c-c942-44e4-a9a7-e78b739e4a93",
+          "trial_name": "hof-topology-interpenetration__PLvfU58",
+          "task_name": "terminal-bench/hof-topology-interpenetration",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "e0edde6b-febe-40cb-8f20-459ceccd69b8"
+        },
+        {
+          "trial_id": "f7d837b6-c39d-4ce6-a8b4-aaa59a1a202a",
+          "trial_name": "hof-topology-interpenetration__Q5NM3GT",
+          "task_name": "terminal-bench/hof-topology-interpenetration",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "c56b28c2-85d5-4a29-9ebc-be6c00e57be4"
+        },
+        {
+          "trial_id": "350003b3-2c05-4743-bd24-a1832258fc96",
+          "trial_name": "ontology-kg-querying__5AzQrFB",
+          "task_name": "terminal-bench/ontology-kg-querying",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "88d77f4b-24e3-4546-9267-b518f42e2f06"
+        },
+        {
+          "trial_id": "2a6c1817-8b57-4918-ac69-371c36728ec9",
+          "trial_name": "ontology-kg-querying__8Fzx57H",
+          "task_name": "terminal-bench/ontology-kg-querying",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "fb05ad2e-040e-49b5-9a21-07663b66b373"
+        },
+        {
+          "trial_id": "b3d6dec3-29d5-412a-9f62-6aa3eed181fc",
+          "trial_name": "ontology-kg-querying__CPLteYG",
+          "task_name": "terminal-bench/ontology-kg-querying",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "b8b42b39-c146-496a-827a-f496be34f6ed"
+        },
+        {
+          "trial_id": "0119366a-b050-4893-ad7a-7adab179729f",
+          "trial_name": "ontology-kg-querying__K4VgqZy",
+          "task_name": "terminal-bench/ontology-kg-querying",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "5cfb7e03-959d-4e9b-80d9-2b7b37a19729"
+        },
+        {
+          "trial_id": "4fb10abe-2a95-4bea-8c0d-bbbb0ace61c2",
+          "trial_name": "ontology-kg-querying__pnHD3VT",
+          "task_name": "terminal-bench/ontology-kg-querying",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "8aa8aabb-8e07-4217-acbb-103fc21bbe5f"
+        },
+        {
+          "trial_id": "5b2abdf0-0c6d-4007-abac-855366243839",
+          "trial_name": "photonic-waveguide-routing__7s4azsc",
+          "task_name": "terminal-bench/photonic-waveguide-routing",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "04aca93b-e706-47ad-89e4-2b33974d5cb7"
+        },
+        {
+          "trial_id": "8bcb3c0a-ff63-42db-bd73-04bde25fecd3",
+          "trial_name": "photonic-waveguide-routing__JAupFjN",
+          "task_name": "terminal-bench/photonic-waveguide-routing",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "563b14ea-2502-47e3-b243-9465ee623557"
+        },
+        {
+          "trial_id": "2b59d954-3e92-47f6-8a1f-ee2695503afe",
+          "trial_name": "photonic-waveguide-routing__UJdS6od",
+          "task_name": "terminal-bench/photonic-waveguide-routing",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "847e8df4-f333-4b06-8774-251962b38fba"
+        },
+        {
+          "trial_id": "604e0cad-29bd-4fec-9478-2afe971480a2",
+          "trial_name": "photonic-waveguide-routing__eKHu6ek",
+          "task_name": "terminal-bench/photonic-waveguide-routing",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "90f2efb6-fda1-4c27-b435-5fb08dba5ba1"
+        },
+        {
+          "trial_id": "d96ec28f-f59b-45c5-8e04-8d17a370eacb",
+          "trial_name": "photonic-waveguide-routing__kMHB8jT",
+          "task_name": "terminal-bench/photonic-waveguide-routing",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "43cb8abe-af95-458e-b8be-06a1c26eba87"
+        },
+        {
+          "trial_id": "ede10e2e-d86f-453a-beed-e7feebd1a1e7",
+          "trial_name": "session-window-debug__84Hnz27",
+          "task_name": "terminal-bench/session-window-debug",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "9d84c3ed-fd1b-45a1-a79f-31a5878a6624"
+        },
+        {
+          "trial_id": "eb682e26-a04b-42c8-a6f4-c840ea5f2a90",
+          "trial_name": "session-window-debug__9auvYXd",
+          "task_name": "terminal-bench/session-window-debug",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "30acab42-4866-4ab3-b90b-7a252ed7b696"
+        },
+        {
+          "trial_id": "46aad5b0-403d-4179-a193-4487cf24739a",
+          "trial_name": "session-window-debug__JYkjpGi",
+          "task_name": "terminal-bench/session-window-debug",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "8a6ee027-9430-4df3-9922-7da2fff680bd"
+        },
+        {
+          "trial_id": "166f4396-7f16-415b-a6e2-080d48c44999",
+          "trial_name": "session-window-debug__WK4kBtU",
+          "task_name": "terminal-bench/session-window-debug",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "cc16f418-7759-4b6a-9d51-6c874351cc22"
+        },
+        {
+          "trial_id": "20dcf3ae-3952-4db2-9ccf-f8d461092201",
+          "trial_name": "session-window-debug__j4cBxiA",
+          "task_name": "terminal-bench/session-window-debug",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "c6d45bed-df60-452a-8122-49e0882e602b"
+        },
+        {
+          "trial_id": "1d907e17-36f5-48ae-8c66-79d240eb5bc6",
+          "trial_name": "telecom-entity-resolution__7GmJyJW",
+          "task_name": "terminal-bench/telecom-entity-resolution",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "51ce377e-99e6-4868-8105-cbd424b45df5"
+        },
+        {
+          "trial_id": "5a40d9b9-f5df-45b2-8239-015851923f4b",
+          "trial_name": "telecom-entity-resolution__TPn4C3i",
+          "task_name": "terminal-bench/telecom-entity-resolution",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "d071a2e2-833f-4b39-8f64-752e63dc1bc7"
+        },
+        {
+          "trial_id": "11e4e2b4-ffde-4bf8-bb56-5f81b1edba6e",
+          "trial_name": "telecom-entity-resolution__XamDthV",
+          "task_name": "terminal-bench/telecom-entity-resolution",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "2abce1ad-034c-4462-a541-24100d07f28a"
+        },
+        {
+          "trial_id": "27e34bf8-2860-4003-a597-0c74007c7e80",
+          "trial_name": "telecom-entity-resolution__YwcfZm2",
+          "task_name": "terminal-bench/telecom-entity-resolution",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "b25672f0-85db-448e-9bb5-ade1223ad766"
+        },
+        {
+          "trial_id": "75aa7bfa-da67-4300-a380-d46d4031fd1f",
+          "trial_name": "telecom-entity-resolution__hopeKHW",
+          "task_name": "terminal-bench/telecom-entity-resolution",
+          "job_id": "a5b42833-7d5f-4282-b366-fcb9ce3412a4",
+          "job_dir": "tb40-passk-fresh-v6",
+          "claude_session_id": "048e6177-a78c-491f-bf93-0855ab9a1b74"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}

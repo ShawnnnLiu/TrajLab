@@ -1,0 +1,67 @@
+{
+  "totals": {
+    "biped-contact-dynamics/control": {
+      "attempts": 4,
+      "repeats": 1,
+      "same_answer": 0
+    },
+    "biped-contact-dynamics/record-engine": {
+      "attempts": 5,
+      "repeats": 2,
+      "same_answer": 0
+    }
+  },
+  "chains": [
+    {
+      "task": "biped-contact-dynamics",
+      "root": "biped-contact-dynamics__6DEuKzM",
+      "arm": "control",
+      "repeats": [
+        0
+      ]
+    },
+    {
+      "task": "biped-contact-dynamics",
+      "root": "biped-contact-dynamics__6DEuKzM",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        0
+      ]
+    },
+    {
+      "task": "biped-contact-dynamics",
+      "root": "biped-contact-dynamics__vmyudzm",
+      "arm": "control",
+      "repeats": [
+        1,
+        0
+      ]
+    },
+    {
+      "task": "biped-contact-dynamics",
+      "root": "biped-contact-dynamics__vmyudzm",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        0
+      ]
+    },
+    {
+      "task": "biped-contact-dynamics",
+      "root": "biped-contact-dynamics__CRPSoZY",
+      "arm": "control",
+      "repeats": [
+        0
+      ]
+    },
+    {
+      "task": "biped-contact-dynamics",
+      "root": "biped-contact-dynamics__CRPSoZY",
+      "arm": "record-engine",
+      "repeats": [
+        0
+      ]
+    }
+  ]
+}

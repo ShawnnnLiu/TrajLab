@@ -1,0 +1,152 @@
+{
+  "corpus_id": "tb40-passk-fresh-v7-probe",
+  "created_at": "2026-11-23T18:29:48.383633Z",
+  "harbor_version": "0.23.0",
+  "repo_sha": "6e5acbb6a5c087028686f8bb4e3f77ccb246470c",
+  "repo_dirty": true,
+  "config_path": "configs/harbor/tb40-passk-fresh-v7-probe.json",
+  "agent_name": "claude-code",
+  "model_name": "anthropic/claude-sonnet-5-5",
+  "agent_kwargs": {
+    "reasoning_effort": "medium",
+    "version": "2.1.278",
+    "config": "configs/claude-code/settings.hooks.json"
+  },
+  "environment_type": "trajlab.capture.preinstall:PreinstalledDockerEnvironment",
+  "n_attempts": 1,
+  "timeout_multiplier": 1.0,
+  "agent_timeout_multiplier": 0.5,
+  "checkpoint_every": 1,
+  "checkpoint_gate": "change",
+  "writes_recorded": false,
+  "tasks": [
+    {
+      "name": "terminal-bench/cad-model",
+      "digest": "sha256:037b83651678230c04217bc7bd077c9e2c3d5a383bb368cdeb19e88a2202f644"
+    },
+    {
+      "name": "terminal-bench/music-harmony",
+      "digest": "sha256:f32afbf135cbd3c622ee687ba032abe61cab85a33b5243ee5cbbde82557f3ed1"
+    },
+    {
+      "name": "terminal-bench/react-lead-form",
+      "digest": "sha256:790af6a6308be694896fa5258c3f3c1b536dfa75acdb9936799a4344a3e4573b"
+    },
+    {
+      "name": "terminal-bench/retro-console-soc",
+      "digest": "sha256:2b43b109ac633a4740364a3942df1195a8ae6ebfdae93b6a53e1ade8a6ffcf9e"
+    },
+    {
+      "name": "terminal-bench/rs-archive-clone",
+      "digest": "sha256:a6e74dbc5290e535872d70d5a9f52b97ca040d520a7b5f11a6f5b14013c4da85"
+    },
+    {
+      "name": "terminal-bench/satb-audio-transcription",
+      "digest": "sha256:2b1bf5dcc71458a7e378f84468959993a304a8e89e51381ac0f78163e6e60f14"
+    },
+    {
+      "name": "terminal-bench/sglang-qwen-burst",
+      "digest": "sha256:32bdf75983144af64a855c3711df1136cd347219b05bf5ef3b839375b1f82941"
+    }
+  ],
+  "jobs": [
+    {
+      "job_name": "tb40-passk-fresh-v7-probe",
+      "job_id": "7c4180f5-a6d4-4b63-b818-f2be18002ecf",
+      "job_config": {
+        "job_name": "tb40-passk-fresh-v7-probe",
+        "jobs_dir": "corpus/jobs",
+        "agent_timeout_multiplier": 0.5,
+        "n_concurrent_trials": 2,
+        "environment": {
+          "import_path": "trajlab.capture.preinstall:PreinstalledDockerEnvironment"
+        },
+        "agents": [
+          {
+            "name": "claude-code",
+            "model_name": "anthropic/claude-sonnet-5-5",
+            "kwargs": {
+              "reasoning_effort": "medium",
+              "version": "2.1.278",
+              "config": "configs/claude-code/settings.hooks.json"
+            }
+          }
+        ],
+        "datasets": [
+          {
+            "name": "terminal-bench/terminal-bench",
+            "ref": "sha256:39d9f44b40420cde8fdcc087579c0d72a7e14fa3656d603c3f0d22fb35e27732",
+            "task_names": [
+              "terminal-bench/rs-archive-clone",
+              "terminal-bench/satb-audio-transcription",
+              "terminal-bench/react-lead-form",
+              "terminal-bench/music-harmony",
+              "terminal-bench/sglang-qwen-burst",
+              "terminal-bench/retro-console-soc",
+              "terminal-bench/cad-model"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "trial_id": "cfe10e7f-69f1-4953-96a6-f7ff868e1ff9",
+          "trial_name": "cad-model__iANvUvB",
+          "task_name": "terminal-bench/cad-model",
+          "job_id": "7c4180f5-a6d4-4b63-b818-f2be18002ecf",
+          "job_dir": "tb40-passk-fresh-v7-probe",
+          "claude_session_id": "b9c818fa-4003-4bb7-96af-e6415d0bc52b"
+        },
+        {
+          "trial_id": "386151b1-f565-44e2-a412-6c58b6ab4dd6",
+          "trial_name": "music-harmony__uVBef34",
+          "task_name": "terminal-bench/music-harmony",
+          "job_id": "7c4180f5-a6d4-4b63-b818-f2be18002ecf",
+          "job_dir": "tb40-passk-fresh-v7-probe",
+          "claude_session_id": "1802b2f1-3e98-4ff3-a468-d1596c00ba6c"
+        },
+        {
+          "trial_id": "c413c02d-230e-45b2-ad5c-0a9ae09ae7b7",
+          "trial_name": "react-lead-form__Kh5hFZP",
+          "task_name": "terminal-bench/react-lead-form",
+          "job_id": "7c4180f5-a6d4-4b63-b818-f2be18002ecf",
+          "job_dir": "tb40-passk-fresh-v7-probe",
+          "claude_session_id": "639fe3b5-7f9e-46cf-b860-067a2b2d9b4b"
+        },
+        {
+          "trial_id": "d9db8bb5-f5ca-4d58-b0c4-8f4ef5a22a4d",
+          "trial_name": "retro-console-soc__ShFswEM",
+          "task_name": "terminal-bench/retro-console-soc",
+          "job_id": "7c4180f5-a6d4-4b63-b818-f2be18002ecf",
+          "job_dir": "tb40-passk-fresh-v7-probe",
+          "claude_session_id": "c50d7181-43ac-4575-b757-071ff0ab0e65"
+        },
+        {
+          "trial_id": "60e8d2bc-9e2b-449d-b4da-e6598af45617",
+          "trial_name": "rs-archive-clone__7PBScVq",
+          "task_name": "terminal-bench/rs-archive-clone",
+          "job_id": "7c4180f5-a6d4-4b63-b818-f2be18002ecf",
+          "job_dir": "tb40-passk-fresh-v7-probe",
+          "claude_session_id": "72577d3a-5bab-4993-8fad-914a34245d94"
+        },
+        {
+          "trial_id": "bfcf7061-9df2-414f-bf6e-84c9565101da",
+          "trial_name": "satb-audio-transcription__ZcAJvUS",
+          "task_name": "terminal-bench/satb-audio-transcription",
+          "job_id": "7c4180f5-a6d4-4b63-b818-f2be18002ecf",
+          "job_dir": "tb40-passk-fresh-v7-probe",
+          "claude_session_id": "6c7b4e39-0593-4fb6-9aba-f814355454e5"
+        },
+        {
+          "trial_id": "40d6ecb7-16d4-4c50-8a7e-66c37ddc6b60",
+          "trial_name": "sglang-qwen-burst__fgAmKDR",
+          "task_name": "terminal-bench/sglang-qwen-burst",
+          "job_id": "7c4180f5-a6d4-4b63-b818-f2be18002ecf",
+          "job_dir": "tb40-passk-fresh-v7-probe",
+          "claude_session_id": "8946daf9-973f-4bc9-994f-df5847417d12"
+        }
+      ]
+    }
+  ],
+  "storage": null
+}

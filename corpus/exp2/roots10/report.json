@@ -1,0 +1,480 @@
+{
+ "budget": 20,
+ "api_key_sources": [
+  "none"
+ ],
+ "curves": [
+  {
+   "task": "biped-contact-dynamics",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [
+    1,
+    1,
+    2
+   ],
+   "censored_at": [],
+   "attempts_run": 4,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "biped-contact-dynamics",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [
+    1,
+    2,
+    2
+   ],
+   "censored_at": [],
+   "attempts_run": 5,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  }
+ ],
+ "chains": [
+  {
+   "run": "roots10-bc",
+   "task": "biped-contact-dynamics",
+   "root": "biped-contact-dynamics__6DEuKzM",
+   "arm": "control",
+   "counted": 1,
+   "first_pass": 1,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots10-bc-biped-contact-dynamics__6DEuKzM-control-a1",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 50.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 3,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 5.3965,
+     "tool_calls": 81
+    }
+   ]
+  },
+  {
+   "run": "roots10-bc",
+   "task": "biped-contact-dynamics",
+   "root": "biped-contact-dynamics__6DEuKzM",
+   "arm": "record-engine",
+   "counted": 2,
+   "first_pass": 2,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots10-bc-biped-contact-dynamics__6DEuKzM-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 98.1,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 0,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.6766,
+     "tool_calls": 60,
+     "cut_reads": 0,
+     "queries": 12,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots10-bc-biped-contact-dynamics__6DEuKzM-record-engine-a2",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 98.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 3,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 5.8757,
+     "tool_calls": 116,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 1
+    }
+   ]
+  },
+  {
+   "run": "roots10-bc",
+   "task": "biped-contact-dynamics",
+   "root": "biped-contact-dynamics__vmyudzm",
+   "arm": "control",
+   "counted": 2,
+   "first_pass": 2,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots10-bc-biped-contact-dynamics__vmyudzm-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 244.5,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 0,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 3.8421,
+     "tool_calls": 122
+    },
+    {
+     "attempt": 2,
+     "job": "roots10-bc-biped-contact-dynamics__vmyudzm-control-a2",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 41.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 3,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 4.7568,
+     "tool_calls": 93
+    }
+   ]
+  },
+  {
+   "run": "roots10-bc",
+   "task": "biped-contact-dynamics",
+   "root": "biped-contact-dynamics__vmyudzm",
+   "arm": "record-engine",
+   "counted": 2,
+   "first_pass": 2,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots10-bc-biped-contact-dynamics__vmyudzm-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 63.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 0,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6315,
+     "tool_calls": 26,
+     "cut_reads": 0,
+     "queries": 12,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots10-bc-biped-contact-dynamics__vmyudzm-record-engine-a2",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 81.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 3,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 3.0924,
+     "tool_calls": 82,
+     "cut_reads": 0,
+     "queries": 10,
+     "row_capped": 0,
+     "attempt_filters": 7
+    }
+   ]
+  },
+  {
+   "run": "roots10-bc",
+   "task": "biped-contact-dynamics",
+   "root": "biped-contact-dynamics__CRPSoZY",
+   "arm": "control",
+   "counted": 1,
+   "first_pass": 1,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots10-bc-biped-contact-dynamics__CRPSoZY-control-a1",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 40.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 3,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 4.6491,
+     "tool_calls": 56
+    }
+   ]
+  },
+  {
+   "run": "roots10-bc",
+   "task": "biped-contact-dynamics",
+   "root": "biped-contact-dynamics__CRPSoZY",
+   "arm": "record-engine",
+   "counted": 1,
+   "first_pass": 1,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots10-bc-biped-contact-dynamics__CRPSoZY-record-engine-a1",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 137.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 3,
+     "checks_total": 3,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 4.9797,
+     "tool_calls": 141,
+     "cut_reads": 0,
+     "queries": 9,
+     "row_capped": 0,
+     "attempt_filters": 0
+    }
+   ]
+  }
+ ]
+}

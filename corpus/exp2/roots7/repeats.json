@@ -1,0 +1,551 @@
+{
+  "totals": {
+    "freecad-platform-drawing/control": {
+      "attempts": 60,
+      "repeats": 60,
+      "same_answer": 0
+    },
+    "freecad-platform-drawing/record-engine": {
+      "attempts": 11,
+      "repeats": 8,
+      "same_answer": 0
+    },
+    "glycan-ms2-elucidation/control": {
+      "attempts": 60,
+      "repeats": 60,
+      "same_answer": 0
+    },
+    "glycan-ms2-elucidation/record-engine": {
+      "attempts": 40,
+      "repeats": 37,
+      "same_answer": 0
+    },
+    "ontology-kg-querying/control": {
+      "attempts": 60,
+      "repeats": 60,
+      "same_answer": 0
+    },
+    "ontology-kg-querying/record-engine": {
+      "attempts": 60,
+      "repeats": 60,
+      "same_answer": 0
+    },
+    "session-window-debug/control": {
+      "attempts": 24,
+      "repeats": 21,
+      "same_answer": 0
+    },
+    "session-window-debug/record-engine": {
+      "attempts": 22,
+      "repeats": 16,
+      "same_answer": 0
+    }
+  },
+  "chains": [
+    {
+      "task": "freecad-platform-drawing",
+      "root": "freecad-platform-drawing__GNv7SLw",
+      "arm": "control",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "freecad-platform-drawing",
+      "root": "freecad-platform-drawing__GNv7SLw",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        0
+      ]
+    },
+    {
+      "task": "freecad-platform-drawing",
+      "root": "freecad-platform-drawing__QchNvkk",
+      "arm": "control",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "freecad-platform-drawing",
+      "root": "freecad-platform-drawing__QchNvkk",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "task": "freecad-platform-drawing",
+      "root": "freecad-platform-drawing__59ZCEyD",
+      "arm": "control",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "freecad-platform-drawing",
+      "root": "freecad-platform-drawing__59ZCEyD",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "task": "glycan-ms2-elucidation",
+      "root": "glycan-ms2-elucidation__JVwvGia",
+      "arm": "control",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "glycan-ms2-elucidation",
+      "root": "glycan-ms2-elucidation__JVwvGia",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "task": "glycan-ms2-elucidation",
+      "root": "glycan-ms2-elucidation__XB4j2N9",
+      "arm": "control",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "glycan-ms2-elucidation",
+      "root": "glycan-ms2-elucidation__XB4j2N9",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "task": "glycan-ms2-elucidation",
+      "root": "glycan-ms2-elucidation__QFgYyYb",
+      "arm": "control",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "glycan-ms2-elucidation",
+      "root": "glycan-ms2-elucidation__QFgYyYb",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "task": "ontology-kg-querying",
+      "root": "ontology-kg-querying__CPLteYG",
+      "arm": "control",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "ontology-kg-querying",
+      "root": "ontology-kg-querying__CPLteYG",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "ontology-kg-querying",
+      "root": "ontology-kg-querying__5AzQrFB",
+      "arm": "control",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "ontology-kg-querying",
+      "root": "ontology-kg-querying__5AzQrFB",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "ontology-kg-querying",
+      "root": "ontology-kg-querying__8Fzx57H",
+      "arm": "control",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "ontology-kg-querying",
+      "root": "ontology-kg-querying__8Fzx57H",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "session-window-debug",
+      "root": "session-window-debug__j4cBxiA",
+      "arm": "control",
+      "repeats": [
+        1,
+        0
+      ]
+    },
+    {
+      "task": "session-window-debug",
+      "root": "session-window-debug__j4cBxiA",
+      "arm": "record-engine",
+      "repeats": [
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "task": "session-window-debug",
+      "root": "session-window-debug__84Hnz27",
+      "arm": "control",
+      "repeats": [
+        1,
+        0
+      ]
+    },
+    {
+      "task": "session-window-debug",
+      "root": "session-window-debug__84Hnz27",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "task": "session-window-debug",
+      "root": "session-window-debug__WK4kBtU",
+      "arm": "control",
+      "repeats": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "task": "session-window-debug",
+      "root": "session-window-debug__WK4kBtU",
+      "arm": "record-engine",
+      "repeats": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ]
+    }
+  ]
+}

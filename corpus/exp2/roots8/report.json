@@ -1,0 +1,2476 @@
+{
+ "budget": 20,
+ "api_key_sources": [
+  "none"
+ ],
+ "curves": [
+  {
+   "task": "music-harmony",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "music-harmony",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  }
+ ],
+ "chains": [
+  {
+   "run": "roots8-mh",
+   "task": "music-harmony",
+   "root": "music-harmony__SizoS6i",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3834,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 2,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5318,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 3,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4576,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 4,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 7,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4552,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 5,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6058,
+     "tool_calls": 25
+    },
+    {
+     "attempt": 6,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3437,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 7,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5357,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 8,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.548,
+     "tool_calls": 20
+    },
+    {
+     "attempt": 9,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4695,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 10,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5576,
+     "tool_calls": 24
+    },
+    {
+     "attempt": 11,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3475,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 12,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4562,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 13,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4032,
+     "tool_calls": 21
+    },
+    {
+     "attempt": 14,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4249,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 15,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.569,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 16,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5674,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 17,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4621,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 18,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3272,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 19,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6438,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 20,
+     "job": "roots8-mh-music-harmony__SizoS6i-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4097,
+     "tool_calls": 16
+    }
+   ]
+  },
+  {
+   "run": "roots8-mh",
+   "task": "music-harmony",
+   "root": "music-harmony__SizoS6i",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3542,
+     "tool_calls": 18,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3945,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 3,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3128,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 4,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4818,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 1,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 5,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3986,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 6,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2571,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 7,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4727,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 8,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3122,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 9,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3866,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 1,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 10,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5097,
+     "tool_calls": 17,
+     "cut_reads": 0,
+     "queries": 9,
+     "row_capped": 1,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 11,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3295,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 12,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4292,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 13,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3421,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 14,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.8116,
+     "tool_calls": 22,
+     "cut_reads": 0,
+     "queries": 9,
+     "row_capped": 1,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 15,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6401,
+     "tool_calls": 22,
+     "cut_reads": 0,
+     "queries": 10,
+     "row_capped": 0,
+     "attempt_filters": 9
+    },
+    {
+     "attempt": 16,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9208,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 9,
+     "row_capped": 0,
+     "attempt_filters": 8
+    },
+    {
+     "attempt": 17,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4043,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 18,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6221,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 19,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6739,
+     "tool_calls": 19,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 20,
+     "job": "roots8-mh-music-harmony__SizoS6i-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7004,
+     "tool_calls": 21,
+     "cut_reads": 1,
+     "queries": 12,
+     "row_capped": 1,
+     "attempt_filters": 8
+    }
+   ]
+  },
+  {
+   "run": "roots8-mh",
+   "task": "music-harmony",
+   "root": "music-harmony__oJi53ze",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4822,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 2,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5417,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 3,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6104,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 4,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5186,
+     "tool_calls": 20
+    },
+    {
+     "attempt": 5,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3394,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 6,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3957,
+     "tool_calls": 20
+    },
+    {
+     "attempt": 7,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4326,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 8,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7888,
+     "tool_calls": 23
+    },
+    {
+     "attempt": 9,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3285,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 10,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3424,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 11,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4004,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 12,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2758,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 13,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5874,
+     "tool_calls": 27
+    },
+    {
+     "attempt": 14,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5308,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 15,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.431,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 16,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4315,
+     "tool_calls": 20
+    },
+    {
+     "attempt": 17,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4934,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 18,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.592,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 19,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3974,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 20,
+     "job": "roots8-mh-music-harmony__oJi53ze-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7666,
+     "tool_calls": 15
+    }
+   ]
+  },
+  {
+   "run": "roots8-mh",
+   "task": "music-harmony",
+   "root": "music-harmony__oJi53ze",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2577,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2726,
+     "tool_calls": 12,
+     "cut_reads": 1,
+     "queries": 4,
+     "row_capped": 1,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 3,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2562,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 4,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2091,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 5,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5358,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 1,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 6,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4925,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 1,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 7,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.434,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 8,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 5,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4483,
+     "tool_calls": 19,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 1,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 9,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3978,
+     "tool_calls": 13,
+     "cut_reads": 1,
+     "queries": 7,
+     "row_capped": 1,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 10,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5755,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 11,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9136,
+     "tool_calls": 30,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 12,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6004,
+     "tool_calls": 22,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 13,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.627,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 14,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5432,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 15,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6684,
+     "tool_calls": 17,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 1,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 16,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9399,
+     "tool_calls": 19,
+     "cut_reads": 0,
+     "queries": 10,
+     "row_capped": 1,
+     "attempt_filters": 9
+    },
+    {
+     "attempt": 17,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6484,
+     "tool_calls": 17,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 18,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9116,
+     "tool_calls": 24,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 19,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7122,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 20,
+     "job": "roots8-mh-music-harmony__oJi53ze-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7062,
+     "tool_calls": 22,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 1,
+     "attempt_filters": 5
+    }
+   ]
+  },
+  {
+   "run": "roots8-mh",
+   "task": "music-harmony",
+   "root": "music-harmony__5gSg2ge",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.1,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6091,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 2,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4313,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 3,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4636,
+     "tool_calls": 20
+    },
+    {
+     "attempt": 4,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4469,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 5,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3479,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 6,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3966,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 7,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2915,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 8,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5689,
+     "tool_calls": 24
+    },
+    {
+     "attempt": 9,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5328,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 10,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5307,
+     "tool_calls": 22
+    },
+    {
+     "attempt": 11,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.573,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 12,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3472,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 13,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3818,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 14,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7324,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 15,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4029,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 16,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.439,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 17,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4741,
+     "tool_calls": 19
+    },
+    {
+     "attempt": 18,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3741,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 19,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.417,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 20,
+     "job": "roots8-mh-music-harmony__5gSg2ge-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6577,
+     "tool_calls": 20
+    }
+   ]
+  },
+  {
+   "run": "roots8-mh",
+   "task": "music-harmony",
+   "root": "music-harmony__5gSg2ge",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2212,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3014,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 3,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3781,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 4,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4014,
+     "tool_calls": 10,
+     "cut_reads": 1,
+     "queries": 5,
+     "row_capped": 1,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 5,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5636,
+     "tool_calls": 20,
+     "cut_reads": 1,
+     "queries": 6,
+     "row_capped": 1,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 6,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3995,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 7,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.42,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 8,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.508,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 9,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3719,
+     "tool_calls": 18,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 10,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9603,
+     "tool_calls": 23,
+     "cut_reads": 0,
+     "queries": 9,
+     "row_capped": 1,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 11,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4951,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 12,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5522,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 13,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5829,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 14,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9782,
+     "tool_calls": 24,
+     "cut_reads": 1,
+     "queries": 7,
+     "row_capped": 1,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 15,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.511,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 16,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.525,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 1,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 17,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4846,
+     "tool_calls": 14,
+     "cut_reads": 1,
+     "queries": 6,
+     "row_capped": 1,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 18,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6964,
+     "tool_calls": 18,
+     "cut_reads": 0,
+     "queries": 9,
+     "row_capped": 1,
+     "attempt_filters": 7
+    },
+    {
+     "attempt": 19,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6919,
+     "tool_calls": 17,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 20,
+     "job": "roots8-mh-music-harmony__5gSg2ge-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6651,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 2,
+     "attempt_filters": 4
+    }
+   ]
+  }
+ ]
+}

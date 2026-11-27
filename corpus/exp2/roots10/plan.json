@@ -1,0 +1,21 @@
+{
+ "budget": 20,
+ "arms": [
+  "control",
+  "record-engine"
+ ],
+ "label": "none: short-task screen probe of 2026-11-25 under ADR-0025, roots10 (scripts/2026-11-10_exp2_passk_chains.py)",
+ "lanes": [
+  {
+   "run": "roots10-bc",
+   "store": "corpus/stores/biped-contact-dynamics-local-v6",
+   "job": "corpus/jobs/tb40-passk-fresh-v9",
+   "trials": [
+    "biped-contact-dynamics__6DEuKzM",
+    "biped-contact-dynamics__vmyudzm",
+    "biped-contact-dynamics__CRPSoZY"
+   ],
+   "config": "configs/harbor/tb40-passk-fresh-v9.json"
+  }
+ ]
+}

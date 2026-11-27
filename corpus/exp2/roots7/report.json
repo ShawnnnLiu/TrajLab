@@ -1,0 +1,7017 @@
+{
+ "budget": 20,
+ "api_key_sources": [
+  "none"
+ ],
+ "curves": [
+  {
+   "task": "freecad-platform-drawing",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "freecad-platform-drawing",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [
+    2,
+    3,
+    6
+   ],
+   "censored_at": [],
+   "attempts_run": 11,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "glycan-ms2-elucidation",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "glycan-ms2-elucidation",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [
+    12,
+    13,
+    15
+   ],
+   "censored_at": [],
+   "attempts_run": 40,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "ontology-kg-querying",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "ontology-kg-querying",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [],
+   "censored_at": [
+    20,
+    20,
+    20
+   ],
+   "attempts_run": 60,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 0,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "session-window-debug",
+   "arm": "control",
+   "chains": 3,
+   "first_pass": [
+    2,
+    2
+   ],
+   "censored_at": [
+    20
+   ],
+   "attempts_run": 24,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 2,
+     "known": 3
+    }
+   ]
+  },
+  {
+   "task": "session-window-debug",
+   "arm": "record-engine",
+   "chains": 3,
+   "first_pass": [
+    6,
+    7,
+    9
+   ],
+   "censored_at": [],
+   "attempts_run": 22,
+   "solved_by_k": [
+    {
+     "k": 1,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 2,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 3,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 4,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 5,
+     "solved": 0,
+     "known": 3
+    },
+    {
+     "k": 6,
+     "solved": 1,
+     "known": 3
+    },
+    {
+     "k": 7,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 8,
+     "solved": 2,
+     "known": 3
+    },
+    {
+     "k": 9,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 10,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 11,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 12,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 13,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 14,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 15,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 16,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 17,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 18,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 19,
+     "solved": 3,
+     "known": 3
+    },
+    {
+     "k": 20,
+     "solved": 3,
+     "known": 3
+    }
+   ]
+  }
+ ],
+ "chains": [
+  {
+   "run": "roots7-fp",
+   "task": "freecad-platform-drawing",
+   "root": "freecad-platform-drawing__GNv7SLw",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.8947,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.133,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": 0.8803584005780133,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1103,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": 0.7952972955929993,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.105,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": 0.7895,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2438,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": 0.6316,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.136,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": 0.7895,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1433,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.7895,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1387,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": 0.6842,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1828,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": 0.7368,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1145,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 10,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": 0.6316,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1976,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 11,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": 0.7895,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2035,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 12,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": 0.6842,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.117,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 13,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": 0.6316,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1086,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 14,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": 0.7368,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1395,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 15,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": 0.7895,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1174,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 16,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.8421,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1326,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 17,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": 0.785736927823463,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1365,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 18,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.8421,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.146,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 19,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": 0.7368,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1203,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 20,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": 0.6842,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1562,
+     "tool_calls": 9
+    }
+   ]
+  },
+  {
+   "run": "roots7-fp",
+   "task": "freecad-platform-drawing",
+   "root": "freecad-platform-drawing__GNv7SLw",
+   "arm": "record-engine",
+   "counted": 2,
+   "first_pass": 2,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": 0.6842,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1113,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-fp-freecad-platform-drawing__GNv7SLw-record-engine-a2",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.9474,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1581,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    }
+   ]
+  },
+  {
+   "run": "roots7-fp",
+   "task": "freecad-platform-drawing",
+   "root": "freecad-platform-drawing__QchNvkk",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": 0.7895,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0822,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": 0.7635857174067212,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1741,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.7368,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1078,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.6316,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1244,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.6842,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1181,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.7895,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1289,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": 0.6842,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.297,
+     "tool_calls": 23
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": 0.7368,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1231,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": 0.6316,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1041,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 10,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.762631209774736,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1204,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 11,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.6842,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1148,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 12,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.7327962295909124,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1391,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 13,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": 0.7895,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1745,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 14,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": 0.7368,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0875,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 15,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": 0.7368,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.127,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 16,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": 0.6842,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1442,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 17,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": 0.7368,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1182,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 18,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.6316,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1325,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 19,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": 0.6842,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1106,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 20,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": 0.7368,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1702,
+     "tool_calls": 10
+    }
+   ]
+  },
+  {
+   "run": "roots7-fp",
+   "task": "freecad-platform-drawing",
+   "root": "freecad-platform-drawing__QchNvkk",
+   "arm": "record-engine",
+   "counted": 6,
+   "first_pass": 6,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": 0.65,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.106,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.65,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1562,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": 0.6806869189300883,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2918,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": 0.8920034918629767,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2915,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": 0.8920034918629767,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3447,
+     "tool_calls": 17,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-fp-freecad-platform-drawing__QchNvkk-record-engine-a6",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": 1.0,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3114,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    }
+   ]
+  },
+  {
+   "run": "roots7-fp",
+   "task": "freecad-platform-drawing",
+   "root": "freecad-platform-drawing__59ZCEyD",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": 0.7952972955930843,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2012,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": 0.7368,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2286,
+     "tool_calls": 16
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": 0.7895,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0966,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": 0.7895,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0985,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": 0.6316,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1345,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": 0.6842,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1628,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": 0.6956467674925527,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0861,
+     "tool_calls": 3
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": 0.7895,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1084,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.6842,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1162,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 10,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.6316,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1274,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 11,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.7895,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1372,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 12,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": 0.6316,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1519,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 13,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": 0.7895,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1376,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 14,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.8421,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1232,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 15,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": 0.6316,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1713,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 16,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": 0.7327962295908735,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1999,
+     "tool_calls": 13
+    },
+    {
+     "attempt": 17,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": 0.7895,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1678,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 18,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": 0.8440683083041896,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1114,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 19,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.7895,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1237,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 20,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": 0.6316,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1368,
+     "tool_calls": 7
+    }
+   ]
+  },
+  {
+   "run": "roots7-fp",
+   "task": "freecad-platform-drawing",
+   "root": "freecad-platform-drawing__59ZCEyD",
+   "arm": "record-engine",
+   "counted": 3,
+   "first_pass": 3,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": 0.65,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.0978,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": 0.603298819044192,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.099,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-fp-freecad-platform-drawing__59ZCEyD-record-engine-a3",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": 0.9474,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1163,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    }
+   ]
+  },
+  {
+   "run": "roots7-gm",
+   "task": "glycan-ms2-elucidation",
+   "root": "glycan-ms2-elucidation__JVwvGia",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.218,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.236,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2691,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4771,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2169,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2423,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2159,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2787,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2439,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 10,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1567,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 11,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1945,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 12,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5008,
+     "tool_calls": 17
+    },
+    {
+     "attempt": 13,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3224,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 14,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5336,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 15,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2242,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 16,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3609,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 17,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2426,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 18,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1964,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 19,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5049,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 20,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1646,
+     "tool_calls": 7
+    }
+   ]
+  },
+  {
+   "run": "roots7-gm",
+   "task": "glycan-ms2-elucidation",
+   "root": "glycan-ms2-elucidation__JVwvGia",
+   "arm": "record-engine",
+   "counted": 15,
+   "first_pass": 15,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1972,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.352,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5526,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4426,
+     "tool_calls": 13,
+     "cut_reads": 1,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.689,
+     "tool_calls": 17,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6577,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3555,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3968,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3189,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 10,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6329,
+     "tool_calls": 15,
+     "cut_reads": 2,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 11,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4354,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 12,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7922,
+     "tool_calls": 18,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 13,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5418,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 14,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6251,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 15,
+     "job": "roots7-gm-glycan-ms2-elucidation__JVwvGia-record-engine-a15",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.629,
+     "tool_calls": 14,
+     "cut_reads": 1,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    }
+   ]
+  },
+  {
+   "run": "roots7-gm",
+   "task": "glycan-ms2-elucidation",
+   "root": "glycan-ms2-elucidation__XB4j2N9",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3284,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1822,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4227,
+     "tool_calls": 15
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2153,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3346,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.215,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1894,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2341,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2798,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 10,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.429,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 11,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2704,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 12,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5044,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 13,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3342,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 14,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3248,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 15,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1909,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 16,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3396,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 17,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1889,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 18,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3068,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 19,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3071,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 20,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3025,
+     "tool_calls": 12
+    }
+   ]
+  },
+  {
+   "run": "roots7-gm",
+   "task": "glycan-ms2-elucidation",
+   "root": "glycan-ms2-elucidation__XB4j2N9",
+   "arm": "record-engine",
+   "counted": 13,
+   "first_pass": 13,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3418,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5382,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2766,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7387,
+     "tool_calls": 15,
+     "cut_reads": 1,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3428,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4988,
+     "tool_calls": 14,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4054,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6929,
+     "tool_calls": 19,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7178,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 10,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6758,
+     "tool_calls": 13,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 11,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5498,
+     "tool_calls": 15,
+     "cut_reads": 1,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 12,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.7886,
+     "tool_calls": 17,
+     "cut_reads": 1,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 13,
+     "job": "roots7-gm-glycan-ms2-elucidation__XB4j2N9-record-engine-a13",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6717,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    }
+   ]
+  },
+  {
+   "run": "roots7-gm",
+   "task": "glycan-ms2-elucidation",
+   "root": "glycan-ms2-elucidation__QFgYyYb",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2453,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3441,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1654,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.239,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3004,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2931,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3991,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3482,
+     "tool_calls": 14
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2519,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 10,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1756,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 11,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2518,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 12,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.203,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 13,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3088,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 14,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3245,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 15,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2608,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 16,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4644,
+     "tool_calls": 18
+    },
+    {
+     "attempt": 17,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2686,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 18,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3341,
+     "tool_calls": 11
+    },
+    {
+     "attempt": 19,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1539,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 20,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3089,
+     "tool_calls": 12
+    }
+   ]
+  },
+  {
+   "run": "roots7-gm",
+   "task": "glycan-ms2-elucidation",
+   "root": "glycan-ms2-elucidation__QFgYyYb",
+   "arm": "record-engine",
+   "counted": 12,
+   "first_pass": 12,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1856,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5323,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.492,
+     "tool_calls": 12,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2577,
+     "tool_calls": 10,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5452,
+     "tool_calls": 16,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6414,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.6715,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.4943,
+     "tool_calls": 11,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5148,
+     "tool_calls": 17,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 10,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.5591,
+     "tool_calls": 15,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 11,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.36,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 12,
+     "job": "roots7-gm-glycan-ms2-elucidation__QFgYyYb-record-engine-a12",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 4.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 12,
+     "checks_total": 12,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.507,
+     "tool_calls": 13,
+     "cut_reads": 1,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    }
+   ]
+  },
+  {
+   "run": "roots7-ok",
+   "task": "ontology-kg-querying",
+   "root": "ontology-kg-querying__CPLteYG",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.6658,
+     "tool_calls": 32
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8819,
+     "tool_calls": 39
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.6033,
+     "tool_calls": 30
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.4336,
+     "tool_calls": 28
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.4744,
+     "tool_calls": 50
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.4779,
+     "tool_calls": 33
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.3854,
+     "tool_calls": 30
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.4012,
+     "tool_calls": 49
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.3886,
+     "tool_calls": 51
+    },
+    {
+     "attempt": 10,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.7348,
+     "tool_calls": 32
+    },
+    {
+     "attempt": 11,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.4955,
+     "tool_calls": 27
+    },
+    {
+     "attempt": 12,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.772,
+     "tool_calls": 34
+    },
+    {
+     "attempt": 13,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0049,
+     "tool_calls": 20
+    },
+    {
+     "attempt": 14,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.7992,
+     "tool_calls": 33
+    },
+    {
+     "attempt": 15,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.3425,
+     "tool_calls": 30
+    },
+    {
+     "attempt": 16,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.4929,
+     "tool_calls": 29
+    },
+    {
+     "attempt": 17,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.4008,
+     "tool_calls": 46
+    },
+    {
+     "attempt": 18,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.0381,
+     "tool_calls": 39
+    },
+    {
+     "attempt": 19,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.1098,
+     "tool_calls": 43
+    },
+    {
+     "attempt": 20,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8293,
+     "tool_calls": 33
+    }
+   ]
+  },
+  {
+   "run": "roots7-ok",
+   "task": "ontology-kg-querying",
+   "root": "ontology-kg-querying__CPLteYG",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1927,
+     "tool_calls": 21,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.3829,
+     "tool_calls": 27,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.4903,
+     "tool_calls": 34,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.4104,
+     "tool_calls": 49,
+     "cut_reads": 0,
+     "queries": 11,
+     "row_capped": 0,
+     "attempt_filters": 8
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 4.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.9867,
+     "tool_calls": 23,
+     "cut_reads": 0,
+     "queries": 9,
+     "row_capped": 0,
+     "attempt_filters": 8
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.7228,
+     "tool_calls": 31,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.212,
+     "tool_calls": 47,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.8333,
+     "tool_calls": 60,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.0124,
+     "tool_calls": 39,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 10,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 3.1835,
+     "tool_calls": 54,
+     "cut_reads": 0,
+     "queries": 11,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 11,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.7967,
+     "tool_calls": 59,
+     "cut_reads": 0,
+     "queries": 18,
+     "row_capped": 1,
+     "attempt_filters": 8
+    },
+    {
+     "attempt": 12,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 18.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.681,
+     "tool_calls": 60,
+     "cut_reads": 0,
+     "queries": 20,
+     "row_capped": 0,
+     "attempt_filters": 19
+    },
+    {
+     "attempt": 13,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 16.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 3.0671,
+     "tool_calls": 62,
+     "cut_reads": 0,
+     "queries": 14,
+     "row_capped": 0,
+     "attempt_filters": 8
+    },
+    {
+     "attempt": 14,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.5993,
+     "tool_calls": 60,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 1,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 15,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.1455,
+     "tool_calls": 43,
+     "cut_reads": 1,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 16,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 17.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 3.2474,
+     "tool_calls": 74,
+     "cut_reads": 1,
+     "queries": 11,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 17,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.3735,
+     "tool_calls": 56,
+     "cut_reads": 1,
+     "queries": 10,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 18,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.079,
+     "tool_calls": 40,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 19,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 23.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 3.2579,
+     "tool_calls": 63,
+     "cut_reads": 0,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 20,
+     "job": "roots7-ok-ontology-kg-querying__CPLteYG-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.0837,
+     "tool_calls": 46,
+     "cut_reads": 1,
+     "queries": 26,
+     "row_capped": 0,
+     "attempt_filters": 22
+    }
+   ]
+  },
+  {
+   "run": "roots7-ok",
+   "task": "ontology-kg-querying",
+   "root": "ontology-kg-querying__5AzQrFB",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.5707,
+     "tool_calls": 30
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.0966,
+     "tool_calls": 40
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.0068,
+     "tool_calls": 36
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8369,
+     "tool_calls": 37
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 23.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.0482,
+     "tool_calls": 42
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.4777,
+     "tool_calls": 30
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8571,
+     "tool_calls": 37
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8298,
+     "tool_calls": 35
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.6926,
+     "tool_calls": 34
+    },
+    {
+     "attempt": 10,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1517,
+     "tool_calls": 24
+    },
+    {
+     "attempt": 11,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0658,
+     "tool_calls": 23
+    },
+    {
+     "attempt": 12,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.9943,
+     "tool_calls": 47
+    },
+    {
+     "attempt": 13,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.0092,
+     "tool_calls": 37
+    },
+    {
+     "attempt": 14,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.623,
+     "tool_calls": 31
+    },
+    {
+     "attempt": 15,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.702,
+     "tool_calls": 35
+    },
+    {
+     "attempt": 16,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.3297,
+     "tool_calls": 29
+    },
+    {
+     "attempt": 17,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.7089,
+     "tool_calls": 33
+    },
+    {
+     "attempt": 18,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.3448,
+     "tool_calls": 41
+    },
+    {
+     "attempt": 19,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.1195,
+     "tool_calls": 42
+    },
+    {
+     "attempt": 20,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8596,
+     "tool_calls": 39
+    }
+   ]
+  },
+  {
+   "run": "roots7-ok",
+   "task": "ontology-kg-querying",
+   "root": "ontology-kg-querying__5AzQrFB",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.2955,
+     "tool_calls": 20,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1155,
+     "tool_calls": 21,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.4717,
+     "tool_calls": 57,
+     "cut_reads": 0,
+     "queries": 14,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.5414,
+     "tool_calls": 30,
+     "cut_reads": 2,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.3966,
+     "tool_calls": 27,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.9738,
+     "tool_calls": 72,
+     "cut_reads": 0,
+     "queries": 10,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8276,
+     "tool_calls": 37,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 17.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 3.5532,
+     "tool_calls": 72,
+     "cut_reads": 0,
+     "queries": 14,
+     "row_capped": 0,
+     "attempt_filters": 5
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.9094,
+     "tool_calls": 33,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 10,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.5097,
+     "tool_calls": 48,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 11,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.7987,
+     "tool_calls": 54,
+     "cut_reads": 0,
+     "queries": 16,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 12,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.5118,
+     "tool_calls": 53,
+     "cut_reads": 0,
+     "queries": 7,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 13,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.6279,
+     "tool_calls": 57,
+     "cut_reads": 0,
+     "queries": 11,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 14,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.4469,
+     "tool_calls": 48,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 15,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.412,
+     "tool_calls": 59,
+     "cut_reads": 0,
+     "queries": 67,
+     "row_capped": 1,
+     "attempt_filters": 64
+    },
+    {
+     "attempt": 16,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.1884,
+     "tool_calls": 39,
+     "cut_reads": 0,
+     "queries": 9,
+     "row_capped": 0,
+     "attempt_filters": 7
+    },
+    {
+     "attempt": 17,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 14.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.8678,
+     "tool_calls": 60,
+     "cut_reads": 1,
+     "queries": 9,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 18,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 21.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.36,
+     "tool_calls": 54,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 19,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 19.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 3.7987,
+     "tool_calls": 79,
+     "cut_reads": 0,
+     "queries": 14,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 20,
+     "job": "roots7-ok-ontology-kg-querying__5AzQrFB-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.6274,
+     "tool_calls": 31,
+     "cut_reads": 1,
+     "queries": 5,
+     "row_capped": 1,
+     "attempt_filters": 3
+    }
+   ]
+  },
+  {
+   "run": "roots7-ok",
+   "task": "ontology-kg-querying",
+   "root": "ontology-kg-querying__8Fzx57H",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8566,
+     "tool_calls": 38
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8294,
+     "tool_calls": 45
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.4857,
+     "tool_calls": 35
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.5638,
+     "tool_calls": 29
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 20.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.9926,
+     "tool_calls": 64
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.4864,
+     "tool_calls": 32
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8383,
+     "tool_calls": 35
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8005,
+     "tool_calls": 41
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.5643,
+     "tool_calls": 43
+    },
+    {
+     "attempt": 10,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.9418,
+     "tool_calls": 43
+    },
+    {
+     "attempt": 11,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.0934,
+     "tool_calls": 39
+    },
+    {
+     "attempt": 12,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8267,
+     "tool_calls": 39
+    },
+    {
+     "attempt": 13,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.5863,
+     "tool_calls": 34
+    },
+    {
+     "attempt": 14,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.6185,
+     "tool_calls": 27
+    },
+    {
+     "attempt": 15,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.6783,
+     "tool_calls": 36
+    },
+    {
+     "attempt": 16,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.7183,
+     "tool_calls": 38
+    },
+    {
+     "attempt": 17,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.3499,
+     "tool_calls": 30
+    },
+    {
+     "attempt": 18,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 9.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.8399,
+     "tool_calls": 40
+    },
+    {
+     "attempt": 19,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.7687,
+     "tool_calls": 31
+    },
+    {
+     "attempt": 20,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.7213,
+     "tool_calls": 34
+    }
+   ]
+  },
+  {
+   "run": "roots7-ok",
+   "task": "ontology-kg-querying",
+   "root": "ontology-kg-querying__8Fzx57H",
+   "arm": "record-engine",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.6932,
+     "tool_calls": 36,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.4669,
+     "tool_calls": 34,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 5.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.0051,
+     "tool_calls": 21,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 6.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.1871,
+     "tool_calls": 24,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.7111,
+     "tool_calls": 50,
+     "cut_reads": 0,
+     "queries": 15,
+     "row_capped": 0,
+     "attempt_filters": 7
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 10,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.5144,
+     "tool_calls": 57,
+     "cut_reads": 0,
+     "queries": 44,
+     "row_capped": 0,
+     "attempt_filters": 14
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 8.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.4422,
+     "tool_calls": 27,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.5071,
+     "tool_calls": 54,
+     "cut_reads": 0,
+     "queries": 11,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.4253,
+     "tool_calls": 24,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 10,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.9808,
+     "tool_calls": 39,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 11,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 15.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 3.2388,
+     "tool_calls": 65,
+     "cut_reads": 0,
+     "queries": 10,
+     "row_capped": 0,
+     "attempt_filters": 9
+    },
+    {
+     "attempt": 12,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 18.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.9698,
+     "tool_calls": 53,
+     "cut_reads": 0,
+     "queries": 18,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 13,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 11,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.7536,
+     "tool_calls": 32,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 14,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 3.1223,
+     "tool_calls": 65,
+     "cut_reads": 0,
+     "queries": 14,
+     "row_capped": 0,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 15,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 11.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.4486,
+     "tool_calls": 51,
+     "cut_reads": 0,
+     "queries": 6,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 16,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 12.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.4566,
+     "tool_calls": 45,
+     "cut_reads": 1,
+     "queries": 7,
+     "row_capped": 1,
+     "attempt_filters": 4
+    },
+    {
+     "attempt": 17,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 10.4,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.1524,
+     "tool_calls": 47,
+     "cut_reads": 1,
+     "queries": 32,
+     "row_capped": 0,
+     "attempt_filters": 29
+    },
+    {
+     "attempt": 18,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 15.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 8,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 3.0722,
+     "tool_calls": 68,
+     "cut_reads": 1,
+     "queries": 10,
+     "row_capped": 0,
+     "attempt_filters": 6
+    },
+    {
+     "attempt": 19,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 13.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 2.7396,
+     "tool_calls": 54,
+     "cut_reads": 0,
+     "queries": 10,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 20,
+     "job": "roots7-ok-ontology-kg-querying__8Fzx57H-record-engine-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 7.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 9,
+     "checks_total": 13,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 1.5405,
+     "tool_calls": 35,
+     "cut_reads": 1,
+     "queries": 8,
+     "row_capped": 0,
+     "attempt_filters": 4
+    }
+   ]
+  },
+  {
+   "run": "roots7-sw",
+   "task": "session-window-debug",
+   "root": "session-window-debug__j4cBxiA",
+   "arm": "control",
+   "counted": 2,
+   "first_pass": 2,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-sw-session-window-debug__j4cBxiA-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1482,
+     "tool_calls": 4
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-sw-session-window-debug__j4cBxiA-control-a2",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 7,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1959,
+     "tool_calls": 6
+    }
+   ]
+  },
+  {
+   "run": "roots7-sw",
+   "task": "session-window-debug",
+   "root": "session-window-debug__j4cBxiA",
+   "arm": "record-engine",
+   "counted": 9,
+   "first_pass": 9,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-sw-session-window-debug__j4cBxiA-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 5,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1284,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-sw-session-window-debug__j4cBxiA-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.166,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-sw-session-window-debug__j4cBxiA-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.137,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-sw-session-window-debug__j4cBxiA-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 5,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1746,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-sw-session-window-debug__j4cBxiA-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1519,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-sw-session-window-debug__j4cBxiA-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 5,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3343,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-sw-session-window-debug__j4cBxiA-record-engine-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 5,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3179,
+     "tool_calls": 9,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-sw-session-window-debug__j4cBxiA-record-engine-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2086,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-sw-session-window-debug__j4cBxiA-record-engine-a9",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 7,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2334,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 1
+    }
+   ]
+  },
+  {
+   "run": "roots7-sw",
+   "task": "session-window-debug",
+   "root": "session-window-debug__84Hnz27",
+   "arm": "control",
+   "counted": 2,
+   "first_pass": 2,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-sw-session-window-debug__84Hnz27-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.144,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-sw-session-window-debug__84Hnz27-control-a2",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 7,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1514,
+     "tool_calls": 6
+    }
+   ]
+  },
+  {
+   "run": "roots7-sw",
+   "task": "session-window-debug",
+   "root": "session-window-debug__84Hnz27",
+   "arm": "record-engine",
+   "counted": 7,
+   "first_pass": 7,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-sw-session-window-debug__84Hnz27-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1678,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-sw-session-window-debug__84Hnz27-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1633,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-sw-session-window-debug__84Hnz27-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2412,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-sw-session-window-debug__84Hnz27-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2831,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 5,
+     "row_capped": 0,
+     "attempt_filters": 3
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-sw-session-window-debug__84Hnz27-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3355,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 1
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-sw-session-window-debug__84Hnz27-record-engine-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.207,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 3,
+     "row_capped": 0,
+     "attempt_filters": 2
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-sw-session-window-debug__84Hnz27-record-engine-a7",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 3.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 7,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.3411,
+     "tool_calls": 8,
+     "cut_reads": 0,
+     "queries": 4,
+     "row_capped": 0,
+     "attempt_filters": 1
+    }
+   ]
+  },
+  {
+   "run": "roots7-sw",
+   "task": "session-window-debug",
+   "root": "session-window-debug__WK4kBtU",
+   "arm": "control",
+   "counted": 20,
+   "first_pass": null,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 5,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1228,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1549,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2245,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2992,
+     "tool_calls": 12
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2389,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a6",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2006,
+     "tool_calls": 9
+    },
+    {
+     "attempt": 7,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a7",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1751,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 8,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a8",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2621,
+     "tool_calls": 10
+    },
+    {
+     "attempt": 9,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a9",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 5,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1431,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 10,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a10",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2155,
+     "tool_calls": 8
+    },
+    {
+     "attempt": 11,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a11",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1751,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 12,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a12",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1618,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 13,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a13",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1629,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 14,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a14",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1904,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 15,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a15",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1778,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 16,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a16",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1897,
+     "tool_calls": 7
+    },
+    {
+     "attempt": 17,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a17",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.177,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 18,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a18",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1676,
+     "tool_calls": 5
+    },
+    {
+     "attempt": 19,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a19",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1791,
+     "tool_calls": 6
+    },
+    {
+     "attempt": 20,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-control-a20",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2018,
+     "tool_calls": 9
+    }
+   ]
+  },
+  {
+   "run": "roots7-sw",
+   "task": "session-window-debug",
+   "root": "session-window-debug__WK4kBtU",
+   "arm": "record-engine",
+   "counted": 6,
+   "first_pass": 6,
+   "finished": true,
+   "not_counted": [],
+   "ingests_failed": [],
+   "attempts": [
+    {
+     "attempt": 1,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-record-engine-a1",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1319,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 2,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-record-engine-a2",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 2.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2127,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 3,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-record-engine-a3",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 4,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1398,
+     "tool_calls": 6,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 4,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-record-engine-a4",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.3,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.132,
+     "tool_calls": 4,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 5,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-record-engine-a5",
+     "outcome": "failed",
+     "reward": 0.0,
+     "minutes": 1.7,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 6,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.1628,
+     "tool_calls": 5,
+     "cut_reads": 0,
+     "queries": 1,
+     "row_capped": 0,
+     "attempt_filters": 0
+    },
+    {
+     "attempt": 6,
+     "job": "roots7-sw-session-window-debug__WK4kBtU-record-engine-a6",
+     "outcome": "passed",
+     "reward": 1.0,
+     "minutes": 2.0,
+     "prompt_delivered": true,
+     "graded": null,
+     "checks_passed": 7,
+     "checks_total": 7,
+     "api_key_sources": [
+      "none"
+     ],
+     "cost_usd": 0.2103,
+     "tool_calls": 7,
+     "cut_reads": 0,
+     "queries": 2,
+     "row_capped": 0,
+     "attempt_filters": 0
+    }
+   ]
+  }
+ ]
+}

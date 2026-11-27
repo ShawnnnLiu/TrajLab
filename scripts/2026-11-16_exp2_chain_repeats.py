@@ -8,7 +8,8 @@ is that rule, kept). Offline: reads the plan, the JSON that
 An attempt repeats when its verifier outcome equals that of its chain's root or of an earlier
 attempt of the same chain. The outcome is, for a task whose verifier writes
 `verifier/reward_details.json` (freecad), the four reason strings of that file; otherwise the set
-of failing tests, parameters included, from the `FAILED` lines of `verifier/test-stdout.txt`. A
+of failing tests, parameters included, from the `FAILED` lines of `verifier/test-stdout.txt`, and
+from `[FAIL] <name>` lines for a verifier that prints those instead (ks-solver-cpp). A
 passed attempt is never a repeat. `same_answer` is a second, stricter count for
 foodstuff-beta-activity only: the attempt's `artifacts/app/results.txt` equals, byte for byte, the
 root's or an earlier attempt's.
@@ -25,6 +26,7 @@ import re
 from pathlib import Path
 
 FAILED = re.compile(r"^FAILED \S*?([^/\s]+::.+?)(?: - .*)?$", re.MULTILINE)
+BRACKET_FAIL = re.compile(r"^\[FAIL\] (\w+)", re.MULTILINE)
 ANSWER = Path("artifacts/app/results.txt")
 
 
@@ -43,7 +45,8 @@ def outcome(trial: Path) -> str | None:
     stdout = trial / "verifier" / "test-stdout.txt"
     if not stdout.is_file():
         return None
-    return json.dumps(sorted(set(FAILED.findall(stdout.read_text(errors="replace")))))
+    text = stdout.read_text(errors="replace")
+    return json.dumps(sorted(set(FAILED.findall(text)) | set(BRACKET_FAIL.findall(text))))
 
 
 def answer(trial: Path) -> str | None:
